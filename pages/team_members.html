@@ -1,0 +1,70 @@
+<div class="row" id="team_members">
+    <div class="widget clearfix">
+        <h2>{{ t.name }}</h2>
+        <div class="widget_inside">
+            <div class="col_12">
+            <div class="col_4">
+                <p class="m_bottom15">
+                    This team has raised: <b>${{ t.data.donation_total }}</b>
+                </p>
+                <br>
+
+                <div id="edit_container" class="hidden">
+
+                    <div class="clearfix">
+                        <label>Team Name</label>
+                        <div class="input">
+                            <input type="input" id="team_name" value="{{ t.name }}" />
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="input">
+                        <input type="checkbox" id="toggle_team" />
+                        <label for="toggle_team">Show team in donation page</label>
+                    </div>
+                </div>
+                <br>
+
+                <div class="input">
+                    <input id="edit_team" data-state="edit" type="button" class="large black button" value="Edit Team" />
+                </div>
+
+                <br><br>
+
+                <div class="input hidden" id="delete_container">
+                    <p style="cursor:pointer; color:red">
+                        Delete this team...
+                    </p>
+                </div>
+
+            </div>
+            <div class="col_8 last">
+                <table class="regular" style="cursor:pointer">
+                <thead class="bold">
+                        <tr>
+                        <th class="align-left">Name</th>
+                        <th class="align-left">Email</th>
+                        <th class="align-left">Money Raised</th>
+                        </tr>
+
+                    </thead>
+                    <tbody id="members">
+                        {% for tl in t.data.members %}
+                        <tr data-id="{{ tl.individual_key }}">
+                                <td>{{ tl.individual_name }}</td>
+                                <td>{{ tl.individual_email }}</td>
+                                <td>${{ tl.donation_total }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+    </div>   
+</div>
+
+<input type="hidden" id="var_showteam" value="{{ t.show_team }}" />
+<input type="hidden" id="team_key" value="{{ t.websafe }}" />
+<script src="/js/team_members.js?v=3"></script>

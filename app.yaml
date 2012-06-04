@@ -1,0 +1,89 @@
+application: ghidonations
+version: 3b
+runtime: python27
+api_version: 1
+threadsafe: no
+
+default_expiration: "30d"
+
+handlers:
+
+- url: /favicon\.ico
+  static_files: images/favicon.ico
+  upload: images/favicon\.ico
+
+- url: /images
+  static_dir: images
+
+- url: /css
+  static_dir: css
+
+- url: /docs
+  static_dir: docs
+
+- url: /js
+  static_dir: js
+
+- url: /
+  script: mooha.app
+  secure: optional
+
+- url: /login
+  script: mooha.app
+  secure: always
+
+- url: /logout
+  script: mooha.app
+  secure: optional
+
+- url: /thanks
+  script: mooha.app
+  secure: optional
+
+- url: /ajax/*.*
+  script: mooha.app
+  secure: optional
+
+- url: /donate
+  script: mooha.app
+  secure: optional
+
+- url: /profile
+  script: mooha.app
+  secure: optional
+
+- url: /rpc
+  script: rpc.app
+  secure: optional
+
+- url: /ipn
+  script: mooha.app
+  secure: optional
+
+- url: /tasks/.*
+  script: tasks.app
+  secure: optional
+  login: admin
+
+- url: /_ah/mail/.+ 
+  script: incoming_mail.app 
+  login: admin
+
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+
+- url: /.*
+  script: error.app
+  secure: optional
+
+error_handlers:
+  - file: /pages/error.html
+
+builtins:
+- deferred: on
+- remote_api: on
+- appstats: on
+
+inbound_services:
+- mail

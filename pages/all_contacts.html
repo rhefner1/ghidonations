@@ -1,0 +1,35 @@
+<div class="row" id="all_contacts">
+    <div class="widget clearfix">
+        <h2>All Contacts</h2>
+        <div class="widget_inside">
+        	<p class="m_bottom15">Click any one of the contacts below to view more details about them.</p>
+
+            <div class="col_12">
+                <input type="input" name="search" placeholder="Search..." />
+                <br><br>
+                <table class="dataTable">
+                    <thead class="bold">
+                            <tr>
+                            <th class="align-left">Key</th>
+                            <th class="align-left">Name</th>
+                            <th class="align-left">Email</th>
+                            </tr>
+
+                    </thead>
+                    <tbody id="contacts">
+                    	{% for c in contacts %}
+                        <tr>
+                                <td>{{ c.websafe }}</td>
+                                <td>{{ c.name }}</td>
+                                <td>{{ c.email }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="initial_cursor" value="{{ initial_cursor }}" />
+<script src="/js/all_contacts.js?v=3"></script>

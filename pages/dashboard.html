@@ -1,0 +1,30 @@
+<div class="row clearfix" id="dashboard">
+	<div class="col_12">
+		<div class="widget clearfix">
+        <h2>At a Glance</h2>
+			<div class="widget_inside">
+				
+				<div class="report">
+
+					<div class="button" id="review_queue" data-location="review">
+                        <span class="value">{{ num_open_donations }}</span>
+                        <span class="attr">unreviewed donations</span>
+                    </div>
+
+                    <div class="button" data-location="review">
+						<span class="value">{{ past_donations }}</span>
+						<span class="attr">donations (last 7 days)</span>
+					</div>
+
+					<div class="button" data-location="review">
+						<span class="value">${{ past_money }}</span>
+						<span class="attr">money raised (last 7 days)</span>
+
+					</div>
+				</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/dashboard.js?v=3"></script>

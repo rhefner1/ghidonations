@@ -1,0 +1,54 @@
+<div class="row" id="undeposited_donations">
+    <div class="widget clearfix">
+    <h2>Undeposited Donations</h2>
+        <div class="widget_inside">
+            <div class="col_12">
+            <div class="col_4">
+                <h3>{{ d.name }}</h3>
+                <p style="margin_bottom_15">
+                    Offline checks that are in queue to go to the bank.
+                </p>
+                <br>
+                <div class="align_center">
+                    <input id="deposit" type="button" class="large blue button" value="Deposit These Checks">
+                    <br><br><br>
+                    <p id="remove_deposits" style="cursor:pointer; color:red">
+                        Click here to <span style="font-weight:bold">REMOVE</span> selected donations from deposits
+                    </p>
+                </div>
+            </div>
+            <div class="col_8 last">
+                <input type="button" class="small button right" style="margin-bottom:10px" id="deselect_all" value="Deselect All">
+                <input type="button" class="small button right" style="margin-bottom:10px; margin-right:10px" id="select_all" value="Select All">
+
+                <table class="regular">
+                    <thead class="bold">
+                        <tr>
+                            <th></th>
+                            <th class="align-left">Time Donated</th>
+                            <th class="align-left">Name</th>
+                            <th class="align-left">Email</th>
+                            <th class="align-left">Donation Amount</th>
+                            <th class="align-left">Payment Type</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in donations %}
+                        <tr data-id="{{ d.websafe }}">
+                            <td><input type="checkbox" /></td>
+                            <td>{{ d.formatted_time_created }}</td>
+                            <td>{{ d.name }}</td>
+                            <td>{{ d.email }}</td>
+                            <td>${{ d.amount_donated }}</td>
+                            <td>{{ d.payment_type }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+    </div>   
+</div>
+
+<script src="/js/undeposited_donations.js?v=3"></script>

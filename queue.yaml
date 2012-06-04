@@ -1,0 +1,18 @@
+queue:
+- name: default
+  rate: 1/s
+  retry_parameters:
+    min_backoff_seconds: 30
+    max_backoff_seconds: 300
+
+- name: addcontact
+  rate: 1/s
+  retry_parameters:
+    min_backoff_seconds: 30
+    max_backoff_seconds: 300
+
+- name: backend
+  rate: 1/s
+  retry_parameters:
+    min_backoff_seconds: 30
+    max_backoff_seconds: 300

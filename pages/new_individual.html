@@ -1,0 +1,65 @@
+<div class="row" id="newindividual">
+    <div class="widget clearfix">
+    <h2>New Individual</h2>
+        <div class="widget_inside">
+            <div class="col_12">
+            <div class="col_4">
+                <h3>{{ d.name }}</h3>
+                <p style="margin_bottom_15">
+                    This user will log in with their email address and the password you assign here.
+                </p>
+                <br>
+                <p>Do not grant admin priveleges 
+                    unless you want the individual to have full access to <b>ALL</b> donor information for your organization.
+                </p>
+                <br>
+                <div class="align_center">
+                    <input id="save" type="button" class="large blue button" value="Create Individual">
+                </div>
+            </div>
+            <div class="col_8 last">
+                <div class="form">
+                <form>
+                    <div class="clearfix">
+                        <label>Name</label>
+                        <div class="input"><input class="large validate[required]" type="text" name="name" /></div>
+                    </div>
+                    <div class="clearfix">
+                        <label>Email</label>
+                        <div class="input"><input class="large validate[required,custom[email]]" type="text" name="email" /></div>
+                    </div>
+                    <div class="clearfix">
+                        <label>Password</label>
+                        <div class="input"><input class="large validate[required]" type="password" name="password"/></div>
+                    </div>
+                    <div class="clearfix" id="team_selector">
+                        <label>Team</label>
+                        <div class="input">
+                            <select>                               
+                                {% for t in teams %}
+                                <option value="{{ t.websafe }}">{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="clearfix">
+                        <label>Admin privileges?</label>
+                        <div class="input">
+                            <input type="radio" name="admin" id="admin_yes" value="true">
+                            <label style="width:100%; float:none;" for="admin_yes">Yes</label>
+                        </div>
+                        <div class="input">
+                            <input type="radio" name="admin" id="admin_no" value="" checked="yes">
+                            <label style="width:100%; float:none;" for="admin_no">No</label>
+                        </div>
+                        
+                    </div>
+                </form>
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>   
+</div>
+
+<script src="/js/new_individual.js?v=3"></script>

@@ -1,0 +1,137 @@
+<div class="row clearfix" id="individual_profile">
+    <div class="col_12">
+        <div class="widget clearfix">
+        <h2>Profile - {{ i.name }}</h2>
+            <form id="update_profile" action="{{ upload_url }}" method="post" enctype="multipart/form-data">
+            <div class="widget_inside">
+                <div class="col_12">
+                    <input type="button" class="button black" id="edit_profile" value="Edit Profile" />
+                </div>
+
+                <div class="col_3">
+                    <h3>Photo</h3>
+                    <img alt="Profile Picture - {{ i.name }}" src="{{ i.data.photo_url }}">
+
+                    <div class="hidden" style="margin-top:15px" id="edit_photo">
+                        <input type="file" name="new_photo" accept="image/*">
+                    </div>
+                </div>
+
+                <div class="col_8">
+                    <h3>Description</h3>
+                    <div class="form">
+
+                        <div class="clearfix">
+                            <label><strong>Name:</strong></label>
+                            <div class="input"><input class="large unlockable validate[required]" type="text" name="name" value="{{ i.name }}" disabled="disabled" /></div>
+                        </div>
+
+                        <div class="clearfix">
+                            <label><strong>Email:</strong></label>
+                            <div class="input"><input class="large unlockable validate[required,custom[email]]" type="text" name="email" value="{{ i.email }}" disabled="disabled" /></div>
+                        </div>
+
+                        <div class="clearfix">
+                            <label><strong>Money Raised:</strong></label>
+                            <div class="input"><input class="large" type="text" value="${{ i.data.donation_total }}" disabled="disabled" /></div>
+                        </div>
+
+                        <div class="clearfix" id="team_display">
+                            <label><strong>Teams:</strong></label>
+                            <div class="input"><input class="large" type="text" value="" disabled="disabled" /></div>
+                        </div>
+
+                        <div class="clearfix hidden" id="team_selector">
+                            <label><strong>Teams:</strong></label>
+                            <div class="input">
+                                
+                                <h4><strong>All teams:</strong></h4>
+                                <div id="all_teams">
+                                    <select name="team">                                   
+                                        {% for t in s.data.all_teams %}
+                                        <option value="{{ t.websafe }}">{{ t.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <input type="button" class="button black small" value="Add Team" id="add_team" />
+                                </div>
+
+                                <br /><br />
+
+                                
+                                <h4><strong>Current teams:</strong></h4>
+                                <div id="current_teams">
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <div class="clearfix">
+                            <label><strong>Description:</strong></label>
+                            <div class="input"><textarea class="xxlarge unlockable" name="description" disabled="disabled">{{ i.description }}</textarea></div>
+                        </div>
+
+                        <div class="clearfix hidden">
+                            <label><strong>Change password:</strong></label>
+                            <div class="input">
+                                <input class="large" type="password" name="password" value="" />
+                                <span class="info">Leave blank to keep the same password.</span>
+                            </div>
+                        </div>
+
+                        <div class="clearfix hidden grey-highlight" id="save_profile_changes">
+                            <div class="input no-label">
+                                <input type="submit" class="button blue" value="Save Changes" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col_12" style="margin-top:50px">
+                    <h3>Donations</h3>
+                    <table class="regular">
+                        <thead class="bold">
+                                <tr>
+                                <th class="align-left">Time Donated</th>
+                                <th class="align-left">Name</th>
+                                <th class="align-left">Email</th>
+                                <th class="align-left">Donation Amount</th>
+                                <th class="align-left">Payment Type</th>
+                                </tr>
+
+                        </thead>
+                        <tbody>
+                            {% for d in i.data.donations %}
+                            <tr data-id="{{ d.websafe }}">
+                                    <td>{{ d.formatted_time_created }}</td>
+                                    <td>{{ d.name }}</td>
+                                    <td>{{ d.email }}</td>
+
+                                    {% if d.isRecurring %}
+                                    <td>${{ d.monthly_payment }} ({{ d.payment_type }})</td>
+                                    {% else %}
+                                    <td>${{ d.amount_donated }}</td>
+                                    {% endif %}
+
+                                    <td>{{ d.payment_type }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    
+                </div>
+            </div>
+
+            <!-- Variables -->
+            <input type="hidden" name="team_list" value='{{ i.data.team_json|escape }}'>
+            <input type="hidden" name="individual_key" id="individual_key" value="{{ i.websafe }}" />
+
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- IFrame used for submitting the form -->
+<!-- <iframe src="" id="upload_iframe" style="width:0px; height:0px;border=none"></iframe> -->
+
+<script src="/js/profile.js?v=2" type="text/javascript"></script>
+<!-- <script src="/js/muse/jquery.form.js" type="text/javascript"></script> -->

@@ -1,0 +1,127 @@
+<div class="row" id="rq_details">
+    <div class="widget clearfix">
+        <div class="widget_inside">
+            <div class="col_12">
+            <div class="col_4">
+                <h3>{{ d.name }}</h3>
+                <p class="m_bottom15">
+                    Choose any of the actions below or edit the donation information on the right.  A (*) represents current values.
+                </p>
+                <p class="m_bottom15" style="font-weight:bold">
+                    To return to the review queue, you can click in the black area outside this box at any time.
+                </p>
+                <br>
+                <div class="align_center">
+                    <input id="email" name="email" type="button" class="large blue button" value="Email Receipt &amp; Archive">
+                    <input id="preview" name="preview" type="button" class="large black button" value="Preview Email">
+                    <input id="print" name="print" type="button" class="large black button" value="Print Receipt &amp; Archive">   
+                    <input id="archive" name="archive" type="button" class="large black button" value="Just Archive">
+                    <input id="edit_contact" name="edit_contact" type="button" class="large black button" value="Edit Contact">
+                </div>
+            </div>
+            <div class="col_8 last">
+                <div class="form">
+                    <div class="clearfix grey-highlight" id="change_this">
+                        <div class="input no-label">
+                            <input type="button" class="button black" id="change" value="Change this information" style="width:300px"></input>
+                            
+                        </div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label>Name</label>
+                        <div class="input"><input class="large" type="text" name="name" value="{{ d.name }}" disabled="disabled"  title="Click Edit Contact to change" /></div>
+                    </div>
+                    <div class="clearfix">
+                        <label>Email</label>
+                        <div class="input"><input class="large" type="text" name="emailaddress" value="{{ d.email|default_if_none:"" }}" disabled="disabled" title="Click Edit Contact to change" /></div>
+                    </div>
+                    <div class="clearfix" id="team">
+                        <label>Team</label>
+                        <div class="input"><input class="large" type="text" name="team" value="{{ d.data.team_name }}" disabled="disabled" /></div>
+                    </div>
+                    <div class="clearfix hidden yellow-highlight" id="team_selector">
+                        <label>Team</label>
+                        <div class="input">
+                            <select>
+                                <option value="general">General Fund</option>
+                                
+                                {% for t in s.data.all_teams %}
+                                    <option value="{{ t.websafe }}">{{ t.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="clearfix" id="individual">
+                        <label>Individual</label>
+                        <div class="input"><input class="large" type="text" name="individual" value="{{ d.data.individual_name }}" disabled="disabled" /></div>
+                    </div>
+                    <div class="clearfix hidden yellow-highlight" id="individual_selector">
+                        <label>Individual</label>
+                        <div class="input">
+                            <select>
+                                <div id="individual_option">
+                                </div>
+                            </select>
+                        </div>
+                    </div>
+
+                    {% if d.isRecurring %}
+                        <div class="clearfix">
+                            <label>Monthly Donation</label>
+                            <div class="input"><input class="large" type="text" name="amount_donated" value="${{ d.monthly_payment }}" disabled="disabled" /></div>
+                        </div>
+                        <div class="clearfix">
+                            <label>Amount Donated (to date)</label>
+                            <div class="input"><input class="large" type="text" name="amount_donated" value="${{ d.amount_donated }}" disabled="disabled" /></div>
+                        </div>
+                    {% else %}
+                        <div class="clearfix">
+                            <label>Amount Donated</label>
+                            <div class="input"><input class="large" type="text" name="amount_donated" value="${{ d.amount_donated }}" disabled="disabled" /></div>
+                        </div>
+                    {% endif %}
+
+                    <div class="clearfix">
+                        <label>Special Notes</label>
+                        <div class="input"><textarea disabled="disabled" name="special_notes" class="large unlockable" style="width:500px">{{ d.special_notes }}</textarea></div>
+                    </div>
+
+                    <!-- <div class="clearfix hidden">
+                        <label>In deposits window?</label>
+                        <div class="input">
+                            {% if d.deposited %}
+                                <input type="radio" name="add_deposit" id="dep_yes" value="yes">
+                                <label class="unbold" style="width:100%; float:none; margin-right:15px" for="dep_yes">Yes</label>
+
+                                <input type="radio" name="add_deposit" id="dep_no" value="" checked="checked">
+                                <label class="unbold" style="width:100%; float:none; margin-right:15px" for="dep_no">No</label>
+                                
+                            {% else %}
+                                <input type="radio" name="add_deposit" id="dep_yes" value="yes" checked="checked">
+                                <label class="unbold" style="width:100%; float:none; margin-right:15px" for="dep_yes">Yes</label>
+
+                                <input type="radio" name="add_deposit" id="dep_no" value="">
+                                <label class="unbold" style="width:100%; float:none; margin-right:15px" for="dep_no">No</label>
+                            {% endif %}
+
+                        </div>
+                    </div> -->
+
+                </div>
+            </div>
+        </div>
+        </div>
+    </div>   
+</div>
+
+<input type="hidden" id="donation_key" value = "{{ d.websafe }}">
+<input type="hidden" id="team_key" value = "{{ d.team.websafe }}">
+<input type="hidden" id="team_name" value = "{{ d.data.team_name }}">
+<input type="hidden" id="individual_name" value = "{{ d.data.individual_name }}">
+<input type="hidden" id="individual_key" value = "{{ d.individual.websafe }}">
+<input type="hidden" id="address" value = "{{ d.address }}">
+<input type="hidden" id="contact_url" value = "{{ d.contact_url }}">
+
+
+<script src="/js/rq_details.js?v=3"></script>

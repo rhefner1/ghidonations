@@ -1,0 +1,191 @@
+//Flag to see if we're in edit mode or not
+var save_mode = false
+
+function showSave(){
+    //Location of target location (email button)
+    var target_top = $("#email").position().top
+    var target_left = $("#email").position().left
+
+    //Get coordinates of other buttons and calculate how it should move relative to where it is
+    var preview_top = target_top - $("#preview").position().top
+    var print_top = target_top - $("#print").position().top
+    var archive_top = target_top - $("#archive").position().top
+    var contact_top = target_top - $("#edit_contact").position().top
+
+    var preview_left = target_left - $("#preview").position().left
+    var print_left = target_left - $("#print").position().left
+    var archive_left = target_left - $("#archive").position().left
+    var contact_left = target_left - $("#edit_contact").position().left
+
+    $("#preview").animate({top:preview_top, left:preview_left})
+    $("#print").animate({top:print_top, left:print_left})
+    $("#archive").animate({top:archive_top, left:archive_left})
+    $("#edit_contact").animate({top:archive_top, left:archive_left})
+
+    $("#email").val("Save")
+    $("#email").attr("name", "save")
+    save_mode = true
+}
+
+// -- Get team members when editing donation -- //
+function getTeamMembers(team_key){
+    var params = {action: "semi_getTeamMembers", arg0:JSON.stringify(team_key)}
+    rpcGet(params, function(data){
+            //HTML to be inserted
+            individual_key = $("#individual_key").val()
+
+            if (individual_key !== "None"){
+                option_html = '<option value="none">None</option>'
+            }
+            else{
+                option_html = '<option id="current_individual" value="none">* None</option>'
+            }
+            
+            $.each(data, function(name, key) {
+                if (individual_key !== key){
+                    //Putting them into the individual dropdown
+                    option_html = option_html + 
+                    "<option value=" + key + ">" + name + "</option>"
+                }
+                else{
+                    //Putting them into the individual dropdown
+                    option_html = option_html + 
+                    '<option id="current_individual" value=' + key + '>* ' + name + '</option>'
+                }
+                
+            });  
+            //Insert parsed HTML into the page
+            $("#individual_selector select").html(option_html)
+            
+            //Select the current value
+            $("#individual_selector select").val($("#current_individual").val())
+        })
+}
+
+$(document).ready(function(){
+    var team_key = $("#team_key").val()
+    var team_name = $("#team_name").val()
+
+    if (team_key == "None"){
+        $("#team_selector select option[value=general]").text("* General Fund").attr("id", "current_team")
+    }
+    else{
+        $("#team_selector select option[value=" + team_key + "]").text("* " + team_name).attr("id", "current_team")
+    }
+    //Set the team selector to current team
+    $("#team_selector select").val($("#current_team").val())
+
+    $("#change_this input").click(function(){
+        if ($(this).attr("id") == "change"){
+        //Entering edit mode
+            $("#change_this input").val("Delete Donation")
+            $("#change_this input").attr("id", "delete")
+            $("#change_this input").removeClass("black")
+
+            $(".notes").show()
+
+            $("#team").hide()
+            $("#individual").hide()
+            showSave()
+
+            $("#rq_details .hidden").fadeIn()
+
+            //In case a team was selected during loading (and didn't trigger change event)
+            //manually trigger it here
+            $("#team_selector select").change()
+
+            $("#rq_details .unlockable").removeAttr("disabled")
+        }
+        else if ($(this).attr("id") == "delete") {
+            //Delete donation
+            donation_key = $("#donation_key").val()
+            var params = ["deleteDonation", donation_key]
+
+            rpcPost(params, function(data){
+                closeColorbox()
+            })
+        }
+    })
+    
+    $("#rq_details").delegate("input[name=email]", "click", function(){
+        donation_key = $("#donation_key").val()
+        var params = ["emailReceipt", donation_key]
+
+        rpcPost(params, function(data){
+            closeColorbox()        
+        })
+    
+    })
+    
+    $("#rq_details").delegate("input[name=preview]", "click", function(){
+        url = "/thanks?m=w&id=" + $("#donation_key").val()
+        window.open(url)
+    })
+    
+    $("#rq_details").delegate("input[name=print]", "click", function(){
+        donation_key = $("#donation_key").val()
+
+        var params = ["printReceipt", donation_key]
+
+        rpcPost(params, function(data){
+            window.open(data[2])
+            closeColorbox()   
+        })
+    
+    })
+    
+    $("#rq_details").delegate("input[name=archive]", "click", function(){
+        donation_key = $("#donation_key").val()
+
+        var params = ["archiveDonation", donation_key]
+
+        rpcPost(params, function(data){
+            closeColorbox()
+        })
+    
+    })
+
+    $("#rq_details").delegate("input[name=edit_contact]", "click", function(){
+        var contact_url = $("#contact_url").val()
+        window.location.href = contact_url
+    
+    })
+
+    $("#rq_details").delegate("input[name=save]", "click", function(){
+        var donation_key = $("#donation_key").val()
+        var name = $("#rq_details input[name=name]").val()
+        var email = $("#rq_details input[name=emailaddress]").val()
+        var notes = $("#rq_details textarea[name=special_notes]").val()
+        
+        var team_key = $("#rq_details #team_selector option:selected").val()
+        var individual_key = $("#rq_details #individual_selector option:selected").val()
+
+        if (team_key == "none"){
+            team_key = null
+        }
+        if (individual_key == "none"){
+            individual_key = null
+        }
+
+        var add_deposit = Boolean($("input[name=add_deposit]").val())
+        
+        var params = ["updateDonation", donation_key, notes,
+                    team_key, individual_key, add_deposit]
+
+        rpcPost(params, function(data){
+            refreshPage()
+        })
+    
+    })
+
+    $('#team_selector select').bind('change', function(){ 
+        var selection = $("#team_selector select").val()
+        if (selection == "general") {
+            $("#individual_selector").hide("fast")
+        }
+        else {
+            getTeamMembers(selection)
+            $("#individual_selector").show("fast")
+        }   
+    });
+})

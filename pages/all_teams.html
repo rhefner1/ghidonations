@@ -1,0 +1,30 @@
+<div class="row" id="all_teams">
+    <div class="widget clearfix">
+        <h2>All Teams</h2>
+        <div class="widget_inside">
+        	<p class="m_bottom15">Click any of the teams below to see its members and information about it.</p>
+
+            <div class="col_12">
+                <table class="dataTable">
+                    <thead class="bold">
+                        <tr>
+                            <th class="align-left">Key</th>
+                            <th class="align-left">Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="teams">
+                        {% for t in teams %}
+                        <tr>
+                            <td>{{ t.websafe }}</td>
+                            <td>{{ t.name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="initial_cursor" value="{{ initial_cursor }}" />
+<script src="/js/all_teams.js?v=3"></script>

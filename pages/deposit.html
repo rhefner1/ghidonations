@@ -1,0 +1,56 @@
+<div class="row" id="deposit">
+    <div class="widget clearfix">
+    <h2>Deposit - {{ d.time_deposited }}</h2>
+        <div class="widget_inside">
+            <div class="col_12">
+            <div class="col_4">
+                <p style="margin_bottom_15">
+                    <h3>What's in this deposit?</h4>
+
+                    <p>The amount next to the team is the total for that team. The numbers next to
+                    individuals is the specific amount towards them.</p>
+
+                    <ul class="disc">
+                    {% for t in team_breakout.items %}
+                        <li style="font-size:14px; margin-bottom:7px; margin-top:25px"><strong>{{ t.0 }}</strong></li>
+                            <ul>
+                            {% for p in t.1 %}
+                                <li>{{ p }}</li>
+                            {% endfor %}
+                            </ul>
+                    {% endfor %}
+                    </ul>
+                </p>
+            </div>
+            <div class="col_8 last">
+            <h4><strong>Total:</strong> ${{ total_amount }}</h4>
+            <br>
+                <table class="regular">
+                    <thead class="bold">
+                            <tr>
+                            <th class="align-left">Time Donated</th>
+                            <th class="align-left">Name</th>
+                            <th class="align-left">Email</th>
+                            <th class="align-left">Donation Amount</th>
+                            <th class="align-left">Payment Type</th>
+                            </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in donations %}
+                        <tr data-id="{{ d.websafe }}">
+                            <td>{{ d.formatted_time_created }}</td>
+                            <td>{{ d.name }}</td>
+                            <td>{{ d.email }}</td>
+                            <td>${{ d.amount_donated }}</td>
+                            <td>{{ d.payment_type }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            </div>
+        </div>
+    </div>   
+</div>
+
+<!-- <script src="/js/deposit.js"></script> -->

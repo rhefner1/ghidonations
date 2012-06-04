@@ -1,0 +1,35 @@
+<div class="row" id="export">
+    <div class="widget clearfix">
+    <h2>Export Data</h2>
+        <div class="widget_inside">
+            <div class="col_3">
+                <h3>Beginning Date</h3>
+                <div id="beginning_date" class="datepicker"></div>
+            </div>
+
+            <div class="col_3">
+                <h3>Ending Date</h3>
+                <div id="end_date" class="datepicker"></div>
+            </div>
+
+            <div class="col_4 last">
+                <p style="margin-bottom:15px">Select a beginning and end date on the right and what you'd like to export below. </p>
+
+                <div style="margin-bottom:15px"><strong>Export what?</strong></div>
+
+                <div style="margin-bottom:15px">
+                    <input type="radio" name="export_type" id="donations" value="donations" checked="checked">
+                    <label style="width:100%; float:none; margin-right:15px" for="donations">Donations</label>
+
+                    <!-- <input type="radio" name="export_type" id="contacts" value="contacts">
+                    <label style="width:100%; float:none; margin-right:15px" for="contacts">Contacts</label> -->
+                </div>
+
+                <input type="button" class="large button blue" id="export_data" value="Export Data" />
+            </div>
+
+        </div>
+    </div>   
+</div>
+
+<script src="/js/export_donations.js?v=3"></script>

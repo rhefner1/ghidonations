@@ -1,0 +1,102 @@
+/* Make HTML 5 elements display block-level for consistent styling */  
+header, nav, article, footer, address {display: block;}
+
+/* Navigation */
+.hor-list li {display: inline;}
+.hor-list li li {display: block;}
+
+.piped li:before {content:"|"; padding: 0 5px;}
+.piped li:first-child:before {content:""; padding: 0}
+
+.breadcrumbs li:before {content: "/"; padding: 0 5px;}
+.breadcrumbs li:first-child:before {content:""; padding: 0}
+
+.piped li, .breadcrumbs li {*padding-left: 5px !important;} .piped li:first-child, .breadcrumbs li:first-child {*padding-left: 0 !important}
+
+/* Typography */
+.right {float: right;}
+.left {float: left;}
+.align-left {text-align: left;}
+.align-right {text-align: right;}
+.center {text-align:center;}
+.justify {text-align:justify;}
+strong, b, .bold, .strong {font-weight:bold;}
+em, i,.italic,cite {font-style:italic;}
+.underline {text-decoration:underline;}
+.centered {display: block;margin: 0 auto}
+img.alignleft {float:left;margin:4px 10px 4px 0;}
+img.alignright {float:right;margin:4px 0 4px 10px;}
+.block {display: block}
+ins {font-size: 1em;text-decoration: none;vertical-align: super;}
+code, pre {font-family: "Lucida Console", Consolas,"Bitstream Vera Sans Mono","Courier New",Courier,monospace;}
+.numbered {list-style: decimal-leading-zero inside;}
+.disc, .square ul {list-style: disc inside;}
+.disc ul, .square {list-style: square inside}
+abbr, acronym {border-bottom: 1px dotted #161a1f}
+
+.block {display: block}
+.hide {display: none}
+
+pre {border-radius: 1px 1px 1px 1px;box-shadow: 0 0 2px rgba(0, 0, 0, 0.1);display: block;border: 1px solid #E0E0E0;overflow: auto;font-size: 12px;line-height: 20px;margin: 15px 0;white-space: pre-wrap;}
+code {background-color: #FEE9CC;color: rgba(0, 0, 0, 0.75);padding: 1px 3px;border-radius: 3px 3px 3px 3px; border: 1px solid #DCC27C}
+pre code {background: url(/images/muse/code_bg.gif); display: block; border: none}
+
+dd {margin-left: 2em;}
+
+/* Footer */
+html, body {height: 100%;}
+#wrap {min-height: 100%}
+#main {overflow:auto; padding-bottom: 50px;}  /* must be same height as the footer */
+footer {position: relative;margin-top: -50px;height: 50px;clear:both;}
+body:before {content:"";height:100%;float:left;width:0;margin-top:-32767px;/* thank you Erik J - negate effect of float*/}
+
+/* `Clear Floated Elements
+----------------------------------------------------------------------------------------------------*/
+
+/* http://sonspring.com/journal/clearing-floats */
+
+.clear {
+  clear: both;
+  display: block;
+  overflow: hidden;
+  visibility: hidden;
+  width: 0;
+  height: 0;
+}
+
+/* http://www.yuiblog.com/blog/2010/09/27/clearfix-reloaded-overflowhidden-demystified */
+
+.ui-helper-clearfix:before,
+.ui-helper-clearfix:after,
+.clearfix:before,
+.clearfix:after,
+.container_12:before,
+.container_12:after,
+.container_16:before,
+.container_16:after {
+  content: '.';
+  display: block;
+  overflow: hidden;
+  visibility: hidden;
+  font-size: 0;
+  line-height: 0;
+  width: 0;
+  height: 0;
+}
+
+.clearfix:after, .ui-helper-clearfix:after,
+.container_12:after,
+.container_16:after {
+  clear: both;
+}
+
+/*
+  The following zoom:1 rule is specifically for IE6 + IE7.
+  Move to separate stylesheet if invalid CSS is a problem.
+*/
+
+.clearfix, .ui-helper-clearfix,
+.container_12,
+.container_16 {
+  zoom: 1;
+}

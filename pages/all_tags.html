@@ -1,0 +1,31 @@
+<div class="row" id="all_tags">
+    <div class="widget clearfix">
+        <h2>All Tags</h2>
+        <div class="widget_inside">
+        	<p class="m_bottom15">Click any one of the tags below to view more details about them.</p>
+
+            <div class="col_12">
+                <table class="dataTable">
+                    <thead class="bold">
+                            <tr>
+                            <th class="align-left">Key</th>
+                            <th class="align-left">Tag</th>
+                            </tr>
+
+                    </thead>
+                    <tbody id="tags">
+                    	{% for t in tags %}
+                        <tr>
+                                <td>{{ t.websafe }}
+                                <td>{{ t.name }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="initial_cursor" value="{{ initial_cursor }}" />
+<script src="/js/all_tags.js?v=3"></script>

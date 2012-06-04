@@ -1,0 +1,172 @@
+<div class="row clearfix" id="contact">
+    <div class="col_12">
+        <div class="widget clearfix">
+        <h2>Contact - {{ c.name }}</h2>
+            <div class="widget_inside">
+                <div class="col_3">
+                    <h3>Edit Info</h3>
+                    <p style="margin-bottom:15px">A contact is someone that your organization wants to keep track of. All of their information and donations are shown here.</p>
+                    <input type="button" class="large button black" id="edit_contact" value="Edit Contact" />
+                </div>
+
+                <div class="col_8">
+                    <div class="form">
+                    <form>
+
+                        <div class="clearfix">
+                            <label>Name</label>
+                            <div class="input"><input class="large unlockable validate[required]" type="text" name="name" value="{{ c.name }}" disabled="disabled" /></div>
+                        </div>
+
+                        <div class="clearfix">
+                            <label>Email</label>
+                            <div class="input"><input class="large unlockable validate[custom[email]]" type="text" name="email" value="{{ c.email|default_if_none:"" }}" disabled="disabled" /></div>
+                        </div>
+
+                        <div class="clearfix">
+                            <label>Phone</label>
+                            <div class="input">
+                                ( <input class="small unlockable" type="text" name="phone_1" value="{{ d.phone }}" maxlength="3" disabled="disabled" style="text-align:center" /> ) - 
+                                <input class="small unlockable" type="text" name="phone_2" value="{{ d.phone }}" maxlength="3" disabled="disabled" style="text-align:center" /> - 
+                                <input class="small unlockable" type="text" name="phone_3" value="{{ d.phone }}" maxlength="4" disabled="disabled" style="text-align:center" />
+                            </div>
+                        </div>
+
+                        <div class="clearfix">
+                            <label>Notes</label>
+                            <div class="input"><textarea class="xxlarge unlockable" name="notes" disabled="disabled">{{ c.notes }}</textarea></div>
+                        </div>
+
+                        <div class="clearfix">
+                            <label>Address</label>
+                            <div class="input">
+                                <input class="xlarge unlockable" type="text" name="street" placeholder="Street" disabled="disabled" />
+                                <br>
+                                <input class="medium unlockable" type="text" name="city" placeholder="City" disabled="disabled" />
+                                <input class="medium unlockable" type="text" name="state" placeholder="State" disabled="disabled" />
+                                <input class="medium unlockable" type="text" name="zip" placeholder="ZIP" disabled="disabled" />
+                            </div>
+                        </div>
+
+                        <div class="clearfix hidden grey-highlight" id="save_contact_changes">
+                            <div class="input no-label">
+                                <input name="save_contact" type="button" class="button blue" value="Save Contact" />
+                            </div>
+                            <div class="input no-label">
+                                <input name="delete_contact" type="button" class="button" value="Delete contact" />
+                            </div>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget_inside">
+                <div class="col_3" style="margin-top:50px">
+                    <h3>Impressions</h3>
+                    <p style="margin-bottom:15px">Keep in touch with a contact and record it with <strong>Impressions</strong>.</p>
+                    <input type="button" class="large button black" id="add_impression" value="Add Impression" />
+                </div>
+
+                <div class="col_8" style="margin-top:50px">
+                    <div class="form" id="impressions_list">
+
+                        <table class="regular">
+                            <thead class="bold">
+                                <tr>
+                                    <th class="align-left">Date</th>
+                                    <th class="align-left">Impression</th>
+                                    <th class="align-left">Notes</th>
+                                </tr>
+
+                            </thead>
+                            <tbody>
+                                {% for i in c.data.all_impressions %}
+                                <tr style="cursor:default">
+                                    <td>{{ i.formatted_creation_date }}</td>
+                                    <td>{{ i.impression }}</td>
+                                    <td>{{ i.notes }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+                    </div>
+
+                    <div class="form hidden" id="impression_fields">
+
+                        <div class="clearfix">
+                            <label>New Impression</label>
+                            <div id="impressions_edit" class="input">
+                                <select>
+                                {% for s in s.impressions %}
+                                    <option>{{ s }}</option>
+                                {% endfor %}
+                                </select>
+
+                                <textarea class="xlarge" style="vertical-align:top; margin-left:10px" placeholder="Notes about this impression"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="clearfix grey-highlight" id="save_contact_changes">
+                            <div class="input no-label">
+                                <input name="save_impression" type="button" class="button blue" value="Save Impression" />
+                            </div>
+                            <div class="input no-label">
+                                <input name="discard_impression" type="button" class="button" value="Discard" />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="widget_inside">
+                <div class="col_12" style="margin-top:50px">
+                    <h3>Donations By This Contact</h3>
+                    <table class="dataTable">
+                        <thead class="bold">
+                            <tr>
+                                <th class="align-left">Key</th>
+                                <th class="align-left">Time Donated</th>
+                                <th class="align-left">Email</th>
+                                <th class="align-left">Donation Amount</th>
+                                <th class="align-left">Payment Type</th>
+                            </tr>
+
+                        </thead>
+                        <tbody id="donations">
+                            {% for d in donations %}
+                            <tr>
+                                <td>{{ d.websafe }}</td>
+                                <td>{{ d.formatted_time_created }}</td>
+                                <td>{{ d.email }}</td>
+
+                                {% if d.isRecurring %}
+                                <td>${{ d.monthly_payment }} ({{ d.payment_type }})</td>
+                                {% else %}
+                                <td>${{ d.amount_donated }}</td>
+                                {% endif %}
+
+                                <td>{{ d.payment_type }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+                
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="contact_key" value = "{{ c.websafe }}" />
+<input type="hidden" id="address" value='{{ c.address_json }}' />
+<input type="hidden" id="phone" value="{{ c.phone }}">
+<input type="hidden" id="initial_cursor" value="{{ initial_cursor }}">
+
+<div style="display:none" id="contact_container"></div>
+
+<script src="/js/contact.js?v=3" type="text/javascript"></script>

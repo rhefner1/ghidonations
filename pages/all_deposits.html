@@ -1,0 +1,32 @@
+<div class="row" id="all_deposits">
+    <div class="widget clearfix">
+    <h2>All Deposits</h2>
+        <div class="widget_inside">
+            <div class="col_12">
+                <p style="margin_bottom_15">
+                    Click any deposit to see which donations it contained. 
+                </p>
+
+                <table class="dataTable" id="donations">
+                    <thead class="bold">
+                        <tr>
+                            <th class="align-left">Key</th>
+                            <th class="align-left">Time Deposited</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for d in deposits %}
+                        <tr>
+                            <td>{{ d.websafe }}
+                            <td>{{ d.time_deposited }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>   
+</div>
+
+<input type="hidden" id="initial_cursor" value="{{ initial_cursor }}" />
+<script src="/js/all_deposits.js?v=3"></script>

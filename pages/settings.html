@@ -1,0 +1,187 @@
+<div class="row" id="settings_page">
+    <div class="widget clearfix">
+    <h2>Settings</h2>
+        <div class="widget_inside">
+        <form>
+            <div class="col_12">
+            <div class="col_4">
+                <h3>{{ d.name }}</h3>
+                <p style="margin_bottom_15">
+                    Your organization's preferences and other options.
+                </p>
+                <br>
+                <div class="align_center">
+                    <input id="save" type="button" class="large blue button" value="Save Settings">
+                </div>
+            </div>
+            <div class="col_8 last">
+                <h3>Organization</h3>
+                <div class="form" id="settings_org" style="margin-bottom:35px">
+                    <div class="clearfix">
+                        <label>Organization Name</label>
+                        <div class="input"><input class="large validate[required]" type="text" id="name" name="name" value="{{ s.name }}" placeholder="Acme Corporation" /></div>
+                    </div>
+                    <div class="clearfix">
+                        <label>Administrator Email</label>
+                        <div class="input"><input class="large validate[required,custom[email]]" type="text" id="email" name="email" value="{{ s.email }}" placeholder="renee@acmecorp.com" /></div>
+                    </div>
+                </div>
+
+                <h3>Mailchimp</h3>
+                <div class="form" id="settings_mc" style="margin-bottom:35px">
+
+                    <div class="clearfix">
+                        <label>Use Mailchimp?</label>
+                        <div class="input">
+                            <input type="radio" name="mc_use" id="mc_yes" value="yes" checked="checked">
+                            <label class="unbold" style="width:100%; float:none; margin-right:15px" for="mc_yes">Yes</label>
+
+                            <input type="radio" name="mc_use" id="mc_no" value="" checked="checked">
+                            <label class="unbold" style="width:100%; float:none; margin-right:15px" for="mc_no">No</label>
+
+                            <br>
+                            <div class="info" style="margin-top:15px">Add people to existing groups or create new ones - all from within GHI Donations.</div>
+                        </div>
+                    </div>
+
+                    <div id="mc_additional" class="hidden">
+
+                    <div class="clearfix">
+                        <label>Mailchimp API Key</label>
+                        <div class="input">
+                            <input class="large" type="text" name="mc_apikey" value="{{ s.mc_apikey }}" />
+                            <div class="info"><a href="#settings">What is this?</a></div>
+                        </div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label>Donor Mailing List</label>
+                        <div class="input" id="mclists_container">
+                            <input type="button" class="black button" id="get_mclists" value="Get Mailchimp Lists" />
+                            <div class="info" style="margin-top:15px">The mailing list that new donors are added to. Only click this button to change the list.</div>
+                        </div>
+                    </div>
+
+                    </div>
+
+                </div>
+
+                <h3>Paypal</h3>
+                <div class="form" style="margin-bottom:35px">
+                    <div class="clearfix">
+                        <label>Paypal ID/Email</label>
+                        <div class="input">
+                            <input class="large validate[required]" type="text" name="paypal_id" value="{{ s.paypal_id }}" />
+                            <div class="info"><a href="#settings">What is this?</a></div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Wordpress</h3>
+                <div class="form" style="margin-bottom:35px">
+                    <div class="clearfix">
+                        <label>Wordpress URL</label>
+                        <div class="input">
+                            <input class="large" type="text" name="wp_url" value="{{ s.wp_url }}" />
+                        </div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label>Wordpress Username</label>
+                        <div class="input">
+                            <input class="large" type="text" name="wp_username" value="{{ s.wp_username }}" />
+                        </div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label>Wordpress Password</label>
+                        <div class="input">
+                            <input class="large" type="text" name="wp_password" value="{{ s.wp_password }}" />
+                        </div>
+                    </div>
+                </div>
+
+                <h3>Impressions</h3>
+                <div class="form" style="margin-bottom:35px">
+                    <div class="clearfix">
+                        <label>New Impression</label>
+                        <div class="input">
+                            <div id="new_impression">
+                                <input type="text" class="large" placeholder="Impression name" />
+                                <button class="black button">Add</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label>Current Impressions</label>
+                        <div class="input">
+                            <table style="width:auto" id="current_impressions">
+
+                            </table>
+                        </div>
+                    </div>
+                </div>      
+
+                <h3>Donate Page</h3>
+                <div class="form" style="margin-bottom:35px">
+
+                    <div class="clearfix">
+                        <label>Donate Page Link</label>
+                        <div class="input">
+                            <p><a href="/donate?s={{ s.websafe }}" target="_blank">Click here for the donate page</a></p>
+                        </div>
+                    </div>
+                
+                    <div class="clearfix">
+                        <label>Donation Amounts</label>
+                        <div class="input">
+                            <input class="small" type="text" name="amount1" placeholder="10" value="{{ s.amount1 }}" />
+                            <input class="small" type="text" name="amount2" placeholder="25" value="{{ s.amount2 }}" />
+                            <input class="small" type="text" name="amount3" placeholder="50" value="{{ s.amount3 }}" />
+                            <input class="small" type="text" name="amount4" placeholder="100" value="{{ s.amount4 }}" />
+
+                            <input type="checkbox" name="use_custom" id="use_custom" value="custom">
+                            <label class="unbold" style="width:100%; float:none; margin-right:15px" for="use_custom">Custom Amount Box</label>
+                        </div>
+                    </div>
+
+                </div>
+
+                <h3>Confirmation Letter</h3>
+                <div class="form" style="margin-bottom:35px">
+
+                    <div class="clearfix">
+                        <label>Header</label>
+                        <div class="input"><textarea name="confirmation_header" class="cleditor">{{ s.confirmation_header }}</textarea></div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label>Body Text</label>
+                        <div class="input"><textarea name="confirmation_text">{{ s.confirmation_text }}</textarea></div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label>Organization Information</label>
+                        <div class="input"><textarea name="confirmation_info" class="cleditor">{{ s.confirmation_info }}</textarea></div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label>Footer</label>
+                        <div class="input"><textarea name="confirmation_footer" class="cleditor">{{ s.confirmation_footer }}</textarea></div>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+        </div>
+        </div>
+    </div>   
+</div>
+
+<input type="hidden" id="var_mcuse" value="{{ s.mc_use }}" />
+<input type="hidden" id="var_usecustom" value="{{ s.use_custom }}" />
+<input type="hidden" id="var_donorlist" value="{{ s.mc_donorlist }}" />
+<input type="hidden" id="var_impressions" value='{{ s.impressions_json }}' />
+
+<script src="/js/settings.js?v=4"></script>
