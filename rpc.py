@@ -605,15 +605,6 @@ class RPCMethods:
         s = tools.getSettingsKey(self).get()
         return s.data.contactsJSON
 
-    def contactSearch(self, query_cursor, query):
-        s = tools.getSettingsKey(self).get()
-        response = s.search("Contact", query_cursor, query, True)
-
-        results = response[0]
-        new_cursor = response[1]
-
-        return [results, new_cursor]
-
 #### ---- Donation depositing ---- ####
     def depositDonations(self, donation_keys):
         message = "Donations deposited."
