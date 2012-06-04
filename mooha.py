@@ -263,6 +263,18 @@ class AllTeams(webapp.RequestHandler):
         self.response.write(
                 template.render('pages/all_teams.html', template_variables))
 
+class AllIndividuals(webapp.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, False)
+
+        response = s.data.individuals(None)
+        individuals = response[0]
+        initial_cursor = response[1]
+
+        template_variables = {"individuals" : individuals, "initial_cursor" : initial_cursor}
+        self.response.write(
+           template.render('pages/all_individuals.html', template_variables))
+
 class TeamMembers(webapp.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
@@ -327,6 +339,8 @@ class UpdateProfile(blobstore_handlers.BlobstoreUploadHandler):
             new_blobkey = str(blob_info.key())
         else:
             new_blobkey = None
+
+        logging.info("Saving profile for: " + name)
 
         i.update(name, email, team, description, new_blobkey, password)
 
@@ -759,6 +773,7 @@ app = webapp.WSGIApplication([
        ('/ajax/alldeposits', AllDeposits),
        ('/ajax/deposit', Deposit),
 
+       ('/ajax/allindividuals', AllIndividuals),
        ('/ajax/newindividual', NewIndividual),
        ('/ajax/newteam', NewTeam),
 

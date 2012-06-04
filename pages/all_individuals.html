@@ -1,6 +1,6 @@
-<div class="row" id="all_contacts">
+<div class="row" id="all_individuals">
     <div class="widget clearfix">
-        <h2>All Contacts</h2>
+        <h2>All Individuals</h2>
         <div class="widget_inside">
         	<p class="m_bottom15">Click any one of the contacts below to view more details about them.</p>
             <div id="selector_buttons" style="float:right; margin-bottom:15px">
@@ -15,18 +15,18 @@
                 <table class="dataTable">
                     <thead class="bold">
                             <tr>
-                            <th class="align-left">Key</th>
-                            <th class="align-left">Name</th>
-                            <th class="align-left">Email</th>
+                                <th class="align-left">Key</th>
+                                <th class="align-left">Name</th>
+                                <th class="align-left">Email</th>
                             </tr>
 
                     </thead>
                     <tbody id="contacts">
-                    	{% for c in contacts %}
+                    	{% for i in individuals %}
                         <tr>
-                                <td>{{ c.websafe }}</td>
-                                <td>{{ c.name }}</td>
-                                <td>{{ c.email }}</td>
+                                <td>{{ i.websafe }}</td>
+                                <td>{{ i.name }}</td>
+                                <td>{{ i.email }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>

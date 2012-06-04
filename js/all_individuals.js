@@ -1,8 +1,8 @@
-function contactSearch(){
+function individualSearch(){
      $("#back_allcontacts").show()
     // I have no idea why the review queue code like this works
     rpc_params = [$("input[name=search]").val()]
-    pageThrough(data_table, 0, "contactSearch", rpc_params, function(data_table, d){
+    pageThrough(data_table, 0, "individualSearch", rpc_params, function(data_table, d){
         data_table.fnAddData([
             d.key,
             d.name,
@@ -11,9 +11,9 @@ function contactSearch(){
     })
 }
 
-function loadAllContacts(){
+function loadAllIndividuals(){
      $("#back_allcontacts").hide()
-     pageThrough(data_table, 0, "getContacts", null, function(data_table, d){
+     pageThrough(data_table, 0, "getIndividuals", null, function(data_table, d){
         data_table.fnAddData([
             d.key,
             d.name,
@@ -25,7 +25,7 @@ function loadAllContacts(){
 
 $(document).ready(function(){  
     var initial_cursor = $("#initial_cursor").val()
-    var data_table = initializeTable(2, initial_cursor, "getContacts", null, function(data_table, d){
+    var data_table = initializeTable(2, initial_cursor, "getIndividuals", null, function(data_table, d){
         data_table.fnAddData([
             d.key,
             d.name,
@@ -35,24 +35,24 @@ $(document).ready(function(){
 
     $("#back_allcontacts").click(function(){
         $("input[name=search]").val("")
-        loadAllContacts()
+        loadAllIndividuals()
     })
 
     $("input[name=search]").keyup(function(event){
         if(event.keyCode == 13){
-            contactSearch()
+            individualSearch()
         }
     });
 
     $("#submit_search").click(function(){
-        contactSearch(data_table)
+        individualSearch(data_table)
     })
 
     $("#contacts").delegate("tr", "click", function(){
         var row_data = data_table.fnGetData(this)
         var clicked_id =  row_data[0]
 
-        window.location.hash = "contact?c=" + clicked_id
+        window.location.hash = "profile?i=" + clicked_id
     });
 
 });

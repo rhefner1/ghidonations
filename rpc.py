@@ -131,18 +131,17 @@ class RPCMethods:
 
         return settings.urlsafe()
 
-    def pub_saveDatastore(self):
+    def saveDatastore(self):
         from google.appengine.tools import dev_appserver 
         dev_appserver.TearDownStubs()
         return "Datastore Saved!"
 
     def pub_refreshSandbox(self):
         #Local SDK
-        # settings = "ahBkZXZ-Z2hpZG9uYXRpb25zcg4LEghTZXR0aW5ncxhcDA"
-
+        settings = "ahBkZXZ-Z2hpZG9uYXRpb25zcg4LEghTZXR0aW5ncxgBDA"
 
         #Production
-        settings = "ag5zfmdoaWRvbmF0aW9uc3IQCxIIU2V0dGluZ3MY9dIWDA"
+        # settings = "ag5zfmdoaWRvbmF0aW9uc3IQCxIIU2V0dGluZ3MY9dIWDA"
 
         s = tools.getKey(settings).get()
 
@@ -219,9 +218,43 @@ class RPCMethods:
         tools.flushMemcache(self)
         return "Memcache flushed."
 
-    def pub_convertAllKeys(self):
+    def convertAllKeys(self):
         taskqueue.add(url="/tasks/convertkeys", queue_name="backend", params={})
         return "Task added"
+
+    def indexAll(self):
+        all_i = models.Individual.query()
+        all_c = models.Contact.query()
+        all_d = models.Donation.query()
+
+        for i in all_i:
+            if not i.search_id:
+                i.put()
+        for c in all_c:
+            if not c.search_id:
+                c.put()
+        for d in all_d:
+            if not d.search_id:
+                d.put()
+
+        return "All indexed."
+
+    def deleteIndexes(self):
+        tools.deleteAllInIndex("Contact")
+        tools.deleteAllInIndex("Donation")
+        tools.deleteAllInIndex("Individual")
+
+        return "Indexes deleted"
+
+    def repaircontacts(self):
+        all_d = models.Donation.query()
+        for d in all_d:
+            c = d.contact.get()
+            email = c.email
+
+            if email == None or email == "":
+                c.email = d.given_email
+            c.put()
 
 #### ---- Globalhopeindia.org Utility Functions ---- ####
     def individualExists(self, email):
@@ -290,8 +323,11 @@ class RPCMethods:
         s = tools.getSettingsKey(self).get()
 
         response = s.data.teams(query_cursor)
+        teams = []
 
-        teams = tools.GQLtoDict(self, response[0])
+        for t in response[0]:
+            tdict = {"key" : t.websafe, "name" : t.name}
+            teams.append(tdict)
         new_cursor = response[1]
 
         #Return message to confirm 
@@ -303,8 +339,11 @@ class RPCMethods:
 
         response = s.data.deposits(query_cursor)
 
-        deposits = tools.GQLtoDict(self, response[0])
+        deposits = []
         new_cursor = response[1]
+
+        for d in response[0]:
+            ddict = {"key" : d.websafe, "time_deposited" : d.time_deposited}
 
         #Return message to confirm 
         return_vals = [deposits, new_cursor]
@@ -314,6 +353,18 @@ class RPCMethods:
         s = tools.getSettingsKey(self).get()
 
         response = s.data.contacts(query_cursor)
+
+        contacts = tools.GQLtoDict(self, response[0])
+        new_cursor = response[1]
+
+        #Return message to confirm 
+        return_vals = [contacts, new_cursor]
+        return return_vals
+
+    def getIndividuals(self, query_cursor):
+        s = tools.getSettingsKey(self).get()
+
+        response = s.data.individuals(query_cursor)
 
         contacts = tools.GQLtoDict(self, response[0])
         new_cursor = response[1]
@@ -549,10 +600,19 @@ class RPCMethods:
         return_vals = [success, message]
         return return_vals
 
-#### ---- Contact Autocomplete ---- ####
+#### ---- Search ---- ####
     def getContactsJSON(self):
         s = tools.getSettingsKey(self).get()
         return s.data.contactsJSON
+
+    def contactSearch(self, query_cursor, query):
+        s = tools.getSettingsKey(self).get()
+        response = s.search("Contact", query_cursor, query, True)
+
+        results = response[0]
+        new_cursor = response[1]
+
+        return [results, new_cursor]
 
 #### ---- Donation depositing ---- ####
     def depositDonations(self, donation_keys):

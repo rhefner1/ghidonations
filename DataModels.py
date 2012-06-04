@@ -3,7 +3,7 @@ from decimal import *
 from google.appengine.api import datastore_errors
 
 #App Engine platform
-from google.appengine.api import taskqueue, mail, memcache, urlfetch, images
+from google.appengine.api import taskqueue, mail, memcache, urlfetch, images, search
 from google.appengine.ext import ndb, deferred
 
 #Mailchimp API
@@ -68,6 +68,39 @@ class Settings(ndb.Expando):
     @property
     def impressions_json(self):
         return json.dumps(self.impressions)
+
+    def search(self, index_name, query_cursor, query, return_dict):
+        query_options = search.QueryOptions(limit=15, cursor=query_cursor) 
+        query_obj = search.Query(query_string=query, options=query_options)
+        index_obj = search.Index(name=index_name)
+        search_obj = index_obj.search(query=query_obj)
+        entities = []
+
+        for r in search_obj.results:
+            #Ensuring that we only return results from this Settings account
+            settings_key = r.fields[1].value
+
+            # if settings_key == self.websafe:
+            key = r.fields[0].value
+            e = tools.getKey(key).get() 
+
+            entities.append(e)
+
+        if return_dict == True:
+            results = []
+            for e in entities:
+                # try:
+                edict = {"key" : e.key.urlsafe(),"name" : e.name, "email" : e.email}
+                results.append(edict)
+                # except:
+                #     #Failed, so document refers to nonexistent entity. Delete document.
+                #     index_obj.remove([r.doc_id])  
+
+        elif return_dict == False:
+            results = entities
+
+        return [results, search_obj.cursor, search_obj.results]
+        # return search_obj.results
 
     @property
     def data(self):
@@ -229,6 +262,10 @@ class TeamList(ndb.Model):
         return self.team.get().name
 
     @property
+    def team_websafe(self):
+        return self.team.urlsafe()
+
+    @property
     def donation_total(self):
         i = self.individual.get()
         memcache_key = "dtotal" + self.team.urlsafe() + i.key.urlsafe()
@@ -262,6 +299,9 @@ class Individual(ndb.Expando):
     photo = ndb.StringProperty()
     description = ndb.TextProperty()
 
+    #Search
+    search_id = ndb.StringProperty()
+
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
@@ -294,6 +334,20 @@ class Individual(ndb.Expando):
         logging.info("Alert email sent at " + currentTime())
 
         message.send()
+
+    ## -- Search -- ##
+    def index(self):
+        fields = [search.TextField(name='key', value=self.websafe),
+                    search.TextField(name='settings_key', value=self.settings.urlsafe()),
+                    search.TextField(name='name', value=self.name),
+                    search.TextField(name='email', value=self.email)]
+
+        if self.search_id:
+            doc = search.Document(doc_id=self.search_id, fields=fields)
+        else:
+            doc = search.Document(fields=fields)
+        
+        return search.Index(name="Individual").add(doc)
 
     ## -- Update Individual -- #
     def update(self, name, email, team_list, description, change_image, password):
@@ -346,8 +400,12 @@ class Individual(ndb.Expando):
 
         self.put()
 
+    ## -- Before put -- ##
+    def _pre_put_hook(self):
+        result = self.index()
+        self.search_id = result[0].object_id
+
     ## -- After put -- ##
-    @classmethod
     def _post_put_hook(self, future):
         e = future.get_result().get()
 
@@ -403,6 +461,9 @@ class Donation(ndb.Expando):
 
     #Sets date that the model was last acted upon (donated, recurring payment)
     time_created = ndb.DateTimeProperty()
+
+    #Search
+    search_id = ndb.StringProperty()
     
     #Sets the time that the donation was placed
     donation_date = ndb.DateTimeProperty(auto_now_add=True)
@@ -447,6 +508,21 @@ class Donation(ndb.Expando):
     def confirmation(self):
         return tools.DonationConfirmation(self)
 
+    ## -- Search -- ##
+    def index(self):
+        fields = [search.TextField(name='key', value=self.websafe),
+                    search.TextField(name='settings_key', value=self.settings.urlsafe()),
+                    search.NumberField(name='amount', value=float(self.amount_donated)),
+                    search.TextField(name='name', value=self.name),
+                    search.TextField(name='email', value=self.email)]
+
+        if self.search_id:
+            doc = search.Document(doc_id=self.search_id, fields=fields)
+        else:
+            doc = search.Document(fields=fields)
+
+        return search.Index(name="Donation").add(doc)
+
     ## -- Update donation -- ##
     def update(self, notes, team_key, individual_key, add_deposit):
         #Get self data entity from datastore
@@ -482,6 +558,11 @@ class Donation(ndb.Expando):
 
         #And now to put that donation back in the datastore
         self.put()
+
+    ## -- Before put -- ##
+    def _pre_put_hook(self):
+        result = self.index()
+        self.search_id = result[0].object_id
 
     ## -- After Put -- ##
     @classmethod
@@ -522,6 +603,9 @@ class Contact(ndb.Expando):
     
     settings = ndb.KeyProperty()
 
+    #Search
+    search_id = ndb.StringProperty()
+
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
@@ -540,6 +624,22 @@ class Contact(ndb.Expando):
     @property
     def create(self):
         return tools.ContactCreate(self)
+
+    ## -- Search -- ##
+    def index(self):
+        try:
+            fields = [search.TextField(name='key', value=self.websafe),
+                        search.TextField(name='settings_key', value=self.settings.urlsafe()),
+                        search.TextField(name='name', value=self.name),
+                        search.TextField(name='email', value=self.email)]
+            if self.search_id:
+                doc = search.Document(doc_id=self.search_id, fields=fields)
+            else:
+                doc = search.Document(fields=fields)
+
+            return search.Index(name="Contact").add(doc)
+        except:
+            return [None]
 
     ## -- Update contact -- ##
     def update(self, name, email, phone, notes, address):
@@ -576,6 +676,11 @@ class Contact(ndb.Expando):
 
         #And now to put that contact back in the datastore
         self.put()
+
+    ## -- Before put -- ##
+    def _pre_put_hook(self):
+        result = self.index()
+        self.search_id = result[0].object_id
 
     ## -- After Put -- ##
     @classmethod

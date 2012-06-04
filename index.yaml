@@ -133,6 +133,12 @@ indexes:
 
 - kind: Individual
   properties:
+  - name: settings
+  - name: name
+    direction: desc
+
+- kind: Individual
+  properties:
   - name: settings_key
   - name: name
 

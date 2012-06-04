@@ -121,7 +121,6 @@ function initializeTable(num_columns, initial_cursor, rpc_action, rpc_params, ca
         cursors_dict[1] = initial_cursor
     }
     
-
     //Setting page to 0
     current_page = 0
 
