@@ -222,30 +222,6 @@ class RPCMethods:
         taskqueue.add(url="/tasks/convertkeys", queue_name="backend", params={})
         return "Task added"
 
-    def indexAll(self):
-        all_i = models.Individual.query()
-        all_c = models.Contact.query()
-        all_d = models.Donation.query()
-
-        for i in all_i:
-            if not i.search_id:
-                i.put()
-        for c in all_c:
-            if not c.search_id:
-                c.put()
-        for d in all_d:
-            if not d.search_id:
-                d.put()
-
-        return "All indexed."
-
-    def deleteIndexes(self):
-        tools.deleteAllInIndex("Contact")
-        tools.deleteAllInIndex("Donation")
-        tools.deleteAllInIndex("Individual")
-
-        return "Indexes deleted"
-
     def repaircontacts(self):
         all_d = models.Donation.query()
         for d in all_d:

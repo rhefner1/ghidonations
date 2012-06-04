@@ -6,7 +6,7 @@ from datetime import *
 from decimal import *
 
 #App Engine platform
-from google.appengine.api import taskqueue, mail, memcache, urlfetch, images, search
+from google.appengine.api import taskqueue, mail, memcache, urlfetch, images
 from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb
 from google.appengine.datastore import entity_pb
@@ -379,18 +379,6 @@ def isEmail(email):
             return False
     else:
         return False
-
-def deleteAllInIndex(index_name):
-    doc_index = search.Index(name=index_name)
-
-    while True:
-        # Get a list of documents populating only the doc_id field and extract the ids.
-        document_ids = [document.doc_id
-                        for document in doc_index.list_documents(ids_only=True)]
-        if not document_ids:
-            break
-        # Remove the documents for the given ids from the Index.
-        doc_index.remove(document_ids)
 
 ###### ------ Utilities Classes ------ ######
 class UtilitiesBase():
