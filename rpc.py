@@ -206,7 +206,7 @@ class RPCMethods:
         s.create.donation("Sandra Baker", "sbaker@example.com", "1425.25", None, None, None, True, None, None, "offline", False, False, False)
         s.create.donation("Sandra Baker", "sbaker@example.com", "2346.52", None, None, None, True, None, None, "offline", False, True, False)
         s.create.donation("Colleen Molina", "cmolina@example.com", "27.50", None, None, None, True, None, None, "offline", False, False, False)
-        s.create.donation("Colleen Molina", "cmolina@example.com", "77.50", None, None, None, True, None, None, "offline", False, False, False)
+        s.create.donation("Colleen Molina", "cmolina@example.com", "78.50", None, None, None, True, None, None, "offline", False, False, False)
         s.create.donation("Sara Ruiz", "sruiz@example.com", "500.00", None, None, None, True, None, None, "offline", False, False, False)
         s.create.donation("Sara Ruiz", "sruiz@example.com", "700.00", None, None, None, True, None, None, "offline", False, False, False)
         s.create.donation("Constance Weekley", "cweekley@example.com", "1000.00", None, None, None, True, None, None, "offline", False, False, False)
