@@ -1007,7 +1007,7 @@ class DonationConfirmation(UtilitiesBase):
         if not who:
             who = ""
 
-        see_url = who + "/thanks?m=w&id=" + self.e.websafe
+        return who + "/thanks?m=w&id=" + self.e.websafe
 
     def task(self, countdown_secs):
         logging.info("Tasking confirmation email.  Delaying for " + str(countdown_secs) + " seconds.")
