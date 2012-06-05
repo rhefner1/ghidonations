@@ -52,9 +52,9 @@
                     <tbody id="members">
                         {% for tl in t.data.members %}
                         <tr data-id="{{ tl.individual_key }}">
-                                <td>{{ tl.individual_name }}</td>
-                                <td>{{ tl.individual_email }}</td>
-                                <td>${{ tl.donation_total }}</td>
+                            <td>{{ tl.individual_name }}</td>
+                            <td>{{ tl.individual_email }}</td>
+                            <td>${{ tl.donation_total }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
