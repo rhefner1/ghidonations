@@ -45,11 +45,18 @@ $(document).ready(function(){
             $("#unreviewed").removeClass("blue")
         }
 
+        data_table.fnClearTable()
+
         //Reinitialize the table with new settings
         rpc_params = [clicked_id]
         pageThrough(data_table, 0, "getDonations", rpc_params, function(data_table, d){
             writeTable(data_table, d)
         })
 
+        data_table = initializeTable(5, initial_cursor, "getDonations", rpc_params, function(data_table, d){
+            writeTable(data_table, d)
+        })
+
+        data_table.fnAdjustColumnSizing()
     })
 });

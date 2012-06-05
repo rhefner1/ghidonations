@@ -435,11 +435,6 @@ class SettingsData(UtilitiesBase):
         q = models.DepositReceipt.gql("WHERE settings = :s ORDER BY creation_date DESC", s=self.e.key)
         return q
 
-    @property
-    def all_individuals(self):
-        q = models.Individual.gql("WHERE settings = :s ORDER BY name ASC", s = self.e.key)
-        return qCache(q)
-
     def contacts(self, query_cursor):
         query = self.all_contacts
         return queryCursorDB(query, query_cursor)
@@ -458,14 +453,14 @@ class SettingsData(UtilitiesBase):
         q = models.Team.gql("WHERE settings = :k ORDER BY creation_date DESC", k=self.e.key)
         return q
 
+    @property
+    def all_individuals(self):
+        q = models.Individual.gql("WHERE settings = :k ORDER BY name ASC", k=self.e.key)
+        return q
+
     def individuals(self, query_cursor):
         query = self.all_individuals
         return queryCursorDB(query, query_cursor)
-
-    @property
-    def all_individuals(self):
-        q = models.Individual.gql("WHERE settings = :k ORDER BY name DESC", k=self.e.key)
-        return q
 
     @property
     def display_teams(self):
