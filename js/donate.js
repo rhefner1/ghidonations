@@ -51,12 +51,23 @@ function loadIndividuals(team_key){
         var ul = '<ul class="gallery medium" id="members_list"></ul>'
         $("#designate").append(ul)
               
+        var odd = true
         $.each(data, function(entry_number, data) {
             var name_json = data[0]
             var pic_json = data[1]
             var key_json = data[2]
 
-            var li = '<li class="donate_normal" style="margin-left:10px" data-id="key"></li>'
+            
+
+            //To fix the weird spacing issues, use a special 'odd' style
+            if (odd == true){
+                var li = '<li class="donate_normal" style="margin-left:10px; clear:both" data-id="key"></li>'
+                odd = false
+            }
+            else{
+                var li = '<li class="donate_normal" style="margin-left:10px" data-id="key"></li>'
+                odd = true
+            }
             var pic = '<img src="image_url" style="width:50px; height:auto; margin-right:10px; float:left">'
             var name = '<h3 style="margin-bottom:10px;">name</h3>'
             var readmore = '<button class="read_more button small">Designate</button>'              
