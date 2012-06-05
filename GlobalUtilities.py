@@ -272,8 +272,6 @@ def addRecurringDonation(self, payment_id, amount_donated, task_queue):
             self.error(500)
             logging.info("Request from task queue failed. Sending back 500 error.")
 
-###### ------ Introducing new individual ------ ######
-
 ###### ------ Utilities ------ ######
 def strArrayToKey(self, str_array):
     key_array = []
@@ -808,12 +806,18 @@ class TeamData(UtilitiesBase):
 
     @property
     def members_dict(self):
-        members_dict = {}
-        for m in self.members:
-            i = m.individual.get()
-            members_dict[i.name] = i.websafe
+        memcache_key = "teammembersdict" +  self.e.websafe
+        members = self.members
+        
+        def get_item():
+            members_dict = {}
+            for tl in members:
+                i = tl.individual.get()
+                members_dict[i.name] = i.websafe
 
-        return members_dict
+            return members_dict
+
+        return cache(memcache_key, get_item)
 
     @property
     def members_list(self):
