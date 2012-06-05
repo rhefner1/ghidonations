@@ -910,8 +910,7 @@ class IndividualData(UtilitiesBase):
     def photo_url(self):
         if self.e.photo != None:
             try:
-                photo = images.get_serving_url(self.e.photo, 200)
-                photo = photo.replace("http", "https")
+                photo = images.get_serving_url(self.e.photo, 200, secure_url=True)
             except:
                 photo = "/images/face.jpg"
         else:
