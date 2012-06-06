@@ -273,6 +273,11 @@ class RPCMethods:
         settings = tools.getAccountEmails(self)
         return settings
 
+    def getTeamDonors(self, team_key):
+        s = tools.getSettingsKey(self).get()
+        team_key = tools.getKey("ahBkZXZ-Z2hpZG9uYXRpb25zcgoLEgRUZWFtGAIM")
+        return s.data.team_donors(team_key)
+
     def getDonations(self, query_cursor, donation_type):
         s = tools.getSettingsKey(self).get()
 

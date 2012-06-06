@@ -489,7 +489,7 @@ class SpreadsheetGenerator(webapp.RequestHandler):
         ws0 = wb.add_sheet('Sheet 1')
 
         action = self.request.get("e")
-        if action == "contacts" or action == "recurring_donors":
+        if action == "contacts" or action == "recurring_donors" or action == "team_contacts":
             if action == "contacts":
                 #Get all donations from the datastore
                 all_contacts = s.data.all_contacts
@@ -498,6 +498,13 @@ class SpreadsheetGenerator(webapp.RequestHandler):
             elif action == "recurring_donors":
                 all_contacts = s.data.recurring_donors
                 filename = str(s.name) + "-RecurringDonors"
+                
+            elif action == "team_contacts":
+                team_key = self.request.get("tk")
+                team_key = tools.getKey(team_key)
+                
+                all_contacts = s.data.team_donors(team_key)
+                filename = str(s.name) + "-TeamDonors"
             
             #Write headers
             ws0.write(0, 0, "Name")
@@ -532,7 +539,7 @@ class SpreadsheetGenerator(webapp.RequestHandler):
         # HTTP headers to force file download
         self.response.headers['Content-Type'] = 'application/ms-excel'
         self.response.headers['Content-Transfer-Encoding'] = 'Binary'
-        self.response.headers['Content-disposition'] = 'attachment; filename="' + filename + '"'
+        self.response.headers['Content-disposition'] = 'attachment; filename="' + filename + ".xls" +  '"'
  
         # output to user
         wb.save(self.response.out)

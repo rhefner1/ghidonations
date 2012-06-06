@@ -414,9 +414,17 @@ class SettingsData(UtilitiesBase):
         donors = []
         for d in self.all_donations:
             if d.isRecurring == True:
-                c = models.Contact.gql("WHERE name = :n", n=d.name)
-                donors.append(c[0])
+                donors.append(d.contact.get())
 
+        return donors
+        
+    def team_donors(self, team_key):
+        donors = []
+        donations = models.Donation.gql("WHERE team = :t", t=team_key)
+        for d in donations:
+            #if d.name not in donors:
+            donors.append(d.contact.get())
+            
         return donors
 
     @property
