@@ -590,7 +590,7 @@ class SettingsCreate(UtilitiesBase):
     def individual(self, name, team_key, email, password, admin):
         new_individual = models.Individual()
 
-        new_individual.name = name.title()
+        new_individual.name = name
         new_individual.email = email
         new_individual.settings = self.e.key
         new_individual.password = password
@@ -603,6 +603,7 @@ class SettingsCreate(UtilitiesBase):
         new_tl.individual = new_individual.key
         new_tl.team = team_key
         new_tl.fundraise_amt = toDecimal("20")
+        new_tl.sort_name = name
 
         new_tl.put()
 
