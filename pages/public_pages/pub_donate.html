@@ -77,10 +77,10 @@
     <div class="col_12">
     <form id="donate_form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_parent">
         <!-- PayPal Options -->
-        <input id="donation_type" type="hidden" name="cmd" value="_xclick-subscriptions" />
+        <input id="donation_type" type="hidden" name="cmd" value="_donations" />
         <input type="hidden" name="business" value="{{ s.paypal_id }}" />
         <input type="hidden" name="lc" value="US" />
-        <input id="donation_name" type="hidden" name="item_name" value="Recurring Donation | Global Hope India" />
+        <input id="donation_name" type="hidden" name="item_name" value="One-Time Donation | Global Hope India" />
         <input type="hidden" name="item_number" value="0002" />
         <input type="hidden" name="no_note" value="1" />
         <input type="hidden" name="no_shipping" value="1" />
@@ -130,20 +130,20 @@
                 <div class="clearfix">
                     <label>Your generous donation:</label>
                     <div class="input">
-                            <input class="money_select" type="radio" name="a3" id="donate_1" value="{{ s.amount1 }}.00" checked="checked">
+                            <input class="money_select" type="radio" name="amount" id="donate_1" value="{{ s.amount1 }}.00" checked="checked">
                             <label class="unbold form_label" for="donate_1">${{ s.amount1 }}</label>
 
-                            <input class="money_select" type="radio" name="a3" id="donate_2" value="{{ s.amount2 }}.00" checked="checked">
+                            <input class="money_select" type="radio" name="amount" id="donate_2" value="{{ s.amount2 }}.00" checked="checked">
                             <label class="unbold form_label" for="donate_2">${{ s.amount2 }}</label>
 
-                            <input class="money_select" type="radio" name="a3" id="donate_3" value="{{ s.amount3 }}.00">
+                            <input class="money_select" type="radio" name="amount" id="donate_3" value="{{ s.amount3 }}.00">
                             <label class="unbold form_label" for="donate_3">${{ s.amount3 }}</label>
 
-                            <input class="money_select" type="radio" name="a3" id="donate_4" value="{{ s.amount4 }}.00">
+                            <input class="money_select" type="radio" name="amount" id="donate_4" value="{{ s.amount4 }}.00">
                             <label class="unbold form_label" for="donate_4">${{ s.amount4 }}</label>
 
                             {% if s.use_custom %}
-                            <input class="money_select" id="custom" type="radio" name="a3" value="custom" />
+                            <input class="money_select" id="custom" type="radio" name="amount" value="custom" />
                             $ &nbsp;<input id="custom_donation" style="width: 100px" type="text" placeholder="250.00" value="" />
                             {% endif%}
                     </div>
@@ -228,6 +228,6 @@
 <!-- JSON encoder -->
 <script src="/js/muse/jquery.json-2.3.min.js"></script>
 
-<script type="text/javascript" src="/js/donate.js?v=8"></script>
+<script type="text/javascript" src="/js/donate.js?v=9"></script>
 </body>
 </html>
