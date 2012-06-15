@@ -383,6 +383,7 @@ class Donation(ndb.Expando):
 
     #How much is this donation worth?
     amount_donated = DecimalProperty()
+    confirmation_amount = DecimalProperty()
 
     #Is this a recurring donation
     isRecurring = ndb.BooleanProperty(default=False)

@@ -218,9 +218,6 @@ class RPCMethods:
         tools.flushMemcache(self)
         return "Memcache flushed."
 
-    def convertAllKeys(self):
-        taskqueue.add(url="/tasks/convertkeys", queue_name="backend", params={})
-        return "Task added"
 
     def repaircontacts(self):
         all_d = models.Donation.query()
@@ -231,6 +228,9 @@ class RPCMethods:
             if email == None or email == "":
                 c.email = d.given_email
             c.put()
+
+    def setConfAmount(self):
+        taskqueue.add(url="/tasks/utility", queue_name="backend", params={})
 
 #### ---- Globalhopeindia.org Utility Functions ---- ####
     def individualExists(self, email):

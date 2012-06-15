@@ -676,6 +676,7 @@ class IPN(webapp.RequestHandler):
                 cover_trans = False
                 email_subscr = False
 
+            confirmation_amount = parameters['mc_gross']
             if cover_trans:
                 amount_donated = float(parameters['mc_gross']) - float(parameters['mc_fee'])
                 amount_donated = str(amount_donated)
@@ -708,7 +709,7 @@ class IPN(webapp.RequestHandler):
                     payment_type = "monthly"
                 
                 #Create a new donation
-                s.create.donation(name, email, amount_donated, address, team_key, individual_key, False, payment_id, special_notes, payment_type, False, cover_trans, email_subscr, ipn_data)
+                s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, False, payment_id, special_notes, payment_type, False, cover_trans, email_subscr, ipn_data)
 
             elif payment_type == "recurring_payment" or payment_type == "subscr_payment":
                 logging.info("This is a recurring payment.")
@@ -724,7 +725,7 @@ class IPN(webapp.RequestHandler):
                     payment_id = parameters['txn_id']
 
                     #Create a new donation
-                    s.create.donation(name, email, amount_donated, address, team_key, individual_key, False, payment_id, special_notes, "one-time", False, cover_trans, email_subscr, ipn_data)
+                    s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, False, payment_id, special_notes, "one-time", False, cover_trans, email_subscr, ipn_data)
 
                 else:
                     logging.info("Payment status not complete.  Not logging the donation.")

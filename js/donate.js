@@ -128,7 +128,7 @@ function submitForm(){
         //console.log("Covering transaction")
         var current_price = $(".radio_amount:checked").val()
         current_price = parseFloat(current_price)
-        var new_price = current_price + .022 * current_price + .3
+        var new_price = current_price + (.022 * current_price) + .3
         new_price = new_price.toFixed(2)
         new_price = new_price.toString()
 

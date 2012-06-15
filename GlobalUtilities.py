@@ -644,7 +644,7 @@ class SettingsCreate(UtilitiesBase):
         else:
             logging.error("Cannot create contact because there is not a name.")
 
-    def donation(self, name, email, amount_donated, address, team_key, individual_key, add_deposit, payment_id, special_notes, payment_type, reviewed, cover_trans, email_subscr, ipn_data):
+    def donation(self, name, email, amount_donated, confirmation_amount, address, team_key, individual_key, add_deposit, payment_id, special_notes, payment_type, reviewed, cover_trans, email_subscr, ipn_data):
         #All variables being passed as either string or integer
         new_donation = models.Donation()
         new_donation.settings = self.e.key
