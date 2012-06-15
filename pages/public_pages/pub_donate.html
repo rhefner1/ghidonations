@@ -130,16 +130,16 @@
                 <div class="clearfix">
                     <label>Your generous donation:</label>
                     <div class="input">
-                            <input class="money_select" type="radio" name="amount" id="donate_1" value="{{ s.amount1 }}.00" checked="checked">
+                            <input class="money_select radio_amount" type="radio" name="amount" id="donate_1" value="{{ s.amount1 }}.00" checked="checked">
                             <label class="unbold form_label" for="donate_1">${{ s.amount1 }}</label>
 
-                            <input class="money_select" type="radio" name="amount" id="donate_2" value="{{ s.amount2 }}.00" checked="checked">
+                            <input class="money_select radio_amount" type="radio" name="amount" id="donate_2" value="{{ s.amount2 }}.00" checked="checked">
                             <label class="unbold form_label" for="donate_2">${{ s.amount2 }}</label>
 
-                            <input class="money_select" type="radio" name="amount" id="donate_3" value="{{ s.amount3 }}.00">
+                            <input class="money_select radio_amount" type="radio" name="amount" id="donate_3" value="{{ s.amount3 }}.00">
                             <label class="unbold form_label" for="donate_3">${{ s.amount3 }}</label>
 
-                            <input class="money_select" type="radio" name="amount" id="donate_4" value="{{ s.amount4 }}.00">
+                            <input class="money_select radio_amount" type="radio" name="amount" id="donate_4" value="{{ s.amount4 }}.00">
                             <label class="unbold form_label" for="donate_4">${{ s.amount4 }}</label>
 
                             {% if s.use_custom %}

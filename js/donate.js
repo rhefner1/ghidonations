@@ -126,13 +126,13 @@ function submitForm(){
     //If the donor has chosen to cover the donation costs
     if ($("#cover_trans").attr("checked") == "checked") {
         //console.log("Covering transaction")
-        var current_price = $("input[name=a3]:checked").val()
+        var current_price = $(".radio_amount:checked").val()
         current_price = parseFloat(current_price)
         var new_price = current_price + .022 * current_price + .3
         new_price = new_price.toFixed(2)
         new_price = new_price.toString()
 
-        $("input[name=a3]:checked").val(new_price)
+        $(".radio_amount:checked").val(new_price)
     }
 
     //Embed individual designation info as well as 

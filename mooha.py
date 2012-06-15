@@ -633,6 +633,7 @@ class IPN(webapp.RequestHandler):
             #currency = parameters['mc_currency']
 
             s = tools.getKey(settings).get()
+            ipn_data = str(parameters)
 
             #Email and payer ID  numbers
             try:
@@ -675,6 +676,12 @@ class IPN(webapp.RequestHandler):
                 cover_trans = False
                 email_subscr = False
 
+            if cover_trans:
+                amount_donated = float(parameters['mc_gross']) - float(parameters['mc_fee'])
+                amount_donated = str(amount_donated)
+            else:
+                amount_donated = parameters['mc_gross']
+
             #Find out what kind of payment this was - recurring, one-time, etc.
             try:
                 payment_type = parameters['txn_type']
@@ -701,21 +708,12 @@ class IPN(webapp.RequestHandler):
                     payment_type = "monthly"
                 
                 #Create a new donation
-                s.create.donation(name, email, amount_donated, address, team_key, individual_key, False, payment_id, special_notes, payment_type, False, cover_trans, email_subscr)
+                s.create.donation(name, email, amount_donated, address, team_key, individual_key, False, payment_id, special_notes, payment_type, False, cover_trans, email_subscr, ipn_data)
 
             elif payment_type == "recurring_payment" or payment_type == "subscr_payment":
                 logging.info("This is a recurring payment.")
                 
                 payment_id = parameters['subscr_id']
-
-                #Monthly payment of a recurring donation
-                if cover_trans and individual_key:
-                #If donor covers transaction, only give the actual donation amount to the individual
-                    amount_donated = float(parameters['mc_gross']) - float(parameters['mc_fee'])
-                    amount_donated = str(amount_donated)
-                else:
-                    amount_donated = parameters['mc_gross']
-
                 #Add to donation
                 s.create.recurring_donation(payment_id, amount_donated, False)
 
@@ -723,19 +721,10 @@ class IPN(webapp.RequestHandler):
                 logging.info("This is a one-time donation.")
 
                 if payment_status == "Completed":
-                
                     payment_id = parameters['txn_id']
 
-                    #One-time donations
-                    if cover_trans and individual_key:
-                    #If donor covers transaction, only give the actual donation amount to the individual
-                        amount_donated = float(parameters['mc_gross']) - float(parameters['mc_fee'])
-                        amount_donated = str(amount_donated)
-                    else:
-                        amount_donated = parameters['mc_gross']
-
                     #Create a new donation
-                    s.create.donation(name, email, amount_donated, address, team_key, individual_key, False, payment_id, special_notes, "one-time", False, cover_trans, email_subscr)
+                    s.create.donation(name, email, amount_donated, address, team_key, individual_key, False, payment_id, special_notes, "one-time", False, cover_trans, email_subscr, ipn_data)
 
                 else:
                     logging.info("Payment status not complete.  Not logging the donation.")

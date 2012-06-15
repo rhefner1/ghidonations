@@ -410,6 +410,9 @@ class Donation(ndb.Expando):
     #Sets the time that the donation was placed
     donation_date = ndb.DateTimeProperty(auto_now_add=True)
 
+    #IPN original data
+    ipn_data = ndb.TextProperty()
+
     #Used for debugging purposes to see who actually gave the donation
     given_name = ndb.StringProperty()
     given_email = ndb.StringProperty()
