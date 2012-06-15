@@ -81,6 +81,10 @@
                             <label>Amount Donated (to date)</label>
                             <div class="input"><input class="large" type="text" name="amount_donated" value="${{ d.amount_donated }}" disabled="disabled" /></div>
                         </div>
+                        <div class="clearfix">
+                            <label>Start Date</label>
+                            <div class="input"><input class="large" type="text" name="start_date" value="{{ d.donation_date }}" disabled="disabled" /></div>
+                        </div>
                     {% else %}
                         <div class="clearfix">
                             <label>Amount Donated</label>

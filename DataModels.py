@@ -547,7 +547,7 @@ class Contact(ndb.Expando):
     @property
     def address_formatted(self):
         a = self.address
-        if a:
+        if not a == ["", "", "", ""]:
             return a[0] + "\n" + a[1] + ", " + a[2] + "  " + a[3]
         else:
             return ""
