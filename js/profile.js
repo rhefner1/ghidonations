@@ -108,5 +108,12 @@ $(document).ready(function(){
 			$("form").submit()
 		}	
 	})
+
+	$("#donations").delegate("tr", "click", function(){
+        var clicked_id =  $(this).attr("data-id")
+
+        var url = "/ajax/reviewdetails?id=" + clicked_id
+        loadColorbox(url, "donation_container")
+    });
 	
 })

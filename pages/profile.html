@@ -82,9 +82,13 @@
                             <div class="input no-label">
                                 <input type="submit" class="button blue" value="Save Changes" />
                             </div>
+
+                            {% if i.admin %}
                             <div class="input no-label">
                                 <input name="delete_individual" type="button" class="button" value="Delete this person" />
                             </div>
+                            {% endif %}
+                            
                         </div>
                     </div>
                 </div>
@@ -102,7 +106,7 @@
                                 </tr>
 
                         </thead>
-                        <tbody>
+                        <tbody id="donations" style="cursor:pointer">
                             {% for d in i.data.donations %}
                             <tr data-id="{{ d.websafe }}">
                                     <td>{{ d.formatted_time_created }}</td>
@@ -133,8 +137,5 @@
     </div>
 </div>
 
-<!-- IFrame used for submitting the form -->
-<!-- <iframe src="" id="upload_iframe" style="width:0px; height:0px;border=none"></iframe> -->
-
+<div style="display:none" id="donation_container"></div>
 <script src="/js/profile.js?v=2" type="text/javascript"></script>
-<!-- <script src="/js/muse/jquery.form.js" type="text/javascript"></script> -->

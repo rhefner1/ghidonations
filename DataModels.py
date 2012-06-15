@@ -431,6 +431,10 @@ class Donation(ndb.Expando):
         return self.contact.get().email
 
     @property
+    def address(self):
+        return self.contact.get().address_formatted
+
+    @property
     def contact_url(self):
         return "#contact?c=" + self.contact.urlsafe()
 
@@ -539,6 +543,14 @@ class Contact(ndb.Expando):
     @property
     def address_json(self):
         return json.dumps(self.address)
+
+    @property
+    def address_formatted(self):
+        a = self.address
+        if a:
+            return a[0] + "\n" + a[1] + ", " + a[2] + "  " + a[3]
+        else:
+            return ""
 
     @property
     def data(self):

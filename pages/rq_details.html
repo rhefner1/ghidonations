@@ -4,6 +4,8 @@
             <div class="col_12">
             <div class="col_4">
                 <h3>{{ d.name }}</h3>
+
+                {% if i.admin %}
                 <p class="m_bottom15">
                     Choose any of the actions below or edit the donation information on the right.  A (*) represents current values.
                 </p>
@@ -11,6 +13,7 @@
                     To return to the review queue, you can click in the black area outside this box at any time.
                 </p>
                 <br>
+                
                 <div class="align_center">
                     <input id="email" name="email" type="button" class="large blue button" value="Email Receipt &amp; Archive">
                     <input id="preview" name="preview" type="button" class="large black button" value="Preview Email">
@@ -18,14 +21,17 @@
                     <input id="archive" name="archive" type="button" class="large black button" value="Just Archive">
                     <input id="edit_contact" name="edit_contact" type="button" class="large black button" value="Edit Contact">
                 </div>
+                {% endif %}
+
             </div>
             <div class="col_8 last">
                 <div class="form">
                     <div class="clearfix grey-highlight" id="change_this">
+                        {% if i.admin %}
                         <div class="input no-label">
                             <input type="button" class="button black" id="change" value="Change this information" style="width:300px"></input>
-                            
                         </div>
+                        {% endif %}
                     </div>
 
                     <div class="clearfix">
@@ -84,7 +90,12 @@
 
                     <div class="clearfix">
                         <label>Special Notes</label>
-                        <div class="input"><textarea disabled="disabled" name="special_notes" class="large unlockable" style="width:500px">{{ d.special_notes }}</textarea></div>
+                        <div class="input"><textarea disabled="disabled" name="special_notes" class="large unlockable" style="width:365px">{{ d.special_notes }}</textarea></div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label>Address</label>
+                        <div class="input"><textarea disabled="disabled" name="address" class="large" style="width:365px">{{ d.address }}</textarea></div>
                     </div>
 
                     <!-- <div class="clearfix hidden">

@@ -107,7 +107,7 @@ class ReviewQueue(webapp.RequestHandler):
 
 class ReviewQueueDetails(webapp.RequestHandler):
     def get(self):
-        isAdmin, s = tools.checkAuthentication(self, True)
+        isAdmin, s = tools.checkAuthentication(self, False)
         
         donation_key = self.request.get("id")
         if donation_key == "":
@@ -116,6 +116,9 @@ class ReviewQueueDetails(webapp.RequestHandler):
         else:
             #Getting donation by its key (from address bar argument)
             d = tools.getKey(donation_key).get()
+
+            i_key = tools.getUserKey(self)
+            i = i_key.get()
 
             #Custom message detector
             try:
@@ -126,7 +129,7 @@ class ReviewQueueDetails(webapp.RequestHandler):
             except:
                 message = ""
 
-            template_variables = {"d":d, "s":s, "flash":message}
+            template_variables = {"d":d, "s":s, "i":i, "flash":message}
             self.response.write(
                     template.render('pages/rq_details.html', template_variables))
 
@@ -299,12 +302,10 @@ class IndividualProfile(webapp.RequestHandler):
                 i_key = tools.getUserKey(self)
             else:
                 i_key = tools.getKey(i_key)
-            template_location = "pages/profile.html"
 
         else:
             #If a regular user, they can ONLY get their own profile
             i_key = tools.getUserKey(self)
-            template_location = "pages/ind_profile.html"
         
         i = i_key.get()
         logging.info("Getting profile page for: " + i.name)
@@ -314,7 +315,7 @@ class IndividualProfile(webapp.RequestHandler):
             
         template_variables = {"s" : s, "i":i, "upload_url" : upload_url}
         self.response.write(
-           template.render(template_location, template_variables))
+           template.render("pages/profile.html", template_variables))
 
 class UpdateProfile(blobstore_handlers.BlobstoreUploadHandler):
     def post(self):
