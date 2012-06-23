@@ -470,7 +470,7 @@ class RPCMethods:
         if individual_key:
             individual_key = tools.getKey(individual_key)
 
-        s.create.donation(name, email, amount_donated, address, team_key, individual_key, add_deposit, "", "Offline", "offline", False, False, False)
+        s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "Offline", "offline", False, False, False, None)
 
         #Return message to confirm 
         return_vals = [success, message]
@@ -499,7 +499,7 @@ class RPCMethods:
         if authenticated == "semi":
             notes = "[Offline check entered by team member] - " + notes
 
-        s.create.donation(name, email, amount_donated, address, tools.getKey(team_key), tools.getKey(individual_key), None, None, notes, "team member", True, False, False)
+        s.create.donation(name, email, amount_donated, amount_donated, address, tools.getKey(team_key), tools.getKey(individual_key), None, None, notes, "team member", True, False, False, None)
 
         #Return message to confirm 
         return_vals = [success, message]

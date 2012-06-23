@@ -967,8 +967,11 @@ class DonationAssign(UtilitiesBase):
     def associateTeam(self, team_key, writeback):
         if self.e.team != team_key:
         #Just to make sure the association is actually changed - instead of marking the same value as it was before
-            message = "Donation " + self.e.websafe +  " associated with team" + str(team_key.urlsafe()) + "."
-            logging.info(message)
+            try:
+                message = "Donation " + self.e.websafe +  " associated with team" + str(team_key.urlsafe()) + "."
+                logging.info(message)
+            except:
+                pass
 
             self.e.team = team_key
 
@@ -989,8 +992,11 @@ class DonationAssign(UtilitiesBase):
     def associateIndividual(self, individual_key, writeback):
         if self.e.individual != individual_key:
         #Just to make sure the association is actually changed - instead of marking the same value as it was before
-            message = "Donation " + self.e.websafe +  " associated with individual" + str(individual_key.urlsafe()) + "."
-            logging.info(message)
+            try:
+                message = "Donation " + self.e.websafe +  " associated with individual" + str(individual_key.urlsafe()) + "."
+                logging.info(message)
+            except:
+                pass
 
             self.e.individual = individual_key
 
@@ -1003,7 +1009,7 @@ class DonationAssign(UtilitiesBase):
             message = "Donation " + self.e.websafe +  " removed from individual" + str(self.e.individual.urlsafe()) + "."
             logging.info(message)
 
-            donation.individual = None
+            self.e.individual = None
 
         if writeback == True:
             self.e.put()

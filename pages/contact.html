@@ -45,6 +45,9 @@
                                 <input class="medium unlockable" type="text" name="city" placeholder="City" disabled="disabled" />
                                 <input class="medium unlockable" type="text" name="state" placeholder="State" disabled="disabled" />
                                 <input class="medium unlockable" type="text" name="zip" placeholder="ZIP" disabled="disabled" />
+
+                                <br><br>
+                                <button class="small button" id="copy_address">Copy Address to Clipboard</button>
                             </div>
                         </div>
 
@@ -164,6 +167,7 @@
 
 <input type="hidden" id="contact_key" value = "{{ c.websafe }}" />
 <input type="hidden" id="address" value='{{ c.address_json }}' />
+<input type="hidden" id="address_formatted" value='{{ c.address_formatted }}' />
 <input type="hidden" id="phone" value="{{ c.phone }}">
 <input type="hidden" id="initial_cursor" value="{{ initial_cursor }}">
 
