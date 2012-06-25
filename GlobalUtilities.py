@@ -653,6 +653,7 @@ class SettingsCreate(UtilitiesBase):
         new_donation.reviewed = reviewed
         new_donation.special_notes = special_notes
         new_donation.ipn_data = ipn_data
+        new_donation.confirmation_amount = toDecimal(confirmation_amount)
 
         new_donation.given_name = name
         new_donation.given_email = email
