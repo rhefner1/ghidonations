@@ -109,6 +109,8 @@ function hideInfo(){
 }
 
 function submitForm(){
+    var price_object = $(".radio_amount:checked")
+
     if ($("#custom").is(":checked") == true) {
         //console.log("Custom is checked.")
         var new_val = $("#custom_donation").val()
@@ -121,18 +123,19 @@ function submitForm(){
         new_val = new_val.toString()
 
         $("#custom").val(new_val)
+        price_object = $("#custom")
     }
 
     //If the donor has chosen to cover the donation costs
     if ($("#cover_trans").attr("checked") == "checked") {
         //console.log("Covering transaction")
-        var current_price = $(".radio_amount:checked").val()
+        var current_price = price_object.val()
         current_price = parseFloat(current_price)
         var new_price = current_price + (.022 * current_price) + .3
         new_price = new_price.toFixed(2)
         new_price = new_price.toString()
 
-        $(".radio_amount:checked").val(new_price)
+        price_object.val(new_price)
     }
 
     //Embed individual designation info as well as 
