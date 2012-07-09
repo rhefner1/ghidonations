@@ -677,12 +677,17 @@ class IPN(webapp.RequestHandler):
                 cover_trans = False
                 email_subscr = False
 
-            confirmation_amount = parameters['mc_gross']
-            if cover_trans:
-                amount_donated = float(parameters['mc_gross']) - float(parameters['mc_fee'])
-                amount_donated = str(amount_donated)
-            else:
-                amount_donated = parameters['mc_gross']
+            try:
+                confirmation_amount = parameters['mc_gross']
+                if cover_trans:
+                    amount_donated = float(parameters['mc_gross']) - float(parameters['mc_fee'])
+                    amount_donated = str(amount_donated)
+                else:
+                    amount_donated = parameters['mc_gross']
+
+            except:
+                amount_donated = None
+            
 
             #Find out what kind of payment this was - recurring, one-time, etc.
             try:
