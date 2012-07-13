@@ -456,7 +456,7 @@ class SettingsData(UtilitiesBase):
 
     @property
     def all_teams(self):
-        q = models.Team.gql("WHERE settings = :k ORDER BY creation_date DESC", k=self.e.key)
+        q = models.Team.gql("WHERE settings = :k ORDER BY name", k=self.e.key)
         return q
 
     @property
