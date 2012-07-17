@@ -686,6 +686,7 @@ class IPN(webapp.RequestHandler):
                     amount_donated = parameters['mc_gross']
 
             except:
+                confirmation_amount = None
                 amount_donated = None
             
 
