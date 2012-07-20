@@ -171,7 +171,7 @@ class AllDeposits(webapp.RequestHandler):
         deposits = response[0]
         initial_cursor = response[1]
 
-        template_variables = {"deposits" : deposits}
+        template_variables = {"deposits" : deposits, "initial_cursor" : initial_cursor}
         self.response.write(
                 template.render('pages/all_deposits.html', template_variables))
 
@@ -579,7 +579,7 @@ class IPN(webapp.RequestHandler):
 
         #Below URL used for testing with the sandbox - if this is uncommented, all real
         #donations will not be authenticated. ONLY use with dev versions.
-        #PP_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr"
+        # PP_URL = "https://www.sandbox.paypal.com/cgi-bin/webscr"
 
         #Gets all account emails from Settings data models
         #to authenticate PayPal (don't accept payment from unknown)
@@ -677,6 +677,9 @@ class IPN(webapp.RequestHandler):
                 cover_trans = False
                 email_subscr = False
 
+
+            confirmation_amount = None
+            amount_donated = None
             try:
                 confirmation_amount = parameters['mc_gross']
                 if cover_trans:
@@ -686,14 +689,12 @@ class IPN(webapp.RequestHandler):
                     amount_donated = parameters['mc_gross']
 
             except:
-                confirmation_amount = None
-                amount_donated = None
-            
-
+                pass
+                
             #Find out what kind of payment this was - recurring, one-time, etc.
             try:
                 payment_type = parameters['txn_type']
-                logging.info("Txt_type not available, so continuing with payment status")
+                logging.info("Txn_type not available, so continuing with payment status")
             except:
                 payment_type = payment_status
 

@@ -317,7 +317,6 @@ class RPCMethods:
 
     def getDeposits(self, query_cursor):
         s = tools.getSettingsKey(self).get()
-
         response = s.data.deposits(query_cursor)
 
         deposits = []
