@@ -678,8 +678,8 @@ class IPN(webapp.RequestHandler):
                 email_subscr = False
 
 
-            confirmation_amount = None
-            amount_donated = None
+            confirmation_amount = tools.toDecimal(0)
+            amount_donated = tools.toDecimal(0)
             try:
                 confirmation_amount = parameters['mc_gross']
                 if cover_trans:

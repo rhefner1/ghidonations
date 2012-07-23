@@ -363,11 +363,14 @@ def updateTime(self, donation, writeback):
         donation.put()
 
 def toDecimal(number):
-    #Stripping amount donated from commas, etc
-    non_decimal = re.compile(r'[^\d.]+')
-    number = non_decimal.sub('', str(number))
+    if number != None:
+        #Stripping amount donated from commas, etc
+        non_decimal = re.compile(r'[^\d.]+')
+        number = non_decimal.sub('', str(number))
 
-    return Decimal(number).quantize(Decimal("1.00"))
+        return Decimal(number).quantize(Decimal("1.00"))
+    else:
+        return Decimal(0).quantize(Decimal("1.00"))
 
 def isEmail(email):
     if email:
@@ -653,7 +656,7 @@ class SettingsCreate(UtilitiesBase):
         new_donation.reviewed = reviewed
         new_donation.special_notes = special_notes
         new_donation.ipn_data = ipn_data
-        new_donation.confirmation_amount = toDecimal(confirmation_amount)
+        
 
         new_donation.given_name = name
         new_donation.given_email = email
@@ -675,9 +678,11 @@ class SettingsCreate(UtilitiesBase):
             #Store monthly payment amount and put the running total at 0 (no actual money received yet)
             new_donation.monthly_payment = toDecimal(amount_donated)
             new_donation.amount_donated = toDecimal(0)
+            new_donation.confirmation_amount = toDecimal(0)
             new_donation.isRecurring = True
         else:
             new_donation.amount_donated = toDecimal(amount_donated)
+            new_donation.confirmation_amount = toDecimal(confirmation_amount)
 
             #This is just a dummy value
             new_donation.monthly_payment = toDecimal("0")
