@@ -236,7 +236,7 @@ class TeamList(ndb.Model):
     def donations(self):
         i = self.individual.get()
         q = Donation.gql("WHERE settings = :s AND team = :t AND individual = :i", s=i.settings, t=self.team, i=i.key)
-        return qCache(q)
+        return tools.qCache(q)
 
     @property
     def donation_total(self):
