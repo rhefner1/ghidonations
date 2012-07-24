@@ -175,6 +175,12 @@ indexes:
 
 - kind: Team
   properties:
+  - name: settings
+  - name: show_team
+  - name: name
+
+- kind: Team
+  properties:
   - name: settings_key
   - name: creation_date
     direction: desc

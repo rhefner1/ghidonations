@@ -319,15 +319,16 @@ class RPCMethods:
         s = tools.getSettingsKey(self).get()
         response = s.data.deposits(query_cursor)
 
-        # deposits = []
-        # new_cursor = response[1]
+        deposits = []
+        new_cursor = response[1]
 
-        # for d in response[0]:
-        #     ddict = {"key" : d.websafe, "time_deposited" : d.time_deposited}
+        for d in response[0]:
+            ddict = {"key" : d.websafe, "time_deposited" : d.time_deposited}
+            deposits.append(ddict)
 
         # #Return message to confirm 
-        # return_vals = [deposits, new_cursor]
-        # return return_vals
+        return_vals = [deposits, new_cursor]
+        return return_vals
 
     def getContacts(self, query_cursor):
         s = tools.getSettingsKey(self).get()
