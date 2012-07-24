@@ -356,6 +356,7 @@ class Individual(ndb.Expando):
 
         for t in e.data.teams:
             memcache.delete("teammembers" + t.team.urlsafe())
+            memcache.delete("teammembersdict" + t.team.urlsafe())
             memcache.delete("info" + t.team.urlsafe() + e.websafe)
 
     ## -- Before Delete -- ##

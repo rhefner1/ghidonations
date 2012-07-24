@@ -218,7 +218,6 @@ class RPCMethods:
         tools.flushMemcache(self)
         return "Memcache flushed."
 
-
     def repaircontacts(self):
         all_d = models.Donation.query()
         for d in all_d:
