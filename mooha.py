@@ -313,7 +313,7 @@ class IndividualProfile(webapp.RequestHandler):
         #Creating a blobstore upload url
         upload_url = blobstore.create_upload_url('/ajax/profile/upload')
             
-        template_variables = {"s" : s, "i":i, "upload_url" : upload_url}
+        template_variables = {"s" : s, "i":i, "upload_url" : upload_url, "isAdmin" : isAdmin}
         self.response.write(
            template.render("pages/profile.html", template_variables))
 

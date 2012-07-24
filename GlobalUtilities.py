@@ -473,7 +473,7 @@ class SettingsData(UtilitiesBase):
 
     @property
     def display_teams(self):
-        q = models.Team.gql("WHERE settings = :k AND show_team = True ORDER BY creation_date DESC", k=self.e.key)
+        q = models.Team.gql("WHERE settings = :k AND show_team = True ORDER BY name", k=self.e.key)
         return q
 
     @property
@@ -1102,7 +1102,7 @@ class ContactData(UtilitiesBase):
 
     @property
     def all_donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY time_created", s=self.e.settings, c=self.e.key)
+        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY time_created DESC", s=self.e.settings, c=self.e.key)
         return q
 
     def impressions(self, query_cursor):

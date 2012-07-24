@@ -34,6 +34,19 @@ indexes:
 
 - kind: Donation
   properties:
+  - name: contact
+  - name: settings
+  - name: time_created
+
+- kind: Donation
+  properties:
+  - name: contact
+  - name: settings
+  - name: time_created
+    direction: desc
+
+- kind: Donation
+  properties:
   - name: deposited
   - name: settings
   - name: donation_date
