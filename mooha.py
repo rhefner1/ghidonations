@@ -398,7 +398,7 @@ class ThankYou(webapp.RequestHandler):
 
             if mode == "" or donation_key == "":
                 #Throw an error if you don't have those two pieces of info
-                raise
+                raise Exception("Don't know mode or donation key.")
 
             d = tools.getKey(donation_key).get()
             date = tools.convertTime(d.donation_date).strftime("%B %d, %Y")
@@ -450,7 +450,7 @@ class IndividualWelcome(webapp.RequestHandler):
 
             if mode == "" or individual_key == "":
                 #Throw an error if you don't have those two pieces of info
-                raise
+                raise  Exception("Don't know mode or individual_key.")
 
             i = tools.getKey(individual_key).get()
             s = tools.getKey(i.settings).get()
@@ -665,6 +665,12 @@ class IPN(webapp.RequestHandler):
                 team_key = tools.getKey(decoded_custom[0])
                 individual_key = tools.getKey(decoded_custom[1])
                 special_notes = decoded_custom[2]
+
+                if s.exists.entity(tools.getKey(team_key)) == False:
+                    raise  Exception("Bad key.")
+                if s.exists.entity(tools.getKey(individual_key)) == False:
+                    raise  Exception("Bad key.")
+
             except:
                 team_key = None
                 individual_key = None

@@ -576,6 +576,15 @@ class SettingsExists(UtilitiesBase):
 
         except:
             return [False, None]
+
+    def entity(self, key):
+        exists = True
+        try:
+            key.get()
+        except:
+            exists = False
+
+        return exists
     
 class SettingsCreate(UtilitiesBase):
     def team(self, name):
