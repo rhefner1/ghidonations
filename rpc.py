@@ -368,7 +368,7 @@ class RPCMethods:
             donations.append(d_dict)
 
         #Return message to confirm 
-        return_vals = [impressions, new_cursor]
+        return_vals = [donations, new_cursor]
         return return_vals
 
     def getMailchimpLists(self, mc_apikey):

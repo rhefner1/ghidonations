@@ -1102,7 +1102,7 @@ class ContactData(UtilitiesBase):
 
     @property
     def all_donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND contact = :c", s=self.e.settings, c=self.e.key)
+        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY time_created", s=self.e.settings, c=self.e.key)
         return q
 
     def impressions(self, query_cursor):
