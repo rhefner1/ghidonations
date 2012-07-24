@@ -619,6 +619,8 @@ class SettingsCreate(UtilitiesBase):
 
         new_tl.put()
 
+        memcache.delete("teammembersdict" + team_key.urlsafe())
+
         logging.info("Individual created.")
         return new_individual.key
 
