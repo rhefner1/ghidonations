@@ -619,6 +619,8 @@ class SettingsCreate(UtilitiesBase):
 
         new_tl.put()
 
+        memcache.delete("teammembersdict" + team_key.urlsafe())
+
         logging.info("Individual created.")
         return new_individual.key
 
@@ -919,7 +921,7 @@ class IndividualData(UtilitiesBase):
     @property
     def teams(self):
         q = models.TeamList.gql("WHERE individual = :i", i=self.e.key)
-        return qCache(q)
+        return q
 
     @property
     def team_list(self):

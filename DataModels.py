@@ -233,12 +233,18 @@ class TeamList(ndb.Model):
         return self.team.urlsafe()
 
     @property
+    def donations(self):
+        i = self.individual.get()
+        q =  Donation.gql("WHERE settings = :s AND team = :t AND individual = :i", s=i.settings, t=self.team, i=i.key)
+        return q
+
+    @property
     def donation_total(self):
         i = self.individual.get()
         memcache_key = "dtotal" + self.team.urlsafe() + i.key.urlsafe()
 
         def get_item():
-            q = Donation.gql("WHERE settings = :s AND team = :t AND individual = :i", s=i.settings, t=self.team, i=i.key)
+            q = self.donations
             donations = tools.qCache(q)
             
             donation_total = tools.toDecimal(0)
@@ -322,6 +328,12 @@ class Individual(ndb.Expando):
         for key in dd.removed():
             query = TeamList.gql("WHERE team = :t AND individual = :i", t=tools.getKey(key), i=self.key)
             tl = query.fetch(1)[0]
+
+            for d in tl.donations:
+                d.team = None
+                d.individual = None
+                d.put()
+
             tl.key.delete()
 
         for key in dd.changed():
