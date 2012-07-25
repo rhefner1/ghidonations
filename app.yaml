@@ -52,10 +52,6 @@ handlers:
   script: mooha.app
   secure: optional
 
-- url: /profile
-  script: mooha.app
-  secure: optional
-
 - url: /rpc
   script: rpc.app
   secure: optional
@@ -67,10 +63,6 @@ handlers:
 - url: /tasks/.*
   script: tasks.app
   secure: optional
-  login: admin
-
-- url: /_ah/mail/.+ 
-  script: incoming_mail.app 
   login: admin
 
 - url: /remote_api

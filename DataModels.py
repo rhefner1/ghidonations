@@ -53,11 +53,6 @@ class Settings(ndb.Expando):
     confirmation_header = ndb.TextProperty()
     confirmation_footer = ndb.TextProperty()
 
-    #Wordpress
-    wp_url = ndb.StringProperty()
-    wp_username = ndb.StringProperty()
-    wp_password = ndb.StringProperty()
-
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)  
 
