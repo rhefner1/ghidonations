@@ -245,7 +245,8 @@ class TeamList(ndb.Model):
 
         def get_item():
             q = self.donations
-            donations = tools.qCache(q)
+            # donations = tools.qCache(q)
+            donations = q
             
             donation_total = tools.toDecimal(0)
 
