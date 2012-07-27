@@ -201,15 +201,15 @@ class RPCMethods:
         s.create.contact("Curtis Smalls", "csmalls@example.com", None, None, None, False)
         s.create.contact("Constance Weekley", "cweekley@example.com", None, None, None, False)
 
-        s.create.donation("Sandra Baker", "sbaker@example.com", "12.34", "12.34", None, None, None, True, None, None, "offline", False, False, False, None)
-        s.create.donation("Sandra Baker", "sbaker@example.com", "1425.25", "1425.25", None, None, None, True, None, None, "offline", False, False, False, None)
-        s.create.donation("Sandra Baker", "sbaker@example.com", "2346.52", "2346.52", None, None, None, True, None, None, "offline", False, True, False, None)
-        s.create.donation("Colleen Molina", "cmolina@example.com", "27.50", "27.50", None, None, None, True, None, None, "offline", False, False, False, None)
-        s.create.donation("Colleen Molina", "cmolina@example.com", "77.50", "77.50", None, None, None, True, None, None, "offline", False, False, False, None)
-        s.create.donation("Sara Ruiz", "sruiz@example.com", "500.00", "500.00", None, None, None, True, None, None, "offline", False, False, False, None)
-        s.create.donation("Sara Ruiz", "sruiz@example.com", "700.00", "700.00", None, None, None, True, None, None, "offline", False, False, False, None)
-        s.create.donation("Constance Weekley", "cweekley@example.com", "1000.00", "1000.00", None, None, None, True, None, None, "offline", False, False, False, None)
-        s.create.donation("Constance Weekley", "cweekley@example.com", "6000.00", "6000.00", None, None, None, True, None, None, "offline", False, False, False, None)
+        s.create.donation("Sandra Baker", "sbaker@example.com", "12.34", "12.34", None, None, None, True, None, None, "offline", False, False, None)
+        s.create.donation("Sandra Baker", "sbaker@example.com", "1425.25", "1425.25", None, None, None, True, None, None, "offline", False, False, None)
+        s.create.donation("Sandra Baker", "sbaker@example.com", "2346.52", "2346.52", None, None, None, True, None, None, "offline", True, False, None)
+        s.create.donation("Colleen Molina", "cmolina@example.com", "27.50", "27.50", None, None, None, True, None, None, "offline", False, False, None)
+        s.create.donation("Colleen Molina", "cmolina@example.com", "77.50", "77.50", None, None, None, True, None, None, "offline", False, False, None)
+        s.create.donation("Sara Ruiz", "sruiz@example.com", "500.00", "500.00", None, None, None, True, None, None, "offline", False, False, None)
+        s.create.donation("Sara Ruiz", "sruiz@example.com", "700.00", "700.00", None, None, None, True, None, None, "offline", False, False, None)
+        s.create.donation("Constance Weekley", "cweekley@example.com", "1000.00", "1000.00", None, None, None, True, None, None, "offline", False, False, None)
+        s.create.donation("Constance Weekley", "cweekley@example.com", "6000.00", "6000.00", None, None, None, True, None, None, "offline", False, False, None)
 
         tools.flushMemcache(self)
         return "Success"
@@ -290,8 +290,8 @@ class RPCMethods:
         new_cursor = response[1]
 
         for d in response[0]:
-            d_dict = {"key" : d.key.urlsafe(), "formatted_time_created" : d.formatted_time_created, "name" : d.name, "email" : d.email,
-                 "payment_type" : d.payment_type, "monthly_payment" : d.monthly_payment, "amount_donated" : str(d.amount_donated)}
+            d_dict = {"key" : d.key.urlsafe(), "formatted_donation_date" : d.formatted_donation_date, "name" : d.name, "email" : d.email,
+                 "payment_type" : d.payment_type, "amount_donated" : str(d.amount_donated)}
 
             donations.append(d_dict)
 
@@ -362,8 +362,8 @@ class RPCMethods:
         new_cursor = response[1]
 
         for d in response[0]:
-            d_dict = {"key" : d.key.urlsafe(), "formatted_time_created" : d.formatted_time_created, "name" : d.name, "email" : d.email,
-                 "payment_type" : d.payment_type, "monthly_payment" : d.monthly_payment, "amount_donated" : str(d.amount_donated)}
+            d_dict = {"key" : d.key.urlsafe(), "formatted_donation_date" : d.formatted_donation_date, "name" : d.name, "email" : d.email,
+                 "payment_type" : d.payment_type, "amount_donated" : str(d.amount_donated)}
 
             donations.append(d_dict)
 
@@ -469,7 +469,7 @@ class RPCMethods:
         if individual_key:
             individual_key = tools.getKey(individual_key)
 
-        s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "Offline", "offline", False, False, False, None)
+        s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "", "offline", False, False, None)
 
         #Return message to confirm 
         return_vals = [success, message]
@@ -498,7 +498,7 @@ class RPCMethods:
         if authenticated == "semi":
             notes = "[Offline check entered by team member] - " + notes
 
-        s.create.donation(name, email, amount_donated, amount_donated, address, tools.getKey(team_key), tools.getKey(individual_key), None, None, notes, "team member", True, False, False, None)
+        s.create.donation(name, email, amount_donated, amount_donated, address, tools.getKey(team_key), tools.getKey(individual_key), None, None, notes, "team member", False, None)
 
         #Return message to confirm 
         return_vals = [success, message]

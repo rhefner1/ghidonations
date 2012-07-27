@@ -18,15 +18,6 @@ from google.appengine.api import images, taskqueue
 
 #Database and deferred tasks
 from google.appengine.ext import ndb, deferred
-
-class DelayPayment(webapp.RequestHandler):
-    def post(self):
-        payment_id = self.request.get("payment_id")
-        amount_donated = self.request.get("amount_donated")
-        
-        logging.info("Retrying recurring payment: " + payment_id + " for $" + amount_donated)
-
-        tools.addRecurringDonation(self, payment_id, amount_donated, True)
         
 class Confirmation(webapp.RequestHandler):
     def post(self):
@@ -57,7 +48,6 @@ class UtilityTask(webapp.RequestHandler):
 
 
 app = webapp.WSGIApplication([
-       ('/tasks/delaypayment', DelayPayment),
        ('/tasks/confirmation', Confirmation),
        ('/tasks/utility', UtilityTask),
        ('/tasks/mailchimp', MailchimpAdd)],

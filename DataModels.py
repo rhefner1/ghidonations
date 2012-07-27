@@ -404,9 +404,6 @@ class Donation(ndb.Expando):
     #Whether it's reoccuring, one-time, etc.
     payment_type = ndb.StringProperty()
 
-    #Only used in recurring donations
-    monthly_payment = DecimalProperty()
-
     #Special notes from PayPal custom field
     special_notes = ndb.TextProperty(indexed=True)
 
@@ -417,12 +414,11 @@ class Donation(ndb.Expando):
     #Who to associate this donation to (keys)
     team = ndb.KeyProperty()
     individual = ndb.KeyProperty()
-
-    #Sets date that the model was last acted upon (donated, recurring payment)
-    time_created = ndb.DateTimeProperty()
     
     #Sets the time that the donation was placed
-    donation_date = ndb.DateTimeProperty(auto_now_add=True)
+    # donation_date = ndb.DateTimeProperty(auto_now_add=True)
+    time_created = ndb.DateTimeProperty()
+    donation_date = ndb.DateTimeProperty()
 
     #IPN original data
     ipn_data = ndb.TextProperty()
@@ -452,8 +448,8 @@ class Donation(ndb.Expando):
         return "#contact?c=" + self.contact.urlsafe()
 
     @property
-    def formatted_time_created(self):
-        return tools.convertTime(self.time_created).strftime("%b %d, %Y")
+    def formatted_donation_date(self):
+        return tools.convertTime(self.donation_date).strftime("%b %d, %Y")
 
     @property
     def data(self):
@@ -519,6 +515,22 @@ class Donation(ndb.Expando):
             memcache.delete("tdtotal" + e.team.urlsafe())
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
+
+class RecurringDonationInfo(ndb.Expando):
+    #Unique ID
+    payment_id = ndb.StringProperty()
+
+    #Monthly or weekly
+    duration = ndb.StringProperty()
+
+    donation_date = ndb.DateTimeProperty(auto_now_add=True)
+
+    #IPN original data
+    ipn_data = ndb.TextProperty()
+
+    @property
+    def formatted_donation_date(self):
+        return tools.convertTime(self.donation_date).strftime("%b %d, %Y")
 
 class Impression(ndb.Expando):
     contact = ndb.KeyProperty()

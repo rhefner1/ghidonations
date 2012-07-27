@@ -232,46 +232,6 @@ def newSettings(self, name, email):
 
     return new_settings.key
 
-def addRecurringDonation(self, payment_id, amount_donated, task_queue):
-    #When a monthly recurring donation is given, add
-    #history to the source donation (all the same payment_id)
-    #and add to that donation's totals
-    logging.info("Adding new recurring donation payment. Payment_id: " + payment_id +
-        ", amount_donated: " + amount_donated + ", from task queue? " + str(task_queue))
-    
-    try:
-        #Get the original donation object from recurring payments signup
-        query = models.Donation.gql("WHERE payment_id = :id", id=payment_id)
-        source_donation = query.fetch(1)[0]
-
-        logging.info("Recurring payment receieved.")
-
-        source_donation.amount_donated = source_donation.amount_donated + toDecimal(amount_donated)
-        source_donation.reviewed = False
-
-        updateTime(self, source_donation, True)
-        
-        source_donation.put()
-
-        #Go ahead and send the confirmation email automatically
-        source_donation.confirmation.task(86400)
-        source_donation.review.archive()
-        
-        logging.info("Successfully recorded recurring payment.")
-
-    except Exception, error:
-    #If for some reason this fails, put it back into the task queue to be repeated
-        logging.debug("Add recurring donation failed because: " + str(error))
-        
-        if task_queue == False:
-        #If it's from main.py, send it to the task queue to retry and send back a success message to PayPal
-            taskqueue.add(url="/tasks/delaypayment", params={'payment_id' : payment_id, 'amount_donated' : amount_donated})
-            logging.info("Sending recurring donation to task queue.")
-        else:
-        #If this is coming from the task queue, fail it (so the task queue retry mechanism works)
-            self.error(500)
-            logging.info("Request from task queue failed. Sending back 500 error.")
-
 ###### ------ Utilities ------ ######
 def strArrayToKey(self, str_array):
     key_array = []
@@ -356,12 +316,6 @@ def convertTime(time):
     new_time = time.astimezone(to_zone)
     return new_time
 
-def updateTime(self, donation, writeback):
-    donation.time_created = datetime.utcnow() 
-
-    if writeback == True:
-        donation.put()
-
 def toDecimal(number):
     if number != None:
         #Stripping amount donated from commas, etc
@@ -395,11 +349,11 @@ class SettingsData(UtilitiesBase):
 
     @property
     def all_donations(self):
-        q = models.Donation.gql("WHERE settings = :s ORDER BY time_created DESC", s=self.e.key)
+        q = models.Donation.gql("WHERE settings = :s ORDER BY donation_date DESC", s=self.e.key)
         return q
 
     def open_donations(self, query_cursor):
-        query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY time_created DESC", c=False, s=self.e.key)
+        query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY donation_date DESC", c=False, s=self.e.key)
         return queryCursorDB(query, query_cursor)
 
     @property
@@ -407,7 +361,7 @@ class SettingsData(UtilitiesBase):
         memcache_key = "numopen" + self.e.websafe
 
         def get_item():
-            query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY time_created DESC", c=False, s=self.e.key)
+            query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY donation_date DESC", c=False, s=self.e.key)
             return gqlCount(query)
 
         return cache(memcache_key, get_item)
@@ -498,6 +452,10 @@ class SettingsData(UtilitiesBase):
             teams.append(t)
         return teams
 
+    def recurring_info(self, payment_id):
+        info = models.RecurringDonationInfo.gql("WHERE payment_id = :id", id=payment_id).fetch(1)[0]
+        return info
+
     ## -- Contact autocomplete -- ##
     @property
     def contactsJSON(self):
@@ -528,7 +486,7 @@ class SettingsData(UtilitiesBase):
             last_week = datetime.today() - timedelta(days=7)
 
             #Get donations made in the last week
-            donations = models.Donation.gql("WHERE settings = :s AND time_created > :last_week ORDER BY time_created DESC", 
+            donations = models.Donation.gql("WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC", 
                         s=self.e.key, last_week=last_week)
 
             donation_count = 0
@@ -536,10 +494,7 @@ class SettingsData(UtilitiesBase):
 
             for d in donations:
                 #Counting total money
-                if d.isRecurring:
-                    total_money += d.monthly_payment
-                else:
-                    total_money += d.amount_donated
+                total_money += d.amount_donated
                 
                 #Counting number of donations
                 donation_count += 1
@@ -658,55 +613,50 @@ class SettingsCreate(UtilitiesBase):
         else:
             logging.error("Cannot create contact because there is not a name.")
 
-    def donation(self, name, email, amount_donated, confirmation_amount, address, team_key, individual_key, add_deposit, payment_id, special_notes, payment_type, reviewed, cover_trans, email_subscr, ipn_data):
+    def donation(self, name, email, amount_donated, confirmation_amount, address, team_key, individual_key, add_deposit, payment_id, special_notes, payment_type, email_subscr, ipn_data):
         #All variables being passed as either string or integer
         new_donation = models.Donation()
         new_donation.settings = self.e.key
         new_donation.payment_id = payment_id
         new_donation.payment_type = payment_type
-        new_donation.reviewed = reviewed
         new_donation.special_notes = special_notes
         new_donation.ipn_data = ipn_data
-        
 
         new_donation.given_name = name
         new_donation.given_email = email
 
-        query = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
-        if gqlCount(query) != 0:
+        def write_contact(query):
             c = query.fetch(1)[0]
             new_donation.contact = c.key
 
             c.update(name, email, None, None, address)
+
+        query = models.Contact.gql("WHERE settings = :s AND email = :e", s=self.e.key, e=email)
+        query2 = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
+
+        if gqlCount(query) != 0:
+            write_contact(query)
+
+        elif gqlCount(query2) != 0:
+            write_contact(query2)
+
         else:
             #Add new contact
             c_key = self.contact(name, email, None, address, None, email_subscr)
             new_donation.contact = c_key
 
-        updateTime(self, new_donation, False)
-
-        if payment_type == "recurring" or payment_type == "monthly" or payment_type == "weekly":
-            #Store monthly payment amount and put the running total at 0 (no actual money received yet)
-            new_donation.monthly_payment = toDecimal(amount_donated)
-            new_donation.amount_donated = toDecimal(0)
-            new_donation.confirmation_amount = toDecimal(0)
+        if payment_type == "monthly" or payment_type == "weekly":
             new_donation.isRecurring = True
-        else:
-            new_donation.amount_donated = toDecimal(amount_donated)
-            new_donation.confirmation_amount = toDecimal(confirmation_amount)
 
-            #This is just a dummy value
-            new_donation.monthly_payment = toDecimal("0")
+        new_donation.amount_donated = toDecimal(amount_donated)
+        new_donation.confirmation_amount = toDecimal(confirmation_amount)
 
-        if payment_type == "offline" and add_deposit == True:
-            logging.info("Adding to undeposited donations.")
-            new_donation.deposited = False
-        elif payment_type == "one-time" or payment_type == "weekly" or payment_type == "monthly":
+        if add_deposit == True:
             logging.info("Adding to undeposited donations.")
             new_donation.deposited = False
         else:
             logging.info("Not adding to undeposited donations")
-            new_donation.deposited = None
+            new_donation.deposited = True
 
         if team_key == "" or team_key == "none":
             team_key = None
@@ -718,13 +668,18 @@ class SettingsCreate(UtilitiesBase):
             
         new_donation.put()
 
-        if payment_type == "one-time":
+        if payment_type != "offline":
             #Go ahead and send the confirmation email automatically
-            new_donation.confirmation.task(86400)
+            #new_donation.confirmation.task(86400)
             new_donation.review.archive()
 
-    def recurring_donation(self, payment_id, amount_donated, task_queue):
-        addRecurringDonation(self, payment_id, amount_donated, task_queue)
+    def recurring_donation(self, payment_id, duration, ipn_data):
+        new_recurring = models.RecurringDonationInfo()
+        new_recurring.payment_id = payment_id
+        new_recurring.duration = duration
+        new_recurring.ipn_data = ipn_data
+
+        new_recurring.put()
 
     def deposit_receipt(self, entity_keys):
         new_deposit = models.DepositReceipt()
@@ -1113,7 +1068,7 @@ class ContactData(UtilitiesBase):
 
     @property
     def all_donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY time_created DESC", s=self.e.settings, c=self.e.key)
+        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
         return q
 
     def impressions(self, query_cursor):

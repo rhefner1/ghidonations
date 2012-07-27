@@ -705,32 +705,33 @@ class IPN(webapp.RequestHandler):
                 payment_type = payment_status
 
             if payment_type == "recurring_payment_profile_created" or payment_type == "subscr_signup":
-                logging.info("This is the start of a recurring payment.")
-                
-                payment_id = parameters['subscr_id']
+                logging.info("This is the start of a recurring payment. Create info object.")
 
-                #This is the start of a recurring donation
-                amount_donated = parameters['amount3']
+                payment_id = parameters['subscr_id']
 
                 #Duration between payments
                 duration = parameters["period3"]
 
                 if duration.find("W") != -1:
-                    payment_type = "weekly"
+                    duration = "weekly"
                 elif duration.find("M") != -1:
-                    payment_type = "monthly"
+                    duration = "monthly"
                 else:
-                    payment_type = "monthly"
-                
-                #Create a new donation
-                s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, False, payment_id, special_notes, payment_type, False, cover_trans, email_subscr, ipn_data)
+                    duration = "monthly"
 
+                s.create.recurring_donation(self, payment_id, duration, ipn_data)
+                
             elif payment_type == "recurring_payment" or payment_type == "subscr_payment":
-                logging.info("This is a recurring payment.")
+                logging.info("This is a recurring donation payment.")
                 
                 payment_id = parameters['subscr_id']
-                #Add to donation
-                s.create.recurring_donation(payment_id, amount_donated, False)
+
+                #Look up info object
+                info = s.data.recurring_info(payment_id)
+                payment_type = info.duration
+                
+                #Create a new donation
+                s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, True, payment_id, special_notes, payment_type, email_subscr, ipn_data)
 
             elif payment_type == "web_accept":
                 logging.info("This is a one-time donation.")
@@ -739,7 +740,7 @@ class IPN(webapp.RequestHandler):
                     payment_id = parameters['txn_id']
 
                     #Create a new donation
-                    s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, False, payment_id, special_notes, "one-time", False, cover_trans, email_subscr, ipn_data)
+                    s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, False, payment_id, special_notes, "one-time", email_subscr, ipn_data)
 
                 else:
                     logging.info("Payment status not complete.  Not logging the donation.")

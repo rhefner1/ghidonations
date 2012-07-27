@@ -5,18 +5,11 @@ $(document).ready(function(){
 
     var rpc_params = [contact_key]
     var data_table = initializeTable(4, initial_cursor, "getContactDonations", rpc_params, function(data_table, i){
-        if (d.isRecurring == true){
-            var amount = "$" + d.monthly_payment + " (" + d.payment_type + ")"
-        } 
-        else{
-            var amount = "$" + d.amount_donated
-        }
-
         data_table.fnAddData([
             d.key,
-            d.formatted_time_created,
+            d.formatted_donation_date,
             d.email,
-            amount,
+            d.amount_donated,
             d.payment_type
         ])
     })

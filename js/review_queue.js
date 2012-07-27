@@ -1,17 +1,10 @@
 function writeTable(data_table, d){
-    if (d.isRecurring == true){
-        var amount = "$" + d.monthly_payment + " (" + d.payment_type + ")"
-    } 
-    else{
-        var amount = "$" + d.amount_donated
-    }
-
     data_table.fnAddData([
         d.key,
-        d.formatted_time_created,
+        d.formatted_donation_date,
         d.name,
         d.email,
-        amount,
+        d.amount_donated,
         d.payment_type
     ])
 

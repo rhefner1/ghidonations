@@ -142,15 +142,9 @@
                             {% for d in donations %}
                             <tr>
                                 <td>{{ d.websafe }}</td>
-                                <td>{{ d.formatted_time_created }}</td>
+                                <td>{{ d.formatted_donation_date }}</td>
                                 <td>{{ d.email }}</td>
-
-                                {% if d.isRecurring %}
-                                <td>${{ d.monthly_payment }} ({{ d.payment_type }})</td>
-                                {% else %}
                                 <td>${{ d.amount_donated }}</td>
-                                {% endif %}
-
                                 <td>{{ d.payment_type }}</td>
                             </tr>
                             {% endfor %}
@@ -173,4 +167,4 @@
 
 <div style="display:none" id="contact_container"></div>
 
-<script src="/js/contact.js?v=3" type="text/javascript"></script>
+<script src="/js/contact.js?v=4" type="text/javascript"></script>

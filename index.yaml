@@ -36,6 +36,13 @@ indexes:
   properties:
   - name: contact
   - name: settings
+  - name: donation_date
+    direction: desc
+
+- kind: Donation
+  properties:
+  - name: contact
+  - name: settings
   - name: time_created
 
 - kind: Donation
@@ -81,6 +88,13 @@ indexes:
   properties:
   - name: reviewed
   - name: settings
+  - name: donation_date
+    direction: desc
+
+- kind: Donation
+  properties:
+  - name: reviewed
+  - name: settings
   - name: time_created
     direction: desc
 
@@ -95,6 +109,12 @@ indexes:
   properties:
   - name: reviewed
   - name: time_created
+    direction: desc
+
+- kind: Donation
+  properties:
+  - name: settings
+  - name: donation_date
     direction: desc
 
 - kind: Donation

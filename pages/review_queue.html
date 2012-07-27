@@ -25,16 +25,10 @@
                         {% for d in donations %}
                         <tr data-id="{{ d.websafe }}">
                             <td>{{ d.websafe }}</td>
-                            <td>{{ d.formatted_time_created }}</td>
+                            <td>{{ d.formatted_donation_date }}</td>
                             <td>{{ d.name }}</td>
                             <td>{{ d.email }}</td>
-
-                            {% if d.isRecurring %}
-                            <td>${{ d.monthly_payment }} ({{ d.payment_type }})</td>
-                            {% else %}
                             <td>${{ d.amount_donated }}</td>
-                            {% endif %}
-
                             <td>{{ d.payment_type }}</td>
                         </tr>
                         {% endfor %}
@@ -48,4 +42,4 @@
 <div style="display:none" id="rq_details_container"></div>
 
 <input type="hidden" id="initial_cursor" value="{{ initial_cursor }}" />
-<script src="/js/review_queue.js?v=3"></script>
+<script src="/js/review_queue.js?v=4"></script>

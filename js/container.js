@@ -107,6 +107,7 @@ function initializeTable(num_columns, initial_cursor, rpc_action, rpc_params, ca
         "bFilter": false,
         "bSort": false,
         "bInfo": false,
+        "iDisplayLength": 15,
 
         "aoColumns" : column_array
     });
@@ -125,10 +126,10 @@ function initializeTable(num_columns, initial_cursor, rpc_action, rpc_params, ca
     current_page = 0
 
     //AJAX Controls
-    $("a[title=Next]").unbind("click")
-    $("a[title=Previous]").unbind("click")
+    $(".ui-corner-left").unbind("click")
+    $(".ui-corner-right").unbind("click")
 
-    $("a[title=Next]").click(function(){
+    $(".ui-corner-right").click(function(){
         if (data_loading == false){
             data_loading = true
             $(this).effect("highlight", {}, 3000);
@@ -138,7 +139,7 @@ function initializeTable(num_columns, initial_cursor, rpc_action, rpc_params, ca
         } 
     })
 
-    $("a[title=Previous]").click(function(){
+    $(".ui-corner-left").click(function(){
         if (data_loading == false){
            data_loading = true
            $(this).effect("highlight", {}, 3000);
