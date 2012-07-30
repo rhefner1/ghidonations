@@ -726,9 +726,11 @@ class IPN(webapp.RequestHandler):
                 
                 payment_id = parameters['subscr_id']
 
+                #FIX THIS
                 #Look up info object
-                info = s.data.recurring_info(payment_id)
-                payment_type = info.duration
+                # info = s.data.recurring_info(payment_id)
+                # payment_type = info.duration
+                payment_type = "monthly"
                 
                 #Create a new donation
                 s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, True, payment_id, special_notes, payment_type, email_subscr, ipn_data)

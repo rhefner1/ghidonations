@@ -670,7 +670,7 @@ class SettingsCreate(UtilitiesBase):
 
         if payment_type != "offline":
             #Go ahead and send the confirmation email automatically
-            #new_donation.confirmation.task(86400)
+            new_donation.confirmation.task(86400)
             new_donation.review.archive()
 
     def recurring_donation(self, payment_id, duration, ipn_data):

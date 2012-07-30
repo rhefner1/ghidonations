@@ -416,9 +416,7 @@ class Donation(ndb.Expando):
     individual = ndb.KeyProperty()
     
     #Sets the time that the donation was placed
-    # donation_date = ndb.DateTimeProperty(auto_now_add=True)
-    time_created = ndb.DateTimeProperty()
-    donation_date = ndb.DateTimeProperty()
+    donation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     #IPN original data
     ipn_data = ndb.TextProperty()

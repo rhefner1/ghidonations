@@ -361,14 +361,12 @@
                                                                 Thank you for supporting {{ s.name }} with the gift of
                                                                 <strong>
                                                                 {% if d.isRecurring %}
-                                                                    ${{ d.monthly_payment }}
-                                                                    </strong> as part of your recurring payment started on 
+                                                                    ${{ d.amount_donated }}
+                                                                    </strong> as part of your recurring payment
                                                                 {% else %}
                                                                     ${{ d.confirmation_amount }}
-                                                                    </strong> made on
+                                                                    </strong> made on <strong>{{ date }}</strong>.
                                                                 {% endif %}
-
-                                                                <strong>{{ date }}</strong>
 
                                                                 {% if individual_name %}
                                                                     for <strong>{{ individual_name }}</strong>
