@@ -131,7 +131,19 @@ function submitForm(){
         //console.log("Covering transaction")
         var current_price = price_object.val()
         current_price = parseFloat(current_price)
-        var new_price = current_price + (.022 * current_price) + .3 + ((.022 * current_price)*.022)
+        var new_price = current_price
+
+        var addition = (.022 * new_price)
+        new_price += addition
+
+        do{
+            addition = (.022 * addition)
+            new_price += addition
+        }
+        while (addition > 0)
+
+        new_price += .3
+
         new_price = new_price.toFixed(2)
         new_price = new_price.toString()
 

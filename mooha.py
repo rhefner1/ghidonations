@@ -688,11 +688,7 @@ class IPN(webapp.RequestHandler):
             amount_donated = tools.toDecimal(0)
             try:
                 confirmation_amount = parameters['mc_gross']
-                if cover_trans:
-                    amount_donated = float(parameters['mc_gross']) - float(parameters['mc_fee'])
-                    amount_donated = str(amount_donated)
-                else:
-                    amount_donated = parameters['mc_gross']
+                amount_donated = float(parameters['mc_gross']) - float(parameters['mc_fee'])
 
             except:
                 pass
@@ -742,7 +738,7 @@ class IPN(webapp.RequestHandler):
                     payment_id = parameters['txn_id']
 
                     #Create a new donation
-                    s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, False, payment_id, special_notes, "one-time", email_subscr, ipn_data)
+                    s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, True, payment_id, special_notes, "one-time", email_subscr, ipn_data)
 
                 else:
                     logging.info("Payment status not complete.  Not logging the donation.")

@@ -459,17 +459,16 @@ class RPCMethods:
 
         if team_key == "" or team_key == "general":
             team_key = None
-
-        if individual_key == "":
-            individual_key = None
-
-        if team_key:
+        else:
             team_key = tools.getKey(team_key)
 
-        if individual_key:
+        if individual_key == "" or individual_key == None:
+            individual_key = None
+        else:
             individual_key = tools.getKey(individual_key)
+            
 
-        s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "", "offline", False, False, None)
+        s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "", "offline", False, None)
 
         #Return message to confirm 
         return_vals = [success, message]

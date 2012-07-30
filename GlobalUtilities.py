@@ -634,7 +634,7 @@ class SettingsCreate(UtilitiesBase):
         query = models.Contact.gql("WHERE settings = :s AND email = :e", s=self.e.key, e=email)
         query2 = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
 
-        if gqlCount(query) != 0:
+        if gqlCount(query) != 0 and email:
             write_contact(query)
 
         elif gqlCount(query2) != 0:
