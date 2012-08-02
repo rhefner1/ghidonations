@@ -386,7 +386,7 @@ class Individual(ndb.Expando):
 
 class Donation(ndb.Expando):
     contact = ndb.KeyProperty()
-    reviewed = ndb.BooleanProperty()
+    reviewed = ndb.BooleanProperty(default=False)
 
     #Only for deposited donations
     deposited = ndb.BooleanProperty()

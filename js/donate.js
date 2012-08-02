@@ -142,7 +142,7 @@ function submitForm(){
         }
         while (addition > 0)
 
-        new_price += .3
+        new_price += .31
 
         new_price = new_price.toFixed(2)
         new_price = new_price.toString()
