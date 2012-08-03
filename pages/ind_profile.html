@@ -105,13 +105,7 @@
                                     <td>{{ d.formatted_donation_date }}</td>
                                     <td>{{ d.name }}</td>
                                     <td>{{ d.email }}</td>
-
-                                    {% if d.isRecurring %}
-                                    <td>${{ d.monthly_payment }} ({{ d.payment_type }})</td>
-                                    {% else %}
                                     <td>${{ d.amount_donated }}</td>
-                                    {% endif %}
-
                                     <td>{{ d.payment_type }}</td>
                             </tr>
                             {% endfor %}
