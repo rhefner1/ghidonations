@@ -3,9 +3,6 @@
         <h2>All Individuals</h2>
         <div class="widget_inside">
         	<p class="m_bottom15">Click any one of the contacts below to view more details about them.</p>
-            <div id="selector_buttons" style="float:right; margin-bottom:15px">
-                <button id="back_allcontacts" class="small button hidden">Back to All Contacts</button>
-            </div>
 
             <div class="col_12">
                 <table class="dataTable">
@@ -17,7 +14,7 @@
                             </tr>
 
                     </thead>
-                    <tbody id="contacts">
+                    <tbody id="individuals">
                     	{% for i in individuals %}
                         <tr>
                                 <td>{{ i.websafe }}</td>

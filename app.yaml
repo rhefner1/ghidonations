@@ -1,5 +1,5 @@
 application: ghidonations
-version: 3g
+version: 3h
 runtime: python27
 api_version: 1
 threadsafe: no
@@ -11,6 +11,10 @@ handlers:
 - url: /favicon\.ico
   static_files: images/favicon.ico
   upload: images/favicon\.ico
+
+- url: /robots.txt
+  static_files: robots.txt
+  upload: robots.txt
 
 - url: /images
   static_dir: images

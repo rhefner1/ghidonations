@@ -25,20 +25,13 @@
     <link rel="stylesheet" href="/css/global.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/css/config.css" type="text/css" media="screen" />
 
+    <!-- Kendo -->
+    <link rel="stylesheet" href="/css/kendo/kendo.common.min.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/css/kendo/kendo.default.min.css" type="text/css" media="screen" />
+
     <link rel="stylesheet" href="/css/print.css" type="text/css" media="print" />
 
-    <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-27802293-1']);
-      _gaq.push(['_setDomainName', 'ghidonations.appspot.com']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
-    </script>
+    
     
 </head>
 <body>
@@ -165,11 +158,12 @@
 <!-- Use CDN on production server -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.19/jquery-ui.min.js"></script>
+
 <!-- <script src="/js/jquery.js"></script>
 <script src="/js/muse/jqueryui/jquery-ui-1.8.16.custom.min.js"></script> -->
 
 <!-- Custom -->
-<script type="text/javascript" src="/js/container.js?v=5"></script>
+<script type="text/javascript" src="/js/container.js?v=6"></script>
 
 <!-- Menu -->
 <link rel="stylesheet" href="/js/muse/superfish/superfish.css" type="text/css" media="screen" />
@@ -181,21 +175,12 @@
 <!-- Hash change -->
 <script type="text/javascript" src="/js/muse/jquery.ba-hashchange.min.js"></script>
 
-<!-- Js used in the theme -->
-<script src="/js/muse/muse.js"></script>
-
 <!-- Colorbox is a lightbox alternative-->
 <script src="/js/muse/colorbox/jquery.colorbox-min.js"></script>
 <link rel="stylesheet" href="/js/muse/colorbox/colorbox.css" type="text/css" media="screen" />
 
 <!-- Adds HTML5 Placeholder attributes to those lesser browsers (i.e. IE) -->
 <script type="text/javascript" src="/js/muse/jquery.placeholder.1.2.min.shrink.js"></script>
-
-<!-- Adds charts -->
-<!-- <script type="text/javascript" src="/js/muse/flot/jquery.flot.min.js"></script>
-<script type="text/javascript" src="/js/muse/flot/jquery.flot.pie.min.js"></script>
-<script type="text/javascript" src="/js/muse/flot/jquery.flot.stack.min.js"></script>
- -->
 
  <!-- Form Validation Engine -->
 <script src="/js/muse/formvalidator/jquery.validationEngine.js"></script>
@@ -208,13 +193,18 @@
 <!-- Sortable, searchable DataTable -->
 <script src="/js/muse/jquery.dataTables.min.js"></script>
 
-<!-- WYSIWYG Editor -->
-<script src="/js/muse/cleditor/jquery.cleditor.min.js"></script>
-<link rel="stylesheet" href="/js/muse/cleditor/jquery.cleditor.css" type="text/css" media="screen" />
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-27802293-1']);
+  _gaq.push(['_setDomainName', 'ghidonations.appspot.com']);
+  _gaq.push(['_trackPageview']);
 
-<!-- Colorpicker -->
-<!-- <script src="/js/muse/colorpicker/colorpicker.js"></script>
-<link rel="stylesheet" href="/js/muse/colorpicker/colorpicker.css" type="text/css" media="screen" /> -->
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
 
 <!-- End Scripts -->
 

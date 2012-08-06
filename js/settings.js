@@ -1,5 +1,6 @@
 var impressions = []
 
+//Gets list of Mailchimp lists
 function get_mclists(){
     var mc_donorlist = $("#var_donorlist").val()
 
@@ -118,10 +119,10 @@ $(document).ready(function(){
             var amount4 = $("input[name=amount4]").val()
             var use_custom = Boolean($("input[name=use_custom]:checked").val())
 
-            var confirmation_header = $("textarea[name=confirmation_header]").val()
-            var confirmation_info = $("textarea[name=confirmation_info]").val()
-            var confirmation_footer = $("textarea[name=confirmation_footer]").val()
-            var confirmation_text = $("textarea[name=confirmation_text]").val()
+            var confirmation_header = $("textarea[name=confirmation_header]").data("kendoEditor").value()
+            var confirmation_info = $("textarea[name=confirmation_info]").data("kendoEditor").value()
+            var confirmation_footer = $("textarea[name=confirmation_footer]").data("kendoEditor").value()
+            var confirmation_text = $("textarea[name=confirmation_text]").data("kendoEditor").value()
 
             var wp_url = $("input[name=wp_url]").val()
             var wp_username = $("input[name=wp_username]").val()
@@ -151,8 +152,7 @@ $(document).ready(function(){
 
             //Refresh impressions page
             refreshImpressions()
-        }
-        
+        }  
     })
 
     $("#current_impressions").delegate("button", "click", function(){
@@ -168,10 +168,13 @@ $(document).ready(function(){
     })
 
     //WYSIWYG Editor
-    $("textarea[name=confirmation_text]").cleditor({
-        height: 500
-    });
-    $(".cleditor").cleditor()
+    $(".editor").css("width", "500px").css("height", "300px")
+    $(".editor").kendoEditor()
+
+    // $("textarea[name=confirmation_text]").cleditor({
+    //     height: 500
+    // });
+    // $(".cleditor").cleditor()
 
     if (mc_use == "True"){
         $("#mc_yes").attr("checked", "checked")
