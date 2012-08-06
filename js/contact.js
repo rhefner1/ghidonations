@@ -1,6 +1,7 @@
 $(document).ready(function(){
     var contact_key = $("#contact_key").val()
 
+    //Initialize data table
     var initial_cursor = $("#initial_cursor").val()
 
     var rpc_params = [contact_key]
@@ -24,6 +25,7 @@ $(document).ready(function(){
         $("input[name=zip]").val(address[3])
     }
 
+    //Deserialize the phone number
     var phone = $("#phone").val()
     if (phone != "None"){
         $("input[name=phone_1]").val(phone.substr(0,3))
@@ -31,8 +33,10 @@ $(document).ready(function(){
         $("input[name=phone_3]").val(phone.substr(6,4))
     }
 
+    //Initialize the validation engine
     $("form").validationEngine()
 
+    //When donation is clicked, pop open the rq_details lightbox
     $("#donations").delegate("tr", "click", function(){
         var row_data = data_table.fnGetData(this)
         var clicked_id =  row_data[0]
@@ -41,6 +45,7 @@ $(document).ready(function(){
         loadColorbox(url, "contact_container")
     });
 
+    //Change to edit mode
     $("#edit_contact").click(function(){
         //Change the page to edit mode
         $("#edit_contact").hide()
@@ -51,6 +56,7 @@ $(document).ready(function(){
         $(".unlockable").removeAttr("disabled")
     })
 
+    //Change to impression adding mode
     $("#add_impression").click(function(){
         $("#impressions_list").hide()
         $("#impression_fields").fadeIn()
@@ -59,6 +65,7 @@ $(document).ready(function(){
         $("#edit_contact").hide()
     })
 
+    //Revert to normal view after impression was discarded
     $("input[name=discard_impression]").click(function(){
         $("#impressions_list").fadeIn()
         $("#impression_fields").hide()
@@ -69,6 +76,7 @@ $(document).ready(function(){
         $("#impressions_edit textarea").val("")
     })
 
+    //Send RPC request to delete contact
     $("input[name=delete_contact]").click(function(){
         var contact_key = $("#contact_key").val()
         var params = ["deleteContact", contact_key]
@@ -78,10 +86,7 @@ $(document).ready(function(){
         })
     })
 
-    $("#impressions_edit select").change(function(){
-        
-    })
-
+    //Save contact and post it to RPC
     $("input[name=save_contact]").click(function(){
         var name = $("input[name=name]").val()
         var email = $("input[name=email]").val()
@@ -106,6 +111,7 @@ $(document).ready(function(){
         })
     })
 
+    //Save impression and post it to RPC
     $("input[name=save_impression]").click(function(){
         var impression = $("#impressions_edit select").val()
         var notes = $("#impressions_edit textarea").val()

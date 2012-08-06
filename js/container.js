@@ -342,4 +342,25 @@ $(document).ready(function(){
             }
         }
     });
+
+    //This is necessary for the theme to function
+    $("ul.sf-menu").superfish(); // Superfish Menus!
+
+    $("#myaccount").click(function() {
+        $("#logindrop").toggle("slow");
+        return false;
+    });
+
+    $("#logindrop a").click(function(){
+        $("#logindrop").toggle("slow");
+    })
+
+    $("#search").click(function() {
+        $("#searchdrop").toggle("slow");
+        return false;
+    });
+    
+    $(".notification").click(function() {
+        $(this).fadeOut("slow");
+    });
 });

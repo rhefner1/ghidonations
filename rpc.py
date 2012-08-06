@@ -138,10 +138,10 @@ class RPCMethods:
 
     def pub_refreshSandbox(self):
         #Local SDK
-        settings = "ahBkZXZ-Z2hpZG9uYXRpb25zcg4LEghTZXR0aW5ncxgBDA"
+        settings = "ahBkZXZ-Z2hpZG9uYXRpb25zcg4LEghTZXR0aW5ncxgHDA"
 
         #Production
-        settings = "ag5zfmdoaWRvbmF0aW9uc3IQCxIIU2V0dGluZ3MY9dIWDA"
+        # settings = "ag5zfmdoaWRvbmF0aW9uc3IQCxIIU2V0dGluZ3MY9dIWDA"
 
         s = tools.getKey(settings).get()
 

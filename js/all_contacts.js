@@ -1,4 +1,6 @@
 $(document).ready(function(){  
+
+    //Initializing data table
     var initial_cursor = $("#initial_cursor").val()
     var data_table = initializeTable(2, initial_cursor, "getContacts", null, function(data_table, d){
         data_table.fnAddData([
@@ -21,6 +23,7 @@ $(document).ready(function(){
         });
     })
 
+    //When contact row in data table is clicked, go to contact page
     $("#contacts").delegate("tr", "click", function(){
         var row_data = data_table.fnGetData(this)
         var clicked_id =  row_data[0]
