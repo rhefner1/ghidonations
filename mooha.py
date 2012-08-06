@@ -25,7 +25,7 @@ class Login(webapp.RequestHandler):
         #Flash message
         message = tools.getFlash(self)
 
-        #Delete existing session if it already exists
+        #Delete existing session if it exists
         self.session.terminate()
 
         template_variables = {"flash" : message}
