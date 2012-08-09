@@ -401,7 +401,7 @@ class Donation(ndb.Expando):
     #Is this a recurring donation
     isRecurring = ndb.BooleanProperty(default=False)
 
-    #Whether it's reoccuring, one-time, etc.
+    #Whether it's recurring, one-time, or offline
     payment_type = ndb.StringProperty()
 
     #Special notes from PayPal custom field
@@ -513,22 +513,6 @@ class Donation(ndb.Expando):
             memcache.delete("tdtotal" + e.team.urlsafe())
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
-
-class RecurringDonationInfo(ndb.Expando):
-    #Unique ID
-    payment_id = ndb.StringProperty()
-
-    #Monthly or weekly
-    duration = ndb.StringProperty()
-
-    donation_date = ndb.DateTimeProperty(auto_now_add=True)
-
-    #IPN original data
-    ipn_data = ndb.TextProperty()
-
-    @property
-    def formatted_donation_date(self):
-        return tools.convertTime(self.donation_date).strftime("%b %d, %Y")
 
 class Impression(ndb.Expando):
     contact = ndb.KeyProperty()

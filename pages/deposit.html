@@ -38,7 +38,7 @@
                     <tbody>
                         {% for d in donations %}
                         <tr data-id="{{ d.websafe }}">
-                            <td>{{ d.formatted_time_created }}</td>
+                            <td>{{ d.formatted_donation_date }}</td>
                             <td>{{ d.name }}</td>
                             <td>{{ d.email }}</td>
                             <td>${{ d.amount_donated }}</td>

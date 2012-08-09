@@ -645,7 +645,7 @@ class SettingsCreate(UtilitiesBase):
             c_key = self.contact(name, email, None, address, None, email_subscr)
             new_donation.contact = c_key
 
-        if payment_type == "monthly" or payment_type == "weekly":
+        if payment_type == "recurring":
             new_donation.isRecurring = True
 
         new_donation.amount_donated = toDecimal(amount_donated)

@@ -706,14 +706,7 @@ class IPN(webapp.RequestHandler):
                 payment_id = parameters['subscr_id']
 
                 #Duration between payments
-                duration = parameters["period3"]
-
-                if duration.find("W") != -1:
-                    duration = "weekly"
-                elif duration.find("M") != -1:
-                    duration = "monthly"
-                else:
-                    duration = "monthly"
+                duration = "recurring"
 
                 s.create.recurring_donation(self, payment_id, duration, ipn_data)
                 
@@ -721,12 +714,7 @@ class IPN(webapp.RequestHandler):
                 logging.info("This is a recurring donation payment.")
                 
                 payment_id = parameters['subscr_id']
-
-                #FIX THIS
-                #Look up info object
-                # info = s.data.recurring_info(payment_id)
-                # payment_type = info.duration
-                payment_type = "monthly"
+                payment_type = "recurring"
                 
                 #Create a new donation
                 s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, True, payment_id, special_notes, payment_type, email_subscr, ipn_data)

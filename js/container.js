@@ -61,7 +61,7 @@ function change_tab(location)
 }
 
 // ---- DataTables ---- //
-var cursors_dict = {0:null}
+var cursors_dict = {0:[null, null]}
 var data_loading = false
 var current_page = 0
 var data_table = null
@@ -156,7 +156,11 @@ function initializeTable(num_columns, initial_cursor, rpc_action, rpc_params, ca
 }
 
 function pageThrough(data_table, page_number, rpc_action, rpc_params, callback){
-    var query_cursor = cursors_dict[page_number]
+    var query_cursor = cursors_dict[page_number][0]
+    var cached_results = cursors_dict[page_number][1]
+
+    //What will be passed to the writeTable function
+    var rpc_results = null
 
     if(query_cursor == "end"){
         show_flash("setting", "There isn't any more data to show.", true)
@@ -166,38 +170,55 @@ function pageThrough(data_table, page_number, rpc_action, rpc_params, callback){
         query_cursor = JSON.stringify(query_cursor)
     }
 
-    // -- RPC to get donations -- //
-    var params = {action: rpc_action, arg0:query_cursor}
+    //Check for cached results first
+    if (cached_results != null){
+        rpc_results = cached_results
+    }
+    else{
+        // -- RPC to get donations -- //
+        var params = {action: rpc_action, arg0:query_cursor}
 
-    //Adding additional parameters to params dictionary
-    if (rpc_params != null){
-        var current_arg = 1
-        for (p in rpc_params){
-            var param_name = "arg" + current_arg.toString()
-            params[param_name] = JSON.stringify(rpc_params[p])
+        //Adding additional parameters to params dictionary
+        if (rpc_params != null){
+            var current_arg = 1
+            for (p in rpc_params){
+                var param_name = "arg" + current_arg.toString()
+                params[param_name] = JSON.stringify(rpc_params[p])
+            }
         }
+
+        rpcGet(params, function(data){
+            rpc_results = data
+        })
     }
 
-    rpcGet(params, function(data){
-        data_table.fnClearTable()
+    writeTable(data_table, rpc_results)
+       
+}
 
-        $.each(data[0], function(status, d){
-            callback(data_table, d)
-        })
+function writeTable(data_table, data){
+    data_table.fnClearTable()
 
-        if (data[1] == null){
-            var new_cursor = "end"
-        }
-        else{
-            var new_cursor = data[1]
-        }
-        
-        cursors_dict[page_number + 1] = new_cursor
+    $.each(data[0], function(status, d){
+        callback(data_table, d)
+    })
 
-        data_table.fnAdjustColumnSizing()
+    if (data[1] == null){
+        var new_cursor = "end"
+    }
+    else{
+        var new_cursor = data[1]
+    }
 
-        data_loading = false
-    })   
+    //Cache this query
+    cursors_dict[page_number][1] = data
+    
+    //Set next cursor
+    cursors_dict[page_number + 1] = [new_cursor, null]
+
+    data_table.fnAdjustColumnSizing()
+
+    data_loading = false
 }
 
 function htmlDecode(input){
