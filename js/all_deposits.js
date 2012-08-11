@@ -10,11 +10,11 @@ $(document).ready(function(){
     })
 
     //When deposit is clicked, go to its page
-	$("#all_deposits").delegate("tr", "click", function(){
+	$("#all_deposits").delegate("tr", "click", function(e){
         var row_data = data_table.fnGetData(this)
         var clicked_id =  row_data[0]
 
-        window.location.hash = "deposit?d=" + clicked_id
+        change_hash(e, "deposit?d=" + clicked_id)
     });
 
 })

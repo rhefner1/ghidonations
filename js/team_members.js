@@ -5,10 +5,10 @@ $(document).ready(function(){
 	}
 	
 
-    $("#members").delegate("tr", "click", function(){
+    $("#members").delegate("tr", "click", function(e){
         var clicked_id = $(this).attr("data-id")
 
-        window.location.hash = "profile?i=" + clicked_id
+        change_hash(e, "profile?i=" + clicked_id)
     })
 
     $("#edit_team").click(function(){

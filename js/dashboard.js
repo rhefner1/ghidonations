@@ -7,8 +7,8 @@ $(document).ready(function(){
     }
 
     // -- This function changes tab behavior -- //
-    $("#dashboard .report .button").click(function(){
+    $("#dashboard .report .button").click(function(e){
         var hash = $(this).attr("data-location")
-        window.location.hash = hash
+        change_hash(e, hash)
     });
 });

@@ -60,6 +60,16 @@ function change_tab(location)
     loading = false
 }
 
+function change_hash(e, location){
+    if (e.ctrlKey){
+        window.open("#" + location, "_blank")
+    }
+    else{
+        window.location.hash = location
+    }
+    
+}
+
 // ---- DataTables ---- //
 var cursors_dict = {0:[null, null]}
 var data_loading = false
@@ -323,7 +333,7 @@ $(document).ready(function(){
     });
         
     // Bind the event.
-    $(window).hashchange( function(){
+    $(window).hashchange( function(e){
         // Fires every time the hash changes!
         var hash = window.location.hash
 

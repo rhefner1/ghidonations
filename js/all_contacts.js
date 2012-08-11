@@ -18,17 +18,17 @@ $(document).ready(function(){
             source: data,
             select: function(event, ui){
                 $("input[name=search]").val(ui.item.name)
-                window.location.hash = "contact?c=" + ui.item.key
+                change_hash(e, "contact?c=" + ui.item.key) 
             }
         });
     })
 
     //When contact row in data table is clicked, go to contact page
-    $("#contacts").delegate("tr", "click", function(){
+    $("#contacts").delegate("tr", "click", function(e){
         var row_data = data_table.fnGetData(this)
         var clicked_id =  row_data[0]
 
-        window.location.hash = "contact?c=" + clicked_id
+        change_hash(e, "contact?c=" + clicked_id)
     });
 
 });

@@ -11,11 +11,11 @@ $(document).ready(function(){
     })
 
     //When individual is clicked, go to their profile page
-    $("#individuals").delegate("tr", "click", function(){
+    $("#individuals").delegate("tr", "click", function(e){
         var row_data = data_table.fnGetData(this)
         var clicked_id =  row_data[0]
 
-        window.location.hash = "profile?i=" + clicked_id
+        change_hash(e, "profile?i=" + clicked_id)
     });
 
 });
