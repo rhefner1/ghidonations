@@ -9,15 +9,6 @@ import GlobalUtilities as tools
 import DataModels as models
 
 import appengine_config
-
-import json, datetime, time   
-from decimal import *
-
-#Images API and taskqueue
-from google.appengine.api import images, taskqueue
-
-#Database and deferred tasks
-from google.appengine.ext import ndb, deferred
         
 class Confirmation(webapp.RequestHandler):
     def post(self):
