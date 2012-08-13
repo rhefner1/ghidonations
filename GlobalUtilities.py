@@ -1036,14 +1036,6 @@ class DonationConfirmation(UtilitiesBase):
 
     def email(self):
         d = self.e
-        
-        # url = "https://ghidonations.appspot.com/thanks?m=e&id=" + str(d.websafe)
-        # logging.info("Using url: " + url)
-
-        # result = urlfetch.fetch(url, deadline=10)
-
-        #HTML email is the result of the URL fetch
-        # email_html = result.content
 
         message = mail.EmailMessage()
         message.to = d.email
@@ -1068,12 +1060,6 @@ class DonationConfirmation(UtilitiesBase):
             individual_name = None
 
         template_variables = {"s": s, "d" : d, "date" : date, "individual_name" : individual_name}
-
-        # who = wsgiref.tools.request_uri(self.request.environ)
-        #TODO - fix this
-        #Slicing up who
-        # first_slash = who.find("/thanks")
-        # who = who[:first_slash]
 
         who = "http://ghidonations.appspot.com"
 
