@@ -576,23 +576,21 @@ class Contact(ndb.Expando):
             name = None
         if email == None:
             email = ""
-        if phone == "":
-            phone = None
 
         if name != self.name and name != None:
             self.name = name
 
         if email != self.email:
             self.email = email
-            if settings.mc_use:
+            if settings.mc_use and email != "" and email != None:
                 settings.mailchimp.add(email, False)
 
         if phone != self.phone:
             self.phone = phone
 
         if notes != str(self.notes):
-            if notes == None or notes == "":
-                notes = "None"
+            if notes == None:
+                notes = ""
             self.notes = notes
 
         if address != self.address:
