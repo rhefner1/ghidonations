@@ -131,11 +131,6 @@ class RPCMethods:
 
         return settings.urlsafe()
 
-    def saveDatastore(self):
-        from google.appengine.tools import dev_appserver 
-        dev_appserver.TearDownStubs()
-        return "Datastore Saved!"
-
     def pub_refreshSandbox(self):
         #Local SDK
         settings = "ahBkZXZ-Z2hpZG9uYXRpb25zcg4LEghTZXR0aW5ncxgBDA"
@@ -214,22 +209,6 @@ class RPCMethods:
         tools.flushMemcache(self)
         return "Success"
 
-    def flushMemcache(self):
-        tools.flushMemcache(self)
-        return "Memcache flushed."
-
-    def repaircontacts(self):
-        all_d = models.Donation.query()
-        for d in all_d:
-            c = d.contact.get()
-            email = c.email
-
-            if email == None or email == "":
-                c.email = d.given_email
-            c.put()
-
-    def setConfAmount(self):
-        taskqueue.add(url="/tasks/utility", queue_name="backend", params={})
 
 #### ---- Globalhopeindia.org Utility Functions ---- ####
     def individualExists(self, email):
@@ -574,6 +553,20 @@ class RPCMethods:
 
         c = tools.getKey(contact_key).get()
         c.create.impression(impression, notes)
+
+        #Return message to confirm 
+        return_vals = [success, message]
+        return return_vals
+
+#### ---- Contact merge ---- ####
+    def mergeContacts(self, contact1, contact2):
+        message = "Contacts merged"
+        success = True
+
+        c1 = tools.getKey(contact1)
+        c2 = tools.getKey(contact2)
+
+        tools.mergeContacts(c1, c2)
 
         #Return message to confirm 
         return_vals = [success, message]

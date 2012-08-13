@@ -16,7 +16,7 @@ $(document).ready(function(){
     $.getJSON(url, function(data){
         $("input[name=search]").autocomplete({
             source: data,
-            select: function(event, ui){
+            select: function(e, ui){
                 $("input[name=search]").val(ui.item.name)
                 change_hash(e, "contact?c=" + ui.item.key) 
             }

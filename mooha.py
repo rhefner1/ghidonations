@@ -382,6 +382,14 @@ class NewContact(webapp.RequestHandler):
         self.response.write(
            template.render('pages/new_contact.html', template_variables))
 
+class MergeContacts(webapp.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, False)
+
+        template_variables = {}
+        self.response.write(
+           template.render('pages/merge_contacts.html', template_variables))
+
 class Settings(webapp.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
@@ -781,6 +789,7 @@ app = webapp.WSGIApplication([
        ('/ajax/allcontacts', AllContacts),
        ('/ajax/contact', Contact),
        ('/ajax/newcontact', NewContact),
+       ('/ajax/mergecontacts', MergeContacts),
 
        ('/ajax/profile', IndividualProfile),
        ('/ajax/profile/upload', UpdateProfile),
