@@ -762,8 +762,7 @@ class IPN(webapp.RequestHandler):
                 logging.info("Payment type: " + payment_type)
                 logging.info("Name: " + name)
                 logging.info("Email: " + email)
-                logging.info("Amount donated: " + amount_donated)
-                logging.info("Address: " + str(address))
+                logging.info("Amount donated: " + str(amount_donated))
             except:
                 logging.error("Failed somewhere in the logs.")
             
