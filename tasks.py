@@ -38,14 +38,6 @@ class MailchimpAdd(webapp.RequestHandler):
 
         s.mailchimp.add(email,True)
 
-class UtilityTask(webapp.RequestHandler):
-    def post(self):
-        all_d = models.Donation.query()
-        for d in all_d:
-            if not d.confirmation_amount:
-                d.confirmation_amount = d.amount_donated
-                d.put()
-
 
 app = webapp.WSGIApplication([
        ('/tasks/confirmation', Confirmation),
