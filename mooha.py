@@ -2,7 +2,7 @@
 import webapp2, appengine_config, logging, json, quopri, urllib
 from time import strftime
 
-from google.appengine.ext.webapp2 import template, blobstore_handlers
+from google.appengine.ext.webapp import template, blobstore_handlers
 from google.appengine.ext import blobstore
 from google.appengine.api import urlfetch
 
@@ -802,5 +802,5 @@ app = webapp2.WSGIApplication([
 
        ('/ipn', IPN)],
        debug=True)
-app = appengine_config.webapp2_add_wsgi_middleware(app)
+app = appengine_config.webapp_add_wsgi_middleware(app)
 app = appengine_config.recording_add_wsgi_middleware(app)
