@@ -1,16 +1,10 @@
-import logging
-
 #App engine platform
-import wsgiref.handlers
-from google.appengine.ext.webapp.util import run_wsgi_app
-import webapp2 as webapp
+import logging, webapp2, appengine_config
 
 import GlobalUtilities as tools
 import DataModels as models
-
-import appengine_config
         
-class Confirmation(webapp.RequestHandler):
+class Confirmation(webapp2.RequestHandler):
     def post(self):
         donation_key = self.request.get("donation_key")
         d = tools.getKey(donation_key).get()
@@ -19,7 +13,7 @@ class Confirmation(webapp.RequestHandler):
         
         d.confirmation.email()
 
-class MailchimpAdd(webapp.RequestHandler):
+class MailchimpAdd(webapp2.RequestHandler):
     def post(self):
         email = self.request.get("email")
         settings_key = self.request.get("settings")
@@ -30,7 +24,7 @@ class MailchimpAdd(webapp.RequestHandler):
         s.mailchimp.add(email,True)
 
 
-app = webapp.WSGIApplication([
+app = webapp2.WSGIApplication([
        ('/tasks/confirmation', Confirmation),
        ('/tasks/utility', UtilityTask),
        ('/tasks/mailchimp', MailchimpAdd)],

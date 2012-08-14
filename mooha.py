@@ -1,24 +1,22 @@
-import logging, json, quopri, urllib, urllib2, time, re
-from time import gmtime, strftime
-
 #App engine platform
-import webapp2 as webapp
-from google.appengine.ext.webapp import template, blobstore_handlers
-from google.appengine.ext import ndb, blobstore
-from google.appengine.api import images, mail, urlfetch
+import webapp2, appengine_config, logging, json, quopri, urllib
+from time import strftime
+
+from google.appengine.ext.webapp2 import template, blobstore_handlers
+from google.appengine.ext import blobstore
+from google.appengine.api import urlfetch
 
 #Excel export
 from xlwt import *
 
 #Sessions
 from gaesessions import get_current_session
-import appengine_config
 
 #Application files
 import DataModels as models
 import GlobalUtilities as tools
 
-class Login(webapp.RequestHandler):  
+class Login(webapp2.RequestHandler):  
     def get(self):
         self.session = get_current_session()
 
@@ -53,14 +51,14 @@ class Login(webapp.RequestHandler):
             tools.setFlash(self, "Whoops, that didn't get you in. Try again.")
             self.redirect("/login")
 
-class Logout(webapp.RequestHandler):
+class Logout(webapp2.RequestHandler):
     def get(self):
         self.session = get_current_session()
         self.session.terminate()
 
         self.redirect("/login")
 
-class Container(webapp.RequestHandler):
+class Container(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, False)
         username = tools.getUsername(self)
@@ -78,7 +76,7 @@ class Container(webapp.RequestHandler):
             self.response.write(
                 template.render('pages/container_ind.html', template_variables))
         
-class Dashboard(webapp.RequestHandler):
+class Dashboard(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -91,7 +89,7 @@ class Dashboard(webapp.RequestHandler):
         self.response.write(
             template.render('pages/dashboard.html', template_variables))
 
-class ReviewQueue(webapp.RequestHandler):
+class ReviewQueue(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -105,7 +103,7 @@ class ReviewQueue(webapp.RequestHandler):
         self.response.write(
             template.render('pages/review_queue.html', template_variables))
 
-class ReviewQueueDetails(webapp.RequestHandler):
+class ReviewQueueDetails(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, False)
         
@@ -133,7 +131,7 @@ class ReviewQueueDetails(webapp.RequestHandler):
             self.response.write(
                     template.render('pages/rq_details.html', template_variables))
 
-class OfflineDonation(webapp.RequestHandler):
+class OfflineDonation(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, False)
 
@@ -155,7 +153,7 @@ class OfflineDonation(webapp.RequestHandler):
             self.response.write(
                     template.render('pages/offline_ind.html', template_variables))
 
-class UndepositedDonations(webapp.RequestHandler):
+class UndepositedDonations(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -163,7 +161,7 @@ class UndepositedDonations(webapp.RequestHandler):
         self.response.write(
                 template.render('pages/undeposited_donations.html', template_variables))
 
-class AllDeposits(webapp.RequestHandler):
+class AllDeposits(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -175,7 +173,7 @@ class AllDeposits(webapp.RequestHandler):
         self.response.write(
                 template.render('pages/all_deposits.html', template_variables))
 
-class Deposit(webapp.RequestHandler):
+class Deposit(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -238,7 +236,7 @@ class Deposit(webapp.RequestHandler):
         self.response.write(
                 template.render('pages/deposit.html', template_variables))
 
-class NewIndividual(webapp.RequestHandler):
+class NewIndividual(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -246,7 +244,7 @@ class NewIndividual(webapp.RequestHandler):
         self.response.write(
                 template.render('pages/new_individual.html', template_variables))
 
-class NewTeam(webapp.RequestHandler):
+class NewTeam(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -254,7 +252,7 @@ class NewTeam(webapp.RequestHandler):
         self.response.write(
                 template.render('pages/new_team.html', template_variables))
 
-class AllTeams(webapp.RequestHandler):
+class AllTeams(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -266,7 +264,7 @@ class AllTeams(webapp.RequestHandler):
         self.response.write(
                 template.render('pages/all_teams.html', template_variables))
 
-class AllIndividuals(webapp.RequestHandler):
+class AllIndividuals(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, False)
 
@@ -278,7 +276,7 @@ class AllIndividuals(webapp.RequestHandler):
         self.response.write(
            template.render('pages/all_individuals.html', template_variables))
 
-class TeamMembers(webapp.RequestHandler):
+class TeamMembers(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
         
@@ -289,7 +287,7 @@ class TeamMembers(webapp.RequestHandler):
         self.response.write(
            template.render('pages/team_members.html', template_variables))
 
-class IndividualProfile(webapp.RequestHandler):
+class IndividualProfile(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, False)
 
@@ -347,7 +345,7 @@ class UpdateProfile(blobstore_handlers.BlobstoreUploadHandler):
 
         self.redirect("/#profile?i=" + individual_key)
 
-class AllContacts(webapp.RequestHandler):
+class AllContacts(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, False)
 
@@ -359,7 +357,7 @@ class AllContacts(webapp.RequestHandler):
         self.response.write(
            template.render('pages/all_contacts.html', template_variables))
 
-class Contact(webapp.RequestHandler):
+class Contact(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, False)
 
@@ -374,7 +372,7 @@ class Contact(webapp.RequestHandler):
         self.response.write(
            template.render('pages/contact.html', template_variables))
 
-class NewContact(webapp.RequestHandler):
+class NewContact(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, False)
 
@@ -382,7 +380,7 @@ class NewContact(webapp.RequestHandler):
         self.response.write(
            template.render('pages/new_contact.html', template_variables))
 
-class MergeContacts(webapp.RequestHandler):
+class MergeContacts(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, False)
 
@@ -390,7 +388,7 @@ class MergeContacts(webapp.RequestHandler):
         self.response.write(
            template.render('pages/merge_contacts.html', template_variables))
 
-class Settings(webapp.RequestHandler):
+class Settings(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -398,7 +396,7 @@ class Settings(webapp.RequestHandler):
         self.response.write(
            template.render('pages/settings.html', template_variables))
 
-class ThankYou(webapp.RequestHandler):
+class ThankYou(webapp2.RequestHandler):
     def get(self):
         try:
             mode = self.request.get("m")
@@ -428,12 +426,6 @@ class ThankYou(webapp.RequestHandler):
                 template_location= "pages/letters/thanks_print.html"
 
             elif mode == "e":
-                # who = wsgiref.tools.request_uri(self.request.environ)
-                #TODO - fix this
-                #Slicing up who
-                # first_slash = who.find("/thanks")
-                # who = who[:first_slash]
-
                 who = "http://ghidonations.appspot.com"
 
                 template_variables["see_url"] = d.confirmation.see_url(who)
@@ -450,7 +442,7 @@ class ThankYou(webapp.RequestHandler):
             self.response.write(
                    template.render('pages/letters/thankyou_error.html', {}))
 
-class IndividualWelcome(webapp.RequestHandler):
+class IndividualWelcome(webapp2.RequestHandler):
     def get(self):
         try:
             mode = self.request.get("m")
@@ -473,7 +465,7 @@ class IndividualWelcome(webapp.RequestHandler):
             self.response.write(
                    template.render('pages/letters/thankyou_error.html', {}))
 
-class ExportDonations(webapp.RequestHandler):
+class ExportDonations(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -481,7 +473,7 @@ class ExportDonations(webapp.RequestHandler):
         self.response.write(
            template.render('pages/export_donations.html', template_variables))
 
-class ExportContacts(webapp.RequestHandler):
+class ExportContacts(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -489,7 +481,7 @@ class ExportContacts(webapp.RequestHandler):
         self.response.write(
            template.render('pages/export_contacts.html', template_variables))
 
-class SpreadsheetGenerator(webapp.RequestHandler):
+class SpreadsheetGenerator(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -553,7 +545,7 @@ class SpreadsheetGenerator(webapp.RequestHandler):
         # output to user
         wb.save(self.response.out)
 
-class NotAuthorized(webapp.RequestHandler):
+class NotAuthorized(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, False)
 
@@ -561,7 +553,7 @@ class NotAuthorized(webapp.RequestHandler):
         self.response.write(
            template.render('pages/not_authorized.html', template_variables))
 
-class pub_Donate(webapp.RequestHandler):
+class pub_Donate(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         
@@ -577,7 +569,7 @@ class pub_Donate(webapp.RequestHandler):
         except:
             self.response.write("Sorry, this URL triggered an error.  Please try again.")
 
-class IPN(webapp.RequestHandler):
+class IPN(webapp2.RequestHandler):
     def get(self):
         self.response.write("GHI Donations - PayPal IPN Handler")
 
@@ -766,7 +758,7 @@ class IPN(webapp.RequestHandler):
             except:
                 logging.error("Failed somewhere in the logs.")
             
-app = webapp.WSGIApplication([
+app = webapp2.WSGIApplication([
        ('/', Container),
        ('/ajax/dashboard', Dashboard),
 
@@ -810,5 +802,5 @@ app = webapp.WSGIApplication([
 
        ('/ipn', IPN)],
        debug=True)
-app = appengine_config.webapp_add_wsgi_middleware(app)
+app = appengine_config.webapp2_add_wsgi_middleware(app)
 app = appengine_config.recording_add_wsgi_middleware(app)

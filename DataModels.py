@@ -1,13 +1,9 @@
 import logging, json
 from decimal import *
-from google.appengine.api import datastore_errors
 
 #App Engine platform
-from google.appengine.api import taskqueue, mail, memcache, urlfetch, images
-from google.appengine.ext import ndb, deferred
-
-#Mailchimp API
-from mailsnake import MailSnake
+from google.appengine.api import mail, memcache, datastore_errors
+from google.appengine.ext import ndb
 
 import GlobalUtilities as tools
 

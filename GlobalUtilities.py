@@ -1,15 +1,14 @@
 # coding: utf-8
 
-import logging, email, exceptions, traceback, string, urllib, json, random, time, re
+import logging, json, time, re
 from time import gmtime, strftime
 from datetime import *
 from decimal import *
 
 #App Engine platform
-from google.appengine.api import taskqueue, mail, memcache, urlfetch, images
+from google.appengine.api import taskqueue, mail, memcache, images
 from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb
-from google.appengine.datastore import entity_pb
 from google.appengine.datastore.datastore_query import Cursor
 
 #Mailchimp API
@@ -239,17 +238,6 @@ def strArrayToKey(self, str_array):
         key_array.append(getKey(k))
 
     return key_array
-
-def shortURL(self, long_url):
-    url = "https://www.googleapis.com/urlshortener/v1/url"
-    headers = {"Content-Type" : "application/json"}
-
-    params = {"longUrl" : long_url, "key" : "AIzaSyB7k0LsUXibTJHkCx_D3MA0HT6tQAtYZAo"}
-    post_params = json.dumps(params)
-
-    result = urlfetch.fetch(url=url, headers=headers, method="POST", payload=post_params, deadline=10)
-    response = json.loads(result.content)
-    return response["id"]
 
 def getFlash(self):
     try:

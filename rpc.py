@@ -1,22 +1,10 @@
 # coding: utf-8
-import webapp2 as webapp
-from google.appengine.ext.webapp import template
-
-import logging, json, datetime, time   
-from decimal import *
-
-#Images API and taskqueue
-from google.appengine.api import images, taskqueue
-
-#Database and deferred tasks
-from google.appengine.ext import ndb, deferred    
-
-import appengine_config
+import logging, json, datetime, appengine_config, webapp2
 
 import GlobalUtilities as tools
 import DataModels as models
 
-class RPCHandler(webapp.RequestHandler):
+class RPCHandler(webapp2.RequestHandler):
     def __init__(self, request, response):
         self.initialize(request, response)
         self.methods = RPCMethods()
@@ -701,7 +689,7 @@ class RPCMethods:
         return_vals = [success, message]
         return return_vals
 
-app = webapp.WSGIApplication([
+app = webapp2.WSGIApplication([
     ('/rpc', RPCHandler),
     ], debug=True)
 app = appengine_config.recording_add_wsgi_middleware(app)
