@@ -616,10 +616,11 @@ class IPN(webapp2.RequestHandler):
                 parameters['homemadeParameterValidity']=False
 
         #Comparing receiver email to list of allowed email addresses
-        receiver_email = parameters['receiver_email']
-        authenticated = False
-        settings = None
         try:
+            receiver_email = parameters['receiver_email']
+            authenticated = False
+            settings = None
+        
             #If the receiver_email isn't in the database, this will fail
             settings = all_account_emails[receiver_email]
             authenticated = True
