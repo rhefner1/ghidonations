@@ -182,7 +182,7 @@ function pageThrough(data_table, page_number, rpc_action, rpc_params, callback){
 
     //Check for cached results first
     if (cached_results != null){
-        rpc_results = cached_results
+        writeTable(data_table, cached_results, page_number, callback)
     }
     else{
         // -- RPC to get donations -- //
@@ -198,15 +198,13 @@ function pageThrough(data_table, page_number, rpc_action, rpc_params, callback){
         }
 
         rpcGet(params, function(data){
-            rpc_results = data
+            writeTable(data_table, data, page_number, callback)
         })
     }
-
-    writeTable(data_table, rpc_results)
        
 }
 
-function writeTable(data_table, data){
+function writeTable(data_table, data, page_number, callback){
     data_table.fnClearTable()
 
     $.each(data[0], function(status, d){

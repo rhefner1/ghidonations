@@ -1,4 +1,4 @@
-function writeTable(data_table, d){
+function dataTableWriter(data_table, d){
     data_table.fnAddData([
         d.key,
         d.formatted_donation_date,
@@ -15,7 +15,7 @@ $(document).ready(function(){
     var initial_cursor = $("#initial_cursor").val()
     var rpc_params = ["unreviewed"]
     var data_table = initializeTable(5, initial_cursor, "getDonations", rpc_params, function(data_table, d){
-        writeTable(data_table, d)
+        dataTableWriter(data_table, d)
     })
 
     $("#donations").delegate("tr", "click", function(){
@@ -43,11 +43,11 @@ $(document).ready(function(){
         //Reinitialize the table with new settings
         rpc_params = [clicked_id]
         pageThrough(data_table, 0, "getDonations", rpc_params, function(data_table, d){
-            writeTable(data_table, d)
+            dataTableWriter(data_table, d)
         })
 
         data_table = initializeTable(5, initial_cursor, "getDonations", rpc_params, function(data_table, d){
-            writeTable(data_table, d)
+            dataTableWriter(data_table, d)
         })
 
         data_table.fnAdjustColumnSizing()
