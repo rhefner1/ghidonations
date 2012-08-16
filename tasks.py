@@ -26,7 +26,6 @@ class MailchimpAdd(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
        ('/tasks/confirmation', Confirmation),
-       ('/tasks/utility', UtilityTask),
        ('/tasks/mailchimp', MailchimpAdd)],
        debug=True)
 app = appengine_config.recording_add_wsgi_middleware(app)

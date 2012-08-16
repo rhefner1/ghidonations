@@ -5,7 +5,7 @@ $(document).ready(function(){
     var data_table = initializeTable(2, initial_cursor, "getContacts", null, function(data_table, d){
         data_table.fnAddData([
             d.key,
-            d.name,
+            d.label,
             d.email
         ])
     })

@@ -627,6 +627,7 @@ class IPN(webapp2.RequestHandler):
             logging.info("Getting payment to account: " + receiver_email + ", #: " + settings)
 
         except:
+            authenticated = False
             logging.info("No match for incoming payment email address. Not continuing.")
 
         # Make sure money is going to the correct account - otherwise fraudulent
