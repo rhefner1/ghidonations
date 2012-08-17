@@ -27,6 +27,16 @@ var current_container = null
 var loading = false
 var colorbox_open = false
 
+function change_hash(e, location){
+    if (e.ctrlKey){
+        window.open("#" + location, "_blank")
+    }
+    else{
+        window.location.hash = location
+    }
+    
+}
+
 function change_tab(location)
 {
     loading = true
