@@ -8,7 +8,7 @@ class NotFound(webapp2.RequestHandler):
         logging.info("404 error on address: " + str(address))
         utilities.giveError(self, 404)
 
-app = webapp.WSGIApplication([
+app = webapp2.WSGIApplication([
         (r'/(.*)', NotFound)],
         debug=True)
 wsgiref.handlers.CGIHandler().run(app)

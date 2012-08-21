@@ -97,13 +97,19 @@ $(document).ready(function(){
             $("#rq_details .unlockable").removeAttr("disabled")
         }
         else if ($(this).attr("id") == "delete") {
-            //Delete donation
-            donation_key = $("#donation_key").val()
-            var params = ["deleteDonation", donation_key]
+            var r = confirm("Do you want to delete this donation?")
+            if (r==true){
+                //Delete donation
+                donation_key = $("#donation_key").val()
+                var params = ["deleteDonation", donation_key]
 
-            rpcPost(params, function(data){
-                closeColorbox()
-            })
+                rpcPost(params, function(data){
+                    closeColorbox()
+                })
+            }
+            else{
+                return
+            }
         }
     })
     
@@ -148,6 +154,7 @@ $(document).ready(function(){
     $("#rq_details").delegate("input[name=edit_contact]", "click", function(){
         var contact_url = $("#contact_url").val()
         window.location.href = contact_url
+        $.colorbox.close()
     
     })
 

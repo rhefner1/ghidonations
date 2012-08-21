@@ -580,14 +580,14 @@ class SettingsCreate(UtilitiesBase):
         new_individual.settings = self.e.key
         new_individual.password = password
         new_individual.admin = bool(admin)
-        new_individual.description = "[description]"
+        new_individual.description = "Thank you for supporting my short-term mission trip to India. Your prayer and financial support is greatly needed and appreciated. Thanks for helping make it possible for me to go join God in His work in India."
 
         new_individual.put()
 
         new_tl = models.TeamList()
         new_tl.individual = new_individual.key
         new_tl.team = team_key
-        new_tl.fundraise_amt = toDecimal("20")
+        new_tl.fundraise_amt = toDecimal("2700")
         new_tl.sort_name = name
 
         new_tl.put()
