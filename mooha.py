@@ -16,47 +16,68 @@ from gaesessions import get_current_session
 import DataModels as models
 import GlobalUtilities as tools
 
-class Login(webapp2.RequestHandler):  
+class AllContacts(webapp2.RequestHandler):
     def get(self):
-        self.session = get_current_session()
+        isAdmin, s = tools.checkAuthentication(self, False)
 
-        #Flash message
-        message = tools.getFlash(self)
+        response = s.data.contacts(None)
+        contacts = response[0]
+        initial_cursor = response[1]
 
-        #Delete existing session if it exists
-        self.session.terminate()
-
-        template_variables = {"flash" : message}
+        template_variables = {"contacts" : contacts, "initial_cursor" : initial_cursor}
         self.response.write(
-            template.render('pages/login.html', template_variables))
+           template.render('pages/all_contacts.html', template_variables))
 
-    def post(self):
-        self.session = get_current_session()
-
-        email = self.request.get("email")
-        password = self.request.get("password")
-
-        authenticated, user = tools.checkCredentials(self, email, password)
-
-        if authenticated == True:
-            logging.info("Authenticated: " + str(authenticated) + " and User: " + str(user.name))
-            
-            #Log in
-            self.session["key"] = str(user.key.urlsafe())
-            self.redirect("/")
-
-        else:
-            #Invalid login
-            logging.info("Incorrect login.")
-            tools.setFlash(self, "Whoops, that didn't get you in. Try again.")
-            self.redirect("/login")
-
-class Logout(webapp2.RequestHandler):
+class AllDeposits(webapp2.RequestHandler):
     def get(self):
-        self.session = get_current_session()
-        self.session.terminate()
+        isAdmin, s = tools.checkAuthentication(self, True)
 
-        self.redirect("/login")
+        response = s.data.deposits(None)
+        deposits = response[0]
+        initial_cursor = response[1]
+
+        template_variables = {"deposits" : deposits, "initial_cursor" : initial_cursor}
+        self.response.write(
+                template.render('pages/all_deposits.html', template_variables))
+
+class AllIndividuals(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, False)
+
+        response = s.data.individuals(None)
+        individuals = response[0]
+        initial_cursor = response[1]
+
+        template_variables = {"individuals" : individuals, "initial_cursor" : initial_cursor}
+        self.response.write(
+           template.render('pages/all_individuals.html', template_variables))
+
+class AllTeams(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, True)
+
+        response = s.data.teams(None)
+        teams = response[0]
+        initial_cursor = response[1]
+
+        template_variables = {"teams":teams, "initial_cursor" : initial_cursor}
+        self.response.write(
+                template.render('pages/all_teams.html', template_variables))
+
+class Contact(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, False)
+
+        contact_key = self.request.get("c")
+        c = tools.getKey(contact_key).get()
+
+        response = c.data.donations(None)
+        donations = response[0]
+        initial_cursor = response[1]
+
+        template_variables = {"c" : c, "s" : s, "donations" : donations, "initial_cursor" : initial_cursor}
+        self.response.write(
+           template.render('pages/contact.html', template_variables))
 
 class Container(webapp2.RequestHandler):
     def get(self):
@@ -88,90 +109,6 @@ class Dashboard(webapp2.RequestHandler):
         template_variables = {"num_open_donations" : s.data.num_open_donations, "past_donations" : past_donations, "past_money" : past_money}
         self.response.write(
             template.render('pages/dashboard.html', template_variables))
-
-class ReviewQueue(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, True)
-
-        #Get open donations
-        response = s.data.open_donations(None)
-
-        donations = response[0]
-        initial_cursor = response[1]
-
-        template_variables = {"donations":donations, "initial_cursor" : initial_cursor}
-        self.response.write(
-            template.render('pages/review_queue.html', template_variables))
-
-class ReviewQueueDetails(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, False)
-        
-        donation_key = self.request.get("id")
-        if donation_key == "":
-        #If they didn't type any arguments into the address bar - meaning it didn't come from the app
-            tools.giveError(self, 500)
-        else:
-            #Getting donation by its key (from address bar argument)
-            d = tools.getKey(donation_key).get()
-
-            i_key = tools.getUserKey(self)
-            i = i_key.get()
-
-            #Custom message detector
-            try:
-                if d.isRecurring == True and d.amount_donated > d.monthly_payment:
-                    message = tools.setFlash(self, "A payment has been received for this recurring d.")
-                else:
-                    message = ""
-            except:
-                message = ""
-
-            template_variables = {"d":d, "s":s, "i":i, "flash":message}
-            self.response.write(
-                    template.render('pages/rq_details.html', template_variables))
-
-class OfflineDonation(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, False)
-
-        i = tools.getUserKey(self).get()
-
-        template_variables = {"teams":None, "individual_name" : i.name, 
-                "individual_key" : i.key.urlsafe()}
-
-        if isAdmin == True:
-            #Create team dictionary with name and key for insertion into HTML
-            template_variables["teams"] = s.data.all_teams
-
-            self.response.write(
-                    template.render('pages/offline.html', template_variables))
-        else:
-            #Create team dictionary with name and key for insertion into HTML
-            template_variables["teams"] = i.data.teams
-
-            self.response.write(
-                    template.render('pages/offline_ind.html', template_variables))
-
-class UndepositedDonations(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, True)
-
-        template_variables = {"donations" : s.data.undeposited_donations}
-        self.response.write(
-                template.render('pages/undeposited_donations.html', template_variables))
-
-class AllDeposits(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, True)
-
-        response = s.data.deposits(None)
-        deposits = response[0]
-        initial_cursor = response[1]
-
-        template_variables = {"deposits" : deposits, "initial_cursor" : initial_cursor}
-        self.response.write(
-                template.render('pages/all_deposits.html', template_variables))
 
 class Deposit(webapp2.RequestHandler):
     def get(self):
@@ -236,56 +173,37 @@ class Deposit(webapp2.RequestHandler):
         self.response.write(
                 template.render('pages/deposit.html', template_variables))
 
-class NewIndividual(webapp2.RequestHandler):
+class DonatePage(webapp2.RequestHandler):
     def get(self):
-        isAdmin, s = tools.checkAuthentication(self, True)
+        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        
+        settings = self.request.get("s")
 
-        template_variables = {"teams":s.data.all_teams}
-        self.response.write(
-                template.render('pages/new_individual.html', template_variables))
+        try:
+            s = tools.getKey(settings).get()
 
-class NewTeam(webapp2.RequestHandler):
+            template_variables = {"s" : s}
+            self.response.write(
+                    template.render('pages/public_pages/pub_donate.html', template_variables))
+            
+        except:
+            self.response.write("Sorry, this URL triggered an error.  Please try again.")
+
+class ExportContacts(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
         template_variables = {}
         self.response.write(
-                template.render('pages/new_team.html', template_variables))
+           template.render('pages/export_contacts.html', template_variables))
 
-class AllTeams(webapp2.RequestHandler):
+class ExportDonations(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
-        response = s.data.teams(None)
-        teams = response[0]
-        initial_cursor = response[1]
-
-        template_variables = {"teams":teams, "initial_cursor" : initial_cursor}
+        template_variables = {}
         self.response.write(
-                template.render('pages/all_teams.html', template_variables))
-
-class AllIndividuals(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, False)
-
-        response = s.data.individuals(None)
-        individuals = response[0]
-        initial_cursor = response[1]
-
-        template_variables = {"individuals" : individuals, "initial_cursor" : initial_cursor}
-        self.response.write(
-           template.render('pages/all_individuals.html', template_variables))
-
-class TeamMembers(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, True)
-        
-        team_key = self.request.get("t")
-        t = tools.getKey(team_key).get()
-
-        template_variables = {"t":t}
-        self.response.write(
-           template.render('pages/team_members.html', template_variables))
+           template.render('pages/export_donations.html', template_variables))
 
 class IndividualProfile(webapp2.RequestHandler):
     def get(self):
@@ -315,133 +233,6 @@ class IndividualProfile(webapp2.RequestHandler):
         self.response.write(
            template.render("pages/profile.html", template_variables))
 
-class UpdateProfile(blobstore_handlers.BlobstoreUploadHandler):
-    def post(self):
-        #Has a new image been selected?
-        change_image = True
-        try:
-            upload_files = self.get_uploads('new_photo')
-            blob_info = upload_files[0]
-        except:
-            change_image = False
-
-        individual_key = self.request.get("individual_key")
-        name = self.request.get("name")
-        email = self.request.get("email")
-        team = self.request.get("team_list")
-        description = quopri.decodestring(self.request.get("description"))
-        password = self.request.get("password")
-
-        i = tools.getKey(individual_key).get()
-
-        if change_image == True:
-            new_blobkey = str(blob_info.key())
-        else:
-            new_blobkey = None
-
-        logging.info("Saving profile for: " + name)
-
-        i.update(name, email, team, description, new_blobkey, password)
-
-        self.redirect("/#profile?i=" + individual_key)
-
-class AllContacts(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, False)
-
-        response = s.data.contacts(None)
-        contacts = response[0]
-        initial_cursor = response[1]
-
-        template_variables = {"contacts" : contacts, "initial_cursor" : initial_cursor}
-        self.response.write(
-           template.render('pages/all_contacts.html', template_variables))
-
-class Contact(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, False)
-
-        contact_key = self.request.get("c")
-        c = tools.getKey(contact_key).get()
-
-        response = c.data.donations(None)
-        donations = response[0]
-        initial_cursor = response[1]
-
-        template_variables = {"c" : c, "s" : s, "donations" : donations, "initial_cursor" : initial_cursor}
-        self.response.write(
-           template.render('pages/contact.html', template_variables))
-
-class NewContact(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, False)
-
-        template_variables = {}
-        self.response.write(
-           template.render('pages/new_contact.html', template_variables))
-
-class MergeContacts(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, False)
-
-        template_variables = {}
-        self.response.write(
-           template.render('pages/merge_contacts.html', template_variables))
-
-class Settings(webapp2.RequestHandler):
-    def get(self):
-        isAdmin, s = tools.checkAuthentication(self, True)
-
-        template_variables = {"s" : s}
-        self.response.write(
-           template.render('pages/settings.html', template_variables))
-
-class ThankYou(webapp2.RequestHandler):
-    def get(self):
-        try:
-            mode = self.request.get("m")
-            donation_key = self.request.get("id")
-
-            if mode == "" or donation_key == "":
-                #Throw an error if you don't have those two pieces of info
-                raise Exception("Don't know mode or donation key.")
-
-            d = tools.getKey(donation_key).get()
-            date = tools.convertTime(d.donation_date).strftime("%B %d, %Y")
-            s = d.settings.get()
-
-            if d.individual:
-                individual_name = d.individual.get().name
-            elif d.team:
-                individual_name = d.team.get().name
-            else:
-                individual_name = None
-
-            template_variables = {"s": s, "d" : d, "date" : date, "individual_name" : individual_name}
-
-            if mode == "w":
-                template_location= "pages/letters/thanks_live.html"
-
-            elif mode == "p":
-                template_location= "pages/letters/thanks_print.html"
-
-            elif mode == "e":
-                who = "http://ghidonations.appspot.com"
-
-                template_variables["see_url"] = d.confirmation.see_url(who)
-                template_variables["print_url"] = d.confirmation.print_url(who)
-
-                template_location = "pages/letters/thanks_email.html"
-
-            self.response.write(
-                   template.render(template_location, template_variables))
-        
-        except:
-            #If there's a malformed URL, give a 500 error
-            self.error(500)
-            self.response.write(
-                   template.render('pages/letters/thankyou_error.html', {}))
-
 class IndividualWelcome(webapp2.RequestHandler):
     def get(self):
         try:
@@ -465,21 +256,159 @@ class IndividualWelcome(webapp2.RequestHandler):
             self.response.write(
                    template.render('pages/letters/thankyou_error.html', {}))
 
-class ExportDonations(webapp2.RequestHandler):
+class Login(webapp2.RequestHandler):  
+    def get(self):
+        self.session = get_current_session()
+
+        #Flash message
+        message = tools.getFlash(self)
+
+        #Delete existing session if it exists
+        self.session.terminate()
+
+        template_variables = {"flash" : message}
+        self.response.write(
+            template.render('pages/login.html', template_variables))
+
+    def post(self):
+        self.session = get_current_session()
+
+        email = self.request.get("email")
+        password = self.request.get("password")
+
+        authenticated, user = tools.checkCredentials(self, email, password)
+
+        if authenticated == True:
+            logging.info("Authenticated: " + str(authenticated) + " and User: " + str(user.name))
+            
+            #Log in
+            self.session["key"] = str(user.key.urlsafe())
+            self.redirect("/")
+
+        else:
+            #Invalid login
+            logging.info("Incorrect login.")
+            tools.setFlash(self, "Whoops, that didn't get you in. Try again.")
+            self.redirect("/login")
+
+class Logout(webapp2.RequestHandler):
+    def get(self):
+        self.session = get_current_session()
+        self.session.terminate()
+
+        self.redirect("/login")
+
+class MergeContacts(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, False)
+
+        template_variables = {}
+        self.response.write(
+           template.render('pages/merge_contacts.html', template_variables))
+
+class NewContact(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, False)
+
+        template_variables = {}
+        self.response.write(
+           template.render('pages/new_contact.html', template_variables))
+
+class NewIndividual(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, True)
+
+        template_variables = {"teams":s.data.all_teams}
+        self.response.write(
+                template.render('pages/new_individual.html', template_variables))
+
+class NewTeam(webapp2.RequestHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
         template_variables = {}
         self.response.write(
-           template.render('pages/export_donations.html', template_variables))
+                template.render('pages/new_team.html', template_variables))
 
-class ExportContacts(webapp2.RequestHandler):
+class NotAuthorized(webapp2.RequestHandler):
     def get(self):
-        isAdmin, s = tools.checkAuthentication(self, True)
+        isAdmin, s = tools.checkAuthentication(self, False)
 
         template_variables = {}
         self.response.write(
-           template.render('pages/export_contacts.html', template_variables))
+           template.render('pages/not_authorized.html', template_variables))
+
+class OfflineDonation(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, False)
+
+        i = tools.getUserKey(self).get()
+
+        template_variables = {"teams":None, "individual_name" : i.name, 
+                "individual_key" : i.key.urlsafe()}
+
+        if isAdmin == True:
+            #Create team dictionary with name and key for insertion into HTML
+            template_variables["teams"] = s.data.all_teams
+
+            self.response.write(
+                    template.render('pages/offline.html', template_variables))
+        else:
+            #Create team dictionary with name and key for insertion into HTML
+            template_variables["teams"] = i.data.teams
+
+            self.response.write(
+                    template.render('pages/offline_ind.html', template_variables))
+
+class ReviewQueue(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, True)
+
+        #Get open donations
+        response = s.data.open_donations(None)
+
+        donations = response[0]
+        initial_cursor = response[1]
+
+        template_variables = {"donations":donations, "initial_cursor" : initial_cursor}
+        self.response.write(
+            template.render('pages/review_queue.html', template_variables))
+
+class ReviewQueueDetails(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, False)
+        
+        donation_key = self.request.get("id")
+        if donation_key == "":
+        #If they didn't type any arguments into the address bar - meaning it didn't come from the app
+            tools.giveError(self, 500)
+        else:
+            #Getting donation by its key (from address bar argument)
+            d = tools.getKey(donation_key).get()
+
+            i_key = tools.getUserKey(self)
+            i = i_key.get()
+
+            #Custom message detector
+            try:
+                if d.isRecurring == True and d.amount_donated > d.monthly_payment:
+                    message = tools.setFlash(self, "A payment has been received for this recurring d.")
+                else:
+                    message = ""
+            except:
+                message = ""
+
+            template_variables = {"d":d, "s":s, "i":i, "flash":message}
+            self.response.write(
+                    template.render('pages/rq_details.html', template_variables))
+
+class Settings(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, True)
+
+        template_variables = {"s" : s}
+        self.response.write(
+           template.render('pages/settings.html', template_variables))
 
 class SpreadsheetGenerator(webapp2.RequestHandler):
     def get(self):
@@ -545,29 +474,100 @@ class SpreadsheetGenerator(webapp2.RequestHandler):
         # output to user
         wb.save(self.response.out)
 
-class NotAuthorized(webapp2.RequestHandler):
+class TeamMembers(webapp2.RequestHandler):
     def get(self):
-        isAdmin, s = tools.checkAuthentication(self, False)
-
-        template_variables = {}
-        self.response.write(
-           template.render('pages/not_authorized.html', template_variables))
-
-class pub_Donate(webapp2.RequestHandler):
-    def get(self):
-        self.response.headers['Access-Control-Allow-Origin'] = '*'
+        isAdmin, s = tools.checkAuthentication(self, True)
         
-        settings = self.request.get("s")
+        team_key = self.request.get("t")
+        t = tools.getKey(team_key).get()
 
+        template_variables = {"t":t}
+        self.response.write(
+           template.render('pages/team_members.html', template_variables))
+
+class ThankYou(webapp2.RequestHandler):
+    def get(self):
         try:
-            s = tools.getKey(settings).get()
+            mode = self.request.get("m")
+            donation_key = self.request.get("id")
 
-            template_variables = {"s" : s}
+            if mode == "" or donation_key == "":
+                #Throw an error if you don't have those two pieces of info
+                raise Exception("Don't know mode or donation key.")
+
+            d = tools.getKey(donation_key).get()
+            date = tools.convertTime(d.donation_date).strftime("%B %d, %Y")
+            s = d.settings.get()
+
+            if d.individual:
+                individual_name = d.individual.get().name
+            elif d.team:
+                individual_name = d.team.get().name
+            else:
+                individual_name = None
+
+            template_variables = {"s": s, "d" : d, "date" : date, "individual_name" : individual_name}
+
+            if mode == "w":
+                template_location= "pages/letters/thanks_live.html"
+
+            elif mode == "p":
+                template_location= "pages/letters/thanks_print.html"
+
+            elif mode == "e":
+                who = "http://ghidonations.appspot.com"
+
+                template_variables["see_url"] = d.confirmation.see_url(who)
+                template_variables["print_url"] = d.confirmation.print_url(who)
+
+                template_location = "pages/letters/thanks_email.html"
+
             self.response.write(
-                    template.render('pages/public_pages/pub_donate.html', template_variables))
-            
+                   template.render(template_location, template_variables))
+        
         except:
-            self.response.write("Sorry, this URL triggered an error.  Please try again.")
+            #If there's a malformed URL, give a 500 error
+            self.error(500)
+            self.response.write(
+                   template.render('pages/letters/thankyou_error.html', {}))
+
+class UndepositedDonations(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, True)
+
+        template_variables = {"donations" : s.data.undeposited_donations}
+        self.response.write(
+                template.render('pages/undeposited_donations.html', template_variables))
+
+class UpdateProfile(blobstore_handlers.BlobstoreUploadHandler):
+    def post(self):
+        #Has a new image been selected?
+        change_image = True
+        try:
+            upload_files = self.get_uploads('new_photo')
+            blob_info = upload_files[0]
+        except:
+            change_image = False
+
+        individual_key = self.request.get("individual_key")
+        name = self.request.get("name")
+        email = self.request.get("email")
+        team = self.request.get("team_list")
+        description = quopri.decodestring(self.request.get("description"))
+        password = self.request.get("password")
+
+        i = tools.getKey(individual_key).get()
+
+        if change_image == True:
+            new_blobkey = str(blob_info.key())
+        else:
+            new_blobkey = None
+
+        logging.info("Saving profile for: " + name)
+
+        i.update(name, email, team, description, new_blobkey, password)
+
+        self.redirect("/#profile?i=" + individual_key)
 
 class IPN(webapp2.RequestHandler):
     def get(self):
@@ -761,47 +761,34 @@ class IPN(webapp2.RequestHandler):
                 logging.error("Failed somewhere in the logs.")
             
 app = webapp2.WSGIApplication([
-       ('/', Container),
-       ('/ajax/dashboard', Dashboard),
-
-       ('/ajax/review', ReviewQueue),
-       ('/ajax/reviewdetails', ReviewQueueDetails),
-       ('/ajax/offline', OfflineDonation),
-
-       ('/ajax/undeposited', UndepositedDonations),
-       ('/ajax/alldeposits', AllDeposits),
-       ('/ajax/deposit', Deposit),
-
-       ('/ajax/allindividuals', AllIndividuals),
-       ('/ajax/newindividual', NewIndividual),
-       ('/ajax/newteam', NewTeam),
-
-       ('/ajax/allteams', AllTeams),
-       ('/ajax/teammembers', TeamMembers),
-
        ('/ajax/allcontacts', AllContacts),
-       ('/ajax/contact', Contact),
-       ('/ajax/newcontact', NewContact),
-       ('/ajax/mergecontacts', MergeContacts),
-
-       ('/ajax/profile', IndividualProfile),
-       ('/ajax/profile/upload', UpdateProfile),
-
-       ('/ajax/exportdonations', ExportDonations),
+       ('/ajax/alldeposits', AllDeposits),
+       ('/ajax/allindividuals', AllIndividuals),
+       ('/ajax/allteams', AllTeams),       
+       ('/ajax/contact', Contact),       
+       ('/', Container),      
+       ('/ajax/dashboard', Dashboard),       
+       ('/ajax/deposit', Deposit),       
+       ('/donate', DonatePage),
        ('/ajax/exportcontacts', ExportContacts),
-       ('/ajax/spreadsheet', SpreadsheetGenerator),
-
-       ('/ajax/settings', Settings),
-
-       ('/donate', pub_Donate),
-
+       ('/ajax/exportdonations', ExportDonations),
+       ('/ajax/profile', IndividualProfile),
        ('/login', Login),
        ('/logout', Logout),
-
-       ('/thanks', ThankYou),
-
+       ('/ajax/mergecontacts', MergeContacts),
+       ('/ajax/newcontact', NewContact),
+       ('/ajax/newindividual', NewIndividual),
+       ('/ajax/newteam', NewTeam),
        ('/ajax/notauthorized', NotAuthorized),
-
+       ('/ajax/offline', OfflineDonation),
+       ('/ajax/review', ReviewQueue),
+       ('/ajax/reviewdetails', ReviewQueueDetails),
+       ('/ajax/settings', Settings),
+       ('/ajax/spreadsheet', SpreadsheetGenerator),
+       ('/ajax/teammembers', TeamMembers),
+       ('/thanks', ThankYou),
+       ('/ajax/undeposited', UndepositedDonations),
+       ('/ajax/profile/upload', UpdateProfile),
        ('/ipn', IPN)],
        debug=True)
 app = appengine_config.webapp_add_wsgi_middleware(app)

@@ -53,20 +53,12 @@ class Settings(ndb.Expando):
     creation_date = ndb.DateTimeProperty(auto_now_add=True)  
 
     @property
-    def websafe(self):
-        return self.key.urlsafe()
-
-    @property
-    def impressions_json(self):
-        return json.dumps(self.impressions)
+    def create(self):
+        return tools.SettingsCreate(self)
 
     @property
     def data(self):
         return tools.SettingsData(self)
-
-    @property
-    def create(self):
-        return tools.SettingsCreate(self)
 
     @property
     def exists(self):
@@ -75,6 +67,10 @@ class Settings(ndb.Expando):
     @property
     def deposits(self):
         return tools.SettingsDeposits(self)
+
+    @property
+    def impressions_json(self):
+        return json.dumps(self.impressions)
 
     @property
     def mailchimp(self):
@@ -143,21 +139,26 @@ class Settings(ndb.Expando):
 
         s.put()
 
+    @property
+    def websafe(self):
+        return self.key.urlsafe()
+
 class Team(ndb.Expando):
     name = ndb.StringProperty()
-    show_team = ndb.BooleanProperty()
     settings = ndb.KeyProperty()
+    show_team = ndb.BooleanProperty()
+    
 
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
-    def websafe(self):
-        return self.key.urlsafe()
-
-    @property
     def data(self):
         return tools.TeamData(self)
+
+    @property
+    def websafe(self):
+        return self.key.urlsafe()
 
     ## -- Update -- ##
     def update(self, name, show_team):
@@ -200,30 +201,6 @@ class TeamList(ndb.Model):
     sort_name = ndb.StringProperty()
 
     @property
-    def websafe(self):
-        return self.key.urlsafe()
-
-    @property
-    def individual_name(self):
-        return self.individual.get().name
-
-    @property
-    def individual_email(self):
-        return self.individual.get().email
-
-    @property
-    def individual_key(self):
-        return self.individual.urlsafe()
-
-    @property 
-    def team_name(self):
-        return self.team.get().name
-
-    @property
-    def team_websafe(self):
-        return self.team.urlsafe()
-
-    @property
     def donations(self):
         i = self.individual.get()
         q = Donation.gql("WHERE settings = :s AND team = :t AND individual = :i", s=i.settings, t=self.team, i=i.key)
@@ -249,6 +226,30 @@ class TeamList(ndb.Model):
         item = tools.cache(memcache_key, get_item)
         return tools.toDecimal(item)
 
+    @property
+    def individual_email(self):
+        return self.individual.get().email
+
+    @property
+    def individual_key(self):
+        return self.individual.urlsafe()
+
+    @property
+    def individual_name(self):
+        return self.individual.get().name
+
+    @property 
+    def team_name(self):
+        return self.team.get().name
+
+    @property
+    def team_websafe(self):
+        return self.team.urlsafe()
+
+    @property
+    def websafe(self):
+        return self.key.urlsafe()
+
 class Individual(ndb.Expando):
     name = ndb.StringProperty()
     email = ndb.StringProperty()
@@ -257,23 +258,23 @@ class Individual(ndb.Expando):
     settings = ndb.KeyProperty()
 
     #Credentials
-    password = ndb.StringProperty()
     admin = ndb.BooleanProperty()
+    password = ndb.StringProperty()
 
     #Profile
-    photo = ndb.StringProperty()
     description = ndb.TextProperty()
+    photo = ndb.StringProperty()
 
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
-    def websafe(self):
-        return self.key.urlsafe()
-
-    @property
     def data(self):
         return tools.IndividualData(self)
+
+    @property
+    def websafe(self):
+        return self.key.urlsafe()
 
     ## Currently not in use
     def email_user(self, msg_id):
@@ -422,36 +423,8 @@ class Donation(ndb.Expando):
     given_email = ndb.StringProperty()
 
     @property
-    def websafe(self):
-        return self.key.urlsafe()
-
-    @property
-    def name(self):
-        return self.contact.get().name
-
-    @property
-    def email(self):
-        return self.contact.get().email
-
-    @property
     def address(self):
         return self.contact.get().address_formatted
-
-    @property
-    def contact_url(self):
-        return "#contact?c=" + self.contact.urlsafe()
-
-    @property
-    def formatted_donation_date(self):
-        return tools.convertTime(self.donation_date).strftime("%b %d, %Y")
-
-    @property
-    def data(self):
-        return tools.DonationData(self)
-
-    @property
-    def review(self):
-        return tools.DonationReview(self)
 
     @property
     def assign(self):
@@ -460,6 +433,34 @@ class Donation(ndb.Expando):
     @property
     def confirmation(self):
         return tools.DonationConfirmation(self)
+
+    @property
+    def contact_url(self):
+        return "#contact?c=" + self.contact.urlsafe()
+
+    @property
+    def data(self):
+        return tools.DonationData(self)
+
+    @property
+    def email(self):
+        return self.contact.get().email
+
+    @property
+    def formatted_donation_date(self):
+        return tools.convertTime(self.donation_date).strftime("%b %d, %Y")
+
+    @property
+    def name(self):
+        return self.contact.get().name
+
+    @property
+    def review(self):
+        return tools.DonationReview(self)
+
+    @property
+    def websafe(self):
+        return self.key.urlsafe()
 
     ## -- Update donation -- ##
     def update(self, notes, team_key, individual_key, add_deposit):
@@ -519,12 +520,12 @@ class Impression(ndb.Expando):
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
-    def websafe(self):
-        return self.key.urlsafe()
-
-    @property
     def formatted_creation_date(self):
         return tools.convertTime(self.creation_date).strftime("%b %d, %Y")
+
+    @property
+    def websafe(self):
+        return self.key.urlsafe()
 
 class Contact(ndb.Expando):
     #Standard information we need to know
@@ -540,10 +541,6 @@ class Contact(ndb.Expando):
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
-    def websafe(self):
-        return self.key.urlsafe()
-
-    @property
     def address_json(self):
         return json.dumps(self.address)
 
@@ -556,12 +553,16 @@ class Contact(ndb.Expando):
             return ""
 
     @property
+    def create(self):
+        return tools.ContactCreate(self)
+
+    @property
     def data(self):
         return tools.ContactData(self)
 
     @property
-    def create(self):
-        return tools.ContactCreate(self)
+    def websafe(self):
+        return self.key.urlsafe()
 
     ## -- Update contact -- ##
     def update(self, name, email, phone, notes, address):

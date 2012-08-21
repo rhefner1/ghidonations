@@ -56,6 +56,33 @@ def checkAuthentication(self, admin_required):
         self.redirect("/login")
         return None, None
 
+def getUsername(self):
+    try:
+        user_key = getUserKey(self)
+        user = user_key.get()
+
+        return user.name
+    except:
+        self.redirect("/login")
+
+def getUserKey(self):
+    self.session = get_current_session()
+    user_key = self.session["key"]
+
+    if user_key == None or user_key == "":
+        raise
+
+    return getKey(user_key)
+
+def getSettingsKey(self):
+    try:
+        user_key = getUserKey(self)
+        user = user_key.get()
+        
+        return user.settings
+    except:
+        self.redirect("/login")
+
 def RPCcheckAuthentication(self, admin_required):
     try:
         self.session = get_current_session()
@@ -81,51 +108,21 @@ def RPCcheckAuthentication(self, admin_required):
     except:
         return False
 
-def getUsername(self):
-    try:
-        user_key = getUserKey(self)
-        user = user_key.get()
-
-        return user.name
-    except:
-        self.redirect("/login")
-
-def getUserKey(self):
-    self.session = get_current_session()
-    user_key = self.session["key"]
-
-    if user_key == None or user_key == "":
-        raise
-
-    return getKey(user_key)
-
-def getSettingsKey(self):
-        user_key = getUserKey(self)
-        user = user_key.get()
-        
-        return user.settings
-
 ###### ------ Managing entity access w/memcache ------ ######
 
 # Helper Protobuf entity picklers by Nick Johnson
 # http://blog.notdot.net/2009/9/Efficient-model-memcaching
-def serializeEntities(models):
-    if models is None:
-        return None
-    else:
-        entities_list = []
-        for m in models:
-            e_proto = serializeEntity(m)
-            entities_list.append(e_proto)
+def cache(memcache_key, get_item):
+    item_json = memcache.get(memcache_key)
 
-        return entities_list
+    if not item_json:
+        item = get_item()
+        memcache.set(memcache_key, json.dumps(item))
 
-def serializeEntity(model):
-    if model is None:
-        return None
-    else:
-        # Encoding entity to protobuf
-        return ndb.model_to_protobuf(model)
+    else: 
+        item = json.loads(item_json)
+
+    return item
 
 def deserializeEntity(data):
     if data is None:
@@ -134,19 +131,11 @@ def deserializeEntity(data):
         # Getting entity fro protobuf
         return ndb.model_from_protobuf(data)
 
-def getKey(entity_key):
-    return ndb.Key(urlsafe=entity_key)
-
-def gqlCount(gql_object):
-    try:
-        length = len(gql_object)
-    except:
-        length = gql_object.count()
-
-    return length
-
 def flushMemcache(self):
     return memcache.flush_all()
+
+def getKey(entity_key):
+    return ndb.Key(urlsafe=entity_key)
 
 def gqlCache(memcache_key, get_item):
     cached_query = memcache.get(memcache_key)
@@ -165,20 +154,34 @@ def gqlCache(memcache_key, get_item):
 
     return entities
 
-def cache(memcache_key, get_item):
-    item_json = memcache.get(memcache_key)
+def gqlCount(gql_object):
+    try:
+        length = len(gql_object)
+    except:
+        length = gql_object.count()
 
-    if not item_json:
-        item = get_item()
-        memcache.set(memcache_key, json.dumps(item))
-
-    else: 
-        item = json.loads(item_json)
-
-    return item
+    return length
 
 def qCache(q):
     return ndb.get_multi(q.fetch(keys_only=True))
+
+def serializeEntities(models):
+    if models is None:
+        return None
+    else:
+        entities_list = []
+        for m in models:
+            e_proto = serializeEntity(m)
+            entities_list.append(e_proto)
+
+        return entities_list
+
+def serializeEntity(model):
+    if model is None:
+        return None
+    else:
+        # Encoding entity to protobuf
+        return ndb.model_to_protobuf(model)
 
 ###### ------ Data Access ------ ######
 def getAccountEmails(self):
@@ -232,12 +235,17 @@ def newSettings(self, name, email):
     return new_settings.key
 
 ###### ------ Utilities ------ ######
-def strArrayToKey(self, str_array):
-    key_array = []
-    for k in str_array:
-        key_array.append(getKey(k))
+def currentTime():
+    #Outputs current date and time
+    return convertTime(datetime.utcnow()).strftime("%b %d, %Y %I:%M:%S %p") 
 
-    return key_array
+def convertTime(time):
+    utc_zone = UTC()
+    to_zone = EST()
+    time = time.replace(tzinfo=utc_zone)
+
+    new_time = time.astimezone(to_zone)
+    return new_time
 
 def getFlash(self):
     try:
@@ -251,30 +259,15 @@ def getFlash(self):
 
     return message
 
-def setFlash(self, message):
-    self.session = get_current_session()
-    self.session["flash"] = message
+def giveError(self, error_code):
+    checkAuthentication(self, False)
 
-def queryCursorDB(query, encoded_cursor):
-    num_results = 15
-    new_cursor = None
-    more = None
-
-    if encoded_cursor:
-        query_cursor = Cursor.from_websafe_string(encoded_cursor)
-        entities, cursor, more = query.fetch_page(num_results, start_cursor=query_cursor)
-    else:
-        entities, cursor, more = query.fetch_page(num_results)
-
-    if more:
-        new_cursor = cursor.to_websafe_string()
-    else:
-        new_cursor = None
-
-    return [entities, new_cursor]
+    self.error(error_code)
+    self.response.out.write(
+                   template.render('pages/error.html', {}))
 
 def GQLtoDict(self, gql_query):
-#Converts GQLQuery of App Engine data models to dictionary objects
+    #Converts GQLQuery of App Engine data models to dictionary objects
     #An empty list to start out with - will be what we return
     all_objects = []
 
@@ -284,35 +277,6 @@ def GQLtoDict(self, gql_query):
         all_objects.append(new_dict)
 
     return all_objects
-
-def giveError(self, error_code):
-    checkAuthentication(self, False)
-
-    self.error(error_code)
-    self.response.out.write(
-                   template.render('pages/error.html', {}))
-
-def currentTime():
-    #Outputs current date and time
-    return convertTime(datetime.utcnow()).strftime("%b %d, %Y %I:%M:%S %p") 
-
-def convertTime(time):
-    utc_zone = UTC()
-    to_zone = EST()
-    time = time.replace(tzinfo=utc_zone)
-
-    new_time = time.astimezone(to_zone)
-    return new_time
-
-def toDecimal(number):
-    if number != None:
-        #Stripping amount donated from commas, etc
-        non_decimal = re.compile(r'[^\d.]+')
-        number = non_decimal.sub('', str(number))
-
-        return Decimal(number).quantize(Decimal("1.00"))
-    else:
-        return Decimal(0).quantize(Decimal("1.00"))
 
 def isEmail(email):
     if email:
@@ -353,6 +317,45 @@ def mergeContacts(c1_key, c2_key):
     #Finally, delete c1
     c1.key.delete()
 
+def queryCursorDB(query, encoded_cursor):
+    num_results = 15
+    new_cursor = None
+    more = None
+
+    if encoded_cursor:
+        query_cursor = Cursor.from_websafe_string(encoded_cursor)
+        entities, cursor, more = query.fetch_page(num_results, start_cursor=query_cursor)
+    else:
+        entities, cursor, more = query.fetch_page(num_results)
+
+    if more:
+        new_cursor = cursor.to_websafe_string()
+    else:
+        new_cursor = None
+
+    return [entities, new_cursor]
+
+def setFlash(self, message):
+    self.session = get_current_session()
+    self.session["flash"] = message
+
+def strArrayToKey(self, str_array):
+    key_array = []
+    for k in str_array:
+        key_array.append(getKey(k))
+
+    return key_array
+
+def toDecimal(number):
+    if number != None:
+        #Stripping amount donated from commas, etc
+        non_decimal = re.compile(r'[^\d.]+')
+        number = non_decimal.sub('', str(number))
+
+        return Decimal(number).quantize(Decimal("1.00"))
+    else:
+        return Decimal(0).quantize(Decimal("1.00"))
+
 ###### ------ Utilities Classes ------ ######
 class UtilitiesBase():
     def __init__(self, base_entity):
@@ -360,243 +363,7 @@ class UtilitiesBase():
         self.e = base_entity
 
 ## -- Settings Classes -- ##
-class SettingsData(UtilitiesBase):
-    def donations(self, query_cursor):
-        query = self.all_donations
-        return queryCursorDB(query, query_cursor)
-
-    @property
-    def all_donations(self):
-        q = models.Donation.gql("WHERE settings = :s ORDER BY donation_date DESC", s=self.e.key)
-        return q
-
-    def open_donations(self, query_cursor):
-        query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY donation_date DESC", c=False, s=self.e.key)
-        return queryCursorDB(query, query_cursor)
-
-    @property
-    def num_open_donations(self):
-        memcache_key = "numopen" + self.e.websafe
-
-        def get_item():
-            query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY donation_date DESC", c=False, s=self.e.key)
-            return gqlCount(query)
-
-        return cache(memcache_key, get_item)
-
-    @property
-    def recurring_donors(self):
-        donors = []
-        for d in self.all_donations:
-            if d.isRecurring == True:
-                donors.append(d.contact.get())
-
-        return donors
-        
-    def team_donors(self, team_key):
-        donors = []
-        donations = models.Donation.gql("WHERE team = :t", t=team_key)
-        for d in donations:
-            #if d.name not in donors:
-            donors.append(d.contact.get())
-            
-        return donors
-
-    @property
-    def undeposited_donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND deposited = :d ORDER BY donation_date DESC", s=self.e.key, d=False)
-        return qCache(q)
-
-    def deposits(self, query_cursor):
-        query = self.all_deposits
-        return queryCursorDB(query, query_cursor)
-
-    @property
-    def all_deposits(self):
-        q = models.DepositReceipt.gql("WHERE settings = :s ORDER BY creation_date DESC", s=self.e.key)
-        return q
-
-    def contacts(self, query_cursor):
-        query = self.all_contacts
-        return queryCursorDB(query, query_cursor)
-
-    @property
-    def all_contacts(self):
-        q = models.Contact.gql("WHERE settings = :s ORDER BY name", s=self.e.key)
-        return q
-
-    def teams(self, query_cursor):
-        query = self.all_teams
-        return queryCursorDB(query, query_cursor)
-
-    @property
-    def all_teams(self):
-        q = models.Team.gql("WHERE settings = :k ORDER BY name", k=self.e.key)
-        return q
-
-    @property
-    def all_individuals(self):
-        q = models.Individual.gql("WHERE settings = :k ORDER BY name ASC", k=self.e.key)
-        return q
-
-    def individuals(self, query_cursor):
-        query = self.all_individuals
-        return queryCursorDB(query, query_cursor)
-
-    @property
-    def display_teams(self):
-        q = models.Team.gql("WHERE settings = :k AND show_team = True ORDER BY name", k=self.e.key)
-        return q
-
-    @property
-    def teams_dict(self):
-        memcache_key = "teamsdict" + self.e.websafe
-
-        def get_item():
-            teams = models.Team.gql("WHERE settings = :k AND show_team = :s", k=self.e.key, s=True)
-
-            teams_dict = {}
-            for t in teams:
-                teams_dict[t.name] = t.websafe
-
-            return teams_dict
-
-        return cache(memcache_key, get_item)
-
-    @property
-    def teams_list(self):
-        teams = []
-        for t in self.teams:
-            teams.append(t)
-        return teams
-
-    def recurring_info(self, payment_id):
-        info = models.RecurringDonationInfo.gql("WHERE payment_id = :id", id=payment_id).fetch(1)[0]
-        return info
-
-    ## -- Contact autocomplete -- ##
-    @property
-    def contactsJSON(self):
-        memcache_key = "contacts" + self.e.websafe
-
-        def get_item():
-            contacts = []
-
-            for c in self.e.data.all_contacts:
-                contact = {}
-                contact["label"] = c.name
-                contact["email"] = c.email
-                contact["address"] = json.dumps(c.address)
-                contact["key"] = str(c.websafe)
-                
-                contacts.append(contact)
-
-            return contacts
-
-        return cache(memcache_key, get_item)
-
-    ## -- Analytics -- ##
-    @property
-    def one_week_history(self):
-        memcache_key = "owh" + self.e.websafe
-
-        def get_item():
-            last_week = datetime.today() - timedelta(days=7)
-
-            #Get donations made in the last week
-            donations = models.Donation.gql("WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC", 
-                        s=self.e.key, last_week=last_week)
-
-            donation_count = 0
-            total_money = toDecimal(0)
-
-            for d in donations:
-                #Counting total money
-                total_money += d.amount_donated
-                
-                #Counting number of donations
-                donation_count += 1
-
-            return [donation_count, str(total_money)]
-
-        return cache(memcache_key, get_item)
-
-class SettingsExists(UtilitiesBase):
-    ## -- Check existences -- ##
-    def individual(self, email):
-        #Check if a user exists in the database - when creating new users
-        try:
-            user = models.Individual.gql("WHERE settings = :s AND email = :e", s=self.e.key, e=email)
-
-            if user[0]:
-                return [True, user[0]]
-            else:
-                return [False, None]
-
-        except:
-            return [False, None]
-
-    def contact(self, name):
-        #Check if a user exists in the database - when creating new users
-        try:
-            #Try checking by name 
-            user = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
-
-            if user.fetch(1)[0]:
-                return [True, user[0]]
-            else:
-                return [False, None]
-
-        except:
-            return [False, None]
-
-    def entity(self, key):
-        exists = True
-        try:
-            key.get()
-        except:
-            exists = False
-
-        return exists
-    
 class SettingsCreate(UtilitiesBase):
-    def team(self, name):
-        new_team = models.Team()
-        new_team.name = name
-        new_team.settings = self.e.key
-        new_team.show_team = True
-
-        logging.info("Team created.")
-
-        new_team.put()
-
-        return new_team.key
-
-    def individual(self, name, team_key, email, password, admin):
-        new_individual = models.Individual()
-
-        new_individual.name = name
-        new_individual.email = email
-        new_individual.settings = self.e.key
-        new_individual.password = password
-        new_individual.admin = bool(admin)
-        new_individual.description = "Thank you for supporting my short-term mission trip to India. Your prayer and financial support is greatly needed and appreciated. Thanks for helping make it possible for me to go join God in His work in India."
-
-        new_individual.put()
-
-        new_tl = models.TeamList()
-        new_tl.individual = new_individual.key
-        new_tl.team = team_key
-        new_tl.fundraise_amt = toDecimal("2700")
-        new_tl.sort_name = name
-
-        new_tl.put()
-
-        memcache.delete("teammembersdict" + team_key.urlsafe())
-
-        logging.info("Individual created.")
-        return new_individual.key
-
     def contact(self, name, email, phone, address, notes, add_mc):
         logging.info("Creating contact for: " + name)
         if name:
@@ -630,6 +397,15 @@ class SettingsCreate(UtilitiesBase):
             return new_contact.key
         else:
             logging.error("Cannot create contact because there is not a name.")
+
+    def deposit_receipt(self, entity_keys):
+        new_deposit = models.DepositReceipt()
+
+        new_deposit.entity_keys = entity_keys
+        new_deposit.settings = self.e.key
+        new_deposit.time_deposited = currentTime()
+
+        new_deposit.put()
 
     def donation(self, name, email, amount_donated, confirmation_amount, address, team_key, individual_key, add_deposit, payment_id, special_notes, payment_type, email_subscr, ipn_data):
         #All variables being passed as either string or integer
@@ -691,6 +467,31 @@ class SettingsCreate(UtilitiesBase):
             new_donation.confirmation.task(86400)
             new_donation.review.archive()
 
+    def individual(self, name, team_key, email, password, admin):
+        new_individual = models.Individual()
+
+        new_individual.name = name
+        new_individual.email = email
+        new_individual.settings = self.e.key
+        new_individual.password = password
+        new_individual.admin = bool(admin)
+        new_individual.description = "Thank you for supporting my short-term mission trip to India. Your prayer and financial support is greatly needed and appreciated. Thanks for helping make it possible for me to go join God in His work in India."
+
+        new_individual.put()
+
+        new_tl = models.TeamList()
+        new_tl.individual = new_individual.key
+        new_tl.team = team_key
+        new_tl.fundraise_amt = toDecimal("2700")
+        new_tl.sort_name = name
+
+        new_tl.put()
+
+        memcache.delete("teammembersdict" + team_key.urlsafe())
+
+        logging.info("Individual created.")
+        return new_individual.key
+
     def recurring_donation(self, payment_id, duration, ipn_data):
         new_recurring = models.RecurringDonationInfo()
         new_recurring.payment_id = payment_id
@@ -699,14 +500,178 @@ class SettingsCreate(UtilitiesBase):
 
         new_recurring.put()
 
-    def deposit_receipt(self, entity_keys):
-        new_deposit = models.DepositReceipt()
+    def team(self, name):
+        new_team = models.Team()
+        new_team.name = name
+        new_team.settings = self.e.key
+        new_team.show_team = True
 
-        new_deposit.entity_keys = entity_keys
-        new_deposit.settings = self.e.key
-        new_deposit.time_deposited = currentTime()
+        logging.info("Team created.")
 
-        new_deposit.put()
+        new_team.put()
+
+        return new_team.key
+
+class SettingsData(UtilitiesBase):
+    @property
+    def all_contacts(self):
+        q = models.Contact.gql("WHERE settings = :s ORDER BY name", s=self.e.key)
+        return q
+
+    @property
+    def all_deposits(self):
+        q = models.DepositReceipt.gql("WHERE settings = :s ORDER BY creation_date DESC", s=self.e.key)
+        return q
+
+    @property
+    def all_donations(self):
+        q = models.Donation.gql("WHERE settings = :s ORDER BY donation_date DESC", s=self.e.key)
+        return q
+
+    @property
+    def all_individuals(self):
+        q = models.Individual.gql("WHERE settings = :k ORDER BY name ASC", k=self.e.key)
+        return q
+
+    @property
+    def all_teams(self):
+        q = models.Team.gql("WHERE settings = :k ORDER BY name", k=self.e.key)
+        return q
+
+    def contacts(self, query_cursor):
+        query = self.all_contacts
+        return queryCursorDB(query, query_cursor)
+
+    def deposits(self, query_cursor):
+        query = self.all_deposits
+        return queryCursorDB(query, query_cursor)
+
+    @property
+    def display_teams(self):
+        q = models.Team.gql("WHERE settings = :k AND show_team = True ORDER BY name", k=self.e.key)
+        return q
+
+    def donations(self, query_cursor):
+        query = self.all_donations
+        return queryCursorDB(query, query_cursor)
+
+    def individuals(self, query_cursor):
+        query = self.all_individuals
+        return queryCursorDB(query, query_cursor)
+
+    @property
+    def num_open_donations(self):
+        memcache_key = "numopen" + self.e.websafe
+
+        def get_item():
+            query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY donation_date DESC", c=False, s=self.e.key)
+            return gqlCount(query)
+
+        return cache(memcache_key, get_item)
+
+    def open_donations(self, query_cursor):
+        query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY donation_date DESC", c=False, s=self.e.key)
+        return queryCursorDB(query, query_cursor)
+
+    @property
+    def recurring_donors(self):
+        donors = []
+        for d in self.all_donations:
+            if d.isRecurring == True:
+                donors.append(d.contact.get())
+
+        return donors
+
+    def recurring_info(self, payment_id):
+        info = models.RecurringDonationInfo.gql("WHERE payment_id = :id", id=payment_id).fetch(1)[0]
+        return info
+
+    def team_donors(self, team_key):
+        donors = []
+        donations = models.Donation.gql("WHERE team = :t", t=team_key)
+        for d in donations:
+            #if d.name not in donors:
+            donors.append(d.contact.get())
+            
+        return donors
+
+    @property
+    def teams_dict(self):
+        memcache_key = "teamsdict" + self.e.websafe
+
+        def get_item():
+            teams = models.Team.gql("WHERE settings = :k AND show_team = :s", k=self.e.key, s=True)
+
+            teams_dict = {}
+            for t in teams:
+                teams_dict[t.name] = t.websafe
+
+            return teams_dict
+
+        return cache(memcache_key, get_item)
+
+    @property
+    def teams_list(self):
+        teams = []
+        for t in self.teams:
+            teams.append(t)
+        return teams
+        
+    def teams(self, query_cursor):
+        query = self.all_teams
+        return queryCursorDB(query, query_cursor)
+
+    @property
+    def undeposited_donations(self):
+        q = models.Donation.gql("WHERE settings = :s AND deposited = :d ORDER BY donation_date DESC", s=self.e.key, d=False)
+        return qCache(q)
+
+    ## -- Contact autocomplete -- ##
+    @property
+    def contactsJSON(self):
+        memcache_key = "contacts" + self.e.websafe
+
+        def get_item():
+            contacts = []
+
+            for c in self.e.data.all_contacts:
+                contact = {}
+                contact["label"] = c.name
+                contact["email"] = c.email
+                contact["address"] = json.dumps(c.address)
+                contact["key"] = str(c.websafe)
+                
+                contacts.append(contact)
+
+            return contacts
+
+        return cache(memcache_key, get_item)
+
+    ## -- Analytics -- ##
+    @property
+    def one_week_history(self):
+        memcache_key = "owh" + self.e.websafe
+
+        def get_item():
+            last_week = datetime.today() - timedelta(days=7)
+
+            #Get donations made in the last week
+            donations = models.Donation.gql("WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC", 
+                        s=self.e.key, last_week=last_week)
+
+            donation_count = 0
+            total_money = toDecimal(0)
+
+            for d in donations:
+                #Counting total money
+                total_money += d.amount_donated
+                
+                #Counting number of donations
+                donation_count += 1
+
+            return [donation_count, str(total_money)]
+
+        return cache(memcache_key, get_item)
 
 class SettingsDeposits(UtilitiesBase):
     def deposit(self, unicode_keys):
@@ -727,6 +692,44 @@ class SettingsDeposits(UtilitiesBase):
             d = key.get()
             d.deposited = None
             d.put()
+
+class SettingsExists(UtilitiesBase):
+    ## -- Check existences -- ##
+    def contact(self, name):
+        #Check if a user exists in the database - when creating new users
+        try:
+            #Try checking by name 
+            user = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
+
+            if user.fetch(1)[0]:
+                return [True, user[0]]
+            else:
+                return [False, None]
+
+        except:
+            return [False, None]
+
+    def entity(self, key):
+        exists = True
+        try:
+            key.get()
+        except:
+            exists = False
+
+        return exists
+
+    def individual(self, email):
+        #Check if a user exists in the database - when creating new users
+        try:
+            user = models.Individual.gql("WHERE settings = :s AND email = :e", s=self.e.key, e=email)
+
+            if user[0]:
+                return [True, user[0]]
+            else:
+                return [False, None]
+
+        except:
+            return [False, None]
 
 class SettingsMailchimp(UtilitiesBase):
     def add(self, email, task_queue):
@@ -774,6 +777,11 @@ class SettingsMailchimp(UtilitiesBase):
 ## -- Team Classes -- ##
 class TeamData(UtilitiesBase):
     @property
+    def donations(self):
+        q = models.Donation.gql("WHERE settings = :s AND team = :t ORDER BY donation_date", s=self.e.settings, t=self.e.key)
+        return qCache(q)
+
+    @property
     def donation_total(self):
         team_key = self.e.key
         memcache_key = "tdtotal" +  team_key.urlsafe()
@@ -793,11 +801,6 @@ class TeamData(UtilitiesBase):
 
         item = cache(memcache_key, get_item) 
         return toDecimal(item)
-
-    @property
-    def donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND team = :t ORDER BY donation_date", s=self.e.settings, t=self.e.key)
-        return qCache(q)
 
     @property
     def members(self):
@@ -864,6 +867,15 @@ class IndividualData(UtilitiesBase):
         item = cache(memcache_key, get_item)
         return toDecimal(item)
 
+    @property
+    def donations(self):
+        q = models.Donation.gql("WHERE individual = :i ORDER BY donation_date", i=self.e.key)
+        return qCache(q)
+
+    def getTeamList(self, team):
+        query = models.TeamList.gql("WHERE individual = :i AND team = :t", i=self.e.key, t=team)
+        return query.fetch(1)[0]
+
     def info(self, team):
         memcache_key = "info" + team.urlsafe() + self.e.websafe
         def get_item():
@@ -887,9 +899,16 @@ class IndividualData(UtilitiesBase):
         return cache(memcache_key, get_item)
 
     @property
-    def donations(self):
-        q = models.Donation.gql("WHERE individual = :i ORDER BY donation_date", i=self.e.key)
-        return qCache(q)
+    def photo_url(self):
+        if self.e.photo != None:
+            try:
+                photo = images.get_serving_url(self.e.photo, 200, secure_url=True)
+            except:
+                photo = "/images/face.jpg"
+        else:
+            photo = "/images/face.jpg"
+
+        return photo
 
     @property
     def teams(self):
@@ -910,75 +929,9 @@ class IndividualData(UtilitiesBase):
     def team_json(self):
         return json.dumps(self.team_list)
 
-    @property
-    def photo_url(self):
-        if self.e.photo != None:
-            try:
-                photo = images.get_serving_url(self.e.photo, 200, secure_url=True)
-            except:
-                photo = "/images/face.jpg"
-        else:
-            photo = "/images/face.jpg"
-
-        return photo
-
-    def getTeamList(self, team):
-        query = models.TeamList.gql("WHERE individual = :i AND team = :t", i=self.e.key, t=team)
-        return query.fetch(1)[0]
-
 ## -- Donation Classes -- ##
-class DonationData(UtilitiesBase):
-    @property
-    def team_name(self):
-        if self.e.team != None:
-            return self.e.team.get().name
-        else:
-            return None
-
-    @property
-    def individual_name(self):
-        if self.e.individual != None:
-            return self.e.individual.get().name
-        else:
-            return None
-
-class DonationReview(UtilitiesBase):
-    ## -- Review Queue -- ##
-    def archive(self):
-        self.e.reviewed = True
-        self.e.put()
-
-    def markUnreviewed(self):
-        self.e.reviewed = False
-        self.e.put()
-
 class DonationAssign(UtilitiesBase):
     ## -- Associating Donations With Team/Individual -- ##
-    def associateTeam(self, team_key, writeback):
-        if self.e.team != team_key:
-        #Just to make sure the association is actually changed - instead of marking the same value as it was before
-            try:
-                message = "Donation " + self.e.websafe +  " associated with team" + str(team_key.urlsafe()) + "."
-                logging.info(message)
-            except:
-                pass
-
-            self.e.team = team_key
-
-        if writeback == True:
-            self.e.put()
-
-    def disassociateTeam(self, writeback):
-        if self.e.team != None:
-        #Just to make sure the association is actually changed - instead of marking the same value as it was before
-            message = "Donation " + self.e.websafe +  " removed from team" + str(self.e.team.urlsafe()) + "."
-            logging.info(message)
-
-            self.e.team = None
-
-        if writeback == True:
-            self.e.put()
-
     def associateIndividual(self, individual_key, writeback):
         if self.e.individual != individual_key:
         #Just to make sure the association is actually changed - instead of marking the same value as it was before
@@ -989,6 +942,20 @@ class DonationAssign(UtilitiesBase):
                 pass
 
             self.e.individual = individual_key
+
+        if writeback == True:
+            self.e.put()
+
+    def associateTeam(self, team_key, writeback):
+        if self.e.team != team_key:
+        #Just to make sure the association is actually changed - instead of marking the same value as it was before
+            try:
+                message = "Donation " + self.e.websafe +  " associated with team" + str(team_key.urlsafe()) + "."
+                logging.info(message)
+            except:
+                pass
+
+            self.e.team = team_key
 
         if writeback == True:
             self.e.put()
@@ -1004,24 +971,19 @@ class DonationAssign(UtilitiesBase):
         if writeback == True:
             self.e.put()
 
+    def disassociateTeam(self, writeback):
+        if self.e.team != None:
+        #Just to make sure the association is actually changed - instead of marking the same value as it was before
+            message = "Donation " + self.e.websafe +  " removed from team" + str(self.e.team.urlsafe()) + "."
+            logging.info(message)
+
+            self.e.team = None
+
+        if writeback == True:
+            self.e.put()
+
 class DonationConfirmation(UtilitiesBase):
     ## -- Confirmation Letter -- ##
-    def print_url(self, who):
-        if not who:
-            who = ""
-
-        return who + "/thanks?m=p&id=" + self.e.websafe
-
-    def see_url(self, who):
-        if not who:
-            who = ""
-
-        return who + "/thanks?m=w&id=" + self.e.websafe
-
-    def task(self, countdown_secs):
-        logging.info("Tasking confirmation email.  Delaying for " + str(countdown_secs) + " seconds.")
-        taskqueue.add(url="/tasks/confirmation", params={'donation_key' : self.e.websafe}, countdown=int(countdown_secs))
-
     def email(self):
         d = self.e
 
@@ -1064,26 +1026,49 @@ class DonationConfirmation(UtilitiesBase):
 
         message.send()
 
-## -- Contact Classes -- ##
-class ContactData(UtilitiesBase):
-    def donations(self, query_cursor):
-        query = self.all_donations
-        return queryCursorDB(query, query_cursor)
+    def print_url(self, who):
+        if not who:
+            who = ""
+
+        return who + "/thanks?m=p&id=" + self.e.websafe
+
+    def see_url(self, who):
+        if not who:
+            who = ""
+
+        return who + "/thanks?m=w&id=" + self.e.websafe
+
+    def task(self, countdown_secs):
+        logging.info("Tasking confirmation email.  Delaying for " + str(countdown_secs) + " seconds.")
+        taskqueue.add(url="/tasks/confirmation", params={'donation_key' : self.e.websafe}, countdown=int(countdown_secs))
+
+class DonationData(UtilitiesBase):
+    @property
+    def individual_name(self):
+        if self.e.individual != None:
+            return self.e.individual.get().name
+        else:
+            return None
 
     @property
-    def all_donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
-        return q
+    def team_name(self):
+        if self.e.team != None:
+            return self.e.team.get().name
+        else:
+            return None
 
-    def impressions(self, query_cursor):
-        query = self.all_impressions
-        return queryCursorDB(query, query_cursor)
+class DonationReview(UtilitiesBase):
+    ## -- Review Queue -- ##
+    def archive(self):
+        self.e.reviewed = True
+        self.e.put()
 
-    @property 
-    def all_impressions(self):
-        q = models.Impression.gql("WHERE contact = :c ORDER BY creation_date DESC", c=self.e.key)
-        return q
+    def markUnreviewed(self):
+        self.e.reviewed = False
+        self.e.put()
 
+
+## -- Contact Classes -- ##
 class ContactCreate(UtilitiesBase):
     def impression(self, impression, notes):
         new_impression = models.Impression()
@@ -1093,6 +1078,25 @@ class ContactCreate(UtilitiesBase):
         new_impression.notes = notes
 
         new_impression.put()
+
+class ContactData(UtilitiesBase):
+    @property
+    def all_donations(self):
+        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
+        return q
+
+    @property 
+    def all_impressions(self):
+        q = models.Impression.gql("WHERE contact = :c ORDER BY creation_date DESC", c=self.e.key)
+        return q
+
+    def donations(self, query_cursor):
+        query = self.all_donations
+        return queryCursorDB(query, query_cursor)
+
+    def impressions(self, query_cursor):
+        query = self.all_impressions
+        return queryCursorDB(query, query_cursor)
 
 ## -- Dictionary Difference Class -- ##
 class DictDiffer(object):
