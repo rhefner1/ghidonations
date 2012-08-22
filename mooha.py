@@ -193,8 +193,8 @@ class Deposit(BaseHandlerAdmin):
         self.response.write(
                 template.render('pages/deposit.html', template_variables))
 
-class DonatePage(BaseHandlerAdmin):
-    def task(self, isAdmin, s):
+class DonatePage(webapp2.RequestHandler):
+    def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         
         settings = self.request.get("s")

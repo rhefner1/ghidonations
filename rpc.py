@@ -64,6 +64,8 @@ class RPCHandler(webapp2.RequestHandler):
         authenticated = tools.RPCcheckAuthentication(self, True)
 
         args = json.loads(self.request.body)
+        logging.info(args)
+        
         func, args = args[0], args[1:]
 
         if func[0] == '_':
