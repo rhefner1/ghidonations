@@ -35,6 +35,11 @@ indexes:
 - kind: Donation
   properties:
   - name: contact
+  - name: donation_date
+
+- kind: Donation
+  properties:
+  - name: contact
   - name: settings
   - name: donation_date
     direction: desc

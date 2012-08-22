@@ -48,6 +48,7 @@ class Settings(ndb.Expando):
     confirmation_info = ndb.TextProperty()
     confirmation_header = ndb.TextProperty()
     confirmation_footer = ndb.TextProperty()
+    donor_report_text = ndb.TextProperty()
 
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)  
@@ -77,7 +78,7 @@ class Settings(ndb.Expando):
         return tools.SettingsMailchimp(self)
 
     ## -- Update -- ##
-    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, wp_url, wp_username, wp_password):
+    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text, wp_url, wp_username, wp_password):
         s = self
 
         if name != s.name:
@@ -127,6 +128,9 @@ class Settings(ndb.Expando):
 
         if confirmation_text != s.confirmation_text:
             s.confirmation_text = confirmation_text
+
+        if donor_report_text != s.donor_report_text:
+            s.donor_report_text = donor_report_text
 
         if wp_url != s.wp_url:
             s.wp_url = wp_url
@@ -441,6 +445,20 @@ class Donation(ndb.Expando):
     @property
     def data(self):
         return tools.DonationData(self)
+
+    @property
+    def designated_individual(self):
+        if self.individual:
+            return self.individual.get().name
+        else:
+            return None
+
+    @property
+    def designated_team(self):
+        if self.team:
+            return self.team.get().name
+        else:
+            return None
 
     @property
     def email(self):

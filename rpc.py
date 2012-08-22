@@ -502,12 +502,12 @@ class RPCMethods:
         return_vals = [success, message]
         return return_vals
 
-    def updateSettings(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, wp_url, wp_username, wp_password):
+    def updateSettings(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text, wp_url, wp_username, wp_password):
         message = "Settings have been updated"
         success = True
 
         s = tools.getSettingsKey(self).get()
-        s.update(name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, wp_url, wp_username, wp_password)
+        s.update(name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text, wp_url, wp_username, wp_password)
 
         #Return message to confirm 
         return_vals = [success, message]

@@ -1,5 +1,6 @@
 #App engine platform
 import webapp2, appengine_config, logging, json, quopri, urllib
+from datetime import datetime
 from time import strftime
 
 from google.appengine.ext.webapp import template, blobstore_handlers
@@ -188,6 +189,47 @@ class DonatePage(webapp2.RequestHandler):
             
         except:
             self.response.write("Sorry, this URL triggered an error.  Please try again.")
+
+class DonorReport(webapp2.RequestHandler):
+    def get(self):
+        try:
+            isAdmin, s = tools.checkAuthentication(self, True)
+            
+            contact_key = self.request.get("c")
+            year = int(self.request.get("y"))
+
+            if contact_key == "" or year == "" or len(str(year)) != 4:
+                #Throw an error if you don't have those two pieces of info or if the year isn't a number
+                raise Exception("Don't know contact key or year.")
+
+            c = tools.getKey(contact_key).get()
+            s = c.settings.get()
+
+            year_start = datetime(year, 1, 1)
+            year_end = datetime(year, 12, 31)
+
+            donations = models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=c.key, year_start=year_start, year_end=year_end)
+
+            template_variables = {"s": s, "c" : c, "donations" : donations, "year" : str(year)}
+
+            self.response.write(
+                   template.render("pages/letters/donor_report.html", template_variables))
+
+        
+        except:
+            #If there's a malformed URL, give a 500 error
+            self.error(500)
+            self.response.write(
+                   template.render('pages/letters/thankyou_error.html', {}))
+
+class DonorReportSelect(webapp2.RequestHandler):
+    def get(self):
+        isAdmin, s = tools.checkAuthentication(self, True)
+
+        template_variables = {"s" : s}
+        self.response.write(
+           template.render('pages/donor_report_select.html', template_variables))
+        
 
 class ExportContacts(webapp2.RequestHandler):
     def get(self):
@@ -770,6 +812,8 @@ app = webapp2.WSGIApplication([
        ('/ajax/dashboard', Dashboard),       
        ('/ajax/deposit', Deposit),       
        ('/donate', DonatePage),
+       ('/reports/donor', DonorReport),
+       ('/ajax/donorreport', DonorReportSelect),
        ('/ajax/exportcontacts', ExportContacts),
        ('/ajax/exportdonations', ExportDonations),
        ('/ajax/profile', IndividualProfile),
@@ -791,5 +835,6 @@ app = webapp2.WSGIApplication([
        ('/ajax/profile/upload', UpdateProfile),
        ('/ipn', IPN)],
        debug=True)
+
 app = appengine_config.webapp_add_wsgi_middleware(app)
 app = appengine_config.recording_add_wsgi_middleware(app)

@@ -1,5 +1,5 @@
 application: ghidonations
-version: 3j
+version: 3k
 runtime: python27
 api_version: 1
 threadsafe: no
@@ -41,6 +41,10 @@ handlers:
   secure: optional
 
 - url: /logout
+  script: mooha.app
+  secure: optional
+
+- url: /reports/.*
   script: mooha.app
   secure: optional
 
