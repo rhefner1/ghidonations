@@ -36,6 +36,8 @@ $(document).ready(function(){
 	    	var row = $(this).parent().parent()
 			row.addClass("selectRow")
 	    });
+
+	    calculateCurrentlyChecked()
 	})
 
 	$("#deselect_all").click(function(){
@@ -45,6 +47,8 @@ $(document).ready(function(){
 			var row = $(this).parent().parent()
 			row.removeClass("selectRow")
 	    });
+
+	    calculateCurrentlyChecked()
 	})
 
 
