@@ -8,11 +8,25 @@ function getCheckedRows(){
 	return checked_rows
 }
 
+function calculateCurrentlyChecked(){
+	total_amount = parseFloat("0")
+
+	$("input[type=checkbox]:checked").each(function(index){
+		var amount = $(this).parent().parent().children()[4].innerHTML.substr(1)
+		amount = parseFloat(amount)
+		total_amount += amount
+	})
+
+	$("#aggregate_amount").text(total_amount.toFixed(2).toString()) 
+}
+
 $(document).ready(function(){
 
 	$("input[type=checkbox]").change(function(){
 		var row = $(this).parent().parent()
 		row.toggleClass("selectRow")
+
+		calculateCurrentlyChecked()
 	})
 
 	$("#select_all").click(function(){

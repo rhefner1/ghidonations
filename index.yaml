@@ -120,6 +120,11 @@ indexes:
   properties:
   - name: settings
   - name: donation_date
+
+- kind: Donation
+  properties:
+  - name: settings
+  - name: donation_date
     direction: desc
 
 - kind: Donation
