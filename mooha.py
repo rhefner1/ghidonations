@@ -501,6 +501,7 @@ class SpreadsheetGenerator(BaseHandlerAdmin):
             ws0.write(0, 4, "City")
             ws0.write(0, 5, "State")
             ws0.write(0, 6, "ZIP")
+            ws0.write(0, 7, "Phone")
             
             
             current_line = 1
@@ -517,6 +518,7 @@ class SpreadsheetGenerator(BaseHandlerAdmin):
                 ws0.write(current_line, 4, a[1])
                 ws0.write(current_line, 5, a[2])
                 ws0.write(current_line, 6, a[3])
+                ws0.write(current_line, 7, c.phone)
                     
                 current_line += 1
         
