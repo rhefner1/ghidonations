@@ -520,8 +520,8 @@ class Donation(ndb.Expando):
     @classmethod
     def _post_put_hook(self, future):
         e = future.get_result().get()
-        memcache.delete("numopen" + e.websafe)
-        memcache.delete("owh" + e.websafe)
+        memcache.delete("numopen" + e.settings.websafe)
+        memcache.delete("owh" + e.settings.websafe)
 
         if e.team and e.individual:
             memcache.delete("dtotal" + e.team.urlsafe() + e.individual.urlsafe())
