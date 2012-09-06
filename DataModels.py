@@ -3,7 +3,7 @@ from decimal import *
 
 #App Engine platform
 from google.appengine.api import mail, memcache, datastore_errors
-from google.appengine.ext import ndb
+from google.appengine.ext import ndb, blobstore
 
 import GlobalUtilities as tools
 
