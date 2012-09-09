@@ -727,12 +727,13 @@ class IPN(BaseHandlerAdmin):
                 individual_key = tools.getKey(decoded_custom[1])
                 special_notes = decoded_custom[2]
 
-                if s.exists.entity(tools.getKey(team_key)) == False:
+                if s.exists.entity(team_key) == False:
                     raise  Exception("Bad key.")
-                if s.exists.entity(tools.getKey(individual_key)) == False:
+                if s.exists.entity(individual_key) == False:
                     raise  Exception("Bad key.")
 
             except:
+                logging.info("Excepted on designation.")
                 team_key = None
                 individual_key = None
                 special_notes = None
