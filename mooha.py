@@ -770,7 +770,7 @@ class IPN(BaseHandlerAdmin):
                 #Duration between payments
                 duration = "recurring"
 
-                s.create.recurring_donation(self, payment_id, duration, ipn_data)
+                # s.create.recurring_donation(payment_id, duration, ipn_data)
                 
             elif payment_type == "recurring_payment" or payment_type == "subscr_payment":
                 logging.info("This is a recurring donation payment.")
