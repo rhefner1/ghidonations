@@ -614,6 +614,12 @@ class UpdateProfile(blobstore_handlers.BlobstoreUploadHandler):
         team = self.request.get("team_list")
         description = quopri.decodestring(self.request.get("description"))
         password = self.request.get("password")
+        show_donation_page = self.request.get("show_donation_page")
+
+        if show_donation_page == "on":
+            show_donation_page = True
+        elif show_donation_page == "":
+            show_donation_page = False
 
         i = tools.getKey(individual_key).get()
 
@@ -624,7 +630,7 @@ class UpdateProfile(blobstore_handlers.BlobstoreUploadHandler):
 
         logging.info("Saving profile for: " + name)
 
-        i.update(name, email, team, description, new_blobkey, password)
+        i.update(name, email, team, description, new_blobkey, password, show_donation_page)
 
         self.redirect("/#profile?i=" + individual_key)
 

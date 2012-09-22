@@ -223,5 +223,11 @@ indexes:
 
 - kind: TeamList
   properties:
+  - name: show_donation_page
+  - name: team
+  - name: sort_name
+
+- kind: TeamList
+  properties:
   - name: team
   - name: sort_name

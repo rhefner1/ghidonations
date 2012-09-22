@@ -202,6 +202,9 @@ class TeamList(ndb.Model):
     team = ndb.KeyProperty()
     fundraise_amt = DecimalProperty()
 
+    #Show in public donation page
+    show_donation_page = ndb.BooleanProperty()
+
     sort_name = ndb.StringProperty()
 
     @property
@@ -277,6 +280,16 @@ class Individual(ndb.Expando):
         return tools.IndividualData(self)
 
     @property
+    def teamlist_entities(self):
+        q = TeamList.gql("WHERE individual = :i", i=self.key)
+        return tools.qCache(q)
+
+    @property
+    def show_donation_page(self):
+        q = TeamList.gql("WHERE individual = :i", i=self.key)
+        return q.fetch(1)[0].show_donation_page
+
+    @property
     def websafe(self):
         return self.key.urlsafe()
 
@@ -303,7 +316,7 @@ class Individual(ndb.Expando):
         message.send()
 
     ## -- Update Individual -- #
-    def update(self, name, email, team_list, description, change_image, password):
+    def update(self, name, email, team_list, description, change_image, password, show_donation_page):
         if name != self.name:
             self.name = name
         
@@ -356,6 +369,11 @@ class Individual(ndb.Expando):
 
         if password != None and password != "" and self.password != password:
             self.password = password
+
+        for tl in self.teamlist_entities:
+            if show_donation_page != tl.show_donation_page:
+                tl.show_donation_page = show_donation_page
+                tl.put()
 
         self.put()
 

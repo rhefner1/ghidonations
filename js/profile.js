@@ -22,6 +22,11 @@ $(document).ready(function(){
 	team_list = JSON.parse(htmlDecode($("input[name=team_list]").val()))
 	var team_names = ""
 
+	var show_donation_page = $("#var_show_donation_page").val()
+	if (show_donation_page == "True"){
+		$("input[name=show_donation_page]").attr("checked", "checked")
+	}
+
 	//Formatting team field
 	$.each(team_list, function(team_key, values){
 		team_names += values[0] + ", "

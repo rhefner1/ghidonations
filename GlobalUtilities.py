@@ -493,7 +493,7 @@ class SettingsCreate(UtilitiesBase):
         return new_individual.key
 
     def recurring_donation(self, payment_id, duration, ipn_data):
-        new_recurring = models.RecurringDonationInfo()
+        new_recurring = models.show_donation_page()
         new_recurring.payment_id = payment_id
         new_recurring.duration = duration
         new_recurring.ipn_data = ipn_data
@@ -583,7 +583,7 @@ class SettingsData(UtilitiesBase):
         return donors
 
     def recurring_info(self, payment_id):
-        info = models.RecurringDonationInfo.gql("WHERE payment_id = :id", id=payment_id).fetch(1)[0]
+        info = models.show_donation_page.gql("WHERE payment_id = :id", id=payment_id).fetch(1)[0]
         return info
 
     def team_donors(self, team_key):
@@ -808,6 +808,13 @@ class TeamData(UtilitiesBase):
         return qCache(q)
 
     @property
+    def members_public_donation_page(self):
+        #Returns members that indicated that they want to be included
+        #in the public donation page
+        q = models.TeamList.gql("WHERE team = :t AND show_donation_page = :s ORDER BY sort_name", t=self.e.key, s=True)
+        return qCache(q)
+
+    @property
     def members_dict(self):
         memcache_key = "teammembersdict" +  self.e.websafe
         members = self.members
@@ -827,7 +834,7 @@ class TeamData(UtilitiesBase):
         memcache_key = "teammembers" +  self.e.websafe
         
         def get_item():
-            members = self.members
+            members = self.members_public_donation_page
             all_members = []
 
             for tl in members:
