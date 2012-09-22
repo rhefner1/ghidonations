@@ -431,7 +431,7 @@ class RPCMethods:
         else:
             team_key = tools.getKey(team_key)
 
-        if individual_key == "" or individual_key == None:
+        if individual_key == "" or individual_key == None or individual_key == "none":
             individual_key = None
         else:
             individual_key = tools.getKey(individual_key)
