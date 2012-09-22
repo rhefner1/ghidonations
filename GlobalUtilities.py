@@ -768,7 +768,7 @@ class SettingsMailchimp(UtilitiesBase):
                         
                     else:
                     #If this is coming from the task queue, fail it (so the task queue retry mechanism works)
-                        self.error(500)
+                        raise
                         logging.info("Request from task queue failed. Sending back 500 error.")
 
             else:
