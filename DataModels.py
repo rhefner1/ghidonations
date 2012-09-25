@@ -370,10 +370,13 @@ class Individual(ndb.Expando):
         if password != None and password != "" and self.password != password:
             self.password = password
 
-        for tl in self.teamlist_entities:
-            if show_donation_page != tl.show_donation_page:
-                tl.show_donation_page = show_donation_page
-                tl.put()
+        try:
+            for tl in self.teamlist_entities:
+                if show_donation_page != tl.show_donation_page:
+                    tl.show_donation_page = show_donation_page
+                    tl.put()
+        except:
+            pass
 
         self.put()
 
