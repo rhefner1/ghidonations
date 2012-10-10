@@ -553,8 +553,8 @@ class TeamMembers(BaseHandlerAdmin):
         self.response.write(
            template.render('pages/team_members.html', template_variables))
 
-class ThankYou(BaseHandler):
-    def task(self, isAdmin, s):
+class ThankYou(webapp2.RequestHandler):
+    def get(self):
         try:
             mode = self.request.get("m")
             donation_key = self.request.get("id")
