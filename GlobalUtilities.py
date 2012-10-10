@@ -575,10 +575,20 @@ class SettingsData(UtilitiesBase):
 
     @property
     def recurring_donors(self):
+        donors_dict = {}
+        query = models.Donation.gql("WHERE settings = :s AND isRecurring = :r", s=self.e.key, r=True)
+
+        for d in query:
+            #Adding to dictionary first to manage duplicates
+            websafe = d.contact
+
+            if not websafe in donors_dict:
+                donors_dict[websafe] = d.contact.get()
+
         donors = []
-        for d in self.all_donations:
-            if d.isRecurring == True:
-                donors.append(d.contact.get())
+        for k in donors_dict:
+            #Now creating a normal iterable array of just entities
+            donors.append(donors_dict[k])
 
         return donors
 
@@ -1100,6 +1110,16 @@ class ContactData(UtilitiesBase):
     def donations(self, query_cursor):
         query = self.all_donations
         return queryCursorDB(query, query_cursor)
+
+    @property
+    def recurring_donation_total(self):
+        donation_total = toDecimal(0)
+
+        query = models.Donation.gql("WHERE contact = :c AND isRecurring = :r", c=self.e.key, r=True)
+        for d in query:
+            donation_total += d.amount_donated
+
+        return donation_total
 
     def impressions(self, query_cursor):
         query = self.all_impressions

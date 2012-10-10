@@ -475,6 +475,8 @@ class SpreadsheetGenerator(BaseHandlerAdmin):
         wb = Workbook()
         ws0 = wb.add_sheet('Sheet 1')
 
+        add_donation_total = False
+
         action = self.request.get("e")
         if action == "contacts" or action == "recurring_donors" or action == "team_contacts":
             if action == "contacts":
@@ -485,6 +487,7 @@ class SpreadsheetGenerator(BaseHandlerAdmin):
             elif action == "recurring_donors":
                 all_contacts = s.data.recurring_donors
                 filename = str(s.name) + "-RecurringDonors"
+                add_donation_total = True
                 
             elif action == "team_contacts":
                 team_key = self.request.get("tk")
@@ -502,6 +505,9 @@ class SpreadsheetGenerator(BaseHandlerAdmin):
             ws0.write(0, 5, "State")
             ws0.write(0, 6, "ZIP")
             ws0.write(0, 7, "Phone")
+
+            if add_donation_total == True:
+                ws0.write(0, 8, "Donation Total")
             
             
             current_line = 1
@@ -519,6 +525,9 @@ class SpreadsheetGenerator(BaseHandlerAdmin):
                 ws0.write(current_line, 5, a[2])
                 ws0.write(current_line, 6, a[3])
                 ws0.write(current_line, 7, c.phone)
+
+                if add_donation_total == True:
+                    ws0.write(current_line, 8, "$" + str(c.data.recurring_donation_total))
                     
                 current_line += 1
         
