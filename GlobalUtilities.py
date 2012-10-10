@@ -828,7 +828,7 @@ class TeamData(UtilitiesBase):
     def members_dict(self):
         memcache_key = "teammembersdict" +  self.e.websafe
         members = self.members
-        
+    
         def get_item():
             members_dict = {}
             for tl in members:

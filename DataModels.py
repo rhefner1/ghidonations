@@ -317,8 +317,11 @@ class Individual(ndb.Expando):
 
     ## -- Update Individual -- #
     def update(self, name, email, team_list, description, change_image, password, show_donation_page):
+        name_changed = False
+
         if name != self.name:
             self.name = name
+            name_changed = True
         
         if email != self.email:
             self.email = email
@@ -374,7 +377,11 @@ class Individual(ndb.Expando):
             for tl in self.teamlist_entities:
                 if show_donation_page != tl.show_donation_page:
                     tl.show_donation_page = show_donation_page
-                    tl.put()
+                
+                if name_changed == True:
+                    tl.sort_name = name
+                    
+                tl.put()
         except:
             pass
 
