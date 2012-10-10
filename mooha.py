@@ -553,7 +553,7 @@ class TeamMembers(BaseHandlerAdmin):
         self.response.write(
            template.render('pages/team_members.html', template_variables))
 
-class ThankYou(BaseHandlerAdmin):
+class ThankYou(BaseHandler):
     def task(self, isAdmin, s):
         try:
             mode = self.request.get("m")
