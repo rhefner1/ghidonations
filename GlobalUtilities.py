@@ -484,6 +484,7 @@ class SettingsCreate(UtilitiesBase):
         new_tl.team = team_key
         new_tl.fundraise_amt = toDecimal("2700")
         new_tl.sort_name = name
+        new_tl.show_donation_page = True
 
         new_tl.put()
 

@@ -380,7 +380,7 @@ class Individual(ndb.Expando):
                 
                 if name_changed == True:
                     tl.sort_name = name
-                    
+
                 tl.put()
         except:
             pass
