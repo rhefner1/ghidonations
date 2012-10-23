@@ -392,7 +392,7 @@ class SettingsCreate(UtilitiesBase):
 
             if add_mc == True and email:
                 #Add new contact to Mailchimp
-                self.e.mailchimp.add(email, False)
+                self.e.mailchimp.add(email, name, False)
 
             return new_contact.key
         else:
@@ -743,7 +743,7 @@ class SettingsExists(UtilitiesBase):
             return [False, None]
 
 class SettingsMailchimp(UtilitiesBase):
-    def add(self, email, task_queue):
+    def add(self, email, name, task_queue):
         if self.e.mc_use == True:
         #Check if the settings indicate to use Mailchimp
 
@@ -756,8 +756,10 @@ class SettingsMailchimp(UtilitiesBase):
                     #http://apidocs.mailchimp.com/api/1.3/listsubscribe.func.php
                     #listSubscribe(string apikey, string id, string email_address, array merge_vars, string email_type, 
                     #bool double_optin, bool update_existing, bool replace_interests, bool send_welcome)
-
-                    response = ms.listSubscribe(id=self.e.mc_donorlist, email_address=email)
+                    name = name.split()
+                    merge_vars = {"FNAME":name[0], "LNAME":" ".join(name[1:])}
+                    
+                    response = ms.listSubscribe(id=self.e.mc_donorlist, email_address=email, merge_vars=merge_vars)
 
                     logging.info("Mailchimp response: " + str(response))
 
