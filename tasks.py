@@ -16,12 +16,14 @@ class Confirmation(webapp2.RequestHandler):
 class MailchimpAdd(webapp2.RequestHandler):
     def post(self):
         email = self.request.get("email")
+        name = self.request.get("name")
+        
         settings_key = self.request.get("settings")
         s = tools.getKey(settings_key).get()
 
         logging.info("Retrying Mailchimp add through task queue for: " + email  + " under settings ID: " + settings_key)
 
-        s.mailchimp.add(email,True)
+        s.mailchimp.add(email, name, True)
 
 
 app = webapp2.WSGIApplication([

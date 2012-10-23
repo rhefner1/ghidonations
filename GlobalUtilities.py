@@ -756,9 +756,9 @@ class SettingsMailchimp(UtilitiesBase):
                     #http://apidocs.mailchimp.com/api/1.3/listsubscribe.func.php
                     #listSubscribe(string apikey, string id, string email_address, array merge_vars, string email_type, 
                     #bool double_optin, bool update_existing, bool replace_interests, bool send_welcome)
-                    name = name.split()
-                    merge_vars = {"FNAME":name[0], "LNAME":" ".join(name[1:])}
-                    
+                    name_split = name.split()
+                    merge_vars = {"FNAME":name_split[0], "LNAME":" ".join(name_split[1:])}
+
                     response = ms.listSubscribe(id=self.e.mc_donorlist, email_address=email, merge_vars=merge_vars)
 
                     logging.info("Mailchimp response: " + str(response))
@@ -777,7 +777,7 @@ class SettingsMailchimp(UtilitiesBase):
                     if task_queue == False:
                     #This is the original request, so add to task queue.
                         logging.error("An error occured contacting Mailchimp. Added to task queue to try again.")
-                        taskqueue.add(url="/tasks/mailchimp", params={'email' : email, 'settings' : self.e.websafe})
+                        taskqueue.add(url="/tasks/mailchimp", params={'email' : email, 'name' : name, 'settings' : self.e.websafe})
                         
                     else:
                     #If this is coming from the task queue, fail it (so the task queue retry mechanism works)
