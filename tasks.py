@@ -17,7 +17,7 @@ class MailchimpAdd(webapp2.RequestHandler):
     def post(self):
         email = self.request.get("email")
         name = self.request.get("name")
-        
+
         settings_key = self.request.get("settings")
         s = tools.getKey(settings_key).get()
 

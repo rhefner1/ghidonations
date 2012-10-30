@@ -626,7 +626,7 @@ class Contact(ndb.Expando):
         if email != self.email:
             self.email = email
             if settings.mc_use and email != "" and email != None:
-                settings.mailchimp.add(email, False)
+                settings.mailchimp.add(email, name, False)
 
         if phone != self.phone:
             self.phone = phone

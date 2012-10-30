@@ -449,17 +449,13 @@ class RPCMethods:
 
         s = tools.getSettingsKey(self).get()
 
-        if team_key == "general":
-            team_key = None
-
-        if individual_key == "none":
-            individual_key = None
-
         if notes == None or notes == "":
             notes = "None"
         
-        if address == None or address == "":
-            address = "None"
+        if address == "":
+            address = None
+        else:
+            address = json.loads(address)
 
         authenticated = tools.RPCcheckAuthentication(self, True)
 

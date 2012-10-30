@@ -75,16 +75,20 @@ $(document).ready(function(){
 
             var home_page = $("#home_page").val()
             var submit_action = ""
+            var params
 
             if (home_page == "dashboard"){
                 submit_action = "offlineDonation"
+                params = [submit_action, name, email, amount_donated,
+                        notes, address, team_key, individual_key, add_deposit]
             }
             else{
                 submit_action = "semi_createDonation"
+                var params = [submit_action, name, email, amount_donated,
+                        notes, address, team_key, individual_key]
             }
             
-            var params = [submit_action, name, email, amount_donated,
-                        notes, address, team_key, individual_key, add_deposit]
+            
 
             //Flash message
             show_flash("setting", "Saving donation...", false)
