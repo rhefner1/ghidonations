@@ -442,31 +442,6 @@ class RPCMethods:
         #Return message to confirm 
         return_vals = [success, message]
         return return_vals
-
-    def semi_createDonation(self, name, email, amount_donated, notes, address, team_key, individual_key):
-        message = "Donation created"
-        success = True
-
-        s = tools.getSettingsKey(self).get()
-
-        if notes == None or notes == "":
-            notes = "None"
-        
-        if address == "":
-            address = None
-        else:
-            address = json.loads(address)
-
-        authenticated = tools.RPCcheckAuthentication(self, True)
-
-        if authenticated == "semi":
-            notes = "[Offline check entered by team member] - " + notes
-
-        s.create.donation(name, email, amount_donated, amount_donated, address, tools.getKey(team_key), tools.getKey(individual_key), None, None, notes, "team member", False, None)
-
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
     
     def updateDonation(self, donation_key, notes, team_key, individual_key, add_deposit):
         message = "Donation has been saved"

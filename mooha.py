@@ -396,26 +396,16 @@ class NotAuthorized(webapp2.RequestHandler):
         self.response.write(
            template.render('pages/not_authorized.html', template_variables))
 
-class OfflineDonation(BaseHandler):
+class OfflineDonation(BaseHandlerAdmin):
     def task(self, isAdmin, s):
         
         i = tools.getUserKey(self).get()
 
         template_variables = {"teams":None, "individual_name" : i.name, 
-                "individual_key" : i.key.urlsafe()}
+                "individual_key" : i.key.urlsafe(), "teams" : s.data.all_teams}
 
-        if isAdmin == True:
-            #Create team dictionary with name and key for insertion into HTML
-            template_variables["teams"] = s.data.all_teams
-
-            self.response.write(
-                    template.render('pages/offline.html', template_variables))
-        else:
-            #Create team dictionary with name and key for insertion into HTML
-            template_variables["teams"] = i.data.teams
-
-            self.response.write(
-                    template.render('pages/offline_ind.html', template_variables))
+        self.response.write(
+                template.render('pages/offline.html', template_variables))
 
 class ReviewQueue(BaseHandlerAdmin):
     def task(self, isAdmin, s):
