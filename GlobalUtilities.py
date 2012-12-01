@@ -419,25 +419,29 @@ class SettingsCreate(UtilitiesBase):
         new_donation.given_name = name
         new_donation.given_email = email
 
+        contact_key = None
+
         def write_contact(query):
             c = query.fetch(1)[0]
             new_donation.contact = c.key
 
             c.update(name, email, None, None, address)
+            return c.key
 
         query = models.Contact.gql("WHERE settings = :s AND email = :e", s=self.e.key, e=email)
         query2 = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
 
         if gqlCount(query) != 0 and email:
-            write_contact(query)
+            contact_key = write_contact(query)
 
         elif gqlCount(query2) != 0:
-            write_contact(query2)
+            contact_key = write_contact(query2)
 
         else:
             #Add new contact
             c_key = self.contact(name, email, None, address, None, email_subscr)
             new_donation.contact = c_key
+            contact_key = c_key
 
         if payment_type == "recurring":
             new_donation.isRecurring = True
@@ -463,9 +467,31 @@ class SettingsCreate(UtilitiesBase):
         new_donation.put()
 
         if payment_type != "offline":
+
+            if special_notes != "" and special_notes != None:
+                email = mail.EmailMessage()
+                email.sender = "GHI Donations <mailer@ghidonations.appspotmail.com>"
+                email.subject = "New Donation with Note"
+                email.to = self.e.email
+
+                message = """
+A new {payment_type} donation was received from {name} for ${confirmation_amount} with the following note: <br>
+
+<strong>{special_notes}</strong> <br><br>
+
+You can view this donation at <a href="https://ghidonations.appspot.com/#contact?c={contact_key}">https://ghidonations.appspot.com/contact?c={contact_key}</a>.<br><br>
+Thanks!"""
+
+                message = message.format(payment_type=payment_type, name=name, confirmation_amount=confirmation_amount, special_notes=special_notes, contact_key=contact_key.urlsafe())
+
+                email.html = message
+                email.send()
+
             #Go ahead and send the confirmation email automatically
             new_donation.confirmation.task(86400)
             new_donation.review.archive()
+
+        return new_donation.key
 
     def individual(self, name, team_key, email, password, admin):
         new_individual = models.Individual()
