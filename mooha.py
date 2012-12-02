@@ -421,7 +421,7 @@ class ReviewQueue(BaseHandlerAdmin):
         self.response.write(
             template.render('pages/review_queue.html', template_variables))
 
-class ReviewQueueDetails(BaseHandlerAdmin):
+class ReviewQueueDetails(BaseHandler):
     def task(self, isAdmin, s):
         
         
@@ -436,16 +436,7 @@ class ReviewQueueDetails(BaseHandlerAdmin):
             i_key = tools.getUserKey(self)
             i = i_key.get()
 
-            #Custom message detector
-            try:
-                if d.isRecurring == True and d.amount_donated > d.monthly_payment:
-                    message = tools.setFlash(self, "A payment has been received for this recurring d.")
-                else:
-                    message = ""
-            except:
-                message = ""
-
-            template_variables = {"d":d, "s":s, "i":i, "flash":message}
+            template_variables = {"d":d, "s":s, "i":i}
             self.response.write(
                     template.render('pages/rq_details.html', template_variables))
 
