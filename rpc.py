@@ -620,7 +620,7 @@ class RPCMethods:
         return return_vals
 
     def deleteContact(self, contact_key):
-        message = "Donation deleted"
+        message = "Contact deleted"
         success = True
 
         tools.getKey(contact_key).delete()
