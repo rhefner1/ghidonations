@@ -125,13 +125,9 @@ $(document).ready(function(){
             var confirmation_text = $("textarea[name=confirmation_text]").data("kendoEditor").value()
             var donor_report_text = $("textarea[name=donor_report_text]").data("kendoEditor").value()
 
-            var wp_url = $("input[name=wp_url]").val()
-            var wp_username = $("input[name=wp_username]").val()
-            var wp_password = $("input[name=wp_password]").val()
-
             var params = ["updateSettings", name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions,
                     amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text,
-                    donor_report_text, wp_url, wp_username, wp_password]
+                    donor_report_text]
 
             //Flash message
             show_flash("setting", "Updating settings...", false)

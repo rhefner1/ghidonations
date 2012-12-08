@@ -78,7 +78,7 @@ class Settings(ndb.Expando):
         return tools.SettingsMailchimp(self)
 
     ## -- Update -- ##
-    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text, wp_url, wp_username, wp_password):
+    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
         s = self
 
         if name != s.name:
@@ -131,15 +131,6 @@ class Settings(ndb.Expando):
 
         if donor_report_text != s.donor_report_text:
             s.donor_report_text = donor_report_text
-
-        if wp_url != s.wp_url:
-            s.wp_url = wp_url
-
-        if wp_username != s.wp_username:
-            s.wp_username = wp_username
-
-        if wp_password != s.wp_password:
-            s.wp_password = wp_password
 
         s.put()
 
