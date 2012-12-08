@@ -5,7 +5,7 @@ $(document).ready(function(){
     var initial_cursor = $("#initial_cursor").val()
 
     var rpc_params = [contact_key]
-    var data_table = initializeTable(4, initial_cursor, "getContactDonations", rpc_params, function(data_table, i){
+    var data_table = initializeTable(4, initial_cursor, "getContactDonations", rpc_params, function(data_table, d){
         data_table.fnAddData([
             d.key,
             d.formatted_donation_date,
