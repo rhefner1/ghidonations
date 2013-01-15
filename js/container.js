@@ -249,6 +249,15 @@ function refreshPage(){
         var hash = window.location.hash
         var location = hash.substr(1)
         change_tab(location)
+
+        cursors_dict = {0:null}
+        data_loading = false
+        current_page = 0
+        data_table = null
+
+        pub_rpc_action = null
+        pub_rpc_params = null
+        pub_callback = null
     }    
 }
 

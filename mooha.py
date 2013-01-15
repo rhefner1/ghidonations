@@ -224,15 +224,18 @@ class DonorReport(BaseHandlerAdmin):
             c = tools.getKey(contact_key).get()
             s = c.settings.get()
 
-            year_start = datetime(year, 1, 1)
-            year_end = datetime(year, 12, 31)
+            donations = c.data.annual_donations(year)
+            donation_total = tools.toDecimal(0)
 
-            donations = models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=c.key, year_start=year_start, year_end=year_end)
+            for d in donations:
+                donation_total += d.amount_donated
 
-            template_variables = {"s": s, "c" : c, "donations" : donations, "year" : str(year)}
+            donation_total = "${:,.2f}".format(donation_total)
+
+            template_variables = {"s":s, "c":c, "donations":donations, "year":str(year), "donation_total":str(donation_total), "street":c.address[0], "city":c.address[1], "state":c.address[2], "zip":c.address[3]}
 
             self.response.write(
-                   template.render("pages/letters/donor_report.html", template_variables))
+                   template.render("pages/letters/donor_report_print.html", template_variables))
 
         
         except:
@@ -555,7 +558,7 @@ class ThankYou(webapp2.RequestHandler):
             else:
                 individual_name = None
 
-            template_variables = {"s": s, "d" : d, "date" : date, "individual_name" : individual_name}
+            template_variables = {"s": s, "d" : d, "c" : d.contact, "date" : date, "individual_name" : individual_name}
 
             if mode == "w":
                 template_location= "pages/letters/thanks_live.html"

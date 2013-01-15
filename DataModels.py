@@ -277,8 +277,12 @@ class Individual(ndb.Expando):
 
     @property
     def show_donation_page(self):
-        q = TeamList.gql("WHERE individual = :i", i=self.key)
-        return q.fetch(1)[0].show_donation_page
+        try:
+            q = TeamList.gql("WHERE individual = :i", i=self.key)
+            return q.fetch(1)[0].show_donation_page
+
+        except:
+            return False
 
     @property
     def websafe(self):

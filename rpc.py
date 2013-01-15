@@ -1,5 +1,6 @@
 # coding: utf-8
 import logging, json, datetime, appengine_config, webapp2
+from google.appengine.api import taskqueue
 
 import GlobalUtilities as tools
 import DataModels as models
@@ -123,10 +124,10 @@ class RPCMethods:
 
     def pub_refreshSandbox(self):
         #Local SDK
-        settings = "ahBkZXZ-Z2hpZG9uYXRpb25zcg4LEghTZXR0aW5ncxgBDA"
+        # settings = "ahBkZXZ-Z2hpZG9uYXRpb25zcg4LEghTZXR0aW5ncxgBDA"
 
         #Production
-        # settings = "ag5zfmdoaWRvbmF0aW9uc3IQCxIIU2V0dGluZ3MY9dIWDA"
+        settings = "ag5zfmdoaWRvbmF0aW9uc3IQCxIIU2V0dGluZ3MY9dIWDA"
 
         s = tools.getKey(settings).get()
 
@@ -603,6 +604,16 @@ class RPCMethods:
 
         d = tools.getKey(donation_key).get()
         d.review.archive()
+
+        #Return message to confirm
+        return_vals = [success, message]
+        return return_vals
+
+    def emailAnnualReport(self, contact_key, year):
+        message = "Annual report sent"
+        success = True
+
+        taskqueue.add(queue_name="annualreport", url="/tasks/annualreport", params={'contact_key' : contact_key, 'year' : year})
 
         #Return message to confirm
         return_vals = [success, message]

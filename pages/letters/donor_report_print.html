@@ -1,0 +1,93 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+
+	
+
+	<head>
+
+		<title>GHI Donation Report</title>
+		<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=8" />
+		
+		<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js"></script>			
+		
+	</head>
+
+<body>
+
+	<div id="upfold">
+	
+	   <div class="address">
+	   <p>
+	   Global Hope India<br>
+       400 Fayetteville St, Ste E<br>
+       Raleigh, NC 27601-1704<br>
+	   </p>	 
+	   <p>&nbsp;</p>
+	   <p>
+	   {{ c.name }}<br>
+       {{ street }}<br>
+       {{ city }}, {{ state }}   {{ zip }}
+	   </p>	   
+	   </div>
+	   
+    </div>
+	
+	<div id="logo" style="position:absolute; top:50px; left:290px;">
+	   <img src="/images/annualreport/logo.png" alt="Global Hope India - Thanks for donating!">
+	</div>
+	
+
+    <div id="downfold" style="position:absolute; top:300px;">
+       <div class="content">
+        <b>Dear {{ c.name }},</b>
+		<p>Thank you for supporting {{ s.name }} in the year of {{ year }}.</p>
+		<p>
+		{{ s.donor_report_text|safe }}
+		</p>
+		</div>
+		
+	  <div class="table">
+	  <table style="border: 1px solid gray; border-collapse:collapse;padding:5px">
+	  <tr>
+	  <th style="border: 1px solid gray; border-collapse:collapse;padding:5px">Date Donated</th>
+	  <th style="border: 1px solid gray; border-collapse:collapse;padding:5px">Donation Amount</th>
+	  <th style="border: 1px solid gray; border-collapse:collapse;padding:5px">Payment Type</th>
+	  <th style="border: 1px solid gray; border-collapse:collapse;padding:5px">Designated Team</th>
+	  <th style="border: 1px solid gray; border-collapse:collapse;padding:5px">Designated Individual</th>
+	  </tr>
+	  {% for d in donations %}
+		  <tr>
+		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.formatted_donation_date }}</td>
+		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">${{ d.amount_donated }}</td>
+		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.payment_type }}</td>
+		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.designated_team }}</td>
+		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.designated_individual }}</td>
+		  </tr>
+	  {% endfor %}
+	  </table>
+	  </div>
+
+	  <br>
+	  Donation total: {{ donation_total }}
+	  
+	  <div class="row">
+	  	<br><br>
+            <div class="span16" style="left:50px">
+                {{ s.confirmation_info|safe }}
+            </div>
+
+        </div>
+		<div id="footer">
+			<p>
+			{{ s.confirmation_footer|safe }}
+			</p>
+		</div>
+		
+	</div>
+	
+	
+         		
+</body>
+</html>

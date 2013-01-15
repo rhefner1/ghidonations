@@ -1140,6 +1140,14 @@ class ContactData(UtilitiesBase):
         query = self.all_donations
         return queryCursorDB(query, query_cursor)
 
+    def annual_donations(self, year):
+        year = int(year)
+        year_start = datetime(year, 1, 1)
+        year_end = datetime(year, 12, 31)
+
+        return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
+
+
     @property
     def recurring_donation_total(self):
         donation_total = toDecimal(0)
