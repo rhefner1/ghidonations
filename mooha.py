@@ -228,7 +228,7 @@ class DonorReport(BaseHandlerAdmin):
             donation_total = tools.toDecimal(0)
 
             for d in donations:
-                donation_total += d.amount_donated
+                donation_total += d.confirmation_amount
 
             donation_total = "${:,.2f}".format(donation_total)
 

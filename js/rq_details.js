@@ -134,7 +134,7 @@ $(document).ready(function(){
         var params = ["printReceipt", donation_key]
 
         rpcPost(params, function(data){
-            window.open(data[2])
+            window.open(data[2], "_blank")
             closeColorbox()   
         })
     

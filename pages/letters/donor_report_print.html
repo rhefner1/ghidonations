@@ -16,7 +16,7 @@
 
 <body>
 
-	<div id="upfold">
+	<div id="upfold" style="margin-left:50px">
 	
 	   <div class="address">
 	   <p>
@@ -25,6 +25,7 @@
        Raleigh, NC 27601-1704<br>
 	   </p>	 
 	   <p>&nbsp;</p>
+	   <br>
 	   <p>
 	   {{ c.name }}<br>
        {{ street }}<br>
@@ -60,7 +61,7 @@
 	  {% for d in donations %}
 		  <tr>
 		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.formatted_donation_date }}</td>
-		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">${{ d.amount_donated }}</td>
+		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">${{ d.confirmation_amount }}</td>
 		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.payment_type }}</td>
 		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.designated_team }}</td>
 		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.designated_individual }}</td>
