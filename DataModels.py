@@ -77,6 +77,10 @@ class Settings(ndb.Expando):
     def mailchimp(self):
         return tools.SettingsMailchimp(self)
 
+    @property
+    def search(self):
+        return tools.SettingsSearch(self)
+
     ## -- Update -- ##
     def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
         s = self
@@ -500,6 +504,10 @@ class Donation(ndb.Expando):
         return tools.DonationReview(self)
 
     @property
+    def search(self):
+        return tools.DonationSearch(self)
+
+    @property
     def websafe(self):
         return self.key.urlsafe()
 
@@ -551,6 +559,8 @@ class Donation(ndb.Expando):
             memcache.delete("tdtotal" + e.team.urlsafe())
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
+
+        e.search.index()
 
 class Impression(ndb.Expando):
     contact = ndb.KeyProperty()

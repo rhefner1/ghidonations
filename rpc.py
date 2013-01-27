@@ -247,19 +247,15 @@ class RPCMethods:
         team_key = tools.getKey("ahBkZXZ-Z2hpZG9uYXRpb25zcgoLEgRUZWFtGAIM")
         return s.data.team_donors(team_key)
 
-    def getDonations(self, query_cursor, donation_type):
+    def getDonations(self, query_cursor, query):
         s = tools.getSettingsKey(self).get()
 
-        if donation_type == "unreviewed":
-            response = s.data.open_donations(query_cursor)
-
-        elif donation_type == "all_donations":
-            response = s.data.donations(query_cursor)
+        results = s.search.donation(query, query_cursor)
 
         donations = []
-        new_cursor = response[1]
+        new_cursor = results[1]
 
-        for d in response[0]:
+        for d in results[0]:
             d_dict = {"key" : d.key.urlsafe(), "formatted_donation_date" : d.formatted_donation_date, "name" : d.name, "email" : d.email,
                  "payment_type" : d.payment_type, "amount_donated" : str(d.amount_donated)}
 

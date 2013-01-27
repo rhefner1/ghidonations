@@ -20,6 +20,12 @@ from gaesessions import get_current_session
 #Application files
 import DataModels as models
 
+#Search
+from google.appengine.api import search
+
+_DONATION_SEARCH_INDEX = "donation"
+_NUM_RESULTS = 15
+
 ###### ------ Authentication ------ ######
 def checkCredentials(self, email, password):
     try:
@@ -318,15 +324,14 @@ def mergeContacts(c1_key, c2_key):
     c1.key.delete()
 
 def queryCursorDB(query, encoded_cursor):
-    num_results = 15
     new_cursor = None
     more = None
 
     if encoded_cursor:
         query_cursor = Cursor.from_websafe_string(encoded_cursor)
-        entities, cursor, more = query.fetch_page(num_results, start_cursor=query_cursor)
+        entities, cursor, more = query.fetch_page(_NUM_RESULTS, start_cursor=query_cursor)
     else:
-        entities, cursor, more = query.fetch_page(num_results)
+        entities, cursor, more = query.fetch_page(_NUM_RESULTS)
 
     if more:
         new_cursor = cursor.to_websafe_string()
@@ -334,6 +339,16 @@ def queryCursorDB(query, encoded_cursor):
         new_cursor = None
 
     return [entities, new_cursor]
+
+def searchToEntities(search_results):
+    entities = []
+
+    for r in search_results:
+        key = r.fields[0].value
+        d = getKey(key).get()
+        entities.append(d)
+
+    return entities
 
 def setFlash(self, message):
     self.session = get_current_session()
@@ -813,6 +828,30 @@ class SettingsMailchimp(UtilitiesBase):
             else:
                 logging.info("Not a valid email address. Not continuing.")
 
+class SettingsSearch(UtilitiesBase):
+    def donation(self, query, query_cursor=None, entity_return=True):
+        # query dict looks like 'job tag:"very important" sent < 2011-02-28'
+
+        # sort results by author descending
+        expr_list = [search.SortExpression(
+            expression='donation_date', default_value='',
+            direction=search.SortExpression.DESCENDING)]
+        # construct the sort options
+        sort_opts = search.SortOptions(
+             expressions=expr_list)
+        query_options = search.QueryOptions(
+            cursor=query_cursor,
+            limit=_NUM_RESULTS,
+            sort_options=sort_opts)
+        query_obj = search.Query(query_string=query, options=query_options)
+
+        search_results = search.Index(name=_DONATION_SEARCH_INDEX).search(query=query_obj)
+
+        if entity_return == True:
+            return [searchToEntities(search_results), search_results.cursor]
+        else:
+            return search_results
+
 ## -- Team Classes -- ##
 class TeamData(UtilitiesBase):
     @property
@@ -1113,6 +1152,57 @@ class DonationReview(UtilitiesBase):
         self.e.reviewed = False
         self.e.put()
 
+class DonationSearch(UtilitiesBase):
+
+    def createDocument(self):
+        d = self.e
+
+        team = None
+        individual = None
+        if d.team:
+            team = d.team.get().name
+        if d.individual:
+            individual = d.individual.get().name
+
+        reviewed = "no"
+        if d.reviewed == True:
+            reviewed = "yes"
+
+        document = search.Document(
+            fields=[search.TextField(name='donation_key', value=d.key.urlsafe()),
+                    search.TextField(name='contact_key', value=d.contact.urlsafe()),
+                    search.TextField(name='name', value=d.contact.get().name),
+                    search.TextField(name='email', value=d.contact.get().email),
+                    search.NumberField(name='amount', value=float(d.amount_donated)),
+                    search.TextField(name='type', value=d.payment_type),
+                    search.TextField(name='team', value=team),
+                    search.TextField(name='individual', value=individual),
+                    search.DateField(name='date', value=d.donation_date),
+                    search.TextField(name='reviewed', value=reviewed),
+                    ])
+
+        return document
+
+    def index(self):
+        # Updates search index of this entity or creates new one if it doesn't exist
+        d = self.e
+        s = self.e.settings.get()
+        index = search.Index(name=_DONATION_SEARCH_INDEX)
+        
+        # Removing existing search documents associated with this donation
+        existing_docs = s.search.donation("donation_key:" + d.key.urlsafe(), entity_return=False)
+        doc_ids = []
+        for f in existing_docs:
+            doc_ids.append(f.doc_id)
+
+        index.remove(doc_ids)
+
+        # Creating the new index
+        try:
+            doc = self.createDocument()
+            index.add(doc)
+        except:
+            logging.error("Failed creating index on donation key:" + d.key.urlsafe())
 
 ## -- Contact Classes -- ##
 class ContactCreate(UtilitiesBase):
