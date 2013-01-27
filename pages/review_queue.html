@@ -2,9 +2,15 @@
     <div class="widget clearfix">
         <h2>Review Queue</h2>
         <div class="widget_inside">
-            <p class="m_bottom15">Click any one of the donations below to view more details, send out a thank-you email, etc.</p>
+            <p class="m_bottom15" style="float:left">Click any one of the donations below to view more details, send out a thank-you email, etc.</p>
+            <div id="selector_buttons" style="float:right; margin-bottom:15px">
+                <input id="unreviewed" type="button" class="small blue button" value="Unreviewed">
+                <input id="all_donations" type="button" class="small button" value="All Donations">
+            </div>
 
-            <div style="width:100%; margin-bottom:10px">
+
+
+            <div style="width:100%; margin-bottom:10px; clear:both">
                 <div style="float:right">
                     <span style="width:15px"></span>
                     <button class="button" id="search_go" style="margin-left:15px"><span class="ui-icon ui-icon-search">Search</span></button>
@@ -17,7 +23,7 @@
 
             <div id="search_help" style="display:none; margin-bottom:10px">
                 <p>
-                    Try queries like these: <code>date > 2012-8-25 individual:becca taylor</code> &nbsp;&nbsp; <code>reviewed:yes</code> &nbsp;&nbsp; <code>name:sandra amount > 1000</code> &nbsp;&nbsp; <code>type:offline team:august 2012</code>
+                    Try queries like these: <code>date > 2012-8-25 individual:becca taylor</code> &nbsp;&nbsp; <code>reviewed:no</code> &nbsp;&nbsp; <code>name:sandra amount > 1000</code> &nbsp;&nbsp; <code>type:offline OR team:august 2012</code>
                 </p>
 
                 <p>

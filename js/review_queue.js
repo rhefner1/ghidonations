@@ -35,6 +35,9 @@ $(document).ready(function(){
     })
 
     $("#search_go").click(function(){
+        $("#unreviewed").removeClass("blue")
+        $("#all_donations").removeClass("blue")
+
         var query = $("#search_query").val()
 
         data_table.fnClearTable()
@@ -61,4 +64,25 @@ $(document).ready(function(){
         }
         
     })
+
+    $("#selector_buttons input").click(function(){
+        var clicked_id = $(this).attr("id")
+        if (clicked_id == "unreviewed"){
+            $("#search_query").val("reviewed:no")
+            $("#search_go").click()
+
+            $("#unreviewed").addClass("blue")
+            $("#all_donations").removeClass("blue")
+        }
+        else {
+            $("#search_query").val("")
+            $("#search_go").click()
+            
+            $("#all_donations").addClass("blue")
+            $("#unreviewed").removeClass("blue")
+        }
+
+    })
+
+    $("#unreviewed").click()
 });

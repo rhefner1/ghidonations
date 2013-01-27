@@ -250,7 +250,10 @@ class RPCMethods:
     def getDonations(self, query_cursor, query):
         s = tools.getSettingsKey(self).get()
 
-        results = s.search.donation(query, query_cursor)
+        if query == "":
+            results = s.data.donations(query_cursor)
+        else:
+            results = s.search.donation(query, query_cursor)
 
         donations = []
         new_cursor = results[1]
