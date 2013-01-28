@@ -915,7 +915,7 @@ class IndividualData(UtilitiesBase):
 
     @property
     def donations(self):
-        q = models.Donation.gql("WHERE individual = :i ORDER BY donation_date", i=self.e.key)
+        q = models.Donation.gql("WHERE individual = :i ORDER BY donation_date DESC", i=self.e.key)
         return qCache(q)
 
     def getTeamList(self, team):
