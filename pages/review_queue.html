@@ -17,7 +17,7 @@
                 </div>
 
                 <div style="display:block; overflow:hidden">
-                    <input type="text" id="search_query" placeholder="Search..." style="width:100%; font-size:17">
+                    <input type="text" id="search_query" placeholder="Search..." value="reviewed:no" style="width:100%; font-size:17">
                 </div>
             </div>
 
@@ -45,24 +45,19 @@
 
                     </thead>
                     <tbody id="donations">
-                        {% for d in donations %}
-                        <tr data-id="{{ d.websafe }}">
-                            <td>{{ d.websafe }}</td>
-                            <td>{{ d.formatted_donation_date }}</td>
-                            <td>{{ d.name }}</td>
-                            <td>{{ d.email }}</td>
-                            <td>${{ d.amount_donated }}</td>
-                            <td>{{ d.payment_type }}</td>
-                        </tr>
-                        {% endfor %}
                     </tbody>
                 </table>
+            
+                <div style="float:right; margin-top:10px">
+                    <button class="small button" id="download_query">Download query as a spreadsheet</button>
+                </div>
+
             </div>
+            
         </div>
     </div>
 </div>
 
 <div style="display:none" id="rq_details_container"></div>
 
-<input type="hidden" id="initial_cursor" value="{{ initial_cursor }}" />
 <script src="/js/review_queue.js?v=5"></script>

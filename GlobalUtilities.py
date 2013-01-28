@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import logging, json, time, re
+import logging, json, time, re, math
 from time import gmtime, strftime
 from datetime import *
 from decimal import *
@@ -23,7 +23,9 @@ import DataModels as models
 #Search
 from google.appengine.api import search
 
+_CONTACT_SEARCH_INDEX = "contact"
 _DONATION_SEARCH_INDEX = "donation"
+_INDIVIDUAL_SEARCH_INDEX = "individual"
 _NUM_RESULTS = 15
 
 ###### ------ Authentication ------ ######
@@ -272,6 +274,22 @@ def giveError(self, error_code):
     self.response.out.write(
                    template.render('pages/error.html', {}))
 
+def getSearchDoc(doc_id, index):
+  if not doc_id:
+    return None
+
+  try:
+    response = index.list_documents(
+        start_doc_id=doc_id, limit=1, include_start_doc=True)
+
+    if response.results and response.results[0].doc_id == doc_id:
+      return response.results[0]
+
+    return None
+
+  except search.InvalidRequest: # catches ill-formed doc ids
+    return None
+
 def GQLtoDict(self, gql_query):
     #Converts GQLQuery of App Engine data models to dictionary objects
     #An empty list to start out with - will be what we return
@@ -339,6 +357,33 @@ def queryCursorDB(query, encoded_cursor):
         new_cursor = None
 
     return [entities, new_cursor]
+
+def searchReturnAll(query, search_results, settings, entity_return=True):
+    total_results = search_results.number_found
+    num_cursors_needed = int(math.ceil(float(total_results) / float(_NUM_RESULTS)))
+
+    all_results = []
+    results = search_results
+    
+    for x in range(0, num_cursors_needed):
+        if entity_return == True:
+            all_results += searchToEntities(results)
+
+        else:
+            all_results.extend(searchToDocuments(results))
+
+        query_cursor = search_results.cursor
+        results = settings.search.donation(query, query_cursor=query_cursor)
+
+    return all_results
+
+def searchToDocuments(search_results):
+    documents = []
+
+    for r in search_results:
+        documents.append(r)
+
+    return documents
 
 def searchToEntities(search_results):
     entities = []
@@ -829,28 +874,59 @@ class SettingsMailchimp(UtilitiesBase):
                 logging.info("Not a valid email address. Not continuing.")
 
 class SettingsSearch(UtilitiesBase):
-    def donation(self, query, query_cursor=None, entity_return=True):
-        # query dict looks like 'job tag:"very important" sent < 2011-02-28'
+    def search(self, index_name, expr_list, query, query_cursor=None, entity_return=True, return_all=False):
+        # query string looks like 'job tag:"very important" sent < 2011-02-28'
 
-        # sort results by author descending
-        expr_list = [search.SortExpression(
-            expression='donation_date', default_value='',
-            direction=search.SortExpression.DESCENDING)]
+        if query_cursor == None:
+            query_cursor = search.Cursor()
+        else:
+            query_cursor = search.Cursor(web_safe_string=query_cursor)
+
         # construct the sort options
-        sort_opts = search.SortOptions(
-             expressions=expr_list)
+        sort_opts = search.SortOptions(expressions=expr_list)
+
         query_options = search.QueryOptions(
             cursor=query_cursor,
             limit=_NUM_RESULTS,
             sort_options=sort_opts)
+
         query_obj = search.Query(query_string=query, options=query_options)
 
-        search_results = search.Index(name=_DONATION_SEARCH_INDEX).search(query=query_obj)
+        search_results = search.Index(name=index_name).search(query=query_obj)
 
-        if entity_return == True:
-            return [searchToEntities(search_results), search_results.cursor]
+        if entity_return == True and return_all == False:
+            new_cursor = None
+            if search_results.cursor != None:
+                new_cursor = search_results.cursor.web_safe_string
+
+            return [searchToEntities(search_results), new_cursor]
+
+        elif return_all == True:
+            return searchReturnAll(query, search_results, settings=self.e, entity_return=entity_return)
+
         else:
             return search_results
+
+    def contact(self, query, **kwargs):
+        expr_list = [search.SortExpression(
+            expression="name", default_value='',
+            direction=search.SortExpression.ASCENDING)]
+
+        return self.search(index_name=_CONTACT_SEARCH_INDEX, expr_list=expr_list, query=query, **kwargs)
+
+    def donation(self, query, **kwargs):
+        expr_list = [search.SortExpression(
+            expression="date", default_value='',
+            direction=search.SortExpression.DESCENDING)]
+
+        return self.search(index_name=_DONATION_SEARCH_INDEX, expr_list=expr_list, query=query, **kwargs)
+
+    def individual(self, query, **kwargs):
+        expr_list = [search.SortExpression(
+            expression="name", default_value='',
+            direction=search.SortExpression.ASCENDING)]
+
+        return self.search(index_name=_INDIVIDUAL_SEARCH_INDEX, expr_list=expr_list, query=query, **kwargs)
 
 ## -- Team Classes -- ##
 class TeamData(UtilitiesBase):
@@ -954,7 +1030,7 @@ class IndividualData(UtilitiesBase):
 
     @property
     def donations(self):
-        q = models.Donation.gql("WHERE individual = :i ORDER BY donation_date", i=self.e.key)
+        q = models.Donation.gql("WHERE individual = :i ORDER BY donation_date DESC", i=self.e.key)
         return qCache(q)
 
     def getTeamList(self, team):
@@ -1013,6 +1089,42 @@ class IndividualData(UtilitiesBase):
     @property
     def team_json(self):
         return json.dumps(self.team_list)
+
+class IndividualSearch(UtilitiesBase):
+    def createDocument(self):
+        i = self.e
+
+        team_names = ""
+        raised = toDecimal(0)
+
+        tl_list = i.teamlist_entities
+        for tl in tl_list:
+            team_names += tl.team_name + ", "
+            raised += tl.donation_total
+
+        document = search.Document(doc_id=i.websafe,
+            fields=[search.TextField(name='individual_key', value=i.websafe),
+                    search.TextField(name='name', value=i.name),
+                    search.TextField(name='email', value=i.email),
+                    search.TextField(name='team', value=team_names),
+                    search.NumberField(name='raised', value=float(raised)),
+                    search.DateField(name='created', value=i.creation_date)
+                    ])
+
+        return document
+
+    def index(self):
+        # Updates search index of this entity or creates new one if it doesn't exist
+        i = self.e
+        s = i.settings.get()
+        index = search.Index(name=_INDIVIDUAL_SEARCH_INDEX)
+    
+        # Creating the new index
+        try:
+            doc = self.createDocument()
+            index.add(doc)
+        except:
+            logging.error("Failed creating index on individual key:" + i.websafe)
 
 ## -- Donation Classes -- ##
 class DonationAssign(UtilitiesBase):
@@ -1153,32 +1265,24 @@ class DonationReview(UtilitiesBase):
         self.e.put()
 
 class DonationSearch(UtilitiesBase):
-
     def createDocument(self):
         d = self.e
-
-        team = None
-        individual = None
-        if d.team:
-            team = d.team.get().name
-        if d.individual:
-            individual = d.individual.get().name
 
         reviewed = "no"
         if d.reviewed == True:
             reviewed = "yes"
 
-        document = search.Document(
-            fields=[search.TextField(name='donation_key', value=d.key.urlsafe()),
-                    search.TextField(name='contact_key', value=d.contact.urlsafe()),
+        document = search.Document(doc_id=d.websafe,
+            fields=[search.TextField(name='donation_key', value=d.websafe),
+                    search.DateField(name='time', value=d.donation_date),
                     search.TextField(name='name', value=d.contact.get().name),
                     search.TextField(name='email', value=d.contact.get().email),
                     search.NumberField(name='amount', value=float(d.amount_donated)),
                     search.TextField(name='type', value=d.payment_type),
-                    search.TextField(name='team', value=team),
-                    search.TextField(name='individual', value=individual),
-                    search.DateField(name='date', value=d.donation_date),
+                    search.TextField(name='team', value=d.designated_team),
+                    search.TextField(name='individual', value=d.designated_individual),
                     search.TextField(name='reviewed', value=reviewed),
+                    search.TextField(name='contact_key', value=d.contact.urlsafe()),
                     ])
 
         return document
@@ -1186,23 +1290,15 @@ class DonationSearch(UtilitiesBase):
     def index(self):
         # Updates search index of this entity or creates new one if it doesn't exist
         d = self.e
-        s = self.e.settings.get()
+        s = d.settings.get()
         index = search.Index(name=_DONATION_SEARCH_INDEX)
-        
-        # Removing existing search documents associated with this donation
-        existing_docs = s.search.donation("donation_key:" + d.key.urlsafe(), entity_return=False)
-        doc_ids = []
-        for f in existing_docs:
-            doc_ids.append(f.doc_id)
-
-        index.remove(doc_ids)
 
         # Creating the new index
         try:
             doc = self.createDocument()
             index.add(doc)
         except:
-            logging.error("Failed creating index on donation key:" + d.key.urlsafe())
+            logging.error("Failed creating index on donation key:" + d.websafe)
 
 ## -- Contact Classes -- ##
 class ContactCreate(UtilitiesBase):
@@ -1251,6 +1347,46 @@ class ContactData(UtilitiesBase):
     def impressions(self, query_cursor):
         query = self.all_impressions
         return queryCursorDB(query, query_cursor)
+
+class ContactSearch(UtilitiesBase):
+    def createDocument(self):
+        c = self.e
+
+        city = c.address[1]
+        state = c.address[2]
+
+        total_donated = toDecimal(0)
+        number_donations = 0
+        for d in c.data.all_donations:
+            total_donated += d.confirmation_amount
+            number_donations += 1
+
+        document = search.Document(doc_id=c.websafe,
+            fields=[search.TextField(name='contact_key', value=c.websafe),
+                    search.TextField(name='name', value=c.name),
+                    search.TextField(name='email', value=c.email),
+                    search.NumberField(name='total_donated', value=float(total_donated)),
+                    search.NumberField(name='number_donations', value=int(number_donations)),
+                    search.TextField(name='phone', value=c.phone),
+                    search.TextField(name='city', value=city),
+                    search.TextField(name='state', value=state),
+                    search.DateField(name='created', value=c.creation_date)
+                    ])
+
+        return document
+
+    def index(self):
+        # Updates search index of this entity or creates new one if it doesn't exist
+        c = self.e
+        s = c.settings.get()
+        index = search.Index(name=_CONTACT_SEARCH_INDEX)
+
+        # Creating the new index
+        try:
+            doc = self.createDocument()
+            index.add(doc)
+        except:
+            logging.error("Failed creating index on contact key:" + c.websafe)
 
 ## -- Dictionary Difference Class -- ##
 class DictDiffer(object):

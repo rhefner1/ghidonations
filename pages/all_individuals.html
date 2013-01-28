@@ -4,26 +4,52 @@
         <div class="widget_inside">
         	<p class="m_bottom15">Click any one of the contacts below to view more details about them.</p>
 
+            <div style="width:100%; margin-bottom:10px; clear:both">
+                <div style="float:right">
+                    <span style="width:15px"></span>
+                    <button class="button" id="search_go" style="margin-left:15px"><span class="ui-icon ui-icon-search">Search</span></button>
+                </div>
+
+                <div style="display:block; overflow:hidden">
+                    <input type="text" id="search_query" placeholder="Search..." style="width:100%; font-size:17">
+                </div>
+            </div>
+
+            <div id="search_help" style="display:none; margin-bottom:10px">
+                <p>
+                    Try queries like these: <code>team:august 2012 raised > 1000</code> &nbsp;&nbsp; <code>name:katie</code> &nbsp;&nbsp; <code>team:august 2012 team:august 2013</code>
+                </p>
+
+                <p>
+                    Here's everything you can use: <code>name</code> &nbsp;|&nbsp; <code>email</code> &nbsp;|&nbsp; <code>raised</code> &nbsp;|&nbsp;<code>team</code> &nbsp;|&nbsp; <code>created</code>
+                </p>
+            </div>
+
             <div class="col_12">
                 <table class="dataTable">
                     <thead class="bold">
-                            <tr>
-                                <th class="align-left">Key</th>
-                                <th class="align-left">Name</th>
-                                <th class="align-left">Email</th>
-                            </tr>
+                        <tr>
+                            <th class="align-left">Key</th>
+                            <th class="align-left">Name</th>
+                            <th class="align-left">Email</th>
+                        </tr>
 
                     </thead>
                     <tbody id="individuals">
                     	{% for i in individuals %}
                         <tr>
-                                <td>{{ i.websafe }}</td>
-                                <td>{{ i.name }}</td>
-                                <td>{{ i.email }}</td>
+                            <td>{{ i.websafe }}</td>
+                            <td>{{ i.name }}</td>
+                            <td>{{ i.email }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
                 </table>
+
+                <div style="float:right; margin-top:10px">
+                    <button class="small button" id="download_query">Download query as a spreadsheet</button>
+                </div>
+
             </div>
         </div>
     </div>

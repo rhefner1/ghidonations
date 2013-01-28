@@ -64,9 +64,23 @@ class IndexAllDonations(webapp2.RequestHandler):
         settings_key = self.request.get("settings_key")
         key = tools.getKey(settings_key)
 
-        donations = models.Donation.gql("WHERE settings = :s", s=key)
-        for d in donations:
-            d.search.index()
+        mode = self.request.get("mode")
+
+        if mode == "donations":
+            donations = models.Donation.gql("WHERE settings = :s", s=key)
+            for d in donations:
+                d.search.index()
+
+        elif mode == "contacts":
+            contacts = models.Contact.gql("WHERE settings = :s", s=key)
+            for c in contacts:
+                c.search.index()
+
+        elif mode == "individuals":
+            individuals = models.Individual.gql("WHERE settings = :s", s=key)
+            for i in individuals:
+                i.search.index()
+
 
 app = webapp2.WSGIApplication([
        ('/tasks/confirmation', Confirmation),

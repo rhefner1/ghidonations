@@ -12,9 +12,9 @@ function dataTableWriter(data_table, d){
 }
 
 $(document).ready(function(){  
-    var initial_cursor = $("#initial_cursor").val()
-    var rpc_params = ["unreviewed"]
-    var data_table = initializeTable(5, initial_cursor, "getDonations", rpc_params, function(data_table, d){
+    var query = $("#search_query").val()
+    var rpc_params = [query]
+    var data_table = initializeTable(5, "getDonations", rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 
@@ -83,6 +83,11 @@ $(document).ready(function(){
         }
 
     })
-
-    $("#unreviewed").click()
+    
+    $("#download_query").click(function(){
+        query = $("#search_query").val()
+        data = {"query" : query}
+        url = "/ajax/spreadsheetdonations?" + $.param(data)
+        window.open(url)
+    })
 });

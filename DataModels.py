@@ -280,6 +280,10 @@ class Individual(ndb.Expando):
         return tools.qCache(q)
 
     @property
+    def search(self):
+        return tools.IndividualSearch(self)
+
+    @property
     def show_donation_page(self):
         try:
             q = TeamList.gql("WHERE individual = :i", i=self.key)
@@ -395,6 +399,8 @@ class Individual(ndb.Expando):
             memcache.delete("teammembersdict" + t.team.urlsafe())
             memcache.delete("info" + t.team.urlsafe() + e.websafe)
 
+        e.search.index()
+
     ## -- Before Delete -- ##
     @classmethod
     def _pre_delete_hook(cls, key):
@@ -411,6 +417,10 @@ class Individual(ndb.Expando):
             memcache.delete("teammembersdict" + tl.team.urlsafe())
 
             tl.key.delete()
+
+        # Delete search index
+        doc = tools.getSearchKey(i.websafe)
+        doc.remove()
 
 class Donation(ndb.Expando):
     contact = ndb.KeyProperty()
@@ -562,6 +572,15 @@ class Donation(ndb.Expando):
 
         e.search.index()
 
+     ## -- Before Delete -- ##
+    @classmethod
+    def _pre_delete_hook(cls, key):
+        e = key.get()
+
+        # Delete search index
+        doc = tools.getSearchKey(e.websafe)
+        doc.remove()
+
 class Impression(ndb.Expando):
     contact = ndb.KeyProperty()
     impression = ndb.StringProperty()
@@ -578,7 +597,7 @@ class Impression(ndb.Expando):
     def websafe(self):
         return self.key.urlsafe()
 
-class Contact(ndb.Expando):
+class Conta[0]ct(ndb.Expando):
     #Standard information we need to know
     name = ndb.StringProperty()
     email = ndb.StringProperty()
@@ -610,6 +629,10 @@ class Contact(ndb.Expando):
     @property
     def data(self):
         return tools.ContactData(self)
+
+    @property
+    def search(self):
+        return tools.ContactSearch(self)
 
     @property
     def websafe(self):
@@ -654,6 +677,17 @@ class Contact(ndb.Expando):
     def _post_put_hook(self, future):
         e = future.get_result().get()
         memcache.delete("contacts" + e.settings.urlsafe())
+
+        e.search.index()
+
+    ## -- Before Delete -- ##
+    @classmethod
+    def _pre_delete_hook(cls, key):
+        e = key.get()
+
+        # Delete search index
+        doc = tools.getSearchKey(e.websafe)
+        doc.remove()
 
 class DepositReceipt(ndb.Expando):
     entity_keys = ndb.KeyProperty(repeated=True)
