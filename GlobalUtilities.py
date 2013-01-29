@@ -1143,7 +1143,7 @@ class ContactData(UtilitiesBase):
     def annual_donations(self, year):
         year = int(year)
         year_start = datetime(year, 1, 1)
-        year_end = datetime(year, 12, 31)
+        year_end = datetime(year, 12, 31, 23, 59)
 
         return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
 
