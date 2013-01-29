@@ -5,9 +5,27 @@
         	<p class="m_bottom15">Click any one of the contacts below to view more details about them.</p>
 
             <div class="col_12">
-                <input type="input" name="search" placeholder="Search..." />
+                <div style="width:100%; margin-bottom:10px; clear:both">
+                    <div style="float:right">
+                        <span style="width:15px"></span>
+                        <button class="button" id="search_go" style="margin-left:15px"><span class="ui-icon ui-icon-search">Search</span></button>
+                    </div>
 
-                <br><br>
+                    <div style="display:block; overflow:hidden">
+                        <input type="text" id="search_query" placeholder="Search..." style="width:100%; font-size:17">
+                    </div>
+                </div>
+
+                <div id="search_help" style="display:none; margin-bottom:10px">
+                    <p>
+                        Try queries like these: <code>created > 2012-1-1 total_donated > 500</code> &nbsp;&nbsp; <code>number_donations > 5 state:nc</code> &nbsp;&nbsp; <code>sandra</code>
+                    </p>
+
+                    <p>
+                        Here's everything you can use: <code>name</code> &nbsp;|&nbsp; <code>email</code> &nbsp;|&nbsp; <code>total_donated</code> &nbsp;|&nbsp; <code>number_donations</code> &nbsp;|&nbsp; <code>phone</code> &nbsp;|&nbsp; <code>city</code> &nbsp;|&nbsp; <code>state</code> &nbsp;|&nbsp; <code>created</code> 
+                    </p>
+                </div>
+
                 <table class="dataTable">
                     <thead class="bold">
                             <tr>
@@ -27,6 +45,11 @@
                         {% endfor %}
                     </tbody>
                 </table>
+
+                <div style="float:right; margin-top:10px">
+                    <button class="small button" id="download_query">Download query as a spreadsheet</button>
+                </div>
+                
             </div>
         </div>
     </div>

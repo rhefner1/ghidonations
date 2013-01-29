@@ -200,7 +200,6 @@ class RPCMethods:
         tools.flushMemcache(self)
         return "Success"
 
-
 #### ---- Globalhopeindia.org Utility Functions ---- ####
     def individualExists(self, email):
         settings = tools.getSettingsKey(self)
@@ -217,107 +216,35 @@ class RPCMethods:
         
         return all_teams
 
+    def pub_individualInfo(self, team_key, individual_key):
+        i = tools.getKey(individual_key).get()
+        t_key = tools.getKey(team_key)
+        return i.data.info(t_key)
+
     def pub_teamInfo(self, team_key):
     # This returns a simplejson list of team members' names, hosted link to picture, and description
     # Response parsed by Javascript on main GHI site
         t = tools.getKey(team_key).get()
         return t.data.members_list
 
-    def pub_individualInfo(self, team_key, individual_key):
-        i = tools.getKey(individual_key).get()
-        t_key = tools.getKey(team_key)
-        return i.data.info(t_key)
-
 #### ---- Data Access ---- ####
-    def semi_getTeamMembers(self, team_key):
-    # Returns team information
-        t = tools.getKey(team_key).get()
-        return t.data.members_dict
-
-    def IndividualName(self, individual_key):
-        i = tools.getKey(individual_key).get()
-        return individual.name
-
-    def getSettings(self):
-        settings = tools.getAccountEmails(self)
-        return settings
-
-    def getTeamDonors(self, team_key):
-        s = tools.getSettingsKey(self).get()
-        team_key = tools.getKey("ahBkZXZ-Z2hpZG9uYXRpb25zcgoLEgRUZWFtGAIM")
-        return s.data.team_donors(team_key)
-
-    def getDonations(self, query_cursor, donation_type):
+    def getContacts(self, query_cursor, query):
         s = tools.getSettingsKey(self).get()
 
-        if donation_type == "unreviewed":
-            response = s.data.open_donations(query_cursor)
+        if query == "":
+            results = s.data.contacts(query_cursor)
+        else:
+            results = s.search.contact(query, query_cursor=query_cursor)
+            
+            logging.info("Getting contacts with query: " + query)
 
-        elif donation_type == "all_donations":
-            response = s.data.donations(query_cursor)
+        contacts = []
+        new_cursor = results[1]
 
-        donations = []
-        new_cursor = response[1]
+        for c in results[0]:
+            c_dict = {"key" : c.websafe, "name" : c.name, "email" : c.email}
 
-        for d in response[0]:
-            d_dict = {"key" : d.key.urlsafe(), "formatted_donation_date" : d.formatted_donation_date, "name" : d.name, "email" : d.email,
-                 "payment_type" : d.payment_type, "amount_donated" : str(d.amount_donated)}
-
-            donations.append(d_dict)
-
-        #Return message to confirm 
-        return_vals = [donations, new_cursor]
-        return return_vals
-
-    def getTeams(self, query_cursor):
-        s = tools.getSettingsKey(self).get()
-
-        response = s.data.teams(query_cursor)
-        teams = []
-
-        for t in response[0]:
-            tdict = {"key" : t.websafe, "name" : t.name}
-            teams.append(tdict)
-        new_cursor = response[1]
-
-        #Return message to confirm 
-        return_vals = [teams, new_cursor]
-        return return_vals
-
-    def getDeposits(self, query_cursor):
-        s = tools.getSettingsKey(self).get()
-        response = s.data.deposits(query_cursor)
-
-        deposits = []
-        new_cursor = response[1]
-
-        for d in response[0]:
-            ddict = {"key" : d.websafe, "time_deposited" : d.time_deposited}
-            deposits.append(ddict)
-
-        # #Return message to confirm 
-        return_vals = [deposits, new_cursor]
-        return return_vals
-
-    def getContacts(self, query_cursor):
-        s = tools.getSettingsKey(self).get()
-
-        response = s.data.contacts(query_cursor)
-
-        contacts = tools.GQLtoDict(self, response[0])
-        new_cursor = response[1]
-
-        #Return message to confirm 
-        return_vals = [contacts, new_cursor]
-        return return_vals
-
-    def getIndividuals(self, query_cursor):
-        s = tools.getSettingsKey(self).get()
-
-        response = s.data.individuals(query_cursor)
-
-        contacts = tools.GQLtoDict(self, response[0])
-        new_cursor = response[1]
+            contacts.append(c_dict)
 
         #Return message to confirm 
         return_vals = [contacts, new_cursor]
@@ -341,17 +268,154 @@ class RPCMethods:
         return_vals = [donations, new_cursor]
         return return_vals
 
+    def getDeposits(self, query_cursor):
+        s = tools.getSettingsKey(self).get()
+        response = s.data.deposits(query_cursor)
+
+        deposits = []
+        new_cursor = response[1]
+
+        for d in response[0]:
+            ddict = {"key" : d.websafe, "time_deposited" : d.time_deposited}
+            deposits.append(ddict)
+
+        # #Return message to confirm 
+        return_vals = [deposits, new_cursor]
+        return return_vals
+
+    def getDonations(self, query_cursor, query):
+        s = tools.getSettingsKey(self).get()
+
+        if query == "":
+            results = s.data.donations(query_cursor)
+        else:
+            results = s.search.donation(query, query_cursor=query_cursor)
+            
+            logging.info("Getting donations with query: " + query)
+
+        donations = []
+        new_cursor = results[1]
+
+        for d in results[0]:
+            d_dict = {"key" : d.websafe, "formatted_donation_date" : d.formatted_donation_date, "name" : d.name, "email" : d.email,
+                 "payment_type" : d.payment_type, "amount_donated" : str(d.amount_donated)}
+
+            donations.append(d_dict)
+
+        #Return message to confirm 
+        return_vals = [donations, new_cursor]
+        return return_vals
+
+    def getIndividuals(self, query_cursor, query):
+        s = tools.getSettingsKey(self).get()
+
+        if query == "":
+            results = s.data.individuals(query_cursor)
+        else:
+            results = s.search.individual(query, query_cursor=query_cursor)
+            
+            logging.info("Getting individuals with query: " + query)
+
+        individuals = []
+        new_cursor = results[1]
+
+        for i in results[0]:
+            i_dict = {"key" : i.websafe, "name" : i.name, "email" : i.email}
+
+            individuals.append(i_dict)
+
+        #Return message to confirm 
+        return_vals = [individuals, new_cursor]
+        return return_vals
+
     def getMailchimpLists(self, mc_apikey):
         return tools.getMailchimpLists(self, mc_apikey)
 
-#### ---- Data creation/updating ---- ####
+    def getSettings(self):
+        settings = tools.getAccountEmails(self)
+        return settings
 
-    def newTeam(self, name):
+    def getTeams(self, query_cursor):
+        s = tools.getSettingsKey(self).get()
+
+        response = s.data.teams(query_cursor)
+        teams = []
+
+        for t in response[0]:
+            tdict = {"key" : t.websafe, "name" : t.name}
+            teams.append(tdict)
+        new_cursor = response[1]
+
+        #Return message to confirm 
+        return_vals = [teams, new_cursor]
+        return return_vals
+
+    def getTeamDonors(self, team_key):
+        s = tools.getSettingsKey(self).get()
+        team_key = tools.getKey("ahBkZXZ-Z2hpZG9uYXRpb25zcgoLEgRUZWFtGAIM")
+        return s.data.team_donors(team_key)
+
+    def semi_getTeamMembers(self, team_key):
+    # Returns team information
+        t = tools.getKey(team_key).get()
+        return t.data.members_dict
+
+    def IndividualName(self, individual_key):
+        i = tools.getKey(individual_key).get()
+        return individual.name
+
+#### ---- Data creation/updating ---- ####
+    def donationUnreviewed(self, donation_key):
+        message = "Donation marked as unreviewed"
+        success = True
+
+        d = tools.getKey(donation_key).get()
+        d.review.markUnreviewed()
+
+        #Return message to confirm 
+        return_vals = [success, message]
+        return return_vals
+
+    def editIndividual(self, name, email, team_list, description):
+        message = "Individual saved"
+        success = True
+        
+        i = tools.getKey(individual_key).get()
+        i.update(name, email, team_list, description, None)
+
+        #Return message to confirm 
+        return_vals = [success, message]
+        return return_vals
+
+    def newContact(self, name, email, phone, address, notes):
         message = "<b>" + name + "</b> created"
         success = True
 
         s = tools.getSettingsKey(self).get()
-        s.create.team(name)
+        contact_exists = s.exists.contact(email)
+
+        address = json.loads(address)
+
+        if contact_exists[0] == False:
+            s.create.contact(name, email, phone, address, notes, True)
+
+        else:
+            #If this email address already exists for a user
+            message = "This contact already exists, but we updated their information."
+
+            c = exists[1].get()
+            contact.update(name, email, phone, notes, address)
+
+        #Return message to confirm 
+        return_vals = [success, message]
+        return return_vals
+
+    def newImpression(self, contact_key, impression, notes):
+        message = "Impression saved"
+        success = True
+
+        c = tools.getKey(contact_key).get()
+        c.create.impression(impression, notes)
 
         #Return message to confirm 
         return_vals = [success, message]
@@ -382,35 +446,12 @@ class RPCMethods:
         return_vals = [success, message]
         return return_vals
 
-    def newContact(self, name, email, phone, address, notes):
+    def newTeam(self, name):
         message = "<b>" + name + "</b> created"
         success = True
 
         s = tools.getSettingsKey(self).get()
-        contact_exists = s.exists.contact(email)
-
-        address = json.loads(address)
-
-        if contact_exists[0] == False:
-            s.create.contact(name, email, phone, address, notes, True)
-
-        else:
-            #If this email address already exists for a user
-            message = "This contact already exists, but we updated their information."
-
-            c = exists[1].get()
-            contact.update(name, email, phone, notes, address)
-
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
-
-    def editIndividual(self, name, email, team_list, description):
-        message = "Individual saved"
-        success = True
-        
-        i = tools.getKey(individual_key).get()
-        i.update(name, email, team_list, description, None)
+        s.create.team(name)
 
         #Return message to confirm 
         return_vals = [success, message]
@@ -493,28 +534,6 @@ class RPCMethods:
 
         t = tools.getKey(team_key).get()
         t.update(name, show_team)
-
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
-
-    def donationUnreviewed(self, donation_key):
-        message = "Donation marked as unreviewed"
-        success = True
-
-        d = tools.getKey(donation_key).get()
-        d.review.markUnreviewed()
-
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
-
-    def newImpression(self, contact_key, impression, notes):
-        message = "Impression saved"
-        success = True
-
-        c = tools.getKey(contact_key).get()
-        c.create.impression(impression, notes)
 
         #Return message to confirm 
         return_vals = [success, message]

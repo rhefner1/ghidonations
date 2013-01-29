@@ -80,11 +80,14 @@ var pub_rpc_action = null
 var pub_rpc_params = null
 var pub_callback = null
 
-function initializeTable(num_columns, initial_cursor, rpc_action, rpc_params, callback){
+function initializeTable(num_columns, rpc_action, rpc_params, callback){
     //Making these variables public
     pub_rpc_action = rpc_action
     pub_rpc_params = rpc_params
     pub_callback = callback
+
+    // Reset cursor dict
+    cursors_dict = {0:null}
 
     var column_array = [{bVisible:false}]
 
@@ -123,14 +126,6 @@ function initializeTable(num_columns, initial_cursor, rpc_action, rpc_params, ca
     });
 
     $(".dataTable").css("width", "100%")
-
-    //Setting initial database cursor
-    if (initial_cursor == "None"){
-        cursors_dict[1] = "end"
-    }
-    else{
-        cursors_dict[1] = initial_cursor
-    }
     
     //Setting page to 0
     current_page = 0
@@ -143,9 +138,11 @@ function initializeTable(num_columns, initial_cursor, rpc_action, rpc_params, ca
         if (data_loading == false){
             data_loading = true
             $(this).effect("highlight", {}, 3000);
-
-            current_page += 1
-            pageThrough(data_table, current_page, rpc_action, rpc_params, callback)
+            try{
+                pageThrough(data_table, current_page, rpc_action, rpc_params, callback)  
+                current_page += 1
+            }
+            catch(error){}
         } 
     })
 
@@ -155,13 +152,16 @@ function initializeTable(num_columns, initial_cursor, rpc_action, rpc_params, ca
            $(this).effect("highlight", {}, 3000);
 
             if (current_page >= 1){
-                current_page -= 1
-                pageThrough(data_table, current_page, rpc_action, rpc_params, callback)
+                try{
+                    pageThrough(data_table, current_page, rpc_action, rpc_params, callback)  
+                    current_page -= 1
+                }
+                catch(error){}
             }  
         }
-        
     })
 
+    pageThrough(data_table, current_page, rpc_action, rpc_params, callback)
     return data_table
 }
 
@@ -170,9 +170,10 @@ function pageThrough(data_table, page_number, rpc_action, rpc_params, callback){
 
     if(query_cursor == "end"){
         show_flash("setting", "There isn't any more data to show.", true)
-        return
+        throw "Reached end"
     }
-    else if (query_cursor != null){
+    
+    if (query_cursor != null){
         query_cursor = JSON.stringify(query_cursor)
     }
 

@@ -77,6 +77,10 @@ class Settings(ndb.Expando):
     def mailchimp(self):
         return tools.SettingsMailchimp(self)
 
+    @property
+    def search(self):
+        return tools.SettingsSearch(self)
+
     ## -- Update -- ##
     def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
         s = self
@@ -276,6 +280,10 @@ class Individual(ndb.Expando):
         return tools.qCache(q)
 
     @property
+    def search(self):
+        return tools.IndividualSearch(self)
+
+    @property
     def show_donation_page(self):
         try:
             q = TeamList.gql("WHERE individual = :i", i=self.key)
@@ -391,6 +399,8 @@ class Individual(ndb.Expando):
             memcache.delete("teammembersdict" + t.team.urlsafe())
             memcache.delete("info" + t.team.urlsafe() + e.websafe)
 
+        e.search.index()
+
     ## -- Before Delete -- ##
     @classmethod
     def _pre_delete_hook(cls, key):
@@ -407,6 +417,10 @@ class Individual(ndb.Expando):
             memcache.delete("teammembersdict" + tl.team.urlsafe())
 
             tl.key.delete()
+
+        # Delete search index
+        doc = tools.getSearchKey(i.websafe)
+        doc.remove()
 
 class Donation(ndb.Expando):
     contact = ndb.KeyProperty()
@@ -500,6 +514,10 @@ class Donation(ndb.Expando):
         return tools.DonationReview(self)
 
     @property
+    def search(self):
+        return tools.DonationSearch(self)
+
+    @property
     def websafe(self):
         return self.key.urlsafe()
 
@@ -552,6 +570,17 @@ class Donation(ndb.Expando):
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
 
+        e.search.index()
+
+     ## -- Before Delete -- ##
+    @classmethod
+    def _pre_delete_hook(cls, key):
+        e = key.get()
+
+        # Delete search index
+        doc = tools.getSearchKey(e.websafe)
+        doc.remove()
+
 class Impression(ndb.Expando):
     contact = ndb.KeyProperty()
     impression = ndb.StringProperty()
@@ -568,7 +597,7 @@ class Impression(ndb.Expando):
     def websafe(self):
         return self.key.urlsafe()
 
-class Contact(ndb.Expando):
+class Conta[0]ct(ndb.Expando):
     #Standard information we need to know
     name = ndb.StringProperty()
     email = ndb.StringProperty()
@@ -600,6 +629,10 @@ class Contact(ndb.Expando):
     @property
     def data(self):
         return tools.ContactData(self)
+
+    @property
+    def search(self):
+        return tools.ContactSearch(self)
 
     @property
     def websafe(self):
@@ -644,6 +677,17 @@ class Contact(ndb.Expando):
     def _post_put_hook(self, future):
         e = future.get_result().get()
         memcache.delete("contacts" + e.settings.urlsafe())
+
+        e.search.index()
+
+    ## -- Before Delete -- ##
+    @classmethod
+    def _pre_delete_hook(cls, key):
+        e = key.get()
+
+        # Delete search index
+        doc = tools.getSearchKey(e.websafe)
+        doc.remove()
 
 class DepositReceipt(ndb.Expando):
     entity_keys = ndb.KeyProperty(repeated=True)

@@ -363,7 +363,6 @@ class Logout(webapp2.RequestHandler):
 
 class MergeContacts(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        
 
         template_variables = {}
         self.response.write(
@@ -371,7 +370,6 @@ class MergeContacts(BaseHandlerAdmin):
 
 class NewContact(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        
 
         template_variables = {}
         self.response.write(
@@ -414,13 +412,7 @@ class ReviewQueue(BaseHandlerAdmin):
     def task(self, isAdmin, s):
         isAdmin, s = tools.checkAuthentication(self, True)
 
-        #Get open donations
-        response = s.data.open_donations(None)
-
-        donations = response[0]
-        initial_cursor = response[1]
-
-        template_variables = {"donations":donations, "initial_cursor" : initial_cursor}
+        template_variables = {}
         self.response.write(
             template.render('pages/review_queue.html', template_variables))
 
@@ -451,7 +443,7 @@ class Settings(BaseHandlerAdmin):
         self.response.write(
            template.render('pages/settings.html', template_variables))
 
-class SpreadsheetGenerator(BaseHandlerAdmin):
+class SpreadsheetContacts(BaseHandlerAdmin):
     def task(self, isAdmin, s):
         isAdmin, s = tools.checkAuthentication(self, True)
 
@@ -459,66 +451,132 @@ class SpreadsheetGenerator(BaseHandlerAdmin):
         wb = Workbook()
         ws0 = wb.add_sheet('Sheet 1')
 
-        add_donation_total = False
+        query = self.request.get("query")
+        query = urllib.unquote(query)
 
-        action = self.request.get("e")
-        if action == "contacts" or action == "recurring_donors" or action == "team_contacts":
-            if action == "contacts":
-                #Get all donations from the datastore
-                all_contacts = s.data.all_contacts
-                filename = str(s.name) + "-Contacts"
+        logging.info("Exporting contacts spreadsheet with query: " + query)
+    
+        contacts = s.search.contact(query, entity_return=False, return_all=True)
+            
+        #Write headers
+        ws0.write(0, 0, "Name")
+        ws0.write(0, 1, "Email")
+        ws0.write(0, 2, "Total Donated")
+        ws0.write(0, 3, "Number Donations")
+        ws0.write(0, 4, "Phone")
+        ws0.write(0, 5, "City")
+        ws0.write(0, 6, "State")
+        ws0.write(0, 7, "Created")
 
-            elif action == "recurring_donors":
-                all_contacts = s.data.recurring_donors
-                filename = str(s.name) + "-RecurringDonors"
-                add_donation_total = True
+        current_line = 1
+        for c in contacts:
+            f = c.fields
+
+            ws0.write(current_line, 0, f[1].value)
+            ws0.write(current_line, 1, f[2].value)
+            ws0.write(current_line, 2, str(f[3].value))
+            ws0.write(current_line, 3, str(f[4].value))
+            ws0.write(current_line, 4, f[5].value)
+            ws0.write(current_line, 5, f[6].value)
+            ws0.write(current_line, 6, f[7].value)
+            ws0.write(current_line, 7, str(f[8].value))
                 
-            elif action == "team_contacts":
-                team_key = self.request.get("tk")
-                team_key = tools.getKey(team_key)
-                
-                all_contacts = s.data.team_donors(team_key)
-                filename = str(s.name) + "-TeamDonors"
-            
-            #Write headers
-            ws0.write(0, 0, "Name")
-            ws0.write(0, 1, "Email")
-            ws0.write(0, 2, "Notes")
-            ws0.write(0, 3, "Street")
-            ws0.write(0, 4, "City")
-            ws0.write(0, 5, "State")
-            ws0.write(0, 6, "ZIP")
-            ws0.write(0, 7, "Phone")
-
-            if add_donation_total == True:
-                ws0.write(0, 8, "Donation Total")
-            
-            
-            current_line = 1
-            for c in all_contacts:
-                if c.address and c.address != "None":
-                    a = c.address
-                else:
-                    a = ["", "", "", ""]
-
-                ws0.write(current_line, 0, c.name)
-                ws0.write(current_line, 1, c.email)
-                ws0.write(current_line, 2, str(c.notes))
-                ws0.write(current_line, 3, a[0])
-                ws0.write(current_line, 4, a[1])
-                ws0.write(current_line, 5, a[2])
-                ws0.write(current_line, 6, a[3])
-                ws0.write(current_line, 7, c.phone)
-
-                if add_donation_total == True:
-                    ws0.write(current_line, 8, "$" + str(c.data.recurring_donation_total))
-                    
-                current_line += 1
-        
-        else:
-            tools.giveError(self, 400)
+            current_line += 1
  
         # HTTP headers to force file download
+        filename = str(s.name) + " Contacts"
+        self.response.headers['Content-Type'] = 'application/ms-excel'
+        self.response.headers['Content-Transfer-Encoding'] = 'Binary'
+        self.response.headers['Content-disposition'] = 'attachment; filename="' + filename + ".xls" +  '"'
+ 
+        # output to user
+        wb.save(self.response.out)
+
+class SpreadsheetDonations(BaseHandlerAdmin):
+    def task(self, isAdmin, s):
+        isAdmin, s = tools.checkAuthentication(self, True)
+
+        #Initialize a xlwt Excel file
+        wb = Workbook()
+        ws0 = wb.add_sheet('Sheet 1')
+
+        query = self.request.get("query")
+        query = urllib.unquote(query)
+
+        logging.info("Exporting donations spreadsheet with query: " + query)
+        
+        donations = s.search.donation(query, entity_return=False, return_all=True)
+            
+        #Write headers
+        ws0.write(0, 0, "Date")
+        ws0.write(0, 1, "Name")
+        ws0.write(0, 2, "Email")
+        ws0.write(0, 3, "Amount Donated")
+        ws0.write(0, 4, "Payment Type")
+        ws0.write(0, 5, "Team")
+        ws0.write(0, 6, "Individual")
+        ws0.write(0, 7, "Reviewed")
+
+        current_line = 1
+        for d in donations:
+            f = d.fields
+
+            ws0.write(current_line, 0, str(f[1].value))
+            ws0.write(current_line, 1, f[2].value)
+            ws0.write(current_line, 2, f[3].value)
+            ws0.write(current_line, 3, str(f[4].value))
+            ws0.write(current_line, 4, f[5].value)
+            ws0.write(current_line, 5, f[6].value)
+            ws0.write(current_line, 6, f[7].value)
+            ws0.write(current_line, 7, f[8].value)
+                
+            current_line += 1
+ 
+        # HTTP headers to force file download
+        filename = str(s.name) + " Donations"
+        self.response.headers['Content-Type'] = 'application/ms-excel'
+        self.response.headers['Content-Transfer-Encoding'] = 'Binary'
+        self.response.headers['Content-disposition'] = 'attachment; filename="' + filename + ".xls" +  '"'
+ 
+        # output to user
+        wb.save(self.response.out)
+
+class SpreadsheetIndividuals(BaseHandlerAdmin):
+    def task(self, isAdmin, s):
+        isAdmin, s = tools.checkAuthentication(self, True)
+
+        #Initialize a xlwt Excel file
+        wb = Workbook()
+        ws0 = wb.add_sheet('Sheet 1')
+
+        query = self.request.get("query")
+        query = urllib.unquote(query)
+
+        logging.info("Exporting individuals spreadsheet with query: " + query)
+        
+        individuals = s.search.individual(query, entity_return=False, return_all=True)
+            
+        #Write headers
+        ws0.write(0, 0, "Name")
+        ws0.write(0, 1, "Email")
+        ws0.write(0, 2, "Teams")
+        ws0.write(0, 3, "Raised")
+        ws0.write(0, 4, "Date Created")
+
+        current_line = 1
+        for i in individuals:
+            f = i.fields
+
+            ws0.write(current_line, 0, f[1].value)
+            ws0.write(current_line, 1, f[2].value)
+            ws0.write(current_line, 2, f[3].value)
+            ws0.write(current_line, 3, str(f[4].value))
+            ws0.write(current_line, 4, str(f[5].value))
+                
+            current_line += 1
+ 
+        # HTTP headers to force file download
+        filename = str(s.name) + " Individuals"
         self.response.headers['Content-Type'] = 'application/ms-excel'
         self.response.headers['Content-Transfer-Encoding'] = 'Binary'
         self.response.headers['Content-disposition'] = 'attachment; filename="' + filename + ".xls" +  '"'
@@ -845,7 +903,9 @@ app = webapp2.WSGIApplication([
        ('/ajax/review', ReviewQueue),
        ('/ajax/reviewdetails', ReviewQueueDetails),
        ('/ajax/settings', Settings),
-       ('/ajax/spreadsheet', SpreadsheetGenerator),
+       ('/ajax/spreadsheetcontacts', SpreadsheetContacts),
+       ('/ajax/spreadsheetdonations', SpreadsheetDonations),
+       ('/ajax/spreadsheetindividuals', SpreadsheetIndividuals),
        ('/ajax/teammembers', TeamMembers),
        ('/thanks', ThankYou),
        ('/ajax/undeposited', UndepositedDonations),
