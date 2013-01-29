@@ -597,7 +597,7 @@ class Impression(ndb.Expando):
     def websafe(self):
         return self.key.urlsafe()
 
-class Conta[0]ct(ndb.Expando):
+class Contact(ndb.Expando):
     #Standard information we need to know
     name = ndb.StringProperty()
     email = ndb.StringProperty()
