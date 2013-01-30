@@ -34,7 +34,7 @@ $(document).ready(function(){
 	var individual_key = $("#individual_key").val()
 
     var rpc_params = [individual_key]
-    var data_table = initializeTable(4, "getIndividualDonations", rpc_params, function(data_table, d){
+    var data_table = initializeTable(4, "semi_getIndividualDonations", rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 
@@ -133,8 +133,9 @@ $(document).ready(function(){
 		}	
 	})
 
-	$("#donations").delegate("tr", "click", function(){
-        var clicked_id =  $(this).attr("data-id")
+    $("#donations").delegate("tr", "click", function(){
+        var row_data = data_table.fnGetData(this)
+        var clicked_id =  row_data[0]
 
         var url = "/ajax/reviewdetails?id=" + clicked_id
         loadColorbox(url, "donation_container")

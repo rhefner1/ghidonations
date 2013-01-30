@@ -270,7 +270,7 @@ class RPCMethods:
         return_vals = [donations, new_cursor]
         return return_vals
 
-    def getIndividualDonations(self, query_cursor, individual_key):
+    def semi_getIndividualDonations(self, query_cursor, individual_key):
         s = tools.getSettingsKey(self).get()
         query = "individual_key:" + str(individual_key)
 
