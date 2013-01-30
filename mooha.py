@@ -45,11 +45,8 @@ class BaseHandlerAdmin(webapp2.RequestHandler):
 
 class AllContacts(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        response = s.data.contacts(None)
-        contacts = response[0]
-        initial_cursor = response[1]
 
-        template_variables = {"contacts" : contacts, "initial_cursor" : initial_cursor}
+        template_variables = {}
         self.response.write(
            template.render('pages/all_contacts.html', template_variables))
 
@@ -65,13 +62,8 @@ class AllDeposits(BaseHandlerAdmin):
 
 class AllIndividuals(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        
 
-        response = s.data.individuals(None)
-        individuals = response[0]
-        initial_cursor = response[1]
-
-        template_variables = {"individuals" : individuals, "initial_cursor" : initial_cursor}
+        template_variables = {}
         self.response.write(
            template.render('pages/all_individuals.html', template_variables))
 

@@ -112,7 +112,7 @@ function initializeTable(num_columns, rpc_action, rpc_params, callback){
         "bAutoWidth" : true,
 
         "oLanguage": {
-            "sEmptyTable": "No data here."
+            "sEmptyTable": " "
         },
 
         //Disable some features
@@ -138,11 +138,16 @@ function initializeTable(num_columns, rpc_action, rpc_params, callback){
         if (data_loading == false){
             data_loading = true
             $(this).effect("highlight", {}, 3000);
+
             try{
-                pageThrough(data_table, current_page, rpc_action, rpc_params, callback)  
-                current_page += 1
+               current_page += 1
+               pageThrough(data_table, current_page, rpc_action, rpc_params, callback)  
             }
-            catch(error){}
+            catch(e){
+                current_page -= 1
+                pageThrough(data_table, current_page, rpc_action, rpc_params, callback) 
+            }
+             
         } 
     })
 
@@ -153,10 +158,13 @@ function initializeTable(num_columns, rpc_action, rpc_params, callback){
 
             if (current_page >= 1){
                 try{
-                    pageThrough(data_table, current_page, rpc_action, rpc_params, callback)  
-                    current_page -= 1
+                    current_page -= 1 
+                    pageThrough(data_table, current_page, rpc_action, rpc_params, callback) 
                 }
-                catch(error){}
+                catch(e){
+                    current_page += 1
+                    pageThrough(data_table, current_page, rpc_action, rpc_params, callback) 
+                }
             }  
         }
     })
@@ -166,11 +174,16 @@ function initializeTable(num_columns, rpc_action, rpc_params, callback){
 }
 
 function pageThrough(data_table, page_number, rpc_action, rpc_params, callback){
-    var query_cursor = cursors_dict[page_number]
+    try{
+        var query_cursor = cursors_dict[page_number]
+    }
+    catch(e){
+        var query_cursor = "end" 
+    }
 
     if(query_cursor == "end"){
         show_flash("setting", "There isn't any more data to show.", true)
-        throw "Reached end"
+        throw "No more data"
     }
     
     if (query_cursor != null){
@@ -189,7 +202,12 @@ function pageThrough(data_table, page_number, rpc_action, rpc_params, callback){
         }
     }
 
+    $("#search_icon").hide()
+    $("#search_loading").show()
     rpcGet(params, function(data){
+        $("#search_loading").hide()
+        $("#search_icon").show()
+
         data_table.fnClearTable()
 
         $.each(data[0], function(status, d){

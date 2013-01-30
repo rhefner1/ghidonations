@@ -7,7 +7,10 @@
             <div style="width:100%; margin-bottom:10px; clear:both">
                 <div style="float:right">
                     <span style="width:15px"></span>
-                    <button class="button" id="search_go" style="margin-left:15px"><span class="ui-icon ui-icon-search">Search</span></button>
+                    <button class="button" id="search_go" style="margin-left:15px">
+                        <span id="search_icon" class="ui-icon ui-icon-search">Search</span>
+                        <img id="search_loading" style="display:none" height="16" width="16" src="/images/ajax-loader.gif">
+                    </button>
                 </div>
 
                 <div style="display:block; overflow:hidden">
@@ -36,13 +39,6 @@
 
                     </thead>
                     <tbody id="individuals">
-                    	{% for i in individuals %}
-                        <tr>
-                            <td>{{ i.websafe }}</td>
-                            <td>{{ i.name }}</td>
-                            <td>{{ i.email }}</td>
-                        </tr>
-                        {% endfor %}
                     </tbody>
                 </table>
 
@@ -55,5 +51,4 @@
     </div>
 </div>
 
-<input type="hidden" id="initial_cursor" value="{{ initial_cursor }}" />
 <script src="/js/all_individuals.js?v=4"></script>

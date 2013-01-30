@@ -48,7 +48,7 @@ $(document).ready(function(){
             dataTableWriter(data_table, d)
         })
 
-        data_table = initializeTable(5, initial_cursor, "getDonations", rpc_params, function(data_table, d){
+        data_table = initializeTable(5, "getDonations", rpc_params, function(data_table, d){
             dataTableWriter(data_table, d)
         })
 

@@ -11,8 +11,9 @@ function dataTableWriter(data_table, d){
 $(document).ready(function(){  
 
     //Initialize data table
-    var initial_cursor = $("#initial_cursor").val()
-    var data_table = initializeTable(2, initial_cursor, "getIndividuals", null, function(data_table, d){
+    var query = $("#search_query").val()
+    rpc_params = [query]
+    var data_table = initializeTable(2, "getIndividuals", rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 
@@ -43,7 +44,7 @@ $(document).ready(function(){
             dataTableWriter(data_table, d)
         })
 
-        data_table = initializeTable(2, initial_cursor, "getIndividuals", rpc_params, function(data_table, d){
+        data_table = initializeTable(2, "getIndividuals", rpc_params, function(data_table, d){
             dataTableWriter(data_table, d)
         })
 

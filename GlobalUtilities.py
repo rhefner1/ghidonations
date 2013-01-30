@@ -358,7 +358,7 @@ def queryCursorDB(query, encoded_cursor):
 
     return [entities, new_cursor]
 
-def searchReturnAll(query, search_results, settings, entity_return=True):
+def searchReturnAll(query, search_results, settings, search_function, entity_return=True):
     total_results = search_results.number_found
     num_cursors_needed = int(math.ceil(float(total_results) / float(_NUM_RESULTS)))
 
@@ -373,7 +373,7 @@ def searchReturnAll(query, search_results, settings, entity_return=True):
             all_results.extend(searchToDocuments(results))
 
         query_cursor = search_results.cursor
-        results = settings.search.donation(query, query_cursor=query_cursor)
+        results = search_function(query, query_cursor=query_cursor)
 
     return all_results
 
@@ -874,12 +874,12 @@ class SettingsMailchimp(UtilitiesBase):
                 logging.info("Not a valid email address. Not continuing.")
 
 class SettingsSearch(UtilitiesBase):
-    def search(self, index_name, expr_list, query, query_cursor=None, entity_return=True, return_all=False):
+    def search(self, index_name, expr_list, query, search_function, query_cursor=None, entity_return=True, return_all=False):
         # query string looks like 'job tag:"very important" sent < 2011-02-28'
 
         if query_cursor == None:
             query_cursor = search.Cursor()
-        else:
+        elif isinstance(query_cursor, (str, unicode)):
             query_cursor = search.Cursor(web_safe_string=query_cursor)
 
         # construct the sort options
@@ -902,7 +902,7 @@ class SettingsSearch(UtilitiesBase):
             return [searchToEntities(search_results), new_cursor]
 
         elif return_all == True:
-            return searchReturnAll(query, search_results, settings=self.e, entity_return=entity_return)
+            return searchReturnAll(query, search_results, settings=self.e, search_function=search_function, entity_return=entity_return)
 
         else:
             return search_results
@@ -912,21 +912,27 @@ class SettingsSearch(UtilitiesBase):
             expression="name", default_value='',
             direction=search.SortExpression.ASCENDING)]
 
-        return self.search(index_name=_CONTACT_SEARCH_INDEX, expr_list=expr_list, query=query, **kwargs)
+        search_function = self.e.search.contact
+
+        return self.search(index_name=_CONTACT_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
 
     def donation(self, query, **kwargs):
         expr_list = [search.SortExpression(
             expression="date", default_value='',
             direction=search.SortExpression.DESCENDING)]
 
-        return self.search(index_name=_DONATION_SEARCH_INDEX, expr_list=expr_list, query=query, **kwargs)
+        search_function = self.e.search.donation
+
+        return self.search(index_name=_DONATION_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
 
     def individual(self, query, **kwargs):
         expr_list = [search.SortExpression(
             expression="name", default_value='',
             direction=search.SortExpression.ASCENDING)]
 
-        return self.search(index_name=_INDIVIDUAL_SEARCH_INDEX, expr_list=expr_list, query=query, **kwargs)
+        search_function = self.e.search.individual
+
+        return self.search(index_name=_INDIVIDUAL_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
 
 ## -- Team Classes -- ##
 class TeamData(UtilitiesBase):
@@ -1329,7 +1335,7 @@ class ContactData(UtilitiesBase):
     def annual_donations(self, year):
         year = int(year)
         year_start = datetime(year, 1, 1)
-        year_end = datetime(year, 12, 31, 23, 59)
+        year_end = datetime(year, 12, 31)
 
         return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
 

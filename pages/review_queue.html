@@ -9,11 +9,13 @@
             </div>
 
 
-
             <div style="width:100%; margin-bottom:10px; clear:both">
                 <div style="float:right">
                     <span style="width:15px"></span>
-                    <button class="button" id="search_go" style="margin-left:15px"><span class="ui-icon ui-icon-search">Search</span></button>
+                    <button class="button" id="search_go" style="margin-left:15px">
+                        <span id="search_icon" class="ui-icon ui-icon-search">Search</span>
+                        <img id="search_loading" style="display:none" height="16" width="16" src="/images/ajax-loader.gif">
+                    </button>
                 </div>
 
                 <div style="display:block; overflow:hidden">
@@ -23,11 +25,11 @@
 
             <div id="search_help" style="display:none; margin-bottom:10px">
                 <p>
-                    Try queries like these: <code>date > 2012-8-25 individual:becca taylor</code> &nbsp;&nbsp; <code>reviewed:no</code> &nbsp;&nbsp; <code>name:sandra amount > 1000</code> &nbsp;&nbsp; <code>type:offline OR team:august 2012</code>
+                    Try queries like these: <code>time > 2012-8-25 individual:becca taylor</code> &nbsp;&nbsp; <code>reviewed:no</code> &nbsp;&nbsp; <code>name:sandra amount > 1000</code> &nbsp;&nbsp; <code>type:offline OR team:august 2012</code>
                 </p>
 
                 <p>
-                    Here's everything you can use: <code>name</code> &nbsp;|&nbsp; <code>email</code> &nbsp;|&nbsp; <code>amount</code> &nbsp;|&nbsp; <code>type</code> &nbsp;|&nbsp; <code>team</code> &nbsp;|&nbsp; <code>individual</code> &nbsp;|&nbsp; <code>date</code> &nbsp;|&nbsp; <code>reviewed</code> 
+                    Here's everything you can use: <code>name</code> &nbsp;|&nbsp; <code>email</code> &nbsp;|&nbsp; <code>amount</code> &nbsp;|&nbsp; <code>type</code> &nbsp;|&nbsp; <code>team</code> &nbsp;|&nbsp; <code>individual</code> &nbsp;|&nbsp; <code>time</code> &nbsp;|&nbsp; <code>reviewed</code> 
                 </p>
             </div>
 

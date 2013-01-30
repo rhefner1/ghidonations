@@ -236,7 +236,7 @@ class RPCMethods:
         else:
             results = s.search.contact(query, query_cursor=query_cursor)
             
-            logging.info("Getting contacts with query: " + query)
+        logging.info("Getting contacts with query: " + query)
 
         contacts = []
         new_cursor = results[1]
