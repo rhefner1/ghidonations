@@ -84,11 +84,7 @@ class Contact(BaseHandlerAdmin):
         contact_key = self.request.get("c")
         c = tools.getKey(contact_key).get()
 
-        response = c.data.donations(None)
-        donations = response[0]
-        initial_cursor = response[1]
-
-        template_variables = {"c" : c, "s" : s, "donations" : donations, "initial_cursor" : initial_cursor}
+        template_variables = {"c" : c, "s" : s}
         self.response.write(
            template.render('pages/contact.html', template_variables))
 
@@ -263,7 +259,6 @@ class ExportDonations(BaseHandlerAdmin):
 class IndividualProfile(BaseHandler):
     def task(self, isAdmin, s):
         
-
         if isAdmin == True:
             #If an admin, they can get whatever user they want
             i_key = self.request.get("i")

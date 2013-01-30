@@ -1,18 +1,21 @@
-$(document).ready(function(){
-    var contact_key = $("#contact_key").val()
-
-    //Initialize data table
-    var initial_cursor = $("#initial_cursor").val()
-
-    var rpc_params = [contact_key]
-    var data_table = initializeTable(4, initial_cursor, "getContactDonations", rpc_params, function(data_table, d){
-        data_table.fnAddData([
+function dataTableWriter(data_table, d){
+    data_table.fnAddData([
             d.key,
             d.formatted_donation_date,
             d.email,
             d.amount_donated,
             d.payment_type
         ])
+
+    data_table.fnAdjustColumnSizing()
+}
+
+$(document).ready(function(){
+    var contact_key = $("#contact_key").val()
+
+    var rpc_params = [contact_key]
+    var data_table = initializeTable(4, "getContactDonations", rpc_params, function(data_table, d){
+        dataTableWriter(data_table, d)
     })
 
     //Deserialize the address

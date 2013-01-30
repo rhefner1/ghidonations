@@ -354,7 +354,6 @@ class Individual(ndb.Expando):
 
             for d in tl.donations:
                 d.team = None
-                d.individual = None
                 d.put()
 
             tl.key.delete()

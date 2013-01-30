@@ -1,6 +1,19 @@
 //Global variables
 var team_list = ""
 
+function dataTableWriter(data_table, d){
+    data_table.fnAddData([
+        d.key,
+        d.formatted_donation_date,
+        d.name,
+        d.email,
+        d.amount_donated,
+        d.payment_type
+    ])
+
+    data_table.fnAdjustColumnSizing()
+}
+
 function refreshCurrentTeams(){
 	$("#current_teams").html("")
 
@@ -18,6 +31,13 @@ function refreshCurrentTeams(){
 }
 
 $(document).ready(function(){
+	var individual_key = $("#individual_key").val()
+
+    var rpc_params = [individual_key]
+    var data_table = initializeTable(4, "getIndividualDonations", rpc_params, function(data_table, d){
+        dataTableWriter(data_table, d)
+    })
+
 	//Team list dictionary parsed from JSON
 	team_list = JSON.parse(htmlDecode($("input[name=team_list]").val()))
 	var team_names = ""
@@ -73,7 +93,6 @@ $(document).ready(function(){
     $("form input[name=delete_individual]").click(function(){
     	var r=confirm("Do you want to delete this person?")
 		if (r==true){
-			var individual_key = $("#individual_key").val()
 	    	var params = ["semi_deleteIndividual", individual_key]
 
 		    rpcPost(params, function(data){

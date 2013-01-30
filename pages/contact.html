@@ -47,7 +47,6 @@
                                 <input class="medium unlockable" type="text" name="zip" placeholder="ZIP" disabled="disabled" />
 
                                 <br><br>
-                                <!-- <button class="small button" id="copy_address">Copy Address to Clipboard</button> -->
                             </div>
                         </div>
 
@@ -61,6 +60,26 @@
                         </div>
                     </form>
                     </div>
+                </div>
+            </div>
+
+            <div class="widget_inside">
+                <div class="col_12" style="margin-top:50px">
+                    <h3>Donations By This Contact <img id="search_loading" style="display:none" height="16" width="16" src="/images/ajax-loader.gif"></h3>
+                    <table class="dataTable">
+                        <thead class="bold">
+                            <tr>
+                                <th class="align-left">Key</th>
+                                <th class="align-left">Time Donated</th>
+                                <th class="align-left">Email</th>
+                                <th class="align-left">Donation Amount</th>
+                                <th class="align-left">Payment Type</th>
+                            </tr>
+
+                        </thead>
+                        <tbody id="donations">
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
@@ -121,35 +140,6 @@
                         </div>
 
                     </div>
-                </div>
-            </div>
-
-            <div class="widget_inside">
-                <div class="col_12" style="margin-top:50px">
-                    <h3>Donations By This Contact</h3>
-                    <table class="dataTable">
-                        <thead class="bold">
-                            <tr>
-                                <th class="align-left">Key</th>
-                                <th class="align-left">Time Donated</th>
-                                <th class="align-left">Email</th>
-                                <th class="align-left">Donation Amount</th>
-                                <th class="align-left">Payment Type</th>
-                            </tr>
-
-                        </thead>
-                        <tbody id="donations">
-                            {% for d in donations %}
-                            <tr>
-                                <td>{{ d.websafe }}</td>
-                                <td>{{ d.formatted_donation_date }}</td>
-                                <td>{{ d.email }}</td>
-                                <td>${{ d.amount_donated }}</td>
-                                <td>{{ d.payment_type }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
                 </div>
             </div>
 

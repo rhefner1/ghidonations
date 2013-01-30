@@ -102,28 +102,19 @@
                 </div>
 
                 <div class="col_12" style="margin-top:50px">
-                    <h3>Donations (click for more info)</h3>
-                    <table class="regular">
+                    <h3>Donations <img id="search_loading" style="display:none" height="16" width="16" src="/images/ajax-loader.gif"></h3>
+                    <table class="dataTable">
                         <thead class="bold">
-                                <tr>
+                            <tr>
+                                <th class="align-left">Key</th>
                                 <th class="align-left">Time Donated</th>
-                                <th class="align-left">Name</th>
                                 <th class="align-left">Email</th>
                                 <th class="align-left">Donation Amount</th>
                                 <th class="align-left">Payment Type</th>
-                                </tr>
+                            </tr>
 
                         </thead>
-                        <tbody id="donations" style="cursor:pointer">
-                            {% for d in i.data.donations %}
-                            <tr data-id="{{ d.websafe }}">
-                                    <td>{{ d.formatted_donation_date }}</td>
-                                    <td>{{ d.name }}</td>
-                                    <td>{{ d.email }}</td>
-                                    <td>${{ d.amount_donated }}</td>
-                                    <td>{{ d.payment_type }}</td>
-                            </tr>
-                            {% endfor %}
+                        <tbody id="donations">
                         </tbody>
                     </table>
                     

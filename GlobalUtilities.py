@@ -373,7 +373,7 @@ def searchReturnAll(query, search_results, settings, search_function, entity_ret
             all_results.extend(searchToDocuments(results))
 
         query_cursor = search_results.cursor
-        results = search_function(query, query_cursor=query_cursor)
+        results = search_function(query, query_cursor=query_cursor, entity_return=entity_return)
 
     return all_results
 
@@ -890,6 +890,14 @@ class SettingsSearch(UtilitiesBase):
             limit=_NUM_RESULTS,
             sort_options=sort_opts)
 
+        # Adding settings key to query (AND is mandatory to ensure that you cannot access other organizations' data)
+        add_settings_query = " settings:" + self.e.websafe
+        if query == "":
+            query += add_settings_query
+
+        elif add_settings_query not in query:
+            query += " AND" + add_settings_query  
+
         query_obj = search.Query(query_string=query, options=query_options)
 
         search_results = search.Index(name=index_name).search(query=query_obj)
@@ -1114,7 +1122,8 @@ class IndividualSearch(UtilitiesBase):
                     search.TextField(name='email', value=i.email),
                     search.TextField(name='team', value=team_names),
                     search.NumberField(name='raised', value=float(raised)),
-                    search.DateField(name='created', value=i.creation_date)
+                    search.DateField(name='created', value=i.creation_date),
+                    search.TextField(name='settings', value=i.settings.urlsafe()),
                     ])
 
         return document
@@ -1289,6 +1298,8 @@ class DonationSearch(UtilitiesBase):
                     search.TextField(name='individual', value=d.designated_individual),
                     search.TextField(name='reviewed', value=reviewed),
                     search.TextField(name='contact_key', value=d.contact.urlsafe()),
+                    search.TextField(name='individual_key', value=d.individual.urlsafe()),
+                    search.TextField(name='settings', value=d.settings.urlsafe()),
                     ])
 
         return document
@@ -1339,7 +1350,6 @@ class ContactData(UtilitiesBase):
 
         return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
 
-
     @property
     def recurring_donation_total(self):
         donation_total = toDecimal(0)
@@ -1376,7 +1386,8 @@ class ContactSearch(UtilitiesBase):
                     search.TextField(name='phone', value=c.phone),
                     search.TextField(name='city', value=city),
                     search.TextField(name='state', value=state),
-                    search.DateField(name='created', value=c.creation_date)
+                    search.DateField(name='created', value=c.creation_date),
+                    search.TextField(name='settings', value=c.settings.urlsafe()),
                     ])
 
         return document

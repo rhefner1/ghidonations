@@ -234,7 +234,7 @@ class RPCMethods:
         if query == "":
             results = s.data.contacts(query_cursor)
         else:
-            results = s.search.contact(query.lower(), query_cursor=query_cursor)
+            results = s.search.contact(query, query_cursor=query_cursor)
             
         logging.info("Getting contacts with query: " + query)
 
@@ -251,14 +251,36 @@ class RPCMethods:
         return return_vals
 
     def getContactDonations(self, query_cursor, contact_key):
-        c = tools.getKey(contact_key).get()
+        s = tools.getSettingsKey(self).get()
+        query = "contact_key:" + str(contact_key)
 
-        response = c.data.donations(query_cursor)
+        results = s.search.donation(query, query_cursor=query_cursor)
+        logging.info("Getting contact donations with query: " + query)
 
         donations = []
-        new_cursor = response[1]
+        new_cursor = results[1]
 
-        for d in response[0]:
+        for d in results[0]:
+            d_dict = {"key" : d.key.urlsafe(), "formatted_donation_date" : d.formatted_donation_date, "name" : d.name, "email" : d.email,
+                 "payment_type" : d.payment_type, "amount_donated" : str(d.amount_donated)}
+
+            donations.append(d_dict)
+
+        #Return message to confirm 
+        return_vals = [donations, new_cursor]
+        return return_vals
+
+    def getIndividualDonations(self, query_cursor, individual_key):
+        s = tools.getSettingsKey(self).get()
+        query = "individual_key:" + str(individual_key)
+
+        results = s.search.donation(query, query_cursor=query_cursor)
+        logging.info("Getting individual donations with query: " + query)
+
+        donations = []
+        new_cursor = results[1]
+
+        for d in results[0]:
             d_dict = {"key" : d.key.urlsafe(), "formatted_donation_date" : d.formatted_donation_date, "name" : d.name, "email" : d.email,
                  "payment_type" : d.payment_type, "amount_donated" : str(d.amount_donated)}
 
@@ -289,9 +311,9 @@ class RPCMethods:
         if query == "":
             results = s.data.donations(query_cursor)
         else:
-            results = s.search.donation(query.lower(), query_cursor=query_cursor)
+            results = s.search.donation(query, query_cursor=query_cursor)
             
-            logging.info("Getting donations with query: " + query)
+        logging.info("Getting donations with query: " + query)
 
         donations = []
         new_cursor = results[1]
@@ -312,7 +334,7 @@ class RPCMethods:
         if query == "":
             results = s.data.individuals(query_cursor)
         else:
-            results = s.search.individual(query.lower(), query_cursor=query_cursor)
+            results = s.search.individual(query, query_cursor=query_cursor)
             
             logging.info("Getting individuals with query: " + query)
 
