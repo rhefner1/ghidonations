@@ -234,7 +234,7 @@ class RPCMethods:
         if query == "":
             results = s.data.contacts(query_cursor)
         else:
-            results = s.search.contact(query, query_cursor=query_cursor)
+            results = s.search.contact(query.lower(), query_cursor=query_cursor)
             
         logging.info("Getting contacts with query: " + query)
 
@@ -289,7 +289,7 @@ class RPCMethods:
         if query == "":
             results = s.data.donations(query_cursor)
         else:
-            results = s.search.donation(query, query_cursor=query_cursor)
+            results = s.search.donation(query.lower(), query_cursor=query_cursor)
             
             logging.info("Getting donations with query: " + query)
 
@@ -312,7 +312,7 @@ class RPCMethods:
         if query == "":
             results = s.data.individuals(query_cursor)
         else:
-            results = s.search.individual(query, query_cursor=query_cursor)
+            results = s.search.individual(query.lower(), query_cursor=query_cursor)
             
             logging.info("Getting individuals with query: " + query)
 
