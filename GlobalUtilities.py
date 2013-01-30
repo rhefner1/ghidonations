@@ -1131,7 +1131,6 @@ class IndividualSearch(UtilitiesBase):
     def index(self):
         # Updates search index of this entity or creates new one if it doesn't exist
         i = self.e
-        s = i.settings.get()
         index = search.Index(name=_INDIVIDUAL_SEARCH_INDEX)
     
         # Creating the new index
@@ -1287,9 +1286,16 @@ class DonationSearch(UtilitiesBase):
         if d.reviewed == True:
             reviewed = "yes"
 
+        dd = d.donation_date
+        donation_date = date(dd.year, dd.month, dd.day)
+
+        individual_key = ""
+        if d.individual:
+            individual_key = d.individual.urlsafe()
+
         document = search.Document(doc_id=d.websafe,
             fields=[search.TextField(name='donation_key', value=d.websafe),
-                    search.DateField(name='time', value=d.donation_date),
+                    search.DateField(name='time', value=donation_date),
                     search.TextField(name='name', value=d.contact.get().name),
                     search.TextField(name='email', value=d.contact.get().email),
                     search.NumberField(name='amount', value=float(d.amount_donated)),
@@ -1298,7 +1304,7 @@ class DonationSearch(UtilitiesBase):
                     search.TextField(name='individual', value=d.designated_individual),
                     search.TextField(name='reviewed', value=reviewed),
                     search.TextField(name='contact_key', value=d.contact.urlsafe()),
-                    search.TextField(name='individual_key', value=d.individual.urlsafe()),
+                    search.TextField(name='individual_key', value=individual_key),
                     search.TextField(name='settings', value=d.settings.urlsafe()),
                     ])
 
@@ -1307,7 +1313,6 @@ class DonationSearch(UtilitiesBase):
     def index(self):
         # Updates search index of this entity or creates new one if it doesn't exist
         d = self.e
-        s = d.settings.get()
         index = search.Index(name=_DONATION_SEARCH_INDEX)
 
         # Creating the new index
@@ -1395,7 +1400,6 @@ class ContactSearch(UtilitiesBase):
     def index(self):
         # Updates search index of this entity or creates new one if it doesn't exist
         c = self.e
-        s = c.settings.get()
         index = search.Index(name=_CONTACT_SEARCH_INDEX)
 
         # Creating the new index

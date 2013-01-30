@@ -34,7 +34,7 @@ handlers:
 
 - url: /
   script: mooha.app
-  secure: optional
+  secure: always
 
 - url: /login
   script: mooha.app
