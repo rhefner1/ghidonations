@@ -275,20 +275,20 @@ def giveError(self, error_code):
                    template.render('pages/error.html', {}))
 
 def getSearchDoc(doc_id, index):
-  if not doc_id:
-    return None
+    if not doc_id:
+        return None
 
-  try:
-    response = index.list_documents(
+    try:
+        response = index.list_documents(
         start_doc_id=doc_id, limit=1, include_start_doc=True)
 
-    if response.results and response.results[0].doc_id == doc_id:
-      return response.results[0]
+        if response.results and response.results[0].doc_id == doc_id:
+            return response.results[0]
 
-    return None
+        return None
 
-  except search.InvalidRequest: # catches ill-formed doc ids
-    return None
+    except search.InvalidRequest: # catches ill-formed doc ids
+      return None
 
 def GQLtoDict(self, gql_query):
     #Converts GQLQuery of App Engine data models to dictionary objects

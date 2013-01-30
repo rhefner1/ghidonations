@@ -5,7 +5,14 @@ from decimal import *
 from google.appengine.api import mail, memcache, datastore_errors
 from google.appengine.ext import ndb, blobstore
 
+#Search
+from google.appengine.api import search
+
 import GlobalUtilities as tools
+
+_CONTACT_SEARCH_INDEX = "contact"
+_DONATION_SEARCH_INDEX = "donation"
+_INDIVIDUAL_SEARCH_INDEX = "individual"
 
 class DecimalProperty(ndb.StringProperty):
     def _validate(self, value):
@@ -419,8 +426,8 @@ class Individual(ndb.Expando):
             tl.key.delete()
 
         # Delete search index
-        doc = tools.getSearchKey(i.websafe)
-        doc.remove()
+        index = search.Index(name=_INDIVIDUAL_SEARCH_INDEX)
+        index.remove(i.websafe)
 
 class Donation(ndb.Expando):
     contact = ndb.KeyProperty()
@@ -578,8 +585,8 @@ class Donation(ndb.Expando):
         e = key.get()
 
         # Delete search index
-        doc = tools.getSearchKey(e.websafe)
-        doc.remove()
+        index = search.Index(name=_DONATION_SEARCH_INDEX)
+        index.remove(e.websafe)
 
 class Impression(ndb.Expando):
     contact = ndb.KeyProperty()
@@ -686,8 +693,8 @@ class Contact(ndb.Expando):
         e = key.get()
 
         # Delete search index
-        doc = tools.getSearchKey(e.websafe)
-        doc.remove()
+        index = search.Index(name=_CONTACT_SEARCH_INDEX)
+        index.remove(e.websafe)
 
 class DepositReceipt(ndb.Expando):
     entity_keys = ndb.KeyProperty(repeated=True)

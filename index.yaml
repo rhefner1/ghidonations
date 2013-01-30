@@ -78,6 +78,12 @@ indexes:
 
 - kind: Donation
   properties:
+  - name: individual
+  - name: donation_date
+    direction: desc
+
+- kind: Donation
+  properties:
   - name: name
   - name: settings_key
   - name: time_created
