@@ -59,7 +59,7 @@ class AnnualReport(webapp2.RequestHandler):
         else:
             logging.info("Annual report not sent sent because " + c.name + "doesn't have an email.")
 
-class IndexAllDonations(webapp2.RequestHandler):
+class IndexAll(webapp2.RequestHandler):
     def post(self):
         settings_key = self.request.get("settings_key")
         key = tools.getKey(settings_key)
@@ -81,11 +81,15 @@ class IndexAllDonations(webapp2.RequestHandler):
             for i in individuals:
                 i.search.index()
 
+        elif mode == "teams":
+            teams = models.Team.gql("WHERE settings = :s", s=key)
+            for t in teams:
+                t.search.index()
 
 app = webapp2.WSGIApplication([
        ('/tasks/confirmation', Confirmation),
        ('/tasks/annualreport', AnnualReport),
-       ('/tasks/indexall', IndexAllDonations),
+       ('/tasks/indexall', IndexAll),
        ('/tasks/mailchimp', MailchimpAdd)],
        debug=True)
 app = appengine_config.recording_add_wsgi_middleware(app)

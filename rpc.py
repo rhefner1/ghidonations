@@ -357,16 +357,23 @@ class RPCMethods:
         settings = tools.getAccountEmails(self)
         return settings
 
-    def getTeams(self, query_cursor):
+    def getTeams(self, query_cursor, query):
         s = tools.getSettingsKey(self).get()
 
-        response = s.data.teams(query_cursor)
-        teams = []
+        if query == "":
+            results = s.data.teams(query_cursor)
+        else:
+            results = s.search.team(query, query_cursor=query_cursor)
+            
+            logging.info("Getting teams with query: " + query)
 
-        for t in response[0]:
-            tdict = {"key" : t.websafe, "name" : t.name}
-            teams.append(tdict)
-        new_cursor = response[1]
+        teams = []
+        new_cursor = results[1]
+
+        for t in results[0]:
+            i_dict = {"key" : t.websafe, "name" : t.name}
+
+            teams.append(i_dict)
 
         #Return message to confirm 
         return_vals = [teams, new_cursor]

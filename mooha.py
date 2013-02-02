@@ -71,11 +71,7 @@ class AllTeams(BaseHandlerAdmin):
     def task(self, isAdmin, s):
         isAdmin, s = tools.checkAuthentication(self, True)
 
-        response = s.data.teams(None)
-        teams = response[0]
-        initial_cursor = response[1]
-
-        template_variables = {"teams":teams, "initial_cursor" : initial_cursor}
+        template_variables = {}
         self.response.write(
                 template.render('pages/all_teams.html', template_variables))
 

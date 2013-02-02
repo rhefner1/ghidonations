@@ -13,6 +13,7 @@ import GlobalUtilities as tools
 _CONTACT_SEARCH_INDEX = "contact"
 _DONATION_SEARCH_INDEX = "donation"
 _INDIVIDUAL_SEARCH_INDEX = "individual"
+_TEAM_SEARCH_INDEX = "team"
 
 class DecimalProperty(ndb.StringProperty):
     def _validate(self, value):
@@ -154,13 +155,16 @@ class Team(ndb.Expando):
     settings = ndb.KeyProperty()
     show_team = ndb.BooleanProperty()
     
-
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
     def data(self):
         return tools.TeamData(self)
+
+    @property
+    def search(self):
+        return tools.TeamSearch(self)
 
     @property
     def websafe(self):
@@ -184,6 +188,8 @@ class Team(ndb.Expando):
         memcache.delete("teammembers" + e.websafe)
         memcache.delete("teamsdict" + e.settings.urlsafe())
 
+        e.search.index()       
+
     ## -- Before Deletion -- ##
     @classmethod
     def _pre_delete_hook(cls, key):
@@ -198,6 +204,10 @@ class Team(ndb.Expando):
             d.individual = None
             d.team = None
             d.put()
+
+        # Delete search index
+        index = search.Index(name=_TEAM_SEARCH_INDEX)
+        index.remove(t.websafe)
 
 class TeamList(ndb.Model):
     individual = ndb.KeyProperty()
