@@ -739,7 +739,7 @@ class SettingsData(UtilitiesBase):
         memcache_key = "contacts" + self.e.websafe
 
         def get_item():
-            return self.e.contacts_json
+            return json.loads(self.e.contacts_json)
 
         return cache(memcache_key, get_item)
 
