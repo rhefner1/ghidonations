@@ -261,7 +261,7 @@ class RPCMethods:
             f = d.fields
 
             d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
-                 "payment_type" : f[5].value, "amount_donated" : f[4].value}
+                 "payment_type" : f[5].value, "amount_donated" : tools.moneyAmount(f[4].value)}
 
             donations.append(d_dict)
 
@@ -297,7 +297,7 @@ class RPCMethods:
             f = d.fields
 
             d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
-                 "payment_type" : f[5].value, "amount_donated" : f[4].value}
+                 "payment_type" : f[5].value, "amount_donated" : tools.moneyAmount(f[4].value)}
 
             donations.append(d_dict)
 
@@ -362,7 +362,7 @@ class RPCMethods:
 
         for i in results[0]:
             f = i.fields
-            i_dict = {"key" : f[0].value, "name" : f[1].value, "email" : f[2].value, "raised" : "$" + str(tools.toDecimal(f[4].value))}
+            i_dict = {"key" : f[0].value, "name" : f[1].value, "email" : f[2].value, "raised" : tools.moneyAmount(f[4].value)}
 
             individuals.append(i_dict)
 
