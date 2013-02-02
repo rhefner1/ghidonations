@@ -1,4 +1,23 @@
+function dataTableWriter(data_table, d){
+    data_table.fnAddData([
+        d.key,
+        d.name,
+        d.email,
+        d.raised,
+    ])
+
+    data_table.fnAdjustColumnSizing()
+}
+
 $(document).ready(function(){
+
+    //Initializing data table
+    var team_key = $("#team_key").val()
+
+    var rpc_params = [team_key]
+    var data_table = initializeTable(3, "getTeamMembers", rpc_params, function(data_table, d){
+        dataTableWriter(data_table, d)
+    })
 	
 	if ($("#var_showteam").val() == "True"){
 		$("#toggle_team").attr("checked", "checked")
@@ -6,11 +25,12 @@ $(document).ready(function(){
 	
 
     $("#members").delegate("tr", "click", function(e){
-        var clicked_id = $(this).attr("data-id")
+        var row_data = data_table.fnGetData(this)
+        var clicked_id =  row_data[0]
 
         change_hash(e, "profile?i=" + clicked_id)
     })
-
+    
     $("#edit_team").click(function(){
     	if ($("#edit_team").attr("data-state") == "edit"){
 			$("#edit_team").attr("data-state", "save")

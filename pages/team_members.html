@@ -40,23 +40,18 @@
 
             </div>
             <div class="col_8 last">
-                <table class="regular" style="cursor:pointer">
-                <thead class="bold">
-                        <tr>
-                        <th class="align-left">Name</th>
-                        <th class="align-left">Email</th>
-                        <th class="align-left">Money Raised</th>
-                        </tr>
+
+                <table class="dataTable">
+                    <thead class="bold">
+                            <tr>
+                            <th class="align-left">Key</th>
+                            <th class="align-left">Name</th>
+                            <th class="align-left">Email</th>
+                            <th class="align-left">Money Raised</th>
+                            </tr>
 
                     </thead>
                     <tbody id="members">
-                        {% for tl in t.data.members %}
-                        <tr data-id="{{ tl.individual_key }}">
-                            <td>{{ tl.individual_name }}</td>
-                            <td>{{ tl.individual_email }}</td>
-                            <td>${{ tl.donation_total }}</td>
-                        </tr>
-                        {% endfor %}
                     </tbody>
                 </table>
             </div>

@@ -875,7 +875,7 @@ class SettingsMailchimp(UtilitiesBase):
                 logging.info("Not a valid email address. Not continuing.")
 
 class SettingsSearch(UtilitiesBase):
-    def search(self, index_name, expr_list, query, search_function, query_cursor=None, entity_return=True, return_all=False):
+    def search(self, index_name, expr_list, query, search_function, query_cursor=None, entity_return=False, return_all=False):
         # query string looks like 'job tag:"very important" sent < 2011-02-28'
 
         if query_cursor == None:
@@ -913,8 +913,11 @@ class SettingsSearch(UtilitiesBase):
         elif return_all == True:
             return searchReturnAll(query, search_results, settings=self.e, search_function=search_function, entity_return=entity_return)
 
-        else:
+        elif entity_return == False and return_all == True:
             return search_results
+
+        else:
+            return [search_results, search_results.cursor]
 
     def contact(self, query, **kwargs):
         expr_list = [search.SortExpression(
@@ -1201,6 +1204,7 @@ class DonationSearch(UtilitiesBase):
                     search.TextField(name='team', value=d.designated_team),
                     search.TextField(name='individual', value=d.designated_individual),
                     search.TextField(name='reviewed', value=reviewed),
+                    search.TextField(name='reviewed', value=d.formatted_donation_date),
                     search.TextField(name='contact_key', value=d.contact.urlsafe()),
                     search.TextField(name='individual_key', value=individual_key),
                     search.TextField(name='settings', value=d.settings.urlsafe()),
@@ -1286,6 +1290,15 @@ class IndividualData(UtilitiesBase):
         return photo
 
     @property
+    def search_team_list(self):
+        search_list = ""
+
+        for tl in self.teams:
+            search_list += tl.team.urlsafe()
+
+        return search_list
+
+    @property
     def teams(self):
         q = models.TeamList.gql("WHERE individual = :i", i=self.e.key)
         return q
@@ -1294,9 +1307,9 @@ class IndividualData(UtilitiesBase):
     def team_list(self):
         teams_dict = {}
 
-        for t in self.teams:
-            array = [t.team.get().name, str(t.fundraise_amt)]
-            teams_dict[t.team.urlsafe()] = array
+        for tl in self.teams:
+            array = [tl.team.get().name, str(tl.fundraise_amt)]
+            teams_dict[tl.team.urlsafe()] = array
 
         return teams_dict
 
@@ -1323,6 +1336,7 @@ class IndividualSearch(UtilitiesBase):
                     search.TextField(name='team', value=team_names),
                     search.NumberField(name='raised', value=float(raised)),
                     search.DateField(name='created', value=i.creation_date),
+                    search.TextField(name='team_key', value=i.data.search_team_list),
                     search.TextField(name='settings', value=i.settings.urlsafe()),
                     ])
 
