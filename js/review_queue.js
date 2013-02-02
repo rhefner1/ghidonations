@@ -12,7 +12,6 @@ function dataTableWriter(data_table, d){
 }
 
 function trigger_search(query){
-    data_table.fnClearTable()
 
     //Reinitialize the table with new settings
     rpc_params = [query]
@@ -31,7 +30,11 @@ function trigger_search(query){
     }
     else if (query == "reviewed:no"){
         $("#unreviewed").addClass("blue")
-        ("#all_donations").removeClass("blue")
+        $("#all_donations").removeClass("blue")
+    }
+    else{
+        $("#unreviewed").removeClass("blue")
+        $("#all_donations").removeClass("blue")
     }
 
     $("#search_query").blur()
@@ -52,29 +55,7 @@ $(document).ready(function(){
         loadColorbox(url, "rq_details_container")
     });
 
-    $("#search_query").focus(function(){
-        $("#search_help").slideDown()
-    })
-
-    $("#search_query").focusout(function(){
-        $("#search_help").slideUp()
-    })
-
-    $("#search_go").click(function(){
-        $("#unreviewed").removeClass("blue")
-        $("#all_donations").removeClass("blue")
-
-        var query = $("#search_query").val()
-        change_search_hash(query)
-    })
-        
-
-    $("#search_query").keyup(function(e){
-        if (e.keyCode == 13){
-            $("#search_go").click()
-        }
-        
-    })
+    setupSearchEvents()
 
     $("#selector_buttons input").click(function(){
         var clicked_id = $(this).attr("id")

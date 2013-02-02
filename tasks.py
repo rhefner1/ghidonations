@@ -66,15 +66,20 @@ class IndexAll(webapp2.RequestHandler):
 
         mode = self.request.get("mode")
 
-        if mode == "donations":
-            donations = models.Donation.gql("WHERE settings = :s", s=key)
-            for d in donations:
-                d.search.index()
-
-        elif mode == "contacts":
+        if mode == "contacts":
             contacts = models.Contact.gql("WHERE settings = :s", s=key)
             for c in contacts:
                 c.search.index()
+
+        elif mode == "deposits":
+            deposits = models.DepositReceipt.gql("WHERE settings = :s", s=key)
+            for de in deposits:
+                de.search.index()
+
+        elif mode == "donations":
+            donations = models.Donation.gql("WHERE settings = :s", s=key)
+            for d in donations:
+                d.search.index()
 
         elif mode == "individuals":
             individuals = models.Individual.gql("WHERE settings = :s", s=key)

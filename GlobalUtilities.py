@@ -24,6 +24,7 @@ import DataModels as models
 from google.appengine.api import search
 
 _CONTACT_SEARCH_INDEX = "contact"
+_DEPOSIT_SEARCH_INDEX = "deposit"
 _DONATION_SEARCH_INDEX = "donation"
 _INDIVIDUAL_SEARCH_INDEX = "individual"
 _TEAM_SEARCH_INDEX = "team"
@@ -923,6 +924,15 @@ class SettingsSearch(UtilitiesBase):
 
         return self.search(index_name=_CONTACT_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
 
+    def deposit(self, query, **kwargs):
+        expr_list = [search.SortExpression(
+            expression="created", default_value='',
+            direction=search.SortExpression.DESCENDING)]
+
+        search_function = self.e.search.deposit
+
+        return self.search(index_name=_DEPOSIT_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
+
     def donation(self, query, **kwargs):
         expr_list = [search.SortExpression(
             expression="date", default_value='',
@@ -1035,6 +1045,31 @@ class ContactSearch(UtilitiesBase):
             index.add(doc)
         except:
             logging.error("Failed creating index on contact key:" + self.e.websafe)
+
+## -- Deposit Classes -- ##
+class DepositSearch(UtilitiesBase):
+    def createDocument(self):
+        de = self.e
+
+        document = search.Document(doc_id=de.websafe,
+            fields=[search.TextField(name='deposit_key', value=de.websafe),
+                    search.TextField(name='time_deposited_string', value=de.time_deposited),
+                    search.DateField(name='created', value=de.creation_date),
+                    search.TextField(name='settings', value=de.settings.urlsafe()),
+                    ])
+
+        return document
+
+    def index(self):
+        # Updates search index of this entity or creates new one if it doesn't exist
+        index = search.Index(name=_DEPOSIT_SEARCH_INDEX)
+
+        # Creating the new index
+        try:
+            doc = self.createDocument()
+            index.add(doc)
+        except:
+            logging.error("Failed creating index on deposit key:" + self.e.websafe)
 
 ## -- Donation Classes -- ##
 class DonationAssign(UtilitiesBase):

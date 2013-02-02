@@ -11,6 +11,7 @@ from google.appengine.api import search
 import GlobalUtilities as tools
 
 _CONTACT_SEARCH_INDEX = "contact"
+_DEPOSIT_SEARCH_INDEX = "deposit"
 _DONATION_SEARCH_INDEX = "donation"
 _INDIVIDUAL_SEARCH_INDEX = "individual"
 _TEAM_SEARCH_INDEX = "team"
@@ -132,8 +133,27 @@ class DepositReceipt(ndb.Expando):
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
+    def search(self):
+        return tools.DepositSearch(self)
+
+    @property
     def websafe(self):
         return self.key.urlsafe()
+
+    ## -- After Put -- ##
+    @classmethod
+    def _post_put_hook(self, future):
+        e = future.get_result().get()
+        e.search.index()
+
+     ## -- Before Delete -- ##
+    @classmethod
+    def _pre_delete_hook(cls, key):
+        e = key.get()
+
+        # Delete search index
+        index = search.Index(name=_DEPOSIT_SEARCH_INDEX)
+        index.remove(e.websafe)
 
 class Donation(ndb.Expando):
     contact = ndb.KeyProperty()

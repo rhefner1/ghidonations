@@ -269,18 +269,22 @@ class RPCMethods:
         return_vals = [donations, new_cursor]
         return return_vals
 
-    def getDeposits(self, query_cursor):
+    def getDeposits(self, query_cursor, query):
         s = tools.getSettingsKey(self).get()
-        response = s.data.deposits(query_cursor)
+
+        results = s.search.deposit(query, query_cursor=query_cursor)
+        logging.info("Getting deposits with query: " + query)
 
         deposits = []
-        new_cursor = response[1]
+        new_cursor = tools.getWebsafeCursor(results[1])
 
-        for d in response[0]:
-            ddict = {"key" : d.websafe, "time_deposited" : d.time_deposited}
-            deposits.append(ddict)
+        for de in results[0]:
+            f = de.fields
+            de_dict = {"key" : f[0].value, "time_deposited" : f[1].value}
 
-        # #Return message to confirm 
+            deposits.append(de_dict)
+
+        #Return message to confirm 
         return_vals = [deposits, new_cursor]
         return return_vals
 
