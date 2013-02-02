@@ -168,11 +168,6 @@ $(document).ready(function(){
     $(".editor").css("width", "500px").css("height", "300px")
     $(".editor").kendoEditor()
 
-    // $("textarea[name=confirmation_text]").cleditor({
-    //     height: 500
-    // });
-    // $(".cleditor").cleditor()
-
     if (mc_use == "True"){
         $("#mc_yes").attr("checked", "checked")
         $("#mc_additional").fadeIn()
