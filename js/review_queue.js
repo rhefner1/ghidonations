@@ -11,7 +11,7 @@ function dataTableWriter(data_table, d){
     data_table.fnAdjustColumnSizing()
 }
 
-function toggleSelectionButtons(){
+function toggleSelectionButtons(query){
     // Manage selection buttons
     if (query == ""){
         $("#all_donations").addClass("blue")
@@ -39,7 +39,7 @@ function trigger_search(query){
         dataTableWriter(data_table, d)
     })
 
-    toggleSelectionButtons()
+    toggleSelectionButtons(query)
 
     $("#search_query").blur()
 }
@@ -51,7 +51,7 @@ $(document).ready(function(){
         dataTableWriter(data_table, d)
     })
 
-    toggleSelectionButtons()
+    toggleSelectionButtons(query)
 
     $("#donations").delegate("tr", "click", function(){
         var row_data = data_table.fnGetData(this)
@@ -73,7 +73,6 @@ $(document).ready(function(){
             $("#search_query").val("")
             $("#search_go").click()
         }
-
     })
     
     $("#download_query").click(function(){
