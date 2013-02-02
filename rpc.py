@@ -235,7 +235,7 @@ class RPCMethods:
         logging.info("Getting contacts with query: " + query)
 
         contacts = []
-        new_cursor = results[1]
+        new_cursor = results[1].web_safe_string
 
         for c in results[0]:
             f = c.fields
@@ -255,7 +255,7 @@ class RPCMethods:
         logging.info("Getting contact donations with query: " + query)
 
         donations = []
-        new_cursor = results[1]
+        new_cursor = results[1].web_safe_string
 
         for d in results[0]:
             f = d.fields
@@ -291,7 +291,7 @@ class RPCMethods:
         logging.info("Getting donations with query: " + query)
 
         donations = []
-        new_cursor = results[1]
+        new_cursor = results[1].web_safe_string
 
         for d in results[0]:
             f = d.fields
@@ -312,7 +312,7 @@ class RPCMethods:
         logging.info("Getting individuals with query: " + query)
 
         individuals = []
-        new_cursor = results[1]
+        new_cursor = results[1].web_safe_string
 
         for i in results[0]:
             f = i.fields
@@ -338,7 +338,7 @@ class RPCMethods:
         logging.info("Getting teams with query: " + query)
 
         teams = []
-        new_cursor = results[1]
+        new_cursor = results[1].web_safe_string
 
         for t in results[0]:
             f = t.fields
@@ -358,7 +358,7 @@ class RPCMethods:
         logging.info("Getting team members with query: " + query)
 
         individuals = []
-        new_cursor = results[1]
+        new_cursor = results[1].web_safe_string
 
         for i in results[0]:
             f = i.fields
@@ -383,7 +383,7 @@ class RPCMethods:
         logging.info("Getting individual donations with query: " + query)
 
         donations = []
-        new_cursor = results[1]
+        new_cursor = results[1].web_safe_string
 
         for d in results[0]:
             f = d.fields
