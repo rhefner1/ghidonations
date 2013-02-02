@@ -8,8 +8,6 @@ function dataTableWriter(data_table, d){
 }
 
 function trigger_search(query){
-    data_table.fnClearTable()
-
     //Reinitialize the table with new settings
     rpc_params = [query]
     pageThrough(data_table, 0, "getTeams", rpc_params, function(data_table, d){
@@ -41,23 +39,5 @@ $(document).ready(function(){
         change_hash(e, "teammembers?t=" + clicked_id)
     });
 
-    $("#search_query").focus(function(){
-        $("#search_help").slideDown()
-    })
-
-    $("#search_query").focusout(function(){
-        $("#search_help").slideUp()
-    })
-
-    $("#search_go").click(function(){
-        var query = $("#search_query").val()
-        change_search_hash(query)
-    })
-        
-
-    $("#search_query").keyup(function(e){
-        if (e.keyCode == 13){
-            $("#search_go").click()
-        }
-    })
+    setupSearchEvents()
 });

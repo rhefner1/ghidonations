@@ -147,6 +147,28 @@ function change_tab(location)
     loading = false
 }
 
+function setupSearchEvents(){
+    $("#search_query").focus(function(){
+        $("#search_help").slideDown()
+    })
+
+    $("#search_query").focusout(function(){
+        $("#search_help").slideUp()
+    })
+
+    $("#search_go").click(function(){
+        var query = $("#search_query").val()
+        change_search_hash(query)
+    })
+        
+
+    $("#search_query").keyup(function(e){
+        if (e.keyCode == 13){
+            $("#search_go").click()
+        }
+    })
+}
+
 // ---- DataTables ---- //
 var cursors_dict = {0:null}
 var data_loading = false

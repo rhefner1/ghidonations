@@ -54,11 +54,10 @@ class AllContacts(BaseHandlerAdmin):
 
 class AllDeposits(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        response = s.data.deposits(None)
-        deposits = response[0]
-        initial_cursor = response[1]
 
-        template_variables = {"deposits" : deposits, "initial_cursor" : initial_cursor}
+        search_query = self.request.get("search")
+
+        template_variables = {"search_query" : search_query}
         self.response.write(
                 template.render('pages/all_deposits.html', template_variables))
 
