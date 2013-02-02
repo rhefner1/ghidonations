@@ -905,9 +905,6 @@ class SettingsSearch(UtilitiesBase):
         elif return_all == True:
             return searchReturnAll(query, search_results, settings=self.e, search_function=search_function, entity_return=entity_return)
 
-        elif entity_return == False and return_all == True:
-            return search_results
-
         else:
             return [search_results, search_results.cursor]
 
