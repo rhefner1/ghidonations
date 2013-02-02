@@ -165,7 +165,10 @@ function initializeTable(num_columns, rpc_action, rpc_params, callback){
                     current_page += 1
                     pageThrough(data_table, current_page, rpc_action, rpc_params, callback) 
                 }
-            }  
+            } 
+            else{
+                pageThrough(data_table, current_page, rpc_action, rpc_params, callback) 
+            } 
         }
     })
 
