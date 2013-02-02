@@ -8,6 +8,22 @@ function dataTableWriter(data_table, d){
     data_table.fnAdjustColumnSizing()
 }
 
+function trigger_search(query){
+    data_table.fnClearTable()
+
+    //Reinitialize the table with new settings
+    rpc_params = [query]
+    pageThrough(data_table, 0, "getIndividuals", rpc_params, function(data_table, d){
+        dataTableWriter(data_table, d)
+    })
+
+    data_table = initializeTable(2, "getIndividuals", rpc_params, function(data_table, d){
+        dataTableWriter(data_table, d)
+    })
+
+    $("#search_query").blur()
+}
+
 $(document).ready(function(){  
 
     //Initialize data table
@@ -35,22 +51,7 @@ $(document).ready(function(){
 
     $("#search_go").click(function(){
         var query = $("#search_query").val()
-
-        data_table.fnClearTable()
-
-        //Reinitialize the table with new settings
-        rpc_params = [query]
-        pageThrough(data_table, 0, "getIndividuals", rpc_params, function(data_table, d){
-            dataTableWriter(data_table, d)
-        })
-
-        data_table = initializeTable(2, "getIndividuals", rpc_params, function(data_table, d){
-            dataTableWriter(data_table, d)
-        })
-
-        data_table.fnAdjustColumnSizing()
-
-        $("#search_query").blur()
+        change_search_hash(query)
     })
         
 

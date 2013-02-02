@@ -46,7 +46,9 @@ class BaseHandlerAdmin(webapp2.RequestHandler):
 class AllContacts(BaseHandlerAdmin):
     def task(self, isAdmin, s):
 
-        template_variables = {}
+        search_query = self.request.get("search")
+
+        template_variables = {"search_query" : search_query}
         self.response.write(
            template.render('pages/all_contacts.html', template_variables))
 
@@ -63,7 +65,9 @@ class AllDeposits(BaseHandlerAdmin):
 class AllIndividuals(BaseHandlerAdmin):
     def task(self, isAdmin, s):
 
-        template_variables = {}
+        search_query = self.request.get("search")
+
+        template_variables = {"search_query" : search_query}
         self.response.write(
            template.render('pages/all_individuals.html', template_variables))
 
@@ -71,7 +75,9 @@ class AllTeams(BaseHandlerAdmin):
     def task(self, isAdmin, s):
         isAdmin, s = tools.checkAuthentication(self, True)
 
-        template_variables = {}
+        search_query = self.request.get("search")
+
+        template_variables = {"search_query" : search_query}
         self.response.write(
                 template.render('pages/all_teams.html', template_variables))
 
@@ -395,7 +401,11 @@ class ReviewQueue(BaseHandlerAdmin):
     def task(self, isAdmin, s):
         isAdmin, s = tools.checkAuthentication(self, True)
 
-        template_variables = {}
+        search_query = self.request.get("search")
+        if not search_query:
+            search_query = "reviewed:no"
+
+        template_variables = {"search_query" : search_query}
         self.response.write(
             template.render('pages/review_queue.html', template_variables))
 

@@ -11,6 +11,32 @@ function dataTableWriter(data_table, d){
     data_table.fnAdjustColumnSizing()
 }
 
+function trigger_search(query){
+    data_table.fnClearTable()
+
+    //Reinitialize the table with new settings
+    rpc_params = [query]
+    pageThrough(data_table, 0, "getDonations", rpc_params, function(data_table, d){
+        dataTableWriter(data_table, d)
+    })
+
+    data_table = initializeTable(5, "getDonations", rpc_params, function(data_table, d){
+        dataTableWriter(data_table, d)
+    })
+
+    // Manage selection buttons
+    if (query == ""){
+        $("#all_donations").addClass("blue")
+        $("#unreviewed").removeClass("blue")
+    }
+    else if (query == "reviewed:no"){
+        $("#unreviewed").addClass("blue")
+        ("#all_donations").removeClass("blue")
+    }
+
+    $("#search_query").blur()
+}
+
 $(document).ready(function(){  
     var query = $("#search_query").val()
     var rpc_params = [query]
@@ -39,22 +65,7 @@ $(document).ready(function(){
         $("#all_donations").removeClass("blue")
 
         var query = $("#search_query").val()
-
-        data_table.fnClearTable()
-
-        //Reinitialize the table with new settings
-        rpc_params = [query]
-        pageThrough(data_table, 0, "getDonations", rpc_params, function(data_table, d){
-            dataTableWriter(data_table, d)
-        })
-
-        data_table = initializeTable(5, "getDonations", rpc_params, function(data_table, d){
-            dataTableWriter(data_table, d)
-        })
-
-        data_table.fnAdjustColumnSizing()
-
-        $("#search_query").blur()
+        change_search_hash(query)
     })
         
 
@@ -70,16 +81,10 @@ $(document).ready(function(){
         if (clicked_id == "unreviewed"){
             $("#search_query").val("reviewed:no")
             $("#search_go").click()
-
-            $("#unreviewed").addClass("blue")
-            $("#all_donations").removeClass("blue")
         }
         else {
             $("#search_query").val("")
             $("#search_go").click()
-            
-            $("#all_donations").addClass("blue")
-            $("#unreviewed").removeClass("blue")
         }
 
     })
