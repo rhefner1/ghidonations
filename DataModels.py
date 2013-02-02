@@ -58,6 +58,9 @@ class Settings(ndb.Expando):
     confirmation_footer = ndb.TextProperty()
     donor_report_text = ndb.TextProperty()
 
+    #Contact JSON
+    contacts_json = ndb.TextProperty()
+
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)  
 
@@ -145,6 +148,22 @@ class Settings(ndb.Expando):
             s.donor_report_text = donor_report_text
 
         s.put()
+
+    def updateContactsJSON(self):
+        contacts = []
+
+        for c in self.data.all_contacts:
+            contact = {}
+            contact["label"] = c.name
+            contact["email"] = c.email
+            contact["address"] = json.dumps(c.address)
+            contact["key"] = str(c.websafe)
+            
+            contacts.append(contact)
+
+        contacts_json =  json.dumps(contacts)
+        self.contacts_json = contacts_json
+        self.put()
 
     @property
     def websafe(self):
@@ -694,6 +713,7 @@ class Contact(ndb.Expando):
         e = future.get_result().get()
         memcache.delete("contacts" + e.settings.urlsafe())
 
+        e.settings.get().updateContactsJSON()
         e.search.index()
 
     ## -- Before Delete -- ##

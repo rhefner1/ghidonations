@@ -733,18 +733,7 @@ class SettingsData(UtilitiesBase):
         memcache_key = "contacts" + self.e.websafe
 
         def get_item():
-            contacts = []
-
-            for c in self.e.data.all_contacts:
-                contact = {}
-                contact["label"] = c.name
-                contact["email"] = c.email
-                contact["address"] = json.dumps(c.address)
-                contact["key"] = str(c.websafe)
-                
-                contacts.append(contact)
-
-            return contacts
+            return self.e.contact_json
 
         return cache(memcache_key, get_item)
 
