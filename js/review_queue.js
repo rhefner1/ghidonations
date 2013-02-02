@@ -11,18 +11,7 @@ function dataTableWriter(data_table, d){
     data_table.fnAdjustColumnSizing()
 }
 
-function trigger_search(query){
-
-    //Reinitialize the table with new settings
-    rpc_params = [query]
-    pageThrough(data_table, 0, "getDonations", rpc_params, function(data_table, d){
-        dataTableWriter(data_table, d)
-    })
-
-    data_table = initializeTable(5, "getDonations", rpc_params, function(data_table, d){
-        dataTableWriter(data_table, d)
-    })
-
+function toggleSelectionButtons(){
     // Manage selection buttons
     if (query == ""){
         $("#all_donations").addClass("blue")
@@ -36,6 +25,21 @@ function trigger_search(query){
         $("#unreviewed").removeClass("blue")
         $("#all_donations").removeClass("blue")
     }
+}
+
+function trigger_search(query){
+
+    //Reinitialize the table with new settings
+    rpc_params = [query]
+    pageThrough(data_table, 0, "getDonations", rpc_params, function(data_table, d){
+        dataTableWriter(data_table, d)
+    })
+
+    data_table = initializeTable(5, "getDonations", rpc_params, function(data_table, d){
+        dataTableWriter(data_table, d)
+    })
+
+    toggleSelectionButtons()
 
     $("#search_query").blur()
 }
@@ -46,6 +50,8 @@ $(document).ready(function(){
     var data_table = initializeTable(5, "getDonations", rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
+
+    toggleSelectionButtons()
 
     $("#donations").delegate("tr", "click", function(){
         var row_data = data_table.fnGetData(this)
