@@ -26,6 +26,7 @@ from google.appengine.api import search
 _CONTACT_SEARCH_INDEX = "contact"
 _DONATION_SEARCH_INDEX = "donation"
 _INDIVIDUAL_SEARCH_INDEX = "individual"
+_TEAM_SEARCH_INDEX = "team"
 _NUM_RESULTS = 15
 
 ###### ------ Authentication ------ ######
@@ -340,6 +341,9 @@ def mergeContacts(c1_key, c2_key):
 
     #Finally, delete c1
     c1.key.delete()
+
+def moneyAmount(money_string):
+    return "$" + str(toDecimal(money_string))
 
 def queryCursorDB(query, encoded_cursor):
     new_cursor = None
@@ -729,18 +733,7 @@ class SettingsData(UtilitiesBase):
         memcache_key = "contacts" + self.e.websafe
 
         def get_item():
-            contacts = []
-
-            for c in self.e.data.all_contacts:
-                contact = {}
-                contact["label"] = c.name
-                contact["email"] = c.email
-                contact["address"] = json.dumps(c.address)
-                contact["key"] = str(c.websafe)
-                
-                contacts.append(contact)
-
-            return contacts
+            return self.e.contact_json
 
         return cache(memcache_key, get_item)
 
@@ -874,7 +867,7 @@ class SettingsMailchimp(UtilitiesBase):
                 logging.info("Not a valid email address. Not continuing.")
 
 class SettingsSearch(UtilitiesBase):
-    def search(self, index_name, expr_list, query, search_function, query_cursor=None, entity_return=True, return_all=False):
+    def search(self, index_name, expr_list, query, search_function, query_cursor=None, entity_return=False, return_all=False):
         # query string looks like 'job tag:"very important" sent < 2011-02-28'
 
         if query_cursor == None:
@@ -913,7 +906,7 @@ class SettingsSearch(UtilitiesBase):
             return searchReturnAll(query, search_results, settings=self.e, search_function=search_function, entity_return=entity_return)
 
         else:
-            return search_results
+            return [search_results, search_results.cursor]
 
     def contact(self, query, **kwargs):
         expr_list = [search.SortExpression(
@@ -942,203 +935,100 @@ class SettingsSearch(UtilitiesBase):
 
         return self.search(index_name=_INDIVIDUAL_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
 
-## -- Team Classes -- ##
-class TeamData(UtilitiesBase):
+    def team(self, query, **kwargs):
+        expr_list = [search.SortExpression(
+            expression="name", default_value='',
+            direction=search.SortExpression.ASCENDING)]
+
+        search_function = self.e.search.team
+
+        return self.search(index_name=_TEAM_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
+
+## -- Contact Classes -- ##
+class ContactCreate(UtilitiesBase):
+    def impression(self, impression, notes):
+        new_impression = models.Impression()
+
+        new_impression.contact = self.e.key
+        new_impression.impression = impression
+        new_impression.notes = notes
+
+        new_impression.put()
+
+class ContactData(UtilitiesBase):
     @property
-    def donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND team = :t ORDER BY donation_date", s=self.e.settings, t=self.e.key)
-        return qCache(q)
-
-    @property
-    def donation_total(self):
-        team_key = self.e.key
-        memcache_key = "tdtotal" +  team_key.urlsafe()
-        
-        def get_item():
-            settings = self.e.settings
-
-            q = models.Donation.gql("WHERE settings = :s AND team = :t", s=settings, t=team_key)
-            donations = qCache(q)
-
-            donation_total = toDecimal(0)
-
-            for d in donations:
-                donation_total += d.amount_donated
-
-            return str(donation_total)
-
-        item = cache(memcache_key, get_item) 
-        return toDecimal(item)
-
-    @property
-    def members(self):
-        q = models.TeamList.gql("WHERE team = :t ORDER BY sort_name", t=self.e.key)
-        return qCache(q)
-
-    @property
-    def members_public_donation_page(self):
-        #Returns members that indicated that they want to be included
-        #in the public donation page
-        q = models.TeamList.gql("WHERE team = :t AND show_donation_page = :s ORDER BY sort_name", t=self.e.key, s=True)
-        return qCache(q)
-
-    @property
-    def members_dict(self):
-        memcache_key = "teammembersdict" +  self.e.websafe
-        members = self.members
-    
-        def get_item():
-            members_dict = {}
-            for tl in members:
-                i = tl.individual.get()
-                members_dict[i.name] = i.websafe
-
-            return members_dict
-
-        return cache(memcache_key, get_item)
-
-    @property
-    def members_list(self):
-        memcache_key = "teammembers" +  self.e.websafe
-        
-        def get_item():
-            members = self.members_public_donation_page
-            all_members = []
-
-            for tl in members:
-                tl_key = tl.individual.urlsafe()
-                member = []
-                member.append(tl.individual_name)
-                member.append(tl.individual.get().data.photo_url)        
-                member.append(tl_key)
-
-                #Attaching this to the main array
-                all_members.append(member)
-
-            return all_members
-
-        return cache(memcache_key, get_item)
-
-## -- Individual Classes -- ##
-class IndividualData(UtilitiesBase):
-    @property
-    def donation_total(self):
-        memcache_key = "idtotal" + self.e.websafe
-
-        def get_item():
-            settings = self.e.settings
-            individual_key = self.e.key
-
-            q = models.Donation.gql("WHERE settings = :s AND individual = :i", s=settings, i=individual_key)
-            donations = qCache(q)
-
-            donation_total = toDecimal(0)
-
-            for d in donations:
-                donation_total += d.amount_donated
-
-            return str(donation_total)
-
-        item = cache(memcache_key, get_item)
-        return toDecimal(item)
-
-    @property
-    def donations(self):
-        q = models.Donation.gql("WHERE individual = :i ORDER BY donation_date DESC", i=self.e.key)
-        return qCache(q)
-
-    def getTeamList(self, team):
-        query = models.TeamList.gql("WHERE individual = :i AND team = :t", i=self.e.key, t=team)
-        return query.fetch(1)[0]
-
-    def info(self, team):
-        memcache_key = "info" + team.urlsafe() + self.e.websafe
-        def get_item():
-            if self.e.photo:
-                image_url = images.get_serving_url(self.e.photo, 150)
-            else:
-                image_url = "https://ghidonations.appspot.com/images/face150.jpg"
-
-            tl = self.getTeamList(team)
-            percentage = int(float(tl.donation_total / tl.fundraise_amt) * 100)
-
-            if percentage > 100:
-                percentage = 100
-            elif percentage <0:
-                percentage = 0
-
-            message = str(percentage) + "% to goal of $" + str(tl.fundraise_amt)
-                
-            return [image_url, self.e.name, self.e.description, percentage, message]
-
-        return cache(memcache_key, get_item)
-
-    @property
-    def photo_url(self):
-        if self.e.photo != None:
-            try:
-                photo = images.get_serving_url(self.e.photo, 200, secure_url=True)
-            except:
-                photo = "/images/face.jpg"
-        else:
-            photo = "/images/face.jpg"
-
-        return photo
-
-    @property
-    def teams(self):
-        q = models.TeamList.gql("WHERE individual = :i", i=self.e.key)
+    def all_donations(self):
+        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
         return q
 
+    @property 
+    def all_impressions(self):
+        q = models.Impression.gql("WHERE contact = :c ORDER BY creation_date DESC", c=self.e.key)
+        return q
+
+    def donations(self, query_cursor):
+        query = self.all_donations
+        return queryCursorDB(query, query_cursor)
+
+    def annual_donations(self, year):
+        year = int(year)
+        year_start = datetime(year, 1, 1)
+        year_end = datetime(year, 12, 31)
+
+        return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
+
     @property
-    def team_list(self):
-        teams_dict = {}
+    def recurring_donation_total(self):
+        donation_total = toDecimal(0)
 
-        for t in self.teams:
-            array = [t.team.get().name, str(t.fundraise_amt)]
-            teams_dict[t.team.urlsafe()] = array
+        query = models.Donation.gql("WHERE contact = :c AND isRecurring = :r", c=self.e.key, r=True)
+        for d in query:
+            donation_total += d.amount_donated
 
-        return teams_dict
+        return donation_total
 
-    @property
-    def team_json(self):
-        return json.dumps(self.team_list)
+    def impressions(self, query_cursor):
+        query = self.all_impressions
+        return queryCursorDB(query, query_cursor)
 
-class IndividualSearch(UtilitiesBase):
+class ContactSearch(UtilitiesBase):
     def createDocument(self):
-        i = self.e
+        c = self.e
 
-        team_names = ""
-        raised = toDecimal(0)
+        city = c.address[1]
+        state = c.address[2]
 
-        tl_list = i.teamlist_entities
-        for tl in tl_list:
-            team_names += tl.team_name + ", "
-            raised += tl.donation_total
+        total_donated = toDecimal(0)
+        number_donations = 0
+        for d in c.data.all_donations:
+            total_donated += d.confirmation_amount
+            number_donations += 1
 
-        document = search.Document(doc_id=i.websafe,
-            fields=[search.TextField(name='individual_key', value=i.websafe),
-                    search.TextField(name='name', value=i.name),
-                    search.TextField(name='email', value=i.email),
-                    search.TextField(name='team', value=team_names),
-                    search.NumberField(name='raised', value=float(raised)),
-                    search.DateField(name='created', value=i.creation_date),
-                    search.TextField(name='settings', value=i.settings.urlsafe()),
+        document = search.Document(doc_id=c.websafe,
+            fields=[search.TextField(name='contact_key', value=c.websafe),
+                    search.TextField(name='name', value=c.name),
+                    search.TextField(name='email', value=c.email),
+                    search.NumberField(name='total_donated', value=float(total_donated)),
+                    search.NumberField(name='number_donations', value=int(number_donations)),
+                    search.TextField(name='phone', value=c.phone),
+                    search.TextField(name='city', value=city),
+                    search.TextField(name='state', value=state),
+                    search.DateField(name='created', value=c.creation_date),
+                    search.TextField(name='settings', value=c.settings.urlsafe()),
                     ])
 
         return document
 
     def index(self):
         # Updates search index of this entity or creates new one if it doesn't exist
-        i = self.e
-        index = search.Index(name=_INDIVIDUAL_SEARCH_INDEX)
-    
+        index = search.Index(name=_CONTACT_SEARCH_INDEX)
+
         # Creating the new index
         try:
             doc = self.createDocument()
             index.add(doc)
         except:
-            logging.error("Failed creating index on individual key:" + i.websafe)
+            logging.error("Failed creating index on contact key:" + self.e.websafe)
 
 ## -- Donation Classes -- ##
 class DonationAssign(UtilitiesBase):
@@ -1303,6 +1193,7 @@ class DonationSearch(UtilitiesBase):
                     search.TextField(name='team', value=d.designated_team),
                     search.TextField(name='individual', value=d.designated_individual),
                     search.TextField(name='reviewed', value=reviewed),
+                    search.TextField(name='formatted_donation_date', value=d.formatted_donation_date),
                     search.TextField(name='contact_key', value=d.contact.urlsafe()),
                     search.TextField(name='individual_key', value=individual_key),
                     search.TextField(name='settings', value=d.settings.urlsafe()),
@@ -1312,7 +1203,6 @@ class DonationSearch(UtilitiesBase):
 
     def index(self):
         # Updates search index of this entity or creates new one if it doesn't exist
-        d = self.e
         index = search.Index(name=_DONATION_SEARCH_INDEX)
 
         # Creating the new index
@@ -1320,94 +1210,238 @@ class DonationSearch(UtilitiesBase):
             doc = self.createDocument()
             index.add(doc)
         except:
-            logging.error("Failed creating index on donation key:" + d.websafe)
+            logging.error("Failed creating index on donation key:" + self.e.websafe)
 
-## -- Contact Classes -- ##
-class ContactCreate(UtilitiesBase):
-    def impression(self, impression, notes):
-        new_impression = models.Impression()
-
-        new_impression.contact = self.e.key
-        new_impression.impression = impression
-        new_impression.notes = notes
-
-        new_impression.put()
-
-class ContactData(UtilitiesBase):
+## -- Individual Classes -- ##
+class IndividualData(UtilitiesBase):
     @property
-    def all_donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
-        return q
+    def donation_total(self):
+        memcache_key = "idtotal" + self.e.websafe
 
-    @property 
-    def all_impressions(self):
-        q = models.Impression.gql("WHERE contact = :c ORDER BY creation_date DESC", c=self.e.key)
-        return q
+        def get_item():
+            settings = self.e.settings
+            individual_key = self.e.key
 
-    def donations(self, query_cursor):
-        query = self.all_donations
-        return queryCursorDB(query, query_cursor)
+            q = models.Donation.gql("WHERE settings = :s AND individual = :i", s=settings, i=individual_key)
+            donations = qCache(q)
 
-    def annual_donations(self, year):
-        year = int(year)
-        year_start = datetime(year, 1, 1)
-        year_end = datetime(year, 12, 31)
+            donation_total = toDecimal(0)
 
-        return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
+            for d in donations:
+                donation_total += d.amount_donated
+
+            return str(donation_total)
+
+        item = cache(memcache_key, get_item)
+        return toDecimal(item)
 
     @property
-    def recurring_donation_total(self):
-        donation_total = toDecimal(0)
+    def donations(self):
+        q = models.Donation.gql("WHERE individual = :i ORDER BY donation_date DESC", i=self.e.key)
+        return qCache(q)
 
-        query = models.Donation.gql("WHERE contact = :c AND isRecurring = :r", c=self.e.key, r=True)
-        for d in query:
-            donation_total += d.amount_donated
+    def getTeamList(self, team):
+        query = models.TeamList.gql("WHERE individual = :i AND team = :t", i=self.e.key, t=team)
+        return query.fetch(1)[0]
 
-        return donation_total
+    def info(self, team):
+        memcache_key = "info" + team.urlsafe() + self.e.websafe
+        def get_item():
+            if self.e.photo:
+                image_url = images.get_serving_url(self.e.photo, 150)
+            else:
+                image_url = "https://ghidonations.appspot.com/images/face150.jpg"
 
-    def impressions(self, query_cursor):
-        query = self.all_impressions
-        return queryCursorDB(query, query_cursor)
+            tl = self.getTeamList(team)
+            percentage = int(float(tl.donation_total / tl.fundraise_amt) * 100)
 
-class ContactSearch(UtilitiesBase):
+            if percentage > 100:
+                percentage = 100
+            elif percentage <0:
+                percentage = 0
+
+            message = str(percentage) + "% to goal of $" + str(tl.fundraise_amt)
+                
+            return [image_url, self.e.name, self.e.description, percentage, message]
+
+        return cache(memcache_key, get_item)
+
+    @property
+    def photo_url(self):
+        if self.e.photo != None:
+            try:
+                photo = images.get_serving_url(self.e.photo, 200, secure_url=True)
+            except:
+                photo = "/images/face.jpg"
+        else:
+            photo = "/images/face.jpg"
+
+        return photo
+
+    @property
+    def search_team_list(self):
+        search_list = ""
+
+        for tl in self.teams:
+            search_list += tl.team.urlsafe()
+
+        return search_list
+
+    @property
+    def teams(self):
+        q = models.TeamList.gql("WHERE individual = :i", i=self.e.key)
+        return q
+
+    @property
+    def team_list(self):
+        teams_dict = {}
+
+        for tl in self.teams:
+            array = [tl.team.get().name, str(tl.fundraise_amt)]
+            teams_dict[tl.team.urlsafe()] = array
+
+        return teams_dict
+
+    @property
+    def team_json(self):
+        return json.dumps(self.team_list)
+
+class IndividualSearch(UtilitiesBase):
     def createDocument(self):
-        c = self.e
+        i = self.e
 
-        city = c.address[1]
-        state = c.address[2]
+        team_names = ""
+        raised = toDecimal(0)
 
-        total_donated = toDecimal(0)
-        number_donations = 0
-        for d in c.data.all_donations:
-            total_donated += d.confirmation_amount
-            number_donations += 1
+        tl_list = i.teamlist_entities
+        for tl in tl_list:
+            team_names += tl.team_name + ", "
+            raised += tl.donation_total
 
-        document = search.Document(doc_id=c.websafe,
-            fields=[search.TextField(name='contact_key', value=c.websafe),
-                    search.TextField(name='name', value=c.name),
-                    search.TextField(name='email', value=c.email),
-                    search.NumberField(name='total_donated', value=float(total_donated)),
-                    search.NumberField(name='number_donations', value=int(number_donations)),
-                    search.TextField(name='phone', value=c.phone),
-                    search.TextField(name='city', value=city),
-                    search.TextField(name='state', value=state),
-                    search.DateField(name='created', value=c.creation_date),
-                    search.TextField(name='settings', value=c.settings.urlsafe()),
+        document = search.Document(doc_id=i.websafe,
+            fields=[search.TextField(name='individual_key', value=i.websafe),
+                    search.TextField(name='name', value=i.name),
+                    search.TextField(name='email', value=i.email),
+                    search.TextField(name='team', value=team_names),
+                    search.NumberField(name='raised', value=float(raised)),
+                    search.DateField(name='created', value=i.creation_date),
+                    search.TextField(name='team_key', value=i.data.search_team_list),
+                    search.TextField(name='settings', value=i.settings.urlsafe()),
                     ])
 
         return document
 
     def index(self):
         # Updates search index of this entity or creates new one if it doesn't exist
-        c = self.e
-        index = search.Index(name=_CONTACT_SEARCH_INDEX)
+        index = search.Index(name=_INDIVIDUAL_SEARCH_INDEX)
+    
+        # Creating the new index
+        try:
+            doc = self.createDocument()
+            index.add(doc)
+        except:
+            logging.error("Failed creating index on individual key:" + self.e.websafe)
+
+## -- Team Classes -- ##
+class TeamData(UtilitiesBase):
+    @property
+    def donations(self):
+        q = models.Donation.gql("WHERE settings = :s AND team = :t ORDER BY donation_date", s=self.e.settings, t=self.e.key)
+        return qCache(q)
+
+    @property
+    def donation_total(self):
+        team_key = self.e.key
+        memcache_key = "tdtotal" +  team_key.urlsafe()
+        
+        def get_item():
+            settings = self.e.settings
+
+            q = models.Donation.gql("WHERE settings = :s AND team = :t", s=settings, t=team_key)
+            donations = qCache(q)
+
+            donation_total = toDecimal(0)
+
+            for d in donations:
+                donation_total += d.amount_donated
+
+            return str(donation_total)
+
+        item = cache(memcache_key, get_item) 
+        return toDecimal(item)
+
+    @property
+    def members(self):
+        q = models.TeamList.gql("WHERE team = :t ORDER BY sort_name", t=self.e.key)
+        return qCache(q)
+
+    @property
+    def members_public_donation_page(self):
+        #Returns members that indicated that they want to be included
+        #in the public donation page
+        q = models.TeamList.gql("WHERE team = :t AND show_donation_page = :s ORDER BY sort_name", t=self.e.key, s=True)
+        return qCache(q)
+
+    @property
+    def members_dict(self):
+        memcache_key = "teammembersdict" +  self.e.websafe
+        members = self.members
+    
+        def get_item():
+            members_dict = {}
+            for tl in members:
+                i = tl.individual.get()
+                members_dict[i.name] = i.websafe
+
+            return members_dict
+
+        return cache(memcache_key, get_item)
+
+    @property
+    def members_list(self):
+        memcache_key = "teammembers" +  self.e.websafe
+        
+        def get_item():
+            members = self.members_public_donation_page
+            all_members = []
+
+            for tl in members:
+                tl_key = tl.individual.urlsafe()
+                member = []
+                member.append(tl.individual_name)
+                member.append(tl.individual.get().data.photo_url)        
+                member.append(tl_key)
+
+                #Attaching this to the main array
+                all_members.append(member)
+
+            return all_members
+
+        return cache(memcache_key, get_item)
+
+class TeamSearch(UtilitiesBase):
+    def createDocument(self):
+        t = self.e
+
+        document = search.Document(doc_id=t.websafe,
+            fields=[search.TextField(name='team_key', value=t.websafe),
+                    search.TextField(name='name', value=t.name),
+                    search.DateField(name='created', value=t.creation_date),
+                    search.TextField(name='settings', value=t.settings.urlsafe()),
+                    ])
+
+        return document
+
+    def index(self):
+        # Updates search index of this entity or creates new one if it doesn't exist
+        index = search.Index(name=_TEAM_SEARCH_INDEX)
 
         # Creating the new index
         try:
             doc = self.createDocument()
             index.add(doc)
         except:
-            logging.error("Failed creating index on contact key:" + c.websafe)
+            logging.error("Failed creating index on contact key:" + self.e.websafe)
 
 ## -- Dictionary Difference Class -- ##
 class DictDiffer(object):

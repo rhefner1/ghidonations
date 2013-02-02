@@ -13,6 +13,7 @@ import GlobalUtilities as tools
 _CONTACT_SEARCH_INDEX = "contact"
 _DONATION_SEARCH_INDEX = "donation"
 _INDIVIDUAL_SEARCH_INDEX = "individual"
+_TEAM_SEARCH_INDEX = "team"
 
 class DecimalProperty(ndb.StringProperty):
     def _validate(self, value):
@@ -28,405 +29,111 @@ class DecimalProperty(ndb.StringProperty):
         return tools.toDecimal(value)
 
 ###### ////// ------ Define datastore models ------ ////// ######
-class Settings(ndb.Expando):
+class Contact(ndb.Expando):
+    #Standard information we need to know
     name = ndb.StringProperty()
     email = ndb.StringProperty()
-
-    #Mailchimp values
-    mc_use = ndb.BooleanProperty()
-    mc_apikey = ndb.StringProperty()
-    mc_donorlist = ndb.StringProperty()
-
-    #Impressions
-    impressions = ndb.StringProperty(repeated=True)
-
-    #PayPal
-    paypal_id = ndb.StringProperty()
-
-    #Donate page
-    amount1 = ndb.IntegerProperty()
-    amount2 = ndb.IntegerProperty()
-    amount3 = ndb.IntegerProperty()
-    amount4 = ndb.IntegerProperty()
-    use_custom = ndb.BooleanProperty()
-
-    #Confirmation letters
-    confirmation_text = ndb.TextProperty()
-    confirmation_info = ndb.TextProperty()
-    confirmation_header = ndb.TextProperty()
-    confirmation_footer = ndb.TextProperty()
-    donor_report_text = ndb.TextProperty()
+    phone = ndb.StringProperty()
+    address = ndb.StringProperty(repeated=True)
+    notes = ndb.TextProperty(indexed=True)
+    
+    settings = ndb.KeyProperty()
 
     #Sets creation date
-    creation_date = ndb.DateTimeProperty(auto_now_add=True)  
+    creation_date = ndb.DateTimeProperty(auto_now_add=True)
+
+    @property
+    def address_json(self):
+        return json.dumps(self.address)
+
+    @property
+    def address_formatted(self):
+        a = self.address
+        if not a == ["", "", "", ""]:
+            return a[0] + "\n" + a[1] + ", " + a[2] + "  " + a[3]
+        else:
+            return ""
 
     @property
     def create(self):
-        return tools.SettingsCreate(self)
+        return tools.ContactCreate(self)
 
     @property
     def data(self):
-        return tools.SettingsData(self)
-
-    @property
-    def exists(self):
-        return tools.SettingsExists(self)
-
-    @property
-    def deposits(self):
-        return tools.SettingsDeposits(self)
-
-    @property
-    def impressions_json(self):
-        return json.dumps(self.impressions)
-
-    @property
-    def mailchimp(self):
-        return tools.SettingsMailchimp(self)
+        return tools.ContactData(self)
 
     @property
     def search(self):
-        return tools.SettingsSearch(self)
-
-    ## -- Update -- ##
-    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
-        s = self
-
-        if name != s.name:
-            s.name = name
-
-        if email != s.email:
-            s.email = email
-
-        if mc_use != s.mc_use:
-            s.mc_use = mc_use
-
-        if mc_apikey != s.mc_apikey:
-            s.mc_apikey = mc_apikey
-
-        if mc_donorlist != s.mc_donorlist:
-            s.mc_donorlist = mc_donorlist
-
-        if paypal_id != s.paypal_id:
-            s.paypal_id = paypal_id
-
-        if impressions != s.impressions:
-            s.impressions = impressions
-
-        if int(amount1) != s.amount1:
-            s.amount1 = int(amount1)
-
-        if int(amount2) != s.amount2:
-            s.amount2 = int(amount2)
-
-        if int(amount3) != s.amount3:
-            s.amount3 = int(amount3)
-
-        if int(amount4) != s.amount4:
-            s.amount4 = int(amount4)
-
-        if use_custom != s.use_custom:
-            s.use_custom = use_custom
-
-        if confirmation_header != s.confirmation_header:
-            s.confirmation_header = confirmation_header
-
-        if confirmation_info != s.confirmation_info:
-            s.confirmation_info = confirmation_info
-
-        if confirmation_footer != s.confirmation_footer:
-            s.confirmation_footer = confirmation_footer
-
-        if confirmation_text != s.confirmation_text:
-            s.confirmation_text = confirmation_text
-
-        if donor_report_text != s.donor_report_text:
-            s.donor_report_text = donor_report_text
-
-        s.put()
+        return tools.ContactSearch(self)
 
     @property
     def websafe(self):
         return self.key.urlsafe()
 
-class Team(ndb.Expando):
-    name = ndb.StringProperty()
-    settings = ndb.KeyProperty()
-    show_team = ndb.BooleanProperty()
-    
+    ## -- Update contact -- ##
+    def update(self, name, email, phone, notes, address):
+        settings = self.settings.get()
 
-    #Sets creation date
-    creation_date = ndb.DateTimeProperty(auto_now_add=True)
+        #Changing blank values to None
+        if name == "":
+            name = None
+        if email == None:
+            email = ""
 
-    @property
-    def data(self):
-        return tools.TeamData(self)
-
-    @property
-    def websafe(self):
-        return self.key.urlsafe()
-
-    ## -- Update -- ##
-    def update(self, name, show_team):
-        if name != self.name:
+        if name != self.name and name != None:
             self.name = name
 
-        if show_team != self.show_team:
-            self.show_team = show_team
-
-        self.put()
-
-    ## -- After put -- ##
-    @classmethod
-    def _post_put_hook(self, future):
-        e = future.get_result().get()
-        memcache.delete('allteams' + e.settings.urlsafe())
-        memcache.delete("teammembers" + e.websafe)
-        memcache.delete("teamsdict" + e.settings.urlsafe())
-
-    ## -- Before Deletion -- ##
-    @classmethod
-    def _pre_delete_hook(cls, key):
-        t = key.get()
-        logging.info("Deleting team:" + t.name)
-
-        for tl in t.data.members:
-            #Delete this team from all
-            tl.key.delete()
-
-        for d in t.data.donations:
-            d.individual = None
-            d.team = None
-            d.put()
-
-class TeamList(ndb.Model):
-    individual = ndb.KeyProperty()
-    team = ndb.KeyProperty()
-    fundraise_amt = DecimalProperty()
-
-    #Show in public donation page
-    show_donation_page = ndb.BooleanProperty()
-
-    sort_name = ndb.StringProperty()
-
-    @property
-    def donations(self):
-        i = self.individual.get()
-        q = Donation.gql("WHERE settings = :s AND team = :t AND individual = :i", s=i.settings, t=self.team, i=i.key)
-        return tools.qCache(q)
-
-    @property
-    def donation_total(self):
-        i = self.individual.get()
-        memcache_key = "dtotal" + self.team.urlsafe() + i.key.urlsafe()
-
-        def get_item():
-            q = self.donations
-            # donations = tools.qCache(q)
-            donations = q
-            
-            donation_total = tools.toDecimal(0)
-
-            for d in donations:
-                donation_total += d.amount_donated
-
-            return str(donation_total)
-
-        item = tools.cache(memcache_key, get_item)
-        return tools.toDecimal(item)
-
-    @property
-    def individual_email(self):
-        return self.individual.get().email
-
-    @property
-    def individual_key(self):
-        return self.individual.urlsafe()
-
-    @property
-    def individual_name(self):
-        return self.individual.get().name
-
-    @property 
-    def team_name(self):
-        return self.team.get().name
-
-    @property
-    def team_websafe(self):
-        return self.team.urlsafe()
-
-    @property
-    def websafe(self):
-        return self.key.urlsafe()
-
-class Individual(ndb.Expando):
-    name = ndb.StringProperty()
-    email = ndb.StringProperty()
-
-    #Determines which account this person belongs to
-    settings = ndb.KeyProperty()
-
-    #Credentials
-    admin = ndb.BooleanProperty()
-    password = ndb.StringProperty()
-
-    #Profile
-    description = ndb.TextProperty()
-    photo = ndb.StringProperty()
-
-    #Sets creation date
-    creation_date = ndb.DateTimeProperty(auto_now_add=True)
-
-    @property
-    def data(self):
-        return tools.IndividualData(self)
-
-    @property
-    def teamlist_entities(self):
-        q = TeamList.gql("WHERE individual = :i", i=self.key)
-        return tools.qCache(q)
-
-    @property
-    def search(self):
-        return tools.IndividualSearch(self)
-
-    @property
-    def show_donation_page(self):
-        try:
-            q = TeamList.gql("WHERE individual = :i", i=self.key)
-            return q.fetch(1)[0].show_donation_page
-
-        except:
-            return False
-
-    @property
-    def websafe(self):
-        return self.key.urlsafe()
-
-    ## Currently not in use
-    def email_user(self, msg_id):
-        #Gives the user an email when something happens in their account
-        if msg_id == 1:
-            email_subject
-            email_message = "A new recurring donation was sent to you!"
-
-        message = mail.EmailMessage()
-        message.sender = "donate@globalhopeindia.org"
-        message.subject = email_subject
-        message.to = self.email
-
-        #Message body here - determined from msg_id
-        message.body = email_message
-
-        logging.info("Sending alert email to: " + self.email)
-
-        #Adding to history
-        logging.info("Alert email sent at " + currentTime())
-
-        message.send()
-
-    ## -- Update Individual -- #
-    def update(self, name, email, team_list, description, change_image, password, show_donation_page):
-        name_changed = False
-
-        if name != self.name:
-            self.name = name
-            name_changed = True
-        
         if email != self.email:
             self.email = email
+            if settings.mc_use and email != "" and email != None:
+                settings.mailchimp.add(email, name, False)
 
-        #Initializes DictDiffer object to tell differences from current dictionary to server-side one
-        team = json.loads(team_list)
-        dd = tools.DictDiffer(team, self.data.team_list)
+        if phone != self.phone:
+            self.phone = phone
 
-        for key in dd.added():
-            new_tl = TeamList()
-            new_tl.individual = self.key
-            new_tl.team = tools.getKey(key)
-            new_tl.fundraise_amt = tools.toDecimal(team[key][1])
+        if notes != str(self.notes):
+            if notes == None:
+                notes = ""
+            self.notes = notes
 
-            new_tl.put()
+        if address != self.address:
+            if address != None and address != "" and address != "None":
+                #If the address is something and is different than that on file
+                self.address = address
 
-        for key in dd.removed():
-            query = TeamList.gql("WHERE team = :t AND individual = :i", t=tools.getKey(key), i=self.key)
-            tl = query.fetch(1)[0]
-
-            for d in tl.donations:
-                d.team = None
-                d.put()
-
-            tl.key.delete()
-
-        for key in dd.changed():
-            query = TeamList.gql("WHERE team = :t AND individual = :i", t=tools.getKey(key), i=self.key)
-
-            tl = query.fetch(1)[0]
-            tl.fundraise_amt = tools.toDecimal(team[key][1])
-            tl.put()
-
-        if description != str(self.description):
-            self.description = description
-
-        if change_image != None:
-        #If change_image = None, there isn't any change. If it isn't, it 
-        #contains a 
-            if self.photo != None:
-                #Delete old blob to keep it from orphaning
-                old_blobkey = self.photo
-                old_blob = blobstore.BlobInfo.get(old_blobkey)
-                old_blob.delete()
-
-            self.photo = change_image
-
-        if password != None and password != "" and self.password != password:
-            self.password = password
-
-        try:
-            for tl in self.teamlist_entities:
-                if show_donation_page != tl.show_donation_page:
-                    tl.show_donation_page = show_donation_page
-                
-                if name_changed == True:
-                    tl.sort_name = name
-
-                tl.put()
-        except:
-            pass
-
+        #And now to put that contact back in the datastore
         self.put()
 
-    ## -- After put -- ##
+    ## -- After Put -- ##
+    @classmethod
     def _post_put_hook(self, future):
         e = future.get_result().get()
+        memcache.delete("contacts" + e.settings.urlsafe())
 
-        for t in e.data.teams:
-            memcache.delete("teammembers" + t.team.urlsafe())
-            memcache.delete("teammembersdict" + t.team.urlsafe())
-            memcache.delete("info" + t.team.urlsafe() + e.websafe)
-
+        e.settings.get().updateContactsJSON()
         e.search.index()
 
     ## -- Before Delete -- ##
     @classmethod
     def _pre_delete_hook(cls, key):
-        i = key.get()
-
-        #Removing this individual's association with donations
-        for d in i.data.donations:
-            d.team = None
-            d.individual = None
-            d.put()
-
-        for tl in i.data.teams:
-            memcache.delete("teammembers" + tl.team.urlsafe())
-            memcache.delete("teammembersdict" + tl.team.urlsafe())
-
-            tl.key.delete()
+        e = key.get()
 
         # Delete search index
-        index = search.Index(name=_INDIVIDUAL_SEARCH_INDEX)
-        index.remove(i.websafe)
+        index = search.Index(name=_CONTACT_SEARCH_INDEX)
+        index.remove(e.websafe)
+
+class DepositReceipt(ndb.Expando):
+    entity_keys = ndb.KeyProperty(repeated=True)
+
+    settings = ndb.KeyProperty()
+    time_deposited = ndb.StringProperty()
+
+    #Sets creation date
+    creation_date = ndb.DateTimeProperty(auto_now_add=True)
+
+    @property
+    def websafe(self):
+        return self.key.urlsafe()
 
 class Donation(ndb.Expando):
     contact = ndb.KeyProperty()
@@ -603,106 +310,429 @@ class Impression(ndb.Expando):
     def websafe(self):
         return self.key.urlsafe()
 
-class Contact(ndb.Expando):
-    #Standard information we need to know
+class Individual(ndb.Expando):
     name = ndb.StringProperty()
     email = ndb.StringProperty()
-    phone = ndb.StringProperty()
-    address = ndb.StringProperty(repeated=True)
-    notes = ndb.TextProperty(indexed=True)
-    
+
+    #Determines which account this person belongs to
     settings = ndb.KeyProperty()
+
+    #Credentials
+    admin = ndb.BooleanProperty()
+    password = ndb.StringProperty()
+
+    #Profile
+    description = ndb.TextProperty()
+    photo = ndb.StringProperty()
 
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
-    def address_json(self):
-        return json.dumps(self.address)
-
-    @property
-    def address_formatted(self):
-        a = self.address
-        if not a == ["", "", "", ""]:
-            return a[0] + "\n" + a[1] + ", " + a[2] + "  " + a[3]
-        else:
-            return ""
-
-    @property
-    def create(self):
-        return tools.ContactCreate(self)
-
-    @property
     def data(self):
-        return tools.ContactData(self)
+        return tools.IndividualData(self)
+
+    @property
+    def teamlist_entities(self):
+        q = TeamList.gql("WHERE individual = :i", i=self.key)
+        return tools.qCache(q)
 
     @property
     def search(self):
-        return tools.ContactSearch(self)
+        return tools.IndividualSearch(self)
+
+    @property
+    def show_donation_page(self):
+        try:
+            q = TeamList.gql("WHERE individual = :i", i=self.key)
+            return q.fetch(1)[0].show_donation_page
+
+        except:
+            return False
 
     @property
     def websafe(self):
         return self.key.urlsafe()
 
-    ## -- Update contact -- ##
-    def update(self, name, email, phone, notes, address):
-        settings = self.settings.get()
+    ## Currently not in use
+    def email_user(self, msg_id):
+        #Gives the user an email when something happens in their account
+        if msg_id == 1:
+            email_subject
+            email_message = "A new recurring donation was sent to you!"
 
-        #Changing blank values to None
-        if name == "":
-            name = None
-        if email == None:
-            email = ""
+        message = mail.EmailMessage()
+        message.sender = "donate@globalhopeindia.org"
+        message.subject = email_subject
+        message.to = self.email
 
-        if name != self.name and name != None:
+        #Message body here - determined from msg_id
+        message.body = email_message
+
+        logging.info("Sending alert email to: " + self.email)
+
+        #Adding to history
+        logging.info("Alert email sent at " + currentTime())
+
+        message.send()
+
+    ## -- Update Individual -- #
+    def update(self, name, email, team_list, description, change_image, password, show_donation_page):
+        name_changed = False
+
+        if name != self.name:
             self.name = name
-
+            name_changed = True
+        
         if email != self.email:
             self.email = email
-            if settings.mc_use and email != "" and email != None:
-                settings.mailchimp.add(email, name, False)
 
-        if phone != self.phone:
-            self.phone = phone
+        #Initializes DictDiffer object to tell differences from current dictionary to server-side one
+        team = json.loads(team_list)
+        dd = tools.DictDiffer(team, self.data.team_list)
 
-        if notes != str(self.notes):
-            if notes == None:
-                notes = ""
-            self.notes = notes
+        for key in dd.added():
+            new_tl = TeamList()
+            new_tl.individual = self.key
+            new_tl.team = tools.getKey(key)
+            new_tl.fundraise_amt = tools.toDecimal(team[key][1])
 
-        if address != self.address:
-            if address != None and address != "" and address != "None":
-                #If the address is something and is different than that on file
-                self.address = address
+            new_tl.put()
 
-        #And now to put that contact back in the datastore
+        for key in dd.removed():
+            query = TeamList.gql("WHERE team = :t AND individual = :i", t=tools.getKey(key), i=self.key)
+            tl = query.fetch(1)[0]
+
+            for d in tl.donations:
+                d.team = None
+                d.put()
+
+            tl.key.delete()
+
+        for key in dd.changed():
+            query = TeamList.gql("WHERE team = :t AND individual = :i", t=tools.getKey(key), i=self.key)
+
+            tl = query.fetch(1)[0]
+            tl.fundraise_amt = tools.toDecimal(team[key][1])
+            tl.put()
+
+        if description != str(self.description):
+            self.description = description
+
+        if change_image != None:
+        #If change_image = None, there isn't any change. If it isn't, it 
+        #contains a 
+            if self.photo != None:
+                #Delete old blob to keep it from orphaning
+                old_blobkey = self.photo
+                old_blob = blobstore.BlobInfo.get(old_blobkey)
+                old_blob.delete()
+
+            self.photo = change_image
+
+        if password != None and password != "" and self.password != password:
+            self.password = password
+
+        try:
+            for tl in self.teamlist_entities:
+                if show_donation_page != tl.show_donation_page:
+                    tl.show_donation_page = show_donation_page
+                
+                if name_changed == True:
+                    tl.sort_name = name
+
+                tl.put()
+        except:
+            pass
+
         self.put()
 
-    ## -- After Put -- ##
-    @classmethod
+    ## -- After put -- ##
     def _post_put_hook(self, future):
         e = future.get_result().get()
-        memcache.delete("contacts" + e.settings.urlsafe())
+
+        for t in e.data.teams:
+            memcache.delete("teammembers" + t.team.urlsafe())
+            memcache.delete("teammembersdict" + t.team.urlsafe())
+            memcache.delete("info" + t.team.urlsafe() + e.websafe)
 
         e.search.index()
 
     ## -- Before Delete -- ##
     @classmethod
     def _pre_delete_hook(cls, key):
-        e = key.get()
+        i = key.get()
+
+        #Removing this individual's association with donations
+        for d in i.data.donations:
+            d.team = None
+            d.individual = None
+            d.put()
+
+        for tl in i.data.teams:
+            memcache.delete("teammembers" + tl.team.urlsafe())
+            memcache.delete("teammembersdict" + tl.team.urlsafe())
+
+            tl.key.delete()
 
         # Delete search index
-        index = search.Index(name=_CONTACT_SEARCH_INDEX)
-        index.remove(e.websafe)
+        index = search.Index(name=_INDIVIDUAL_SEARCH_INDEX)
+        index.remove(i.websafe)
 
-class DepositReceipt(ndb.Expando):
-    entity_keys = ndb.KeyProperty(repeated=True)
+class Settings(ndb.Expando):
+    name = ndb.StringProperty()
+    email = ndb.StringProperty()
 
-    settings = ndb.KeyProperty()
-    time_deposited = ndb.StringProperty()
+    #Mailchimp values
+    mc_use = ndb.BooleanProperty()
+    mc_apikey = ndb.StringProperty()
+    mc_donorlist = ndb.StringProperty()
+
+    #Impressions
+    impressions = ndb.StringProperty(repeated=True)
+
+    #PayPal
+    paypal_id = ndb.StringProperty()
+
+    #Donate page
+    amount1 = ndb.IntegerProperty()
+    amount2 = ndb.IntegerProperty()
+    amount3 = ndb.IntegerProperty()
+    amount4 = ndb.IntegerProperty()
+    use_custom = ndb.BooleanProperty()
+
+    #Confirmation letters
+    confirmation_text = ndb.TextProperty()
+    confirmation_info = ndb.TextProperty()
+    confirmation_header = ndb.TextProperty()
+    confirmation_footer = ndb.TextProperty()
+    donor_report_text = ndb.TextProperty()
+
+    #Contact JSON
+    contacts_json = ndb.TextProperty()
 
     #Sets creation date
+    creation_date = ndb.DateTimeProperty(auto_now_add=True)  
+
+    @property
+    def create(self):
+        return tools.SettingsCreate(self)
+
+    @property
+    def data(self):
+        return tools.SettingsData(self)
+
+    @property
+    def exists(self):
+        return tools.SettingsExists(self)
+
+    @property
+    def deposits(self):
+        return tools.SettingsDeposits(self)
+
+    @property
+    def impressions_json(self):
+        return json.dumps(self.impressions)
+
+    @property
+    def mailchimp(self):
+        return tools.SettingsMailchimp(self)
+
+    @property
+    def search(self):
+        return tools.SettingsSearch(self)
+
+    ## -- Update -- ##
+    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
+        s = self
+
+        if name != s.name:
+            s.name = name
+
+        if email != s.email:
+            s.email = email
+
+        if mc_use != s.mc_use:
+            s.mc_use = mc_use
+
+        if mc_apikey != s.mc_apikey:
+            s.mc_apikey = mc_apikey
+
+        if mc_donorlist != s.mc_donorlist:
+            s.mc_donorlist = mc_donorlist
+
+        if paypal_id != s.paypal_id:
+            s.paypal_id = paypal_id
+
+        if impressions != s.impressions:
+            s.impressions = impressions
+
+        if int(amount1) != s.amount1:
+            s.amount1 = int(amount1)
+
+        if int(amount2) != s.amount2:
+            s.amount2 = int(amount2)
+
+        if int(amount3) != s.amount3:
+            s.amount3 = int(amount3)
+
+        if int(amount4) != s.amount4:
+            s.amount4 = int(amount4)
+
+        if use_custom != s.use_custom:
+            s.use_custom = use_custom
+
+        if confirmation_header != s.confirmation_header:
+            s.confirmation_header = confirmation_header
+
+        if confirmation_info != s.confirmation_info:
+            s.confirmation_info = confirmation_info
+
+        if confirmation_footer != s.confirmation_footer:
+            s.confirmation_footer = confirmation_footer
+
+        if confirmation_text != s.confirmation_text:
+            s.confirmation_text = confirmation_text
+
+        if donor_report_text != s.donor_report_text:
+            s.donor_report_text = donor_report_text
+
+        s.put()
+
+    def updateContactsJSON(self):
+        contacts = []
+
+        for c in self.data.all_contacts:
+            contact = {}
+            contact["label"] = c.name
+            contact["email"] = c.email
+            contact["address"] = json.dumps(c.address)
+            contact["key"] = str(c.websafe)
+            
+            contacts.append(contact)
+
+        contacts_json =  json.dumps(contacts)
+        self.contacts_json = contacts_json
+        self.put()
+
+    @property
+    def websafe(self):
+        return self.key.urlsafe()
+
+class Team(ndb.Expando):
+    name = ndb.StringProperty()
+    settings = ndb.KeyProperty()
+    show_team = ndb.BooleanProperty()
+    
+    #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
+
+    @property
+    def data(self):
+        return tools.TeamData(self)
+
+    @property
+    def search(self):
+        return tools.TeamSearch(self)
+
+    @property
+    def websafe(self):
+        return self.key.urlsafe()
+
+    ## -- Update -- ##
+    def update(self, name, show_team):
+        if name != self.name:
+            self.name = name
+
+        if show_team != self.show_team:
+            self.show_team = show_team
+
+        self.put()
+
+    ## -- After put -- ##
+    @classmethod
+    def _post_put_hook(self, future):
+        e = future.get_result().get()
+        memcache.delete('allteams' + e.settings.urlsafe())
+        memcache.delete("teammembers" + e.websafe)
+        memcache.delete("teamsdict" + e.settings.urlsafe())
+
+        e.search.index()       
+
+    ## -- Before Deletion -- ##
+    @classmethod
+    def _pre_delete_hook(cls, key):
+        t = key.get()
+        logging.info("Deleting team:" + t.name)
+
+        for tl in t.data.members:
+            #Delete this team from all
+            tl.key.delete()
+
+        for d in t.data.donations:
+            d.individual = None
+            d.team = None
+            d.put()
+
+        # Delete search index
+        index = search.Index(name=_TEAM_SEARCH_INDEX)
+        index.remove(t.websafe)
+
+class TeamList(ndb.Model):
+    individual = ndb.KeyProperty()
+    team = ndb.KeyProperty()
+    fundraise_amt = DecimalProperty()
+
+    #Show in public donation page
+    show_donation_page = ndb.BooleanProperty()
+
+    sort_name = ndb.StringProperty()
+
+    @property
+    def donations(self):
+        i = self.individual.get()
+        q = Donation.gql("WHERE settings = :s AND team = :t AND individual = :i", s=i.settings, t=self.team, i=i.key)
+        return tools.qCache(q)
+
+    @property
+    def donation_total(self):
+        i = self.individual.get()
+        memcache_key = "dtotal" + self.team.urlsafe() + i.key.urlsafe()
+
+        def get_item():
+            q = self.donations
+            # donations = tools.qCache(q)
+            donations = q
+            
+            donation_total = tools.toDecimal(0)
+
+            for d in donations:
+                donation_total += d.amount_donated
+
+            return str(donation_total)
+
+        item = tools.cache(memcache_key, get_item)
+        return tools.toDecimal(item)
+
+    @property
+    def individual_email(self):
+        return self.individual.get().email
+
+    @property
+    def individual_key(self):
+        return self.individual.urlsafe()
+
+    @property
+    def individual_name(self):
+        return self.individual.get().name
+
+    @property 
+    def team_name(self):
+        return self.team.get().name
+
+    @property
+    def team_websafe(self):
+        return self.team.urlsafe()
 
     @property
     def websafe(self):

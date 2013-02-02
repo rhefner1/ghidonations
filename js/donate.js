@@ -3,6 +3,9 @@ var selected_team = null
 var selected_individual = null
 var settings_key = null
 
+var loader = '<img id="loading_gif" style="margin-left:15px; display:none" src="/images/ajax-loader.gif">'
+var loading_message = '<p>Loading...<img style="margin-left:15px" src="/images/ajax-loader.gif"></p>'
+
 function rpcGet(data, callback){
     var url = '/rpc?' + $.param(data)
     $.getJSON(url, function(data){
@@ -13,7 +16,7 @@ function rpcGet(data, callback){
 function loadTeams(){
     $("#designate").css("height", "auto")
     $("#designate_label").html("<strong>Select one:</strong>")
-    $("#designate").html("<p>Loading...</p>")
+    $("#designate").html(loading_message)
 
     selected_team = null
     selected_individual = null
@@ -36,7 +39,7 @@ function loadIndividuals(team_key){
     $("#designate_label").html("<strong>Select one:</strong>")
     $("#designate").css("height", "300px")
     $("#designate").css("overflow", "auto")
-    $("#designate").html("<p>Loading...</p>")
+    $("#designate").html(loading_message)
 
     selected_individual = null
     
@@ -45,7 +48,7 @@ function loadIndividuals(team_key){
         
         $("#designate").html("")
 
-        var back_button = '<br><a href="#" class="button black small" id="back_button"><-- Back</a>'
+        var back_button = '<br><a href="#" class="button black small" id="back_button"><-- Back</a>' + loader
         $("#designate").append(back_button)
 
         var ul = '<ul class="gallery medium" id="members_list"></ul>'
@@ -81,6 +84,7 @@ function loadIndividuals(team_key){
 }
 
 function showInfo(team_key, individual_key){
+    $("#loading_gif").show()
     $("#designate_label").html("<strong>Your donation will be designated to:</strong>")
     var params = {action: "pub_individualInfo", arg0: JSON.stringify(team_key), arg1: JSON.stringify(individual_key)}
 
@@ -100,6 +104,8 @@ function showInfo(team_key, individual_key){
 
         $("#designate").hide()
         $("#info_container").fadeIn()
+
+        $("#loading_gif").hide()
     })  
 }
 

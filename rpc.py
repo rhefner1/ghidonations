@@ -231,18 +231,15 @@ class RPCMethods:
     def getContacts(self, query_cursor, query):
         s = tools.getSettingsKey(self).get()
 
-        if query == "":
-            results = s.data.contacts(query_cursor)
-        else:
-            results = s.search.contact(query, query_cursor=query_cursor)
-            
+        results = s.search.contact(query, query_cursor=query_cursor)
         logging.info("Getting contacts with query: " + query)
 
         contacts = []
         new_cursor = results[1]
 
         for c in results[0]:
-            c_dict = {"key" : c.websafe, "name" : c.name, "email" : c.email}
+            f = c.fields
+            c_dict = {"key" : f[0].value, "name" : f[1].value, "email" : f[2].value}
 
             contacts.append(c_dict)
 
@@ -261,28 +258,10 @@ class RPCMethods:
         new_cursor = results[1]
 
         for d in results[0]:
-            d_dict = {"key" : d.key.urlsafe(), "formatted_donation_date" : d.formatted_donation_date, "name" : d.name, "email" : d.email,
-                 "payment_type" : d.payment_type, "amount_donated" : str(d.amount_donated)}
+            f = d.fields
 
-            donations.append(d_dict)
-
-        #Return message to confirm 
-        return_vals = [donations, new_cursor]
-        return return_vals
-
-    def semi_getIndividualDonations(self, query_cursor, individual_key):
-        s = tools.getSettingsKey(self).get()
-        query = "individual_key:" + str(individual_key)
-
-        results = s.search.donation(query, query_cursor=query_cursor)
-        logging.info("Getting individual donations with query: " + query)
-
-        donations = []
-        new_cursor = results[1]
-
-        for d in results[0]:
-            d_dict = {"key" : d.key.urlsafe(), "formatted_donation_date" : d.formatted_donation_date, "name" : d.name, "email" : d.email,
-                 "payment_type" : d.payment_type, "amount_donated" : str(d.amount_donated)}
+            d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
+                 "payment_type" : f[5].value, "amount_donated" : tools.moneyAmount(f[4].value)}
 
             donations.append(d_dict)
 
@@ -308,19 +287,17 @@ class RPCMethods:
     def getDonations(self, query_cursor, query):
         s = tools.getSettingsKey(self).get()
 
-        if query == "":
-            results = s.data.donations(query_cursor)
-        else:
-            results = s.search.donation(query, query_cursor=query_cursor)
-            
+        results = s.search.donation(query, query_cursor=query_cursor)
         logging.info("Getting donations with query: " + query)
 
         donations = []
         new_cursor = results[1]
 
         for d in results[0]:
-            d_dict = {"key" : d.websafe, "formatted_donation_date" : d.formatted_donation_date, "name" : d.name, "email" : d.email,
-                 "payment_type" : d.payment_type, "amount_donated" : str(d.amount_donated)}
+            f = d.fields
+
+            d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
+                 "payment_type" : f[5].value, "amount_donated" : tools.moneyAmount(f[4].value)}
 
             donations.append(d_dict)
 
@@ -330,19 +307,16 @@ class RPCMethods:
 
     def getIndividuals(self, query_cursor, query):
         s = tools.getSettingsKey(self).get()
-
-        if query == "":
-            results = s.data.individuals(query_cursor)
-        else:
-            results = s.search.individual(query, query_cursor=query_cursor)
-            
-            logging.info("Getting individuals with query: " + query)
+        
+        results = s.search.individual(query, query_cursor=query_cursor)
+        logging.info("Getting individuals with query: " + query)
 
         individuals = []
         new_cursor = results[1]
 
         for i in results[0]:
-            i_dict = {"key" : i.websafe, "name" : i.name, "email" : i.email}
+            f = i.fields
+            i_dict = {"key" : f[0].value, "name" : f[1].value, "email" : f[2].value}
 
             individuals.append(i_dict)
 
@@ -357,25 +331,71 @@ class RPCMethods:
         settings = tools.getAccountEmails(self)
         return settings
 
-    def getTeams(self, query_cursor):
+    def getTeams(self, query_cursor, query):
         s = tools.getSettingsKey(self).get()
 
-        response = s.data.teams(query_cursor)
-        teams = []
+        results = s.search.team(query, query_cursor=query_cursor)
+        logging.info("Getting teams with query: " + query)
 
-        for t in response[0]:
-            tdict = {"key" : t.websafe, "name" : t.name}
-            teams.append(tdict)
-        new_cursor = response[1]
+        teams = []
+        new_cursor = results[1]
+
+        for t in results[0]:
+            f = t.fields
+            i_dict = {"key" : f[0].value, "name" : f[1].value}
+
+            teams.append(i_dict)
 
         #Return message to confirm 
         return_vals = [teams, new_cursor]
+        return return_vals
+
+    def getTeamMembers(self, query_cursor, team_key):
+        s = tools.getSettingsKey(self).get()
+        query = "team_key:" + str(team_key)
+
+        results = s.search.individual(query, query_cursor=query_cursor)
+        logging.info("Getting team members with query: " + query)
+
+        individuals = []
+        new_cursor = results[1]
+
+        for i in results[0]:
+            f = i.fields
+            i_dict = {"key" : f[0].value, "name" : f[1].value, "email" : f[2].value, "raised" : tools.moneyAmount(f[4].value)}
+
+            individuals.append(i_dict)
+
+        #Return message to confirm 
+        return_vals = [individuals, new_cursor]
         return return_vals
 
     def getTeamDonors(self, team_key):
         s = tools.getSettingsKey(self).get()
         team_key = tools.getKey("ahBkZXZ-Z2hpZG9uYXRpb25zcgoLEgRUZWFtGAIM")
         return s.data.team_donors(team_key)
+
+    def semi_getIndividualDonations(self, query_cursor, individual_key):
+        s = tools.getSettingsKey(self).get()
+        query = "individual_key:" + str(individual_key)
+
+        results = s.search.donation(query, query_cursor=query_cursor)
+        logging.info("Getting individual donations with query: " + query)
+
+        donations = []
+        new_cursor = results[1]
+
+        for d in results[0]:
+            f = d.fields
+
+            d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
+                 "payment_type" : f[5].value, "amount_donated" : f[4].value}
+
+            donations.append(d_dict)
+
+        #Return message to confirm 
+        return_vals = [donations, new_cursor]
+        return return_vals
 
     def semi_getTeamMembers(self, team_key):
     # Returns team information
