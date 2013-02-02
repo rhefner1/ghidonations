@@ -1193,7 +1193,7 @@ class DonationSearch(UtilitiesBase):
                     search.TextField(name='team', value=d.designated_team),
                     search.TextField(name='individual', value=d.designated_individual),
                     search.TextField(name='reviewed', value=reviewed),
-                    search.TextField(name='reviewed', value=d.formatted_donation_date),
+                    search.TextField(name='formatted_donation_date', value=d.formatted_donation_date),
                     search.TextField(name='contact_key', value=d.contact.urlsafe()),
                     search.TextField(name='individual_key', value=individual_key),
                     search.TextField(name='settings', value=d.settings.urlsafe()),
