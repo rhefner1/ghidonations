@@ -8,6 +8,8 @@ function dataTableWriter(data_table, d){
 }
 
 function trigger_search(query){
+    data_table.fnClearTable()
+    
     //Reinitialize the table with new settings
     rpc_params = [query]
     pageThrough(data_table, 0, "getDeposits", rpc_params, function(data_table, d){

@@ -926,7 +926,7 @@ class SettingsSearch(UtilitiesBase):
 
     def deposit(self, query, **kwargs):
         expr_list = [search.SortExpression(
-            expression="created", default_value='',
+            expression="date", default_value='',
             direction=search.SortExpression.DESCENDING)]
 
         search_function = self.e.search.deposit
@@ -1217,16 +1217,13 @@ class DonationSearch(UtilitiesBase):
         if d.reviewed == True:
             reviewed = "yes"
 
-        dd = d.donation_date
-        donation_date = date(dd.year, dd.month, dd.day)
-
         individual_key = ""
         if d.individual:
             individual_key = d.individual.urlsafe()
 
         document = search.Document(doc_id=d.websafe,
             fields=[search.TextField(name='donation_key', value=d.websafe),
-                    search.DateField(name='time', value=donation_date),
+                    search.DateField(name='time', value=d.donation_date),
                     search.TextField(name='name', value=d.contact.get().name),
                     search.TextField(name='email', value=d.contact.get().email),
                     search.NumberField(name='amount', value=float(d.amount_donated)),
