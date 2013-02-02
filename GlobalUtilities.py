@@ -256,6 +256,12 @@ def convertTime(time):
     new_time = time.astimezone(to_zone)
     return new_time
 
+def getWebsafeCursor(cursor_object):
+    if cursor_object:
+        return cursor_object.web_safe_string
+    else:
+        return None
+
 def getFlash(self):
     try:
         self.session = get_current_session()
