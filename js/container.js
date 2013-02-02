@@ -1,4 +1,6 @@
 var home_page = $("#home_page").val()
+var previous_hash_params = {}
+var previous_hash_base = ""
 
 // ---- Show flash message ---- //
 function show_flash(type, message, fade){
@@ -33,8 +35,83 @@ function change_hash(e, location){
     }
     else{
         window.location.hash = location
+    }  
+}
+
+function bind_hashchange(){
+    $(window).hashchange(function(){
+        // Fires every time the hash changes!  This thing is pretty jimmy rigged.
+        var hash = window.location.hash
+        var parameters = {}
+
+        if (hash !== ""){
+            var location = hash.substr(1)
+            var location_split = location.split("?")
+            
+            if (location_split[0] != previous_hash_base){
+                // If the base page changes, trigger change_tab
+                change_tab(location)
+            }
+            else{
+                if (location_split[1]){
+                    //If there are parameters, deparam them
+                    parameters = $.deparam(location_split[1])
+                }
+                
+                difference = diff(previous_hash_params, parameters)
+                var search_change = false
+                var other_change = false
+                for (var key in difference){
+                    // If there is a search difference, throw flag
+                    if (key == "search"){
+                        search_change = true
+                    }
+                    // If there is any other difference in the parameter, throw flag
+                    else{
+                        other_change = true
+                    }
+                }
+
+                // If any part of the parameters changed besides search, change tab like normal
+                if (other_change == true){
+                    change_tab(location)
+                }
+                // But if search is the only thing that changed, insert query into box and fire
+                else if(search_change == true){
+                    var query = parameters["search"]
+                    if (query == null){
+                        query = ""
+                    }
+                    
+                    $("#search_query").val(query)
+                    trigger_search(query)
+                }
+            }
+        }
+
+        else{
+            window.location.hash = home_page
+            change_tab(home_page)
+        }
+
+        //Saving these paramters for comparison next time
+        previous_hash_base = location_split[0]
+        previous_hash_params = parameters
+    })
+}
+
+function change_search_hash(query){
+    var hash = window.location.hash.split("?")
+    if (hash[1]){
+        var parameters = $.deparam(hash[1])
+        parameters["search"] = query
     }
-    
+    else{
+        var parameters = {"search" : query}
+    }
+
+    hash = hash[0] + "?" + $.param(parameters)
+    window.location.hash = hash   
 }
 
 function change_tab(location)
@@ -322,6 +399,19 @@ function rpcPost(data, callback){
         });
 }
 
+// ---- Utilities ---- //
+function diff(obj1,obj2) {
+    var newObj = $.extend({},obj1,obj2);
+    var result = {};
+    $.each(newObj, function (key, value) {
+        if (!obj2.hasOwnProperty(key) || !obj1.hasOwnProperty(key) || obj2[key] !== obj1[key]) {
+            result[key] = [obj1[key],obj2[key]];
+        }
+    });
+
+    return result;
+}
+
 $(document).ready(function(){
     //Function to check if an element exists
     jQuery.fn.exists = function() {
@@ -343,27 +433,12 @@ $(document).ready(function(){
     });
         
     // Bind the event.
-    $(window).hashchange( function(){
-        // Fires every time the hash changes!
-        var hash = window.location.hash
-
-        if (hash !== ""){
-            var location = hash.substr(1)
-            change_tab(location)
-        }
-
-        else{
-            window.location.hash = home_page
-            change_tab(home_page)
-        }
-    })
+    bind_hashchange()
 
     // Trigger the event (useful on page load).
     $(window).hashchange();
 
-    $("#refresh").click(function(){
-        refreshPage()
-    })
+    $("#refresh").click(refreshPage)
 
     //Set up AJAX
     $.ajaxSetup({
