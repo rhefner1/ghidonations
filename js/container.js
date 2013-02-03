@@ -94,8 +94,13 @@ function bind_hashchange(){
             change_tab(home_page)
         }
 
-        //Saving these paramters for comparison next time
-        previous_hash_base = location_split[0]
+        //Saving these parameters for comparison next time
+        try{
+            previous_hash_base = location_split[0]
+        catch(e){
+            previous_hash_base = ""
+        }
+        
         previous_hash_params = parameters
     })
 }
