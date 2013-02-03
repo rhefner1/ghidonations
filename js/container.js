@@ -101,7 +101,7 @@ function bind_hashchange(){
         else{
             previous_hash_base = ""
         }
-        
+
         previous_hash_params = parameters
     })
 }
@@ -272,6 +272,7 @@ function initializeTable(num_columns, rpc_action, rpc_params, callback){
                 }
             } 
             else{
+                show_flash("setting", "There isn't any more data to show.", true)
                 pageThrough(data_table, current_page, rpc_action, rpc_params, callback) 
             } 
         }
