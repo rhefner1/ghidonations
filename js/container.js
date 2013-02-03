@@ -95,9 +95,10 @@ function bind_hashchange(){
         }
 
         //Saving these parameters for comparison next time
-        try{
+        if (location_split){
             previous_hash_base = location_split[0]
-        catch(e){
+        }
+        else{
             previous_hash_base = ""
         }
         

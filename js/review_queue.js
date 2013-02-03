@@ -41,12 +41,20 @@ function trigger_search(query){
     })
 
     toggleSelectionButtons(query)
+    change_search_hash(query)
 
     $("#search_query").blur()
 }
 
 $(document).ready(function(){  
     var query = $("#search_query").val()
+
+    //If ?search= doesn't exist in URL bar, resort to default search reviewed:no
+    if (window.location.hash.indexOf("search=") == -1 && query == ""){
+        query = "reviewed:no"
+        $("#search_query").val(query)
+    }
+    
     var rpc_params = [query]
     var data_table = initializeTable(5, "getDonations", rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)

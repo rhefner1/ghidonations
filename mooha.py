@@ -401,8 +401,6 @@ class ReviewQueue(BaseHandlerAdmin):
         isAdmin, s = tools.checkAuthentication(self, True)
 
         search_query = self.request.get("search")
-        if not search_query:
-            search_query = "reviewed:no"
 
         template_variables = {"search_query" : search_query}
         self.response.write(
