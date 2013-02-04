@@ -34,7 +34,7 @@ $(document).ready(function(){
 	var individual_key = $("#individual_key").val()
 
     var rpc_params = [individual_key]
-    var data_table = initializeTable(4, "semi_getIndividualDonations", rpc_params, function(data_table, d){
+    var data_table = initializeTable(5, "semi_getIndividualDonations", rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 
