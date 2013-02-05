@@ -20,3 +20,5 @@ The four main modules are:
  - GlobalUtilities.py (contains utility functions and many functions referenced by data models)
  - rpc.py (contains the RPC client-server communication code)
  - mooha.py (the HTTP GET and POST web handlers)
+
+ For more information and in-depth documentation, check out [the project wiki](https://github.com/rhefner1/ghidonations/wiki/GHI-Donations).
