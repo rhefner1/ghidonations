@@ -240,14 +240,6 @@ class DonorReportSelect(BaseHandlerAdmin):
         template_variables = {"s" : s}
         self.response.write(
            template.render('pages/donor_report_select.html', template_variables))
-        
-class ExportContacts(BaseHandlerAdmin):
-    def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
-
-        template_variables = {}
-        self.response.write(
-           template.render('pages/export_contacts.html', template_variables))
 
 class ExportDonations(BaseHandlerAdmin):
     def task(self, isAdmin, s):
@@ -879,7 +871,6 @@ app = webapp2.WSGIApplication([
        ('/donate', DonatePage),
        ('/reports/donor', DonorReport),
        ('/ajax/donorreport', DonorReportSelect),
-       ('/ajax/exportcontacts', ExportContacts),
        ('/ajax/exportdonations', ExportDonations),
        ('/ajax/profile', IndividualProfile),
        ('/login', Login),
