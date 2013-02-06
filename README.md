@@ -21,4 +21,4 @@ The four main modules are:
  - rpc.py (contains the RPC client-server communication code)
  - mooha.py (the HTTP GET and POST web handlers)
 
- For more information and in-depth documentation, check out [the project wiki](https://github.com/rhefner1/ghidonations/wiki/GHI-Donations).
+For more information and in-depth documentation, check out [the project wiki](https://github.com/rhefner1/ghidonations/wiki).
