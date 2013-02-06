@@ -393,7 +393,7 @@ class RPCMethods:
             f = d.fields
 
             d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
-                 "payment_type" : f[5].value, "amount_donated" : f[4].value}
+                 "payment_type" : f[5].value, "amount_donated" : tools.moneyAmount(f[4].value)}
 
             donations.append(d_dict)
 
