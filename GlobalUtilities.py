@@ -1325,7 +1325,7 @@ class IndividualData(UtilitiesBase):
         search_list = ""
 
         for tl in self.teams:
-            search_list += tl.team.urlsafe()
+            search_list += " " + tl.team.urlsafe()
 
         return search_list
 
