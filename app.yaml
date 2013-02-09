@@ -36,22 +36,6 @@ handlers:
   script: mooha.app
   secure: always
 
-- url: /login
-  script: mooha.app
-  secure: always
-
-- url: /logout
-  script: mooha.app
-  secure: optional
-
-- url: /reports/.*
-  script: mooha.app
-  secure: optional
-
-- url: /thanks
-  script: mooha.app
-  secure: optional
-
 - url: /ajax/*.*
   script: mooha.app
   secure: optional
@@ -60,7 +44,27 @@ handlers:
   script: mooha.app
   secure: optional
 
+- url: /ipn
+  script: mooha.app
+  secure: always
+
+- url: /login
+  script: mooha.app
+  secure: always
+
+- url: /logout
+  script: mooha.app
+  secure: optional
+
 - url: /m
+  script: mooha.app
+  secure: optional
+
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+
+- url: /reports/.*
   script: mooha.app
   secure: optional
 
@@ -68,18 +72,15 @@ handlers:
   script: rpc.app
   secure: always
 
-- url: /ipn
-  script: mooha.app
-  secure: always
-
 - url: /tasks/.*
   script: tasks.app
   secure: optional
   login: admin
 
-- url: /remote_api
-  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
-  login: admin
+- url: /thanks
+  script: mooha.app
+  secure: optional
+
 
 - url: /.*
   script: error.app
