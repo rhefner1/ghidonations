@@ -32,9 +32,10 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/admin
   login: admin
 
+# Should be always secure
 - url: /
   script: mooha.app
-  secure: always
+  secure: optional
 
 - url: /ajax/*.*
   script: mooha.app
@@ -44,13 +45,15 @@ handlers:
   script: mooha.app
   secure: optional
 
+# Should be always secure
 - url: /ipn
   script: mooha.app
-  secure: always
+  secure: optional
 
+# Should be always secure
 - url: /login
   script: mooha.app
-  secure: always
+  secure: optional
 
 - url: /logout
   script: mooha.app
@@ -68,9 +71,10 @@ handlers:
   script: mooha.app
   secure: optional
 
+# Should be always secure
 - url: /rpc
   script: rpc.app
-  secure: always
+  secure: optional
 
 - url: /tasks/.*
   script: tasks.app
