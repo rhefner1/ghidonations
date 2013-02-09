@@ -372,7 +372,10 @@ class MergeContacts(BaseHandlerAdmin):
 class Mobile(BaseHandler):
     def task(self, isAdmin, s):
 
-        template_variables = {}
+        i_key = tools.getUserKey(self)
+        i = i_key.get()
+
+        template_variables = {"i" : i}
         self.response.write(
            template.render('mobile/index.html', template_variables))
 
