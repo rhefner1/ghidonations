@@ -56,7 +56,7 @@ handlers:
   script: mooha.app
   secure: optional
 
-- url: /m
+- url: /m/*.*
   script: mooha.app
   secure: optional
 

@@ -92,6 +92,27 @@ class Contact(BaseHandlerAdmin):
 class Container(BaseHandler):
     def task(self, isAdmin, s):
         username = tools.getUsername(self)
+        session = get_current_session()
+
+        redirect = False
+
+        user_agent = str(self.request.headers['User-Agent'])
+        mobile_devices = ["android", "blackberry", "googlebot-mobile", "iemobile", "iphone", "ipod", "opera", "mobile", "palmos", "webos"]
+        
+        # If user agent matches anything in the list above, redirect
+        for m in mobile_devices:
+            if user_agent.lower().find(m) != -1:
+                redirect = True
+
+        # If user has explicitly requested to be sent to desktop site
+        try:
+            if session["no_redirect"] == "1":
+                redirect = False
+        except:
+            pass
+
+        if redirect == True:
+            self.redirect("/m")
 
         try:
             template_variables = {"settings" : s.key.urlsafe(), "username" : username}
@@ -378,6 +399,13 @@ class NewTeam(BaseHandlerAdmin):
         self.response.write(
                 template.render('pages/new_team.html', template_variables))
 
+class NoMobileRedirect(webapp2.RequestHandler):
+    def get(self):
+        session = gaesessions.get_current_session()
+        session["no-redirect"] = "1"
+
+        self.redirect("/")
+ 
 class NotAuthorized(webapp2.RequestHandler):
     def get(self):
         template_variables = {}
@@ -887,6 +915,7 @@ app = webapp2.WSGIApplication([
        ('/ajax/newcontact', NewContact),
        ('/ajax/newindividual', NewIndividual),
        ('/ajax/newteam', NewTeam),
+       ('/m/noredirect', NoMobileRedirect),
        ('/ajax/notauthorized', NotAuthorized),
        ('/ajax/offline', OfflineDonation),
        ('/ajax/review', ReviewQueue),
