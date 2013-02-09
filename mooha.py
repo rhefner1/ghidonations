@@ -95,6 +95,7 @@ class Container(BaseHandler):
         session = get_current_session()
 
         redirect = False
+        mobile_redirect = "none"
 
         user_agent = str(self.request.headers['User-Agent'])
         mobile_devices = ["android", "blackberry", "googlebot-mobile", "iemobile", "iphone", "ipod", "opera", "mobile", "palmos", "webos"]
@@ -106,8 +107,9 @@ class Container(BaseHandler):
 
         # If user has explicitly requested to be sent to desktop site
         try:
-            if session["no_redirect"] == "1":
+            if session["no-redirect"] == "1":
                 redirect = False
+                mobile_redirect = "block"
         except:
             pass
 
@@ -115,7 +117,7 @@ class Container(BaseHandler):
             self.redirect("/m")
 
         try:
-            template_variables = {"settings" : s.key.urlsafe(), "username" : username}
+            template_variables = {"settings" : s.key.urlsafe(), "username" : username, "mobile_redirect" : mobile_redirect}
         except:
             self.redirect("/login")
 
@@ -402,10 +404,12 @@ class NewTeam(BaseHandlerAdmin):
         self.response.write(
                 template.render('pages/new_team.html', template_variables))
 
-class NoMobileRedirect(webapp2.RequestHandler):
+class MobileRedirectSetting(webapp2.RequestHandler):
     def get(self):
-        session = gaesessions.get_current_session()
-        session["no-redirect"] = "1"
+        session = get_current_session()
+        setting = self.request.get("r")
+
+        session["no-redirect"] = setting
 
         self.redirect("/")
  
@@ -918,7 +922,7 @@ app = webapp2.WSGIApplication([
        ('/ajax/newcontact', NewContact),
        ('/ajax/newindividual', NewIndividual),
        ('/ajax/newteam', NewTeam),
-       ('/m/noredirect', NoMobileRedirect),
+       ('/m/redirect', MobileRedirectSetting),
        ('/ajax/notauthorized', NotAuthorized),
        ('/ajax/offline', OfflineDonation),
        ('/ajax/review', ReviewQueue),

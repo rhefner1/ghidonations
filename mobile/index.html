@@ -69,8 +69,8 @@
                     </ul>
 
                     <ul class="individual">
-                        <li><a target="_blank" href="http://r.hefner1.com">a rhefner1 project</a></li>
-                        <li><a target="_blank" href="/m/noredirect">Desktop Version</a></li>
+                        <li><a href="/m/redirect?r=1" rel="external">Desktop Version</a></li>
+                        <li><a href="/logout" rel="external">Logout</a></li>
                     </ul>
                 </div>
             </div>
@@ -80,9 +80,18 @@
                     <h1>Donations</h1>
                     <a href="#" class="back">Back</a>
                 </div>
+
                 <ul class="edgetoedge scroll" id="donations_list">
-                    
                 </ul>
+
+                <a href="#" id="load_more" class="whiteButton" style="margin-top:35px">
+                    <span id="load_more_text">Load more</span>
+                    <img id="search_loading" style="display:none" height="16" width="16" src="/images/ajax-loader.gif">
+                </a>
+
+                <div id="end_of_donations" style="display:none; margin-top:35px" class="info">
+                    <p>That's all the donations I have!</p>
+                </div>
             </div>
 
 
