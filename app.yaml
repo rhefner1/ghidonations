@@ -60,6 +60,10 @@ handlers:
   script: mooha.app
   secure: optional
 
+- url: /m
+  script: mooha.app
+  secure: optional
+
 - url: /rpc
   script: rpc.app
   secure: always

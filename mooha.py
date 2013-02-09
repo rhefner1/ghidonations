@@ -348,6 +348,13 @@ class MergeContacts(BaseHandlerAdmin):
         self.response.write(
            template.render('pages/merge_contacts.html', template_variables))
 
+class Mobile(BaseHandler):
+    def task(self, isAdmin, s):
+
+        template_variables = {}
+        self.response.write(
+           template.render('mobile/index.html', template_variables))
+
 class NewContact(BaseHandlerAdmin):
     def task(self, isAdmin, s):
 
@@ -876,6 +883,7 @@ app = webapp2.WSGIApplication([
        ('/login', Login),
        ('/logout', Logout),
        ('/ajax/mergecontacts', MergeContacts),
+       ('/m', Mobile),
        ('/ajax/newcontact', NewContact),
        ('/ajax/newindividual', NewIndividual),
        ('/ajax/newteam', NewTeam),
