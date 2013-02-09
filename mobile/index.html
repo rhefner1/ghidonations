@@ -2,19 +2,23 @@
 <html>
     <head>
         <meta charset="UTF-8" />
-        <title>jQTouch &beta;</title>
+        <title>GHI Donations</title>
         <link rel="stylesheet" href="/css/jqtouch/css/jqtouch.css" title="jQTouch">
 
         <script src="/js/jqtouch/lib/zepto.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="/js/jqtouch/jqtouch.min.js" type="text/javascript" charset="utf-8"></script>
+
         <script src="/js/jqtouch/extensions/jqt.themeswitcher.min.js" type="application/x-javascript" charset="utf-8"></script>
+
+        <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png" />
+        <link rel="apple-touch-icon" sizes="114x114" href="/images/icons/apple-touch-icon-retina.png" />
 
         <script type="text/javascript" charset="utf-8">
             var jQT = new $.jQTouch({
-                icon: 'jqtouch.png',
-                icon4: 'jqtouch4.png',
+                icon: '/images/icons/apple-touch-icon.png',
+                icon4: '/images/icons/apple-touch-icon-retina.png',
                 addGlossToIcon: false,
-                startupScreen: 'jqt_startup.png',
+                startupScreen: '/images/icons/jqtouch_startup.png',
                 statusBar: 'black-translucent',
                 themeSelectionSelector: '#jqt #themes ul',
                 preloadImages: []
@@ -98,15 +102,15 @@
     <body>
         <div id="jqt">
             <div id="about" class="selectable">
-                    <p><img src="jqtouch.png" /></p>
-                    <p><strong>jQTouch</strong><br>Version 1.0 beta<br>
-                        <a href="http://www.davidkaneda.com">By David Kaneda</a></p>
-                    <p><em>Create powerful mobile apps with<br> just HTML, CSS, and jQuery.</em></p>
-                    <p>
-                        <a target="_blank" href="http://twitter.com/jqtouch">@jQTouch on Twitter</a>
-                    </p>
-                    <p><br><br><a href="#" class="grayButton goback">Close</a></p>
+                <p><img src="jqtouch.png" /></p>
+
+                <p><strong>GHI Donations</strong>
+                    <a href="http://r.hefner1.com">A rhefner1 project</a></p>
+                <p><em>Track donations. Manage teams.<br> Organize contacts. GHI Donations.</em></p>
+
+                <p><br><br><a href="#" class="grayButton goback">Close</a></p>
             </div>
+
             <div id="ajax">
                 <div class="toolbar">
                     <h1>AJAX</h1>
@@ -121,6 +125,7 @@
                     </ul>
                 </div>
             </div>
+
             <div id="animations">
                 <div class="toolbar">
                     <h1>Animations</h1>
@@ -146,6 +151,7 @@
                     Custom animations are also <a target="_blank" href="http://code.google.com/p/jqtouch/wiki/Animations">easy to write</a>. <br>View the source in <code>demos/customanimation</code> to see how.
                 </div>
             </div>
+
             <div id="animations2">
                 <div class="toolbar">
                     <h1>Animations</h1>
@@ -156,12 +162,14 @@
                     </ul>
                 </div>
             </div>
+
             <div id="animdemo">
                 <div style="font-size: 1.5em; text-align: center; margin: 160px 0 90px; font-family: Marker felt;">
                     Pretty smooth, eh?            
                 </div>
                 <a style="margin-bottom: 120px;color:rgba(0,0,0,.9)" href="#" class="whiteButton goback">Go back</a>
             </div>
+
             <div id="buttons">
                 <div class="toolbar">
                     <h1>Buttons!</h1>
@@ -177,12 +185,14 @@
                     <a href="#" class="greenButton">Green</a>
                 </div>
             </div>
+
             <div id="callback">
                 <div class="toolbar">
                     <h1>AJAX w/Callback</h1>
                     <a class="back" href="#">Ajax</a>
                 </div>
             </div>
+
             <div id="callbacks">
                 <div class="toolbar">
                     <h1>Events</h1>
@@ -197,6 +207,7 @@
                     </ul>
                 </div>
             </div>
+
             <div id="demos">
                 <div class="toolbar">
                     <h1>Demos</h1>
@@ -213,6 +224,7 @@
                      These apps open in a new window. Don&#8217;t forget to save them to your home screen to enable full-screen mode.
                  </div>
             </div>
+
             <div id="edge">
                 <div class="toolbar">
                     <h1>Edge to Edge</h1>
@@ -234,6 +246,7 @@
                     <li class="forward"><a href="#">Rubble, <em>Betty</em></a></li>
                 </ul>
             </div>
+
             <div id="themes">
                 <div class="toolbar">
                     <h1>Themes</h1>
@@ -242,6 +255,7 @@
                 <ul class="rounded">
                 </ul>
             </div>
+
             <div id="extensions">
                 <div class="toolbar">
                     <h1>Extensions</h1>
@@ -259,6 +273,7 @@
                     </ul>
                 </div>
             </div>
+
             <div id="forms">
                 <div class="toolbar">
                     <h1>Forms</h1>
@@ -294,6 +309,7 @@
                     </ul>
                 </form>
             </div>
+
             <div id="home" class="current">
                 <div class="toolbar">
                     <h1>jQTouch</h1>
@@ -324,6 +340,7 @@
                     </div>
                 </div>
             </div>
+
             <div id="metal">
                 <div class="toolbar">
                     <h1>Metal Lists</h1>
@@ -337,6 +354,7 @@
                     <li class="arrow"><a href="#"><small>PM</small> 9:40 <em>Ontario</em></a></li>
                 </ul>
             </div>
+
             <div id="pageevents">
                 <div class="toolbar">
                     <h1>Page Events</h1>
@@ -345,6 +363,7 @@
                 <div class="info scroll" style="font-weight: normal;">
                 </div>
             </div>
+
             <div id="plastic">
                 <div class="toolbar">
                     <h1>Plastic Lists</h1>
@@ -357,6 +376,7 @@
                     <li><a href="#">Metal list</a></li>
                 </ul>
             </div>
+
             <div id="ui">
                 <div class="toolbar">
                     <h1>UI Demos</h1>
@@ -379,6 +399,7 @@
                     </ul>
                 </div>
             </div>
+
             <form id="ajax_post" action="ajax_post.php" method="POST" class="form">
                 <div class="toolbar">
                     <h1>Post Demo</h1>
