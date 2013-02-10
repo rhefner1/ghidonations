@@ -381,7 +381,7 @@ class Mobile(BaseHandler):
 
         template_variables = {"i" : i}
         self.response.write(
-           template.render('mobile/index.html', template_variables))
+           template.render('pages/mobile.html', template_variables))
 
 class NewContact(BaseHandlerAdmin):
     def task(self, isAdmin, s):
