@@ -1,5 +1,5 @@
 application: ghidonations
-version: 4c
+version: 4d
 runtime: python27
 api_version: 1
 threadsafe: no
@@ -32,25 +32,10 @@ handlers:
   script: $PYTHON_LIB/google/appengine/ext/admin
   login: admin
 
+# Should be always secure
 - url: /
   script: mooha.app
   secure: always
-
-- url: /login
-  script: mooha.app
-  secure: always
-
-- url: /logout
-  script: mooha.app
-  secure: optional
-
-- url: /reports/.*
-  script: mooha.app
-  secure: optional
-
-- url: /thanks
-  script: mooha.app
-  secure: optional
 
 - url: /ajax/*.*
   script: mooha.app
@@ -60,12 +45,35 @@ handlers:
   script: mooha.app
   secure: optional
 
-- url: /rpc
-  script: rpc.app
-  secure: always
-
+# Should be always secure
 - url: /ipn
   script: mooha.app
+  secure: always
+
+# Should be always secure
+- url: /login
+  script: mooha.app
+  secure: always
+
+- url: /logout
+  script: mooha.app
+  secure: optional
+
+- url: /m/*.*
+  script: mooha.app
+  secure: optional
+
+- url: /remote_api
+  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
+  login: admin
+
+- url: /reports/.*
+  script: mooha.app
+  secure: optional
+
+# Should be always secure
+- url: /rpc
+  script: rpc.app
   secure: always
 
 - url: /tasks/.*
@@ -73,9 +81,10 @@ handlers:
   secure: optional
   login: admin
 
-- url: /remote_api
-  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
-  login: admin
+- url: /thanks
+  script: mooha.app
+  secure: optional
+
 
 - url: /.*
   script: error.app

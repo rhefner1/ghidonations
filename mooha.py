@@ -92,9 +92,34 @@ class Contact(BaseHandlerAdmin):
 class Container(BaseHandler):
     def task(self, isAdmin, s):
         username = tools.getUsername(self)
+        logging.info("Loading container for: " + str(username))
+
+        session = get_current_session()
+
+        redirect = False
+        mobile_redirect = "none"
+
+        user_agent = str(self.request.headers['User-Agent'])
+        mobile_devices = ["android", "blackberry", "googlebot-mobile", "iemobile", "iphone", "ipod", "opera", "mobile", "palmos", "webos"]
+        
+        # If user agent matches anything in the list above, redirect
+        for m in mobile_devices:
+            if user_agent.lower().find(m) != -1:
+                redirect = True
+
+        # If user has explicitly requested to be sent to desktop site
+        try:
+            if session["no-redirect"] == "1":
+                redirect = False
+                mobile_redirect = "block"
+        except:
+            pass
+
+        if redirect == True:
+            self.redirect("/m")
 
         try:
-            template_variables = {"settings" : s.key.urlsafe(), "username" : username}
+            template_variables = {"settings" : s.key.urlsafe(), "username" : username, "mobile_redirect" : mobile_redirect}
         except:
             self.redirect("/login")
 
@@ -348,6 +373,16 @@ class MergeContacts(BaseHandlerAdmin):
         self.response.write(
            template.render('pages/merge_contacts.html', template_variables))
 
+class Mobile(BaseHandler):
+    def task(self, isAdmin, s):
+
+        i_key = tools.getUserKey(self)
+        i = i_key.get()
+
+        template_variables = {"i" : i}
+        self.response.write(
+           template.render('mobile/index.html', template_variables))
+
 class NewContact(BaseHandlerAdmin):
     def task(self, isAdmin, s):
 
@@ -371,6 +406,15 @@ class NewTeam(BaseHandlerAdmin):
         self.response.write(
                 template.render('pages/new_team.html', template_variables))
 
+class MobileRedirectSetting(webapp2.RequestHandler):
+    def get(self):
+        session = get_current_session()
+        setting = self.request.get("r")
+
+        session["no-redirect"] = setting
+
+        self.redirect("/")
+ 
 class NotAuthorized(webapp2.RequestHandler):
     def get(self):
         template_variables = {}
@@ -876,9 +920,11 @@ app = webapp2.WSGIApplication([
        ('/login', Login),
        ('/logout', Logout),
        ('/ajax/mergecontacts', MergeContacts),
+       ('/m', Mobile),
        ('/ajax/newcontact', NewContact),
        ('/ajax/newindividual', NewIndividual),
        ('/ajax/newteam', NewTeam),
+       ('/m/redirect', MobileRedirectSetting),
        ('/ajax/notauthorized', NotAuthorized),
        ('/ajax/offline', OfflineDonation),
        ('/ajax/review', ReviewQueue),

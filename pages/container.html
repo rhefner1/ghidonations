@@ -5,7 +5,6 @@
 	<meta charset="utf-8" />
     <link rel="apple-touch-icon" href="" />
     <title>GHI Donations</title>
-    <!-- <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0"> -->
 
 	<!-- The Columnal Grid and mobile stylesheet -->
 	<link rel="stylesheet" href="/css/columnal/columnal.css" type="text/css" media="screen" />
@@ -25,6 +24,9 @@
     <link rel="stylesheet" href="/css/global.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/css/config.css" type="text/css" media="screen" />
 
+    <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/images/icons/apple-touch-icon-retina.png" />
+
     <!-- Kendo -->
     <link rel="stylesheet" href="/css/kendo/kendo.common.min.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/css/kendo/kendo.default.min.css" type="text/css" media="screen" />
@@ -39,10 +41,15 @@
 <div id="wrap">
 	<div id="main">
         <header class="container">
-            <div class="row clearfix">                
+            <div class="row clearfix">  
+                <div class="left">
+                    <img src="/images/muse/logo.png">
+                </div> 
+                             
                 <div class="right">
                     
                     <ul id="toolbar">
+                        <li style="display:{{ mobile_redirect }}"><a href="/m/redirect?r=0">Back to mobile</a></li>
                         <li id="myaccount"><span>{{ username }}</span></a> <a id="loginarrow" href="#"></a></li>
                         <li><a id="settings" href="#settings">Settings</a></li>
                         <li><a id="refresh" href="#">Refresh</a></li>
@@ -137,7 +144,7 @@
     <div class="container">
 		<div class="row clearfix">
 			<div class="col_12">
-				<span class="left">a <a target="_blank" href="http://r.hefner1.com">rhefner designs</a> project</span>
+				<span class="left">a <a target="_blank" href="http://r.hefner1.com">rhefner1</a> project</span>
 				<span class="right">Powered by Muse by Themio.</span>
 			</div>
 		</div>
