@@ -92,6 +92,8 @@ class Contact(BaseHandlerAdmin):
 class Container(BaseHandler):
     def task(self, isAdmin, s):
         username = tools.getUsername(self)
+        logging.info("Loading container for: " + str(username))
+
         session = get_current_session()
 
         redirect = False
