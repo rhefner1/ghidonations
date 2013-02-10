@@ -4,13 +4,13 @@ var cursors_dict = {0:null}
 function clickHandler(){
     $("#donations #load_more").off()
     $("#donations #load_more").one("click", function(){
-        $("load_more_text").hide()
+        $("#load_more_text").hide()
         $("#search_loading").show()
 
         getDonations()
 
         $("#search_loading").hide()
-        $("load_more_text").show()
+        $("#load_more_text").show()
     })
 }
 
@@ -27,8 +27,7 @@ function getDonations(){
 
             $.each(data[0], function(num){
                 var template = $.tmpl('<li style="font-size:16px"><span>${name}</span> <small class="counter">${amount_donated}</small></a></li>', data[0][num])
-                var object = template.appendTo("#donations_list");
-                // object.quickfit()
+                template.appendTo("#donations_list");
             })
 
             // Saving query cursor for next request
