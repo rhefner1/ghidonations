@@ -610,6 +610,8 @@ Thanks!"""
 
         return new_team.key
 
+        return new_donation.key.urlsafe()
+        
 class SettingsData(UtilitiesBase):
     @property
     def all_contacts(self):
