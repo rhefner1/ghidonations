@@ -24,6 +24,8 @@ class MailchimpAdd(webapp2.RequestHandler):
         settings_key = self.request.get("settings")
         s = tools.getKey(settings_key).get()
 
+        s.mailchimp.add(email, name, True)
+
         logging.info("Retrying Mailchimp add through task queue for: " + email  + " under settings ID: " + settings_key)
 
 class AnnualReport(webapp2.RequestHandler):
