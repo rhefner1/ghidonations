@@ -384,7 +384,7 @@ def searchReturnAll(query, search_results, settings, search_function, entity_ret
             all_results.extend(searchToDocuments(results))
 
         query_cursor = search_results.cursor
-        results = search_function(query, query_cursor=query_cursor, entity_return=entity_return)
+        results = search_function(query, query_cursor=query_cursor, entity_return=entity_return)[0]
 
     return all_results
 
@@ -610,6 +610,8 @@ Thanks!"""
 
         return new_team.key
 
+        return new_donation.key.urlsafe()
+        
 class SettingsData(UtilitiesBase):
     @property
     def all_contacts(self):
