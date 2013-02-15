@@ -121,7 +121,7 @@ class Contact(ndb.Expando):
 
         # Delete search index
         index = search.Index(name=_CONTACT_SEARCH_INDEX)
-        index.remove(e.websafe)
+        index.delete(e.websafe)
 
 class DepositReceipt(ndb.Expando):
     entity_keys = ndb.KeyProperty(repeated=True)
@@ -153,7 +153,7 @@ class DepositReceipt(ndb.Expando):
 
         # Delete search index
         index = search.Index(name=_DEPOSIT_SEARCH_INDEX)
-        index.remove(e.websafe)
+        index.delete(e.websafe)
 
 class Donation(ndb.Expando):
     contact = ndb.KeyProperty()
@@ -312,7 +312,7 @@ class Donation(ndb.Expando):
 
         # Delete search index
         index = search.Index(name=_DONATION_SEARCH_INDEX)
-        index.remove(e.websafe)
+        index.delete(e.websafe)
 
 class Impression(ndb.Expando):
     contact = ndb.KeyProperty()
@@ -497,7 +497,7 @@ class Individual(ndb.Expando):
 
         # Delete search index
         index = search.Index(name=_INDIVIDUAL_SEARCH_INDEX)
-        index.remove(i.websafe)
+        index.delete(i.websafe)
 
 class Settings(ndb.Expando):
     name = ndb.StringProperty()
@@ -696,7 +696,7 @@ class Team(ndb.Expando):
 
         # Delete search index
         index = search.Index(name=_TEAM_SEARCH_INDEX)
-        index.remove(t.websafe)
+        index.delete(t.websafe)
 
 class TeamList(ndb.Model):
     individual = ndb.KeyProperty()
