@@ -112,7 +112,7 @@ class Contact(ndb.Expando):
         memcache.delete("contacts" + e.settings.urlsafe())
 
         e.settings.get().updateContactsJSON()
-        e.search.index()
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
     @classmethod
@@ -144,7 +144,7 @@ class DepositReceipt(ndb.Expando):
     @classmethod
     def _post_put_hook(self, future):
         e = future.get_result().get()
-        e.search.index()
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")
 
      ## -- Before Delete -- ##
     @classmethod
@@ -303,7 +303,7 @@ class Donation(ndb.Expando):
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
 
-        e.search.index()
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")
 
      ## -- Before Delete -- ##
     @classmethod
@@ -677,7 +677,7 @@ class Team(ndb.Expando):
         memcache.delete("teammembers" + e.websafe)
         memcache.delete("teamsdict" + e.settings.urlsafe())
 
-        e.search.index()       
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")      
 
     ## -- Before Deletion -- ##
     @classmethod
