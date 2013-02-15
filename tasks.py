@@ -91,10 +91,18 @@ class IndexAll(webapp2.RequestHandler):
             for t in teams:
                 t.search.index()
 
+class DelayIndexing(webapp2.RequestHandler):
+    def post(self):
+        entity_key = self.request.get("e")
+
+        e = tools.getKey(entity_key).get()
+        e.search.index()
+
 app = webapp2.WSGIApplication([
        ('/tasks/confirmation', Confirmation),
        ('/tasks/annualreport', AnnualReport),
        ('/tasks/indexall', IndexAll),
+       ('/tasks/delayindexing', DelayIndexing),
        ('/tasks/mailchimp', MailchimpAdd)],
        debug=True)
 app = appengine_config.recording_add_wsgi_middleware(app)
