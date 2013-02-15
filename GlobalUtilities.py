@@ -1046,7 +1046,7 @@ class ContactSearch(UtilitiesBase):
         # Creating the new index
         try:
             doc = self.createDocument()
-            index.add(doc)
+            index.put(doc)
         except:
             logging.error("Failed creating index on contact key:" + self.e.websafe)
 
@@ -1071,7 +1071,7 @@ class DepositSearch(UtilitiesBase):
         # Creating the new index
         try:
             doc = self.createDocument()
-            index.add(doc)
+            index.put(doc)
         except:
             logging.error("Failed creating index on deposit key:" + self.e.websafe)
 
@@ -1250,7 +1250,7 @@ class DonationSearch(UtilitiesBase):
         # Creating the new index
         try:
             doc = self.createDocument()
-            index.add(doc)
+            index.put(doc)
         except:
             logging.error("Failed creating index on donation key:" + self.e.websafe)
 
@@ -1380,7 +1380,7 @@ class IndividualSearch(UtilitiesBase):
         # Creating the new index
         try:
             doc = self.createDocument()
-            index.add(doc)
+            index.put(doc)
         except:
             logging.error("Failed creating index on individual key:" + self.e.websafe)
 
@@ -1481,7 +1481,7 @@ class TeamSearch(UtilitiesBase):
         # Creating the new index
         try:
             doc = self.createDocument()
-            index.add(doc)
+            index.put(doc)
         except:
             logging.error("Failed creating index on contact key:" + self.e.websafe)
 
