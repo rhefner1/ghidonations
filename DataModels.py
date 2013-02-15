@@ -2,7 +2,7 @@ import logging, json
 from decimal import *
 
 #App Engine platform
-from google.appengine.api import mail, memcache, datastore_errors
+from google.appengine.api import mail, memcache, datastore_errors, taskqueue
 from google.appengine.ext import ndb, blobstore
 
 #Search
@@ -475,8 +475,8 @@ class Individual(ndb.Expando):
             memcache.delete("teammembers" + t.team.urlsafe())
             memcache.delete("teammembersdict" + t.team.urlsafe())
             memcache.delete("info" + t.team.urlsafe() + e.websafe)
-
-        e.search.index()
+            
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
     @classmethod
