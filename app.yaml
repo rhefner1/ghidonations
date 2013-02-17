@@ -2,7 +2,7 @@ application: ghidonations
 version: 4d
 runtime: python27
 api_version: 1
-threadsafe: no
+threadsafe: true
 
 default_expiration: "30d"
 
@@ -29,7 +29,7 @@ handlers:
   static_dir: js
 
 - url: /admin/.*
-  script: $PYTHON_LIB/google/appengine/ext/admin
+  script: google.appengine.ext.admin.application
   login: admin
 
 # Should be always secure
@@ -63,10 +63,6 @@ handlers:
   script: mooha.app
   secure: optional
 
-- url: /remote_api
-  script: $PYTHON_LIB/google/appengine/ext/remote_api/handler.py
-  login: admin
-
 - url: /reports/.*
   script: mooha.app
   secure: optional
@@ -95,7 +91,6 @@ error_handlers:
 
 builtins:
 - deferred: on
-- remote_api: on
 - appstats: on
 
 inbound_services:
