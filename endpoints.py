@@ -7,9 +7,9 @@ import DataModels as models
 # Cloud Endpoints
 from google.appengine.ext import endpoints
 from protorpc import remote
-import endpoints_messages
+from endpoints_messages import *
 
-endpoints_client_id = ""
+endpoints_client_id = "AIzaSyB7k0LsUXibTJHkCx_D3MA0HT6tQAtYZAo"
 endpoints_description = "GHI Donations API"
 endpoints_clients = [endpoints_client_id, endpoints.API_EXPLORER_CLIENT_ID]
 
@@ -21,52 +21,71 @@ class EndpointsAPI(remote.Service):
 ## -- Globalhopeindia.org Utility Functions -- ##
 
     # public.all_teams
-    def public_all_teams(self, settings_key):
-        s = tools.getKey(settings_key).get()
+    @endpoints.method(AllTeams_In, AllTeams_Out, path='public/all_teams',
+                    http_method='GET', name='public.all_teams')
+    def public_all_teams(self, req):
+        s = tools.getKey(req.settings_key).get()
 
         all_teams = []
         for t in s.data.display_teams:
-            team = [t.name, t.key.urlsafe()]           
+            team = Team_Data(name=t.name, key=t.key.urlsafe())          
             all_teams.append(team)
         
-        return all_teams
+        return AllTeams_Out(all_teams=all_teams)
 
     # public.individual_info
-    def public_individual_info(self, team_key, individual_key):
-        i = tools.getKey(individual_key).get()
-        t_key = tools.getKey(team_key)
-        return i.data.info(t_key)
+    @endpoints.method(IndividualInfo_In, IndividualInfo_Out, path='public/individual_info',
+                    http_method='GET', name='public.individual_info')
+    def public_individual_info(self, req):
+        i = tools.getKey(req.individual_key).get()
+        t_key = tools.getKey(req.team_key)
+        info = i.data.info(t_key)
+
+        return IndividualInfo_Out(image_url=info[0], name=info[1], description=info[2], 
+                                percentage=info[3], message=info[4])
 
     # public.team_info
-    def public_team_info(self, team_key):
-        t = tools.getKey(team_key).get()
-        return t.data.members_list
+    @endpoints.method(TeamInfo_In, TeamInfo_Out, path='public/team_info',
+                    http_method='GET', name='public.team_info')
+    def public_team_info(self, req):
+        t = tools.getKey(req.team_key).get()
+        
+        info_list = []
+        m_list = t.data.members_list
+        for m in m_list:
+            info = TeamInfo_Data(name=m[0], photo_url=m[1], tl_key=m[2])
+            info_list.append(info)
+
+        return TeamInfo_Out(info_list=info_list)
+
 
 #### ---- Data Access ---- ####
-    def getContacts(self, query_cursor, query):
+    # get.contacts
+    @endpoints.method(Query_In, Contacts_Out, path='get/contacts',
+                    http_method='GET', name='get.contacts')
+    def get_contacts(self, req):
         s = tools.getSettingsKey(self).get()
 
-        results = s.search.contact(query, query_cursor=query_cursor)
-        logging.info("Getting contacts with query: " + query)
+        results = s.search.contact(req.query, query_cursor=req.query_cursor)
+        logging.info("Getting contacts with query: " + req.query)
 
         contacts = []
         new_cursor = tools.getWebsafeCursor(results[1])
 
         for c in results[0]:
             f = c.fields
-            c_dict = {"key" : f[0].value, "name" : f[1].value, "email" : f[2].value}
+            contact = Contact_Data(key=f[0].value, name=f[1].value, email=f[2].value)
+            contacts.append(contact)
 
-            contacts.append(c_dict)
+        return Contacts_Out(contacts=contacts, new_cursor=new_cursor)
 
-        #Return message to confirm 
-        return_vals = [contacts, new_cursor]
-        return return_vals
-
-    def getContactDonations(self, query_cursor, contact_key):
+    @endpoints.method(GetContactDonations_In, Donations_Out, path='get/contact_donations',
+                    http_method='GET', name='get.contact_donations')
+    def get_contact_donations(self, req):
         s = tools.getSettingsKey(self).get()
-        query = "contact_key:" + str(contact_key)
+        query = "contact_key:" + str(req.contact_key)
 
-        results = s.search.donation(query, query_cursor=query_cursor)
+        results = s.search.donation(query, query_cursor=req.query_cursor)
         logging.info("Getting contact donations with query: " + query)
 
         donations = []
@@ -75,39 +94,41 @@ class EndpointsAPI(remote.Service):
         for d in results[0]:
             f = d.fields
 
-            d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
-                 "payment_type" : f[5].value, "amount_donated" : tools.moneyAmount(f[4].value)}
+            donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=f[3].value,
+                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value))
 
-            donations.append(d_dict)
+            donations.append(donation)
 
-        #Return message to confirm 
-        return_vals = [donations, new_cursor]
-        return return_vals
+        return Donations_Out(donations=donations, new_cursor=new_cursor)
 
-    def getDeposits(self, query_cursor, query):
+    # get.deposits
+    @endpoints.method(Query_In, Deposits_Out, path='get/deposits',
+                    http_method='GET', name='get.deposits')
+    def get_deposits(self, req):
         s = tools.getSettingsKey(self).get()
 
-        results = s.search.deposit(query, query_cursor=query_cursor)
-        logging.info("Getting deposits with query: " + query)
+        results = s.search.deposit(req.query, query_cursor=req.query_cursor)
+        logging.info("Getting deposits with query: " + req.query)
 
         deposits = []
         new_cursor = tools.getWebsafeCursor(results[1])
 
         for de in results[0]:
             f = de.fields
-            de_dict = {"key" : f[0].value, "time_deposited" : f[1].value}
 
-            deposits.append(de_dict)
+            deposit = Deposit_Data(key=f[0].value, time_deposited=f[1].value)
+            deposits.append(deposit)
 
-        #Return message to confirm 
-        return_vals = [deposits, new_cursor]
-        return return_vals
+        return Deposits_Out(deposits=deposits, new_cursor=new_cursor)
 
-    def getDonations(self, query_cursor, query):
+    # get.donations
+    @endpoints.method(Query_In, Donations_Out, path='get/donations',
+                    http_method='GET', name='get.donations')
+    def get_donations(self, req):
         s = tools.getSettingsKey(self).get()
 
-        results = s.search.donation(query, query_cursor=query_cursor)
-        logging.info("Getting donations with query: " + query)
+        results = s.search.donation(req.query, query_cursor=req.query_cursor)
+        logging.info("Getting donations with query: " + req.query)
 
         donations = []
         new_cursor = tools.getWebsafeCursor(results[1])
@@ -115,440 +136,452 @@ class EndpointsAPI(remote.Service):
         for d in results[0]:
             f = d.fields
 
-            d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
-                 "payment_type" : f[5].value, "amount_donated" : tools.moneyAmount(f[4].value)}
+            donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=f[3].value,
+                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value))
 
-            donations.append(d_dict)
+            donations.append(donation)
 
-        #Return message to confirm 
-        return_vals = [donations, new_cursor]
-        return return_vals
+        return Donations_Out(donations=donations, new_cursor=new_cursor)
 
-    def getIndividuals(self, query_cursor, query):
+    # get.individuals
+    @endpoints.method(Query_In, Individuals_Out, path='get/individuals',
+                    http_method='GET', name='get.individuals')
+    def get_individuals(self, req):
         s = tools.getSettingsKey(self).get()
         
-        results = s.search.individual(query, query_cursor=query_cursor)
-        logging.info("Getting individuals with query: " + query)
+        results = s.search.individual(req.query, query_cursor=req.query_cursor)
+        logging.info("Getting individuals with query: " + req.query)
 
         individuals = []
         new_cursor = tools.getWebsafeCursor(results[1])
 
         for i in results[0]:
             f = i.fields
-            i_dict = {"key" : f[0].value, "name" : f[1].value, "email" : f[2].value}
 
-            individuals.append(i_dict)
+            individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value)
+            individuals.append(individual)
 
-        #Return message to confirm 
-        return_vals = [individuals, new_cursor]
-        return return_vals
+        return Individuals_Out(individuals=individuals, new_cursor=new_cursor)
 
-    def getMailchimpLists(self, mc_apikey):
-        return tools.getMailchimpLists(self, mc_apikey)
+    # mailchimp.lists
+    @endpoints.method(MailchimpLists_In, MailchimpLists_Out, path='mailchimp/lists',
+                    http_method='GET', name='mailchimp.lists')
+    def mailchimp_lists(self, req):
+        repsonse = tools.getMailchimpLists(self, req.mc_apikey)
+        mc_lists = None
+        error_message = None
 
-    def getSettings(self):
-        settings = tools.getAccountEmails(self)
-        return settings
+        if response[0] == True:
+            mc_lists = json.dumps(response[1])
+        else:
+            mc_lists = None
+            error_message = response[1]
 
-    def getTeams(self, query_cursor, query):
+        return MailchimpLists_Out(success=response[0], mc_lists=mc_lists, error_message=error_message)
+
+    # get.teams
+    @endpoints.method(Query_In, Teams_Out, path='get/teams',
+                    http_method='GET', name='get.teams')
+    def getTeams(self, req):
         s = tools.getSettingsKey(self).get()
 
-        results = s.search.team(query, query_cursor=query_cursor)
-        logging.info("Getting teams with query: " + query)
+        results = s.search.team(req.query, query_cursor=req.query_cursor)
+        logging.info("Getting teams with query: " + req.query)
 
         teams = []
         new_cursor = tools.getWebsafeCursor(results[1])
 
         for t in results[0]:
             f = t.fields
-            i_dict = {"key" : f[0].value, "name" : f[1].value}
+            
+            team = Team_Data(key=f[0].value, name=f[1].value)
+            teams.append(team)
 
-            teams.append(i_dict)
+        return Teams_Out(teams=teams, new_cursor=new_cursor)
 
-        #Return message to confirm 
-        return_vals = [teams, new_cursor]
-        return return_vals
+#     def getTeamMembers(self, query_cursor, team_key):
+#         s = tools.getSettingsKey(self).get()
+#         query = "team_key:" + str(team_key)
 
-    def getTeamMembers(self, query_cursor, team_key):
-        s = tools.getSettingsKey(self).get()
-        query = "team_key:" + str(team_key)
+#         results = s.search.individual(query, query_cursor=query_cursor)
+#         logging.info("Getting team members with query: " + query)
 
-        results = s.search.individual(query, query_cursor=query_cursor)
-        logging.info("Getting team members with query: " + query)
+#         individuals = []
+#         new_cursor = tools.getWebsafeCursor(results[1])
 
-        individuals = []
-        new_cursor = tools.getWebsafeCursor(results[1])
+#         for i in results[0]:
+#             f = i.fields
+#             i_dict = {"key" : f[0].value, "name" : f[1].value, "email" : f[2].value, "raised" : tools.moneyAmount(f[4].value)}
 
-        for i in results[0]:
-            f = i.fields
-            i_dict = {"key" : f[0].value, "name" : f[1].value, "email" : f[2].value, "raised" : tools.moneyAmount(f[4].value)}
+#             individuals.append(i_dict)
 
-            individuals.append(i_dict)
+#         #Return message to confirm 
+#         return_vals = [individuals, new_cursor]
+#         return return_vals
 
-        #Return message to confirm 
-        return_vals = [individuals, new_cursor]
-        return return_vals
+#     def getTeamDonors(self, team_key):
+#         s = tools.getSettingsKey(self).get()
+#         team_key = tools.getKey("ahBkZXZ-Z2hpZG9uYXRpb25zcgoLEgRUZWFtGAIM")
+#         return s.data.team_donors(team_key)
 
-    def getTeamDonors(self, team_key):
-        s = tools.getSettingsKey(self).get()
-        team_key = tools.getKey("ahBkZXZ-Z2hpZG9uYXRpb25zcgoLEgRUZWFtGAIM")
-        return s.data.team_donors(team_key)
+#     def semi_getIndividualDonations(self, query_cursor, individual_key):
+#         s = tools.getSettingsKey(self).get()
+#         query = "individual_key:" + str(individual_key)
 
-    def semi_getIndividualDonations(self, query_cursor, individual_key):
-        s = tools.getSettingsKey(self).get()
-        query = "individual_key:" + str(individual_key)
+#         results = s.search.donation(query, query_cursor=query_cursor)
+#         logging.info("Getting individual donations with query: " + query)
 
-        results = s.search.donation(query, query_cursor=query_cursor)
-        logging.info("Getting individual donations with query: " + query)
+#         donations = []
+#         new_cursor = tools.getWebsafeCursor(results[1])
 
-        donations = []
-        new_cursor = tools.getWebsafeCursor(results[1])
+#         for d in results[0]:
+#             f = d.fields
 
-        for d in results[0]:
-            f = d.fields
+#             d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
+#                  "payment_type" : f[5].value, "amount_donated" : tools.moneyAmount(f[4].value)}
 
-            d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
-                 "payment_type" : f[5].value, "amount_donated" : tools.moneyAmount(f[4].value)}
+#             donations.append(d_dict)
 
-            donations.append(d_dict)
+#         #Return message to confirm 
+#         return_vals = [donations, new_cursor]
+#         return return_vals
 
-        #Return message to confirm 
-        return_vals = [donations, new_cursor]
-        return return_vals
+#     def semi_getTeamMembers(self, team_key):
+#     # Returns team information
+#         t = tools.getKey(team_key).get()
+#         return t.data.members_dict
 
-    def semi_getTeamMembers(self, team_key):
-    # Returns team information
-        t = tools.getKey(team_key).get()
-        return t.data.members_dict
+#     def IndividualName(self, individual_key):
+#         i = tools.getKey(individual_key).get()
+#         return individual.name
 
-    def IndividualName(self, individual_key):
-        i = tools.getKey(individual_key).get()
-        return individual.name
+# #### ---- Data creation/updating ---- ####
+#     def donationUnreviewed(self, donation_key):
+#         message = "Donation marked as unreviewed"
+#         success = True
 
-#### ---- Data creation/updating ---- ####
-    def donationUnreviewed(self, donation_key):
-        message = "Donation marked as unreviewed"
-        success = True
+#         d = tools.getKey(donation_key).get()
+#         d.review.markUnreviewed()
 
-        d = tools.getKey(donation_key).get()
-        d.review.markUnreviewed()
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
-
-    def editIndividual(self, name, email, team_list, description):
-        message = "Individual saved"
-        success = True
+#     def editIndividual(self, name, email, team_list, description):
+#         message = "Individual saved"
+#         success = True
         
-        i = tools.getKey(individual_key).get()
-        i.update(name, email, team_list, description, None)
+#         i = tools.getKey(individual_key).get()
+#         i.update(name, email, team_list, description, None)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-    def newContact(self, name, email, phone, address, notes):
-        message = "<b>" + name + "</b> created"
-        success = True
+#     def newContact(self, name, email, phone, address, notes):
+#         message = "<b>" + name + "</b> created"
+#         success = True
 
-        s = tools.getSettingsKey(self).get()
-        contact_exists = s.exists.contact(email)
+#         s = tools.getSettingsKey(self).get()
+#         contact_exists = s.exists.contact(email)
 
-        address = json.loads(address)
+#         address = json.loads(address)
 
-        if contact_exists[0] == False:
-            s.create.contact(name, email, phone, address, notes, True)
+#         if contact_exists[0] == False:
+#             s.create.contact(name, email, phone, address, notes, True)
 
-        else:
-            #If this email address already exists for a user
-            message = "This contact already exists, but we updated their information."
+#         else:
+#             #If this email address already exists for a user
+#             message = "This contact already exists, but we updated their information."
 
-            c = exists[1].get()
-            contact.update(name, email, phone, notes, address)
+#             c = exists[1].get()
+#             contact.update(name, email, phone, notes, address)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-    def newImpression(self, contact_key, impression, notes):
-        message = "Impression saved"
-        success = True
+#     def newImpression(self, contact_key, impression, notes):
+#         message = "Impression saved"
+#         success = True
 
-        c = tools.getKey(contact_key).get()
-        c.create.impression(impression, notes)
+#         c = tools.getKey(contact_key).get()
+#         c.create.impression(impression, notes)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-    def newIndividual(self, name, team_key, email, password, admin):
-        message = "<b>" + name + "</b> created"
-        success = True
+#     def newIndividual(self, name, team_key, email, password, admin):
+#         message = "<b>" + name + "</b> created"
+#         success = True
 
-        s = tools.getSettingsKey(self).get()
-        exists = s.exists.individual(email)
+#         s = tools.getSettingsKey(self).get()
+#         exists = s.exists.individual(email)
 
-        if exists[0] == False:
-            if email == "":
-                email = None
+#         if exists[0] == False:
+#             if email == "":
+#                 email = None
 
-            if team_key == "team":
-                team_key = None
+#             if team_key == "team":
+#                 team_key = None
 
-            s.create.individual(name, tools.getKey(team_key), email, password, admin)
+#             s.create.individual(name, tools.getKey(team_key), email, password, admin)
 
-        else:
-            #If this email address already exists for a user
-            message = "Sorry, but this email address is already being used."
-            success = False
+#         else:
+#             #If this email address already exists for a user
+#             message = "Sorry, but this email address is already being used."
+#             success = False
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-    def newTeam(self, name):
-        message = "<b>" + name + "</b> created"
-        success = True
+#     def newTeam(self, name):
+#         message = "<b>" + name + "</b> created"
+#         success = True
 
-        s = tools.getSettingsKey(self).get()
-        s.create.team(name)
+#         s = tools.getSettingsKey(self).get()
+#         s.create.team(name)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-    def offlineDonation(self, name, email, amount_donated, notes, address, team_key, individual_key, add_deposit):
-        message = "Offline donation created"
-        success = True
+#     def offlineDonation(self, name, email, amount_donated, notes, address, team_key, individual_key, add_deposit):
+#         message = "Offline donation created"
+#         success = True
 
-        s = tools.getSettingsKey(self).get()
+#         s = tools.getSettingsKey(self).get()
 
-        if address == "":
-            address = None
-        else:
-            address = json.loads(address)
+#         if address == "":
+#             address = None
+#         else:
+#             address = json.loads(address)
 
-        if team_key == "" or team_key == "general":
-            team_key = None
-        else:
-            team_key = tools.getKey(team_key)
+#         if team_key == "" or team_key == "general":
+#             team_key = None
+#         else:
+#             team_key = tools.getKey(team_key)
 
-        if individual_key == "" or individual_key == None or individual_key == "none":
-            individual_key = None
-        else:
-            individual_key = tools.getKey(individual_key)
+#         if individual_key == "" or individual_key == None or individual_key == "none":
+#             individual_key = None
+#         else:
+#             individual_key = tools.getKey(individual_key)
             
 
-        s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "", "offline", False, None)
+#         s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "", "offline", False, None)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
     
-    def updateDonation(self, donation_key, notes, team_key, individual_key, add_deposit):
-        message = "Donation has been saved"
-        success = True
+#     def updateDonation(self, donation_key, notes, team_key, individual_key, add_deposit):
+#         message = "Donation has been saved"
+#         success = True
 
-        d = tools.getKey(donation_key).get()
+#         d = tools.getKey(donation_key).get()
 
-        if team_key == "general":
-            team_key = None
-        elif team_key:
-            team_key = tools.getKey(team_key)
+#         if team_key == "general":
+#             team_key = None
+#         elif team_key:
+#             team_key = tools.getKey(team_key)
 
-        if individual_key:
-            individual_key = tools.getKey(individual_key)
+#         if individual_key:
+#             individual_key = tools.getKey(individual_key)
 
-        d.update(notes, team_key, individual_key, add_deposit)
+#         d.update(notes, team_key, individual_key, add_deposit)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-    def updateContact(self, contact_key, name, email, phone, notes, address):
-        message = "Contact has been saved"
-        success = True
+#     def updateContact(self, contact_key, name, email, phone, notes, address):
+#         message = "Contact has been saved"
+#         success = True
 
-        c = tools.getKey(contact_key).get()
-        address = json.loads(address)
-        c.update(name, email, phone, notes, address)
+#         c = tools.getKey(contact_key).get()
+#         address = json.loads(address)
+#         c.update(name, email, phone, notes, address)
         
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-    def updateSettings(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
-        message = "Settings have been updated"
-        success = True
+#     def updateSettings(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
+#         message = "Settings have been updated"
+#         success = True
 
-        s = tools.getSettingsKey(self).get()
-        s.update(name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text)
+#         s = tools.getSettingsKey(self).get()
+#         s.update(name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-    def updateTeam(self, team_key, name, show_team):
-        message = "Team has been updated"
-        success = True
+#     def updateTeam(self, team_key, name, show_team):
+#         message = "Team has been updated"
+#         success = True
 
-        t = tools.getKey(team_key).get()
-        t.update(name, show_team)
+#         t = tools.getKey(team_key).get()
+#         t.update(name, show_team)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-#### ---- Contact merge ---- ####
-    def mergeContacts(self, contact1, contact2):
-        message = "Contacts merged"
-        success = True
+# #### ---- Contact merge ---- ####
+#     def mergeContacts(self, contact1, contact2):
+#         message = "Contacts merged"
+#         success = True
 
-        c1 = tools.getKey(contact1)
-        c2 = tools.getKey(contact2)
+#         c1 = tools.getKey(contact1)
+#         c2 = tools.getKey(contact2)
 
-        tools.mergeContacts(c1, c2)
+#         tools.mergeContacts(c1, c2)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-#### ---- Search ---- ####
-    def getContactsJSON(self):
-        s = tools.getSettingsKey(self).get()
-        return s.data.contactsJSON
+# #### ---- Search ---- ####
+#     def getContactsJSON(self):
+#         s = tools.getSettingsKey(self).get()
+#         return s.data.contactsJSON
 
-#### ---- Donation depositing ---- ####
-    def depositDonations(self, donation_keys):
-        message = "Donations deposited."
-        success = True
+# #### ---- Donation depositing ---- ####
+#     def depositDonations(self, donation_keys):
+#         message = "Donations deposited."
+#         success = True
 
-        if donation_keys != []:
-            s = tools.getSettingsKey(self).get()
-            s.deposits.deposit(donation_keys)
+#         if donation_keys != []:
+#             s = tools.getSettingsKey(self).get()
+#             s.deposits.deposit(donation_keys)
 
-        else:
-            message = "No donations to deposit."
-            success = False
+#         else:
+#             message = "No donations to deposit."
+#             success = False
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-    def removeFromDeposits(self, donation_keys):
-        message = "Donations removed from deposits."
-        success = True
+#     def removeFromDeposits(self, donation_keys):
+#         message = "Donations removed from deposits."
+#         success = True
 
-        s = tools.getSettingsKey(self).get()
+#         s = tools.getSettingsKey(self).get()
 
-        donation_keys = tools.strArrayToKey(self, donation_keys)
-        s.deposits.remove(donation_keys)
+#         donation_keys = tools.strArrayToKey(self, donation_keys)
+#         s.deposits.remove(donation_keys)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
 
-#### ---- Confirmation Letters ---- ####
-    def emailReceipt(self, donation_key):
-        message = "Email sent"
-        success = True
+# #### ---- Confirmation Letters ---- ####
+#     def emailReceipt(self, donation_key):
+#         message = "Email sent"
+#         success = True
 
-        d = tools.getKey(donation_key).get()
+#         d = tools.getKey(donation_key).get()
 
-        #Email receipt to donor
-        d.review.archive()
-        d.confirmation.task(60)
+#         #Email receipt to donor
+#         d.review.archive()
+#         d.confirmation.task(60)
 
-        #Return message to confirm
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm
+#         return_vals = [success, message]
+#         return return_vals
 
-    def printReceipt(self, donation_key):
-        message = "Receipt open for printing"
-        success = True
+#     def printReceipt(self, donation_key):
+#         message = "Receipt open for printing"
+#         success = True
 
-        d = tools.getKey(donation_key).get()
+#         d = tools.getKey(donation_key).get()
 
-        #Print receipt to donor
-        d.review.archive()
-        print_url = d.confirmation.print_url(None)
+#         #Print receipt to donor
+#         d.review.archive()
+#         print_url = d.confirmation.print_url(None)
 
-        #Return message to confirm
-        return_vals = [success, message, print_url]
-        return return_vals
+#         #Return message to confirm
+#         return_vals = [success, message, print_url]
+#         return return_vals
 
-    def archiveDonation(self, donation_key):
-        message = "Donation archived"
-        success = True
+#     def archiveDonation(self, donation_key):
+#         message = "Donation archived"
+#         success = True
 
-        d = tools.getKey(donation_key).get()
-        d.review.archive()
+#         d = tools.getKey(donation_key).get()
+#         d.review.archive()
 
-        #Return message to confirm
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm
+#         return_vals = [success, message]
+#         return return_vals
 
-    def emailAnnualReport(self, contact_key, year):
-        message = "Annual report sent"
-        success = True
+#     def emailAnnualReport(self, contact_key, year):
+#         message = "Annual report sent"
+#         success = True
 
-        taskqueue.add(queue_name="annualreport", url="/tasks/annualreport", params={'contact_key' : contact_key, 'year' : year})
+#         taskqueue.add(queue_name="annualreport", url="/tasks/annualreport", params={'contact_key' : contact_key, 'year' : year})
 
-        #Return message to confirm
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm
+#         return_vals = [success, message]
+#         return return_vals
 
-#### ---- Data deletion ---- ####
-    def deleteDonation(self, donation_key):
-        message = "Donation deleted"
-        success = True
+# #### ---- Data deletion ---- ####
+#     def deleteDonation(self, donation_key):
+#         message = "Donation deleted"
+#         success = True
 
-        tools.getKey(donation_key).delete()
+#         tools.getKey(donation_key).delete()
 
-        #Return message to confirm
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm
+#         return_vals = [success, message]
+#         return return_vals
 
-    def deleteContact(self, contact_key):
-        message = "Contact deleted"
-        success = True
+#     def deleteContact(self, contact_key):
+#         message = "Contact deleted"
+#         success = True
 
-        tools.getKey(contact_key).delete()
+#         tools.getKey(contact_key).delete()
 
-        #Return message to confirm
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm
+#         return_vals = [success, message]
+#         return return_vals
 
-    def deleteTeam(self, team_key):
-        message = "Team deleted"
-        success = True
+#     def deleteTeam(self, team_key):
+#         message = "Team deleted"
+#         success = True
 
-        tools.getKey(team_key).delete()
+#         tools.getKey(team_key).delete()
 
-        #Return message to confirm
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm
+#         return_vals = [success, message]
+#         return return_vals
 
-    def semi_deleteIndividual(self, individual_key):
-        message = "Individual deleted"
-        success = True
+#     def semi_deleteIndividual(self, individual_key):
+#         message = "Individual deleted"
+#         success = True
 
-        user_key = tools.getUserKey(self)
+#         user_key = tools.getUserKey(self)
         
-        i_key = tools.getKey(individual_key)
-        isAdmin = user_key.get().admin
+#         i_key = tools.getKey(individual_key)
+#         isAdmin = user_key.get().admin
 
-        if isAdmin == True:
-            i_key.delete()
-        else:
-            if user_key == individual_key:
-                i_key.delete()
-            else:
-                #Access denied - non-admin trying to delete someone else
-                message = "Failed - Access denied"
-                success = False
+#         if isAdmin == True:
+#             i_key.delete()
+#         else:
+#             if user_key == individual_key:
+#                 i_key.delete()
+#             else:
+#                 #Access denied - non-admin trying to delete someone else
+#                 message = "Failed - Access denied"
+#                 success = False
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+#         #Return message to confirm 
+#         return_vals = [success, message]
+#         return return_vals
+
+app = endpoints.api_server([EndpointsAPI],
+                                   restricted=False)

@@ -211,9 +211,9 @@ def getMailchimpLists(self, mc_apikey):
         mc_lists = {}
 
         for l in response["data"]:
+
             list_name = l["name"]
-            list_id = l["id"]
-            mc_lists[list_name] = list_id
+            mc_lists[list_name] = l["id"]
 
         return [True, mc_lists]
     except:
