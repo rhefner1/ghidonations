@@ -306,9 +306,16 @@ class Donation(ndb.Expando):
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")
 
      ## -- Before Delete -- ##
+
     @classmethod
     def _pre_delete_hook(cls, key):
         e = key.get()
+        
+        if e.team and e.individual:
+            memcache.delete("dtotal" + e.team.urlsafe() + e.individual.urlsafe())
+            memcache.delete("tdtotal" + e.team.urlsafe())
+            memcache.delete("idtotal" + e.individual.urlsafe())
+            memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
 
         # Delete search index
         index = search.Index(name=_DONATION_SEARCH_INDEX)
