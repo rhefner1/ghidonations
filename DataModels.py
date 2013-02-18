@@ -317,8 +317,8 @@ class Donation(ndb.Expando):
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
 
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.team.urlsafe()}, countdown=5, queue_name="delayindexing")
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.individual.urlsafe()}, countdown=5, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.team.urlsafe()}, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.individual.urlsafe()}, queue_name="delayindexing")
 
         # Delete search index
         index = search.Index(name=_DONATION_SEARCH_INDEX)
