@@ -34,6 +34,7 @@ class Individual_Data(messages.Message):
     key = messages.StringField(1, required=True)
     name = messages.StringField(2, required=True)
     email = messages.StringField(3, required=True)
+    raised = messages.StringField(4, required=True)
 
 class Individual_Out(messages.Message):
     individuals = messages.MessageField(Individual_Data, 1, repeated=True)
@@ -96,3 +97,17 @@ class MailchimpLists_Out(messages.Message):
     mc_lists = messages.StringField(2, required=True)
 
     error_message = messages.StringField(3)
+
+# get.team_members
+class GetTeamMembers_In(messages.Message):
+    query_cursor = messages.StringField(1, required=True)
+    team_key = messages.StringField(2, required=True)
+
+# semi.get.individual_donations
+class GetIndividualDonations_In(messages.Message):
+    query_cursor = messages.StringField(1, required=True)
+    individual_key = messages.StringField(2, required=True)
+
+# semi.get.team_members
+class GetTeamMembers_In(messages.Message):
+    team_key = messages.StringField(1, required=True)

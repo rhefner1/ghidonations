@@ -158,7 +158,7 @@ class EndpointsAPI(remote.Service):
         for i in results[0]:
             f = i.fields
 
-            individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value)
+            individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value, tools.moneyAmount(f[4].value))
             individuals.append(individual)
 
         return Individuals_Out(individuals=individuals, new_cursor=new_cursor)
@@ -199,57 +199,54 @@ class EndpointsAPI(remote.Service):
 
         return Teams_Out(teams=teams, new_cursor=new_cursor)
 
-#     def getTeamMembers(self, query_cursor, team_key):
-#         s = tools.getSettingsKey(self).get()
-#         query = "team_key:" + str(team_key)
+    # get.team_members
+    @endpoints.method(GetTeamMembers_In, Teams_Out, path='get/team_members',
+                    http_method='GET', name='get.team_members')
+    def get_team_members(self, req):
+        s = tools.getSettingsKey(self).get()
+        query = "team_key:" + str(req.team_key)
 
-#         results = s.search.individual(query, query_cursor=query_cursor)
-#         logging.info("Getting team members with query: " + query)
+        results = s.search.individual(query, query_cursor=req.query_cursor)
+        logging.info("Getting team members with query: " + query)
 
-#         individuals = []
-#         new_cursor = tools.getWebsafeCursor(results[1])
+        individuals = []
+        new_cursor = tools.getWebsafeCursor(results[1])
 
-#         for i in results[0]:
-#             f = i.fields
-#             i_dict = {"key" : f[0].value, "name" : f[1].value, "email" : f[2].value, "raised" : tools.moneyAmount(f[4].value)}
+        for i in results[0]:
+            f = i.fields
 
-#             individuals.append(i_dict)
+            individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value, raised=tools.moneyAmount(f[4].value))
+            individuals.append(individual)
 
-#         #Return message to confirm 
-#         return_vals = [individuals, new_cursor]
-#         return return_vals
+        return Individual_Out(individuals=individuals, new_cursor=new_cursor)
 
-#     def getTeamDonors(self, team_key):
-#         s = tools.getSettingsKey(self).get()
-#         team_key = tools.getKey("ahBkZXZ-Z2hpZG9uYXRpb25zcgoLEgRUZWFtGAIM")
-#         return s.data.team_donors(team_key)
+    # get.team_members
+    @endpoints.method(GetIndividualDonations_In, Donations_Out, path='semi/get/individual_donations',
+                    http_method='GET', name='semi.get.individual_donations')
+    def semi_get_individual_donations(self, req):
+        s = tools.getSettingsKey(self).get()
+        query = "individual_key:" + str(req.individual_key)
 
-#     def semi_getIndividualDonations(self, query_cursor, individual_key):
-#         s = tools.getSettingsKey(self).get()
-#         query = "individual_key:" + str(individual_key)
+        results = s.search.donation(query, query_cursor=req.query_cursor)
+        logging.info("Getting individual donations with query: " + query)
 
-#         results = s.search.donation(query, query_cursor=query_cursor)
-#         logging.info("Getting individual donations with query: " + query)
+        donations = []
+        new_cursor = tools.getWebsafeCursor(results[1])
 
-#         donations = []
-#         new_cursor = tools.getWebsafeCursor(results[1])
+        for d in results[0]:
+            f = d.fields
 
-#         for d in results[0]:
-#             f = d.fields
+            donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=f[3].value,
+                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value))
 
-#             d_dict = {"key" : f[0].value, "formatted_donation_date" : f[9].value, "name" : f[2].value, "email" : f[3].value,
-#                  "payment_type" : f[5].value, "amount_donated" : tools.moneyAmount(f[4].value)}
+            donations.append(donation)
 
-#             donations.append(d_dict)
+        return Donations_Out(donations=donations, new_cursor=new_cursor)
 
-#         #Return message to confirm 
-#         return_vals = [donations, new_cursor]
-#         return return_vals
-
-#     def semi_getTeamMembers(self, team_key):
-#     # Returns team information
-#         t = tools.getKey(team_key).get()
-#         return t.data.members_dict
+    def semi_getTeamMembers(self, team_key):
+    # Returns team information
+        t = tools.getKey(team_key).get()
+        return t.data.members_dict
 
 #     def IndividualName(self, individual_key):
 #         i = tools.getKey(individual_key).get()
