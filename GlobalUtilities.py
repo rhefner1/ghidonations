@@ -546,7 +546,7 @@ class SettingsCreate(UtilitiesBase):
                 email.to = self.e.email
 
                 message = """
-A new {payment_type} donation was received from {name} for ${confirmation_amount} with the following note: <br>
+A new note was received from {name} for ${confirmation_amount} ({payment_type} donation): <br>
 
 <strong>{special_notes}</strong> <br><br>
 
