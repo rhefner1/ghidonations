@@ -41,7 +41,10 @@ function getTeamMembers(team_key){
                 option_html = '<option id="current_individual" value="none">* None</option>'
             }
             
-            $.each(data, function(name, key) {
+            $.each(data, function(data) {
+                var key = data[0]
+                var name = data[1]
+                
                 if (individual_key !== key){
                     //Putting them into the individual dropdown
                     option_html = option_html + 

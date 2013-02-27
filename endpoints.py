@@ -158,7 +158,7 @@ class EndpointsAPI(remote.Service):
         for i in results[0]:
             f = i.fields
 
-            individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value, tools.moneyAmount(f[4].value))
+            individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value, amount_donated=tools.moneyAmount(f[4].value))
             individuals.append(individual)
 
         return Individuals_Out(individuals=individuals, new_cursor=new_cursor)
@@ -220,7 +220,7 @@ class EndpointsAPI(remote.Service):
 
         return Individual_Out(individuals=individuals, new_cursor=new_cursor)
 
-    # get.team_members
+    # get.individual_donations
     @endpoints.method(GetIndividualDonations_In, Donations_Out, path='semi/get/individual_donations',
                     http_method='GET', name='semi.get.individual_donations')
     def semi_get_individual_donations(self, req):
@@ -243,71 +243,71 @@ class EndpointsAPI(remote.Service):
 
         return Donations_Out(donations=donations, new_cursor=new_cursor)
 
-    def semi_getTeamMembers(self, team_key):
+    # semi.get.team_members
+    @endpoints.method(SemiGetTeamMembers_In, SemiGetTeamMembers_Out, path='semi/get/team_members',
+                    http_method='GET', name='semi.get.team_members')
+    def semi_get_team_members(self, req):
     # Returns team information
-        t = tools.getKey(team_key).get()
-        return t.data.members_dict
+        t = tools.getKey(req.team_key).get()
+        members_list = t.data.members_list
 
-#     def IndividualName(self, individual_key):
-#         i = tools.getKey(individual_key).get()
-#         return individual.name
+        members = []
+        for m in members_list:
+            member = SemiTeamMembers_Data(key=m[0], name=m[2])
+            members.append(member)
+
+        return SemiGetTeamMembers_Out(members=members)
 
 # #### ---- Data creation/updating ---- ####
-#     def donationUnreviewed(self, donation_key):
-#         message = "Donation marked as unreviewed"
-#         success = True
+    # donation.mark_unreviewed
+    @endpoints.method(DonationMarkUnreviewed_In, SuccessMessage_Out, path='donation/mark_unreviewed',
+                    http_method='POST', name='donation.mark_unreviewed')
+    def donation_mark_unreviewed(self, req):
+        message = "Donation marked as unreviewed"
+        success = True
 
-#         d = tools.getKey(donation_key).get()
-#         d.review.markUnreviewed()
+        d = tools.getKey(req.donation_key).get()
+        d.review.markUnreviewed()
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def editIndividual(self, name, email, team_list, description):
-#         message = "Individual saved"
-#         success = True
-        
-#         i = tools.getKey(individual_key).get()
-#         i.update(name, email, team_list, description, None)
+    # new.contact
+    @endpoints.method(NewContact_In, SuccessMessage_Out, path='new/contact',
+                    http_method='POST', name='new.contact')
+    def new_contact(self, req):
+        message = "<b>" + req.name + "</b> created"
+        success = True
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        s = tools.getSettingsKey(self).get()
+        contact_exists = s.exists.contact(req.email)
 
-#     def newContact(self, name, email, phone, address, notes):
-#         message = "<b>" + name + "</b> created"
-#         success = True
+        address = [req.address.street, req.address.city, req.address.state, req.address.zipcode]
 
-#         s = tools.getSettingsKey(self).get()
-#         contact_exists = s.exists.contact(email)
+        if contact_exists[0] == False:
+            s.create.contact(req.name, req.email, req.phone, address, req.notes, True)
 
-#         address = json.loads(address)
+        else:
+            #If this email address already exists for a user
+            message = "This contact already exists, but we updated their information."
 
-#         if contact_exists[0] == False:
-#             s.create.contact(name, email, phone, address, notes, True)
+            c = exists[1].get()
+            contact.update(name, email, phone, notes, address)
 
-#         else:
-#             #If this email address already exists for a user
-#             message = "This contact already exists, but we updated their information."
+        return SuccessMessage_Out(success=success, message=message)
 
-#             c = exists[1].get()
-#             contact.update(name, email, phone, notes, address)
+    # new.impression
+    @endpoints.method(NewImpression_In, SuccessMessage_Out, path='new/impression',
+                    http_method='POST', name='new.impression')
+    def newImpression(self, req):
+        message = "Impression saved"
+        success = True
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        c = tools.getKey(req.contact_key).get()
+        c.create.impression(req.impression, req.notes)
 
-#     def newImpression(self, contact_key, impression, notes):
-#         message = "Impression saved"
-#         success = True
-
-#         c = tools.getKey(contact_key).get()
-#         c.create.impression(impression, notes)
-
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        #Return message to confirm 
+        return_vals = [success, message]
+        return return_vals
 
 #     def newIndividual(self, name, team_key, email, password, admin):
 #         message = "<b>" + name + "</b> created"

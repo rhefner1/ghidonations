@@ -36,7 +36,7 @@ class Individual_Data(messages.Message):
     email = messages.StringField(3, required=True)
     raised = messages.StringField(4, required=True)
 
-class Individual_Out(messages.Message):
+class Individuals_Out(messages.Message):
     individuals = messages.MessageField(Individual_Data, 1, repeated=True)
     new_cursor = messages.StringField(2, required=True)
 
@@ -49,15 +49,19 @@ class Teams_Out(messages.Message):
     new_cursor = messages.StringField(2, required=True)
 
 class Query_In(messages.Message):
-    query_cursor = messages.StringField(1, required=True)
+    query_cursor = messages.StringField(1)
     query = messages.StringField(2, required=True)
+
+class SuccessMessage_Out(messages.Message):
+    success = messages.BooleanField(1, required=True)
+    message = messages.StringField(2, required=True)
 
 # public.all_teams
 class AllTeams_In(messages.Message):
     settings_key = messages.StringField(1, required=True)
 
 class AllTeams_Out(messages.Message):
-	all_teams = messages.MessageField(TeamData, 1, repeated=True)
+	all_teams = messages.MessageField(Team_Data, 1, repeated=True)
     
 # public.individual_info
 class IndividualInfo_In(messages.Message):
@@ -81,7 +85,7 @@ class TeamInfo_Data(messages.Message):
     tl_key = messages.StringField(3, required=True)
     
 class TeamInfo_Out(messages.Message):
-    info_list = messages.MessageField(TeamInfoData, 1, repeated=True)
+    info_list = messages.MessageField(TeamInfo_Data, 1, repeated=True)
 
 # get.contact_donations
 class GetContactDonations_In(messages.Message):
@@ -109,5 +113,36 @@ class GetIndividualDonations_In(messages.Message):
     individual_key = messages.StringField(2, required=True)
 
 # semi.get.team_members
-class GetTeamMembers_In(messages.Message):
+class SemiGetTeamMembers_In(messages.Message):
     team_key = messages.StringField(1, required=True)
+
+class SemiGetTeamMembers_Data(messages.Message):
+    key = messages.StringField(1, required=True)
+    name = messages.StringField(2, required=True)
+
+class SemiGetTeamMembers_Out(messages.Message):
+    members = messages.MessageField(SemiGetTeamMembers_Data, 1, repeated=True)
+
+# donation.mark_unreviewed
+class DonationMarkUnreviewed_In(messages.Message):
+    donation_key = messages.StringField(1, required=True)
+
+# new.contact
+class AddressInfo(messages.Message):
+    street = messages.StringField(1, required=True)
+    city = messages.StringField(2, required=True)
+    state = messages.StringField(3, required=True)
+    zipcode = messages.StringField(4, required=True)
+
+class NewContact_In(messages.Message):
+    name = messages.StringField(1, required=True)
+    email = messages.StringField(2, required=True)
+    phone = messages.StringField(3, required=True)
+    address = messages.MessageField(AddressInfo, 4, required=True)
+    notes = messages.StringField(5, required=True)
+
+# new.impression
+class NewImpression_In(messages.Message):
+    contact_key = messages.StringField(1, required=True)
+    impression = messages.StringField(2, required=True)
+    notes = messages.StringField(3, required=True)
