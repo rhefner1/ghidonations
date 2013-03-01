@@ -528,7 +528,8 @@ class SettingsCreate(UtilitiesBase):
             new_donation.deposited = True
 
         if team_key == "" or team_key == "none":
-            team_key = None
+            team_key = None 
+            
         if individual_key == "" or individual_key == "none":
             individual_key = None
 
@@ -536,6 +537,14 @@ class SettingsCreate(UtilitiesBase):
         new_donation.individual = individual_key
             
         new_donation.put()
+
+        # If designated, re-index team and individual
+        if team_key:
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : team_key}, countdown=5, queue_name="delayindexing")
+
+        if individual_key:
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : individual_key}, countdown=5, queue_name="delayindexing")
+
 
         if payment_type != "offline":
 
