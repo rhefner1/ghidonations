@@ -540,10 +540,10 @@ class SettingsCreate(UtilitiesBase):
 
         # If designated, re-index team and individual
         if team_key:
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : team_key}, countdown=5, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : team_key.urlsafe()}, countdown=5, queue_name="delayindexing")
 
         if individual_key:
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : individual_key}, countdown=5, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : individual_key.urlsafe()}, countdown=5, queue_name="delayindexing")
 
 
         if payment_type != "offline":
