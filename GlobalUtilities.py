@@ -1224,7 +1224,7 @@ class DonationReview(UtilitiesBase):
         self.e.reviewed = False
         self.e.put()
 
-class DonationSearch(UtilitiesBase):
+class h(UtilitiesBase):
     def createDocument(self):
         d = self.e
 
@@ -1262,8 +1262,8 @@ class DonationSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-        except:
-            logging.error("Failed creating index on donation key:" + self.e.websafe)
+        except Exception as e:
+            logging.error("Failed creating index on donation key:" + self.e.websafe + " because: " + str(e))
 
 ## -- Individual Classes -- ##
 class IndividualData(UtilitiesBase):
