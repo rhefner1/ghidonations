@@ -97,8 +97,12 @@ class DelayIndexing(webapp2.RequestHandler):
     def post(self):
         entity_key = self.request.get("e")
 
-        e = tools.getKey(entity_key).get()
-        e.search.index()
+        try:
+            e = tools.getKey(entity_key).get()
+            e.search.index()
+
+        except:
+            self.error(500)
 
 app = webapp2.WSGIApplication([
        ('/tasks/confirmation', Confirmation),
