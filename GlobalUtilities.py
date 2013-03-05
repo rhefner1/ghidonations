@@ -1224,7 +1224,7 @@ class DonationReview(UtilitiesBase):
         self.e.reviewed = False
         self.e.put()
 
-class h(UtilitiesBase):
+class DonationSearch(UtilitiesBase):
     def createDocument(self):
         d = self.e
 
