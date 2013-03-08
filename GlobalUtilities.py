@@ -936,10 +936,9 @@ class SettingsSearch(UtilitiesBase):
         return self.search(index_name=_CONTACT_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
 
     def deposit(self, query, **kwargs):
-        default_date = datetime(2012,1,1)
 
         expr_list = [search.SortExpression(
-            expression="created", default_value=default_date,
+            expression="created", default_value=0,
             direction=search.SortExpression.DESCENDING)]
 
         search_function = self.e.search.deposit
@@ -947,10 +946,9 @@ class SettingsSearch(UtilitiesBase):
         return self.search(index_name=_DEPOSIT_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
 
     def donation(self, query, **kwargs):
-        default_date = datetime(2012,1,1)
 
         expr_list = [search.SortExpression(
-            expression="time", default_value=default_date,
+            expression="time", default_value=0,
             direction=search.SortExpression.DESCENDING)]
 
         search_function = self.e.search.donation
