@@ -298,100 +298,110 @@ class EndpointsAPI(remote.Service):
     # new.impression
     @endpoints.method(NewImpression_In, SuccessMessage_Out, path='new/impression',
                     http_method='POST', name='new.impression')
-    def newImpression(self, req):
+    def new_impression(self, req):
         message = "Impression saved"
         success = True
 
         c = tools.getKey(req.contact_key).get()
         c.create.impression(req.impression, req.notes)
 
-        #Return message to confirm 
-        return_vals = [success, message]
-        return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def newIndividual(self, name, team_key, email, password, admin):
-#         message = "<b>" + name + "</b> created"
-#         success = True
+    # new.individual
+    @endpoints.method(NewIndividual_In, SuccessMessage_Out, path='new/individual',
+                    http_method='POST', name='new.individual')
+    def new_individual(self, req):
+        message = "<b>" + req.name + "</b> created"
+        success = True
 
-#         s = tools.getSettingsKey(self).get()
-#         exists = s.exists.individual(email)
+        s = tools.getSettingsKey(self).get()
+        exists = s.exists.individual(req.email)
 
-#         if exists[0] == False:
-#             if email == "":
-#                 email = None
+        if exists[0] == False:
+            if email == "":
+                email = None
 
-#             if team_key == "team":
-#                 team_key = None
+            if team_key == "team":
+                team_key = None
 
-#             s.create.individual(name, tools.getKey(team_key), email, password, admin)
+            s.create.individual(req.name, tools.getKey(req.team_key), req.email, req.password, req.admin)
 
-#         else:
-#             #If this email address already exists for a user
-#             message = "Sorry, but this email address is already being used."
-#             success = False
+        else:
+            #If this email address already exists for a user
+            message = "Sorry, but this email address is already being used."
+            success = False
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def newTeam(self, name):
-#         message = "<b>" + name + "</b> created"
-#         success = True
+    # new.team
+    @endpoints.method(NewTeam_In, SuccessMessage_Out, path='new/team',
+                    http_method='POST', name='new.team')
+    def new_team(self, req):
+        message = "<b>" + req.name + "</b> created"
+        success = True
 
-#         s = tools.getSettingsKey(self).get()
-#         s.create.team(name)
+        s = tools.getSettingsKey(self).get()
+        s.create.team(req.name)
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def offlineDonation(self, name, email, amount_donated, notes, address, team_key, individual_key, add_deposit):
-#         message = "Offline donation created"
-#         success = True
+    # new.offline_donation
+    @endpoints.method(NewOfflineDonation_In, SuccessMessage_Out, path='new/offline_donation',
+                    http_method='POST', name='new.offline_donation')
+    def new_offline_donation(self, req):
+        message = "Offline donation created"
+        success = True
 
-#         s = tools.getSettingsKey(self).get()
+        # Make req variables local
+        name, email, amount_donated, notes, address, team_key, individual_key, \
+            add_deposit = req.name, req.email, req.amount_donated, req.notes, \
+            req.address, req.team_key, req.individual_key, req.add_deposit \
 
-#         if address == "":
-#             address = None
-#         else:
-#             address = json.loads(address)
+        s = tools.getSettingsKey(self).get()
 
-#         if team_key == "" or team_key == "general":
-#             team_key = None
-#         else:
-#             team_key = tools.getKey(team_key)
+        if address == "":
+            address = None
+        else:
+            address = json.loads(address)
 
-#         if individual_key == "" or individual_key == None or individual_key == "none":
-#             individual_key = None
-#         else:
-#             individual_key = tools.getKey(individual_key)
+        if team_key == "" or team_key == "general":
+            team_key = None
+        else:
+            team_key = tools.getKey(team_key)
+
+        if individual_key == "" or individual_key == None or individual_key == "none":
+            individual_key = None
+        else:
+            individual_key = tools.getKey(individual_key)
             
 
-#         s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "", "offline", False, None)
+        s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "", "offline", False, None)
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
     
-#     def updateDonation(self, donation_key, notes, team_key, individual_key, add_deposit):
-#         message = "Donation has been saved"
-#         success = True
+    # update.donation
+    @endpoints.method(UpdateDonation_In, SuccessMessage_Out, path='update/donation',
+                    http_method='POST', name='update.donation')
+    def updateDonation(self, req):
+        message = "Donation has been saved"
+        success = True
 
-#         d = tools.getKey(donation_key).get()
+        d = tools.getKey(req.donation_key).get()
 
-#         if team_key == "general":
-#             team_key = None
-#         elif team_key:
-#             team_key = tools.getKey(team_key)
+        # Make req variables local
+        team_key, individual_key = req.team_key, req.individual_key
 
-#         if individual_key:
-#             individual_key = tools.getKey(individual_key)
+        if team_key == "general":
+            team_key = None
+        elif team_key:
+            team_key = tools.getKey(team_key)
 
-#         d.update(notes, team_key, individual_key, add_deposit)
+        if individual_key:
+            individual_key = tools.getKey(individual_key)
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        d.update(req.notes, team_key, individual_key, req.add_deposit)
+
+        return SuccessMessage_Out(success=success, message=message)
 
 #     def updateContact(self, contact_key, name, email, phone, notes, address):
 #         message = "Contact has been saved"
