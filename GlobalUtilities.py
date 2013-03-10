@@ -786,7 +786,12 @@ class SettingsDeposits(UtilitiesBase):
 
         self.e.create.deposit_receipt(donation_keys)
 
-    def remove(self, donation_keys):
+    def remove(self, unicode_keys):
+        #Changing all unicode keys into Key objects
+        donation_keys = []
+        for key in unicode_keys:
+            donation_keys.append(getKey(key))
+
         for key in donation_keys:
             d = key.get()
             d.deposited = None
@@ -893,12 +898,12 @@ class SettingsSearch(UtilitiesBase):
             sort_options=sort_opts)
 
         # Adding settings key to query (AND is mandatory to ensure that you cannot access other organizations' data)
-        add_settings_query = " settings:" + self.e.websafe
+        add_settings_query = "settings:" + self.e.websafe
         if query == "":
             query += add_settings_query
 
         elif add_settings_query not in query:
-            query += " AND" + add_settings_query  
+            query += " AND " + add_settings_query  
 
         query_obj = search.Query(query_string=query, options=query_options)
 

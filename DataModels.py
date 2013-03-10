@@ -620,20 +620,7 @@ class Settings(ndb.Expando):
         s.put()
 
     def updateContactsJSON(self):
-        contacts = []
-
-        for c in self.data.all_contacts:
-            contact = {}
-            contact["label"] = c.name
-            contact["email"] = c.email
-            contact["address"] = json.dumps(c.address)
-            contact["key"] = str(c.websafe)
-            
-            contacts.append(contact)
-
-        contacts_json =  json.dumps(contacts)
-        self.contacts_json = contacts_json
-        self.put()
+        taskqueue.add(url="/tasks/contactsjson", params={'s_key' : e.websafe}, queue_name="backend")    
 
     @property
     def websafe(self):

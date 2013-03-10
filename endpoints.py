@@ -66,6 +66,9 @@ class EndpointsAPI(remote.Service):
     def get_contacts(self, req):
         s = tools.getSettingsKey(self).get()
 
+        if req.query == None:
+            req.query = ""
+
         results = s.search.contact(req.query, query_cursor=req.query_cursor)
         logging.info("Getting contacts with query: " + req.query)
 
@@ -79,6 +82,7 @@ class EndpointsAPI(remote.Service):
 
         return Contacts_Out(contacts=contacts, new_cursor=new_cursor)
 
+    # get.contact_donations
     @endpoints.method(GetContactDonations_In, Donations_Out, path='get/contact_donations',
                     http_method='GET', name='get.contact_donations')
     def get_contact_donations(self, req):
@@ -107,6 +111,11 @@ class EndpointsAPI(remote.Service):
     def get_deposits(self, req):
         s = tools.getSettingsKey(self).get()
 
+        if req.query == None:
+            req.query = ""
+
+        logging.info("************QUERY************: " + str(type(req.query)))
+
         results = s.search.deposit(req.query, query_cursor=req.query_cursor)
         logging.info("Getting deposits with query: " + req.query)
 
@@ -126,6 +135,9 @@ class EndpointsAPI(remote.Service):
                     http_method='GET', name='get.donations')
     def get_donations(self, req):
         s = tools.getSettingsKey(self).get()
+
+        if req.query == None:
+            req.query = ""
 
         results = s.search.donation(req.query, query_cursor=req.query_cursor)
         logging.info("Getting donations with query: " + req.query)
@@ -148,6 +160,9 @@ class EndpointsAPI(remote.Service):
                     http_method='GET', name='get.individuals')
     def get_individuals(self, req):
         s = tools.getSettingsKey(self).get()
+
+        if req.query == None:
+            req.query = ""
         
         results = s.search.individual(req.query, query_cursor=req.query_cursor)
         logging.info("Getting individuals with query: " + req.query)
@@ -184,6 +199,9 @@ class EndpointsAPI(remote.Service):
                     http_method='GET', name='get.teams')
     def getTeams(self, req):
         s = tools.getSettingsKey(self).get()
+
+        if req.query == None:
+            req.query = ""
 
         results = s.search.team(req.query, query_cursor=req.query_cursor)
         logging.info("Getting teams with query: " + req.query)
@@ -260,7 +278,7 @@ class EndpointsAPI(remote.Service):
 
 # #### ---- Data creation/updating ---- ####
     # donation.mark_unreviewed
-    @endpoints.method(DonationMarkUnreviewed_In, SuccessMessage_Out, path='donation/mark_unreviewed',
+    @endpoints.method(DonationKey_In, SuccessMessage_Out, path='donation/mark_unreviewed',
                     http_method='POST', name='donation.mark_unreviewed')
     def donation_mark_unreviewed(self, req):
         message = "Donation marked as unreviewed"
@@ -317,6 +335,8 @@ class EndpointsAPI(remote.Service):
         s = tools.getSettingsKey(self).get()
         exists = s.exists.individual(req.email)
 
+        email, team_key = req.email, req.team_key
+
         if exists[0] == False:
             if email == "":
                 email = None
@@ -324,7 +344,7 @@ class EndpointsAPI(remote.Service):
             if team_key == "team":
                 team_key = None
 
-            s.create.individual(req.name, tools.getKey(req.team_key), req.email, req.password, req.admin)
+            s.create.individual(req.name, tools.getKey(team_key), email, req.password, req.admin)
 
         else:
             #If this email address already exists for a user
@@ -403,192 +423,211 @@ class EndpointsAPI(remote.Service):
 
         return SuccessMessage_Out(success=success, message=message)
 
-#     def updateContact(self, contact_key, name, email, phone, notes, address):
-#         message = "Contact has been saved"
-#         success = True
+    # update.contact
+    @endpoints.method(UpdateContact_In, SuccessMessage_Out, path='update/contact',
+                    http_method='POST', name='update.contact')
+    def update_ontact(self, req):
+        message = "Contact has been saved"
+        success = True
 
-#         c = tools.getKey(contact_key).get()
-#         address = json.loads(address)
-#         c.update(name, email, phone, notes, address)
+        c = tools.getKey(req.contact_key).get()
+        address = json.loads(req.address)
+        c.update(req.name, req.email, req.phone, req.notes, req.address)
         
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def updateSettings(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
-#         message = "Settings have been updated"
-#         success = True
+    # update.settings
+    @endpoints.method(UpdateSettings_In, SuccessMessage_Out, path='update/settings',
+                    http_method='POST', name='update.settings')
+    def updateSettings(self, req):
+        message = "Settings have been updated"
+        success = True
 
-#         s = tools.getSettingsKey(self).get()
-#         s.update(name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text)
+        s = tools.getSettingsKey(self).get()
+        s.update(req.name, req.email, req.mc_use, req.mc_apikey, req.mc_donorlist, 
+            req.paypal_id, req.impressions, req.amount1, req.amount2, req.amount3, 
+            req.amount4, req.use_custom, req.confirmation_header, req.confirmation_info, 
+            req.confirmation_footer, req.confirmation_text, req.donor_report_text)
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def updateTeam(self, team_key, name, show_team):
-#         message = "Team has been updated"
-#         success = True
+    # update.team
+    @endpoints.method(UpdateTeam_In, SuccessMessage_Out, path='update/team',
+                    http_method='POST', name='update.team')
+    def updateTeam(self, req):
+        message = "Team has been updated"
+        success = True
 
-#         t = tools.getKey(team_key).get()
-#         t.update(name, show_team)
+        t = tools.getKey(req.team_key).get()
+        t.update(req.name, req.show_team)
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-# #### ---- Contact merge ---- ####
-#     def mergeContacts(self, contact1, contact2):
-#         message = "Contacts merged"
-#         success = True
+#### ---- Contact merge ---- ####
+    # merge.contacts
+    @endpoints.method(MergeContacts_In, SuccessMessage_Out, path='merge/contacts',
+                    http_method='POST', name='merge.contacts')
+    def mergeContacts(self, req):
+        message = "Contacts merged"
+        success = True
 
-#         c1 = tools.getKey(contact1)
-#         c2 = tools.getKey(contact2)
+        c1 = tools.getKey(req.contact1)
+        c2 = tools.getKey(req.contact2)
 
-#         tools.mergeContacts(c1, c2)
+        tools.mergeContacts(c1, c2)
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-# #### ---- Search ---- ####
-#     def getContactsJSON(self):
-#         s = tools.getSettingsKey(self).get()
-#         return s.data.contactsJSON
+#### ---- Search ---- ####
+    # get.contacts_json
+    @endpoints.method(MergeContacts_In, SuccessMessage_Out, path='merge/contacts',
+                    http_method='POST', name='merge.contacts')
+    def get_contacts_json(self):
+        s = tools.getSettingsKey(self).get()
+        return s.data.contactsJSON
 
-# #### ---- Donation depositing ---- ####
-#     def depositDonations(self, donation_keys):
-#         message = "Donations deposited."
-#         success = True
+#### ---- Donation depositing ---- ####
+    # deposits.add
+    @endpoints.method(Deposits_In, SuccessMessage_Out, path='deposits/add',
+                    http_method='POST', name='deposits.add')
+    def deposits_add(self, req):
+        message = "Donations deposited."
+        success = True
 
-#         if donation_keys != []:
-#             s = tools.getSettingsKey(self).get()
-#             s.deposits.deposit(donation_keys)
+        if req.donation_keys != []:
+            s = tools.getSettingsKey(self).get()
+            s.deposits.deposit(req.donation_keys)
 
-#         else:
-#             message = "No donations to deposit."
-#             success = False
+        else:
+            message = "No donations to deposit."
+            success = False
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def removeFromDeposits(self, donation_keys):
-#         message = "Donations removed from deposits."
-#         success = True
+    # deposits.remove
+    @endpoints.method(Deposits_In, SuccessMessage_Out, path='deposits/remove',
+                    http_method='POST', name='deposits.remove')
+    def deposits_remove(self, req):
+        message = "Donations removed from deposits."
+        success = True
 
-#         s = tools.getSettingsKey(self).get()
+        if req.donation_keys != []:
+            s = tools.getSettingsKey(self).get()
+            s.deposits.remove(req.donation_keys)
 
-#         donation_keys = tools.strArrayToKey(self, donation_keys)
-#         s.deposits.remove(donation_keys)
+        return SuccessMessage_Out(success=success, message=message)
 
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+#### ---- Confirmation Letters ---- ####
 
-# #### ---- Confirmation Letters ---- ####
-#     def emailReceipt(self, donation_key):
-#         message = "Email sent"
-#         success = True
+    # confirmation.email
+    @endpoints.method(DonationKey_In, SuccessMessage_Out, path='confirmation/email',
+                    http_method='POST', name='confirmation.email')
+    def confirmation_email(self, req):
+        message = "Email sent"
+        success = True
 
-#         d = tools.getKey(donation_key).get()
+        d = tools.getKey(req.donation_key).get()
 
-#         #Email receipt to donor
-#         d.review.archive()
-#         d.confirmation.task(60)
+        #Email receipt to donor
+        d.review.archive()
+        d.confirmation.task(60)
 
-#         #Return message to confirm
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def printReceipt(self, donation_key):
-#         message = "Receipt open for printing"
-#         success = True
+    # confirmation.print
+    @endpoints.method(DonationKey_In, ConfirmationPrint_Out, path='confirmation/print',
+                    http_method='POST', name='confirmation.print')
+    def printReceipt(self, req):
+        message = "Receipt open for printing"
+        success = True
 
-#         d = tools.getKey(donation_key).get()
+        d = tools.getKey(req.donation_key).get()
 
-#         #Print receipt to donor
-#         d.review.archive()
-#         print_url = d.confirmation.print_url(None)
+        #Print receipt to donor
+        d.review.archive()
+        print_url = d.confirmation.print_url(None)
 
-#         #Return message to confirm
-#         return_vals = [success, message, print_url]
-#         return return_vals
+        return ConfirmationPrint_Out(success=success, message=message, print_url=print_url)
 
-#     def archiveDonation(self, donation_key):
-#         message = "Donation archived"
-#         success = True
+    # confirmation.annual_report
+    @endpoints.method(ConfirmationAnnualReport_In, SuccessMessage_Out, path='confirmation/annual_report',
+                    http_method='POST', name='confirmation.annual_report')
+    def confirmation_annual_report(self, req):
+        message = "Annual report sent"
+        success = True
 
-#         d = tools.getKey(donation_key).get()
-#         d.review.archive()
+        taskqueue.add(queue_name="annualreport", url="/tasks/annualreport", params={'contact_key' : req.contact_key, 'year' : req.year})
 
-#         #Return message to confirm
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def emailAnnualReport(self, contact_key, year):
-#         message = "Annual report sent"
-#         success = True
+    # donation.archive
+    @endpoints.method(DonationKey_In, SuccessMessage_Out, path='donation/archive',
+                    http_method='POST', name='donation.archive')
+    def donation_archive(self, req):
+        message = "Donation archived"
+        success = True
 
-#         taskqueue.add(queue_name="annualreport", url="/tasks/annualreport", params={'contact_key' : contact_key, 'year' : year})
+        d = tools.getKey(req.donation_key).get()
+        d.review.archive()
 
-#         #Return message to confirm
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-# #### ---- Data deletion ---- ####
-#     def deleteDonation(self, donation_key):
-#         message = "Donation deleted"
-#         success = True
+    # donation.delete
+    @endpoints.method(DonationKey_In, SuccessMessage_Out, path='donation/delete',
+                    http_method='POST', name='donation.delete')
+    def donation_delete(self, req):
+        message = "Donation deleted"
+        success = True
 
-#         tools.getKey(donation_key).delete()
+        tools.getKey(req.donation_key).delete()
 
-#         #Return message to confirm
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def deleteContact(self, contact_key):
-#         message = "Contact deleted"
-#         success = True
+    # contact.delete
+    @endpoints.method(ContactKey_In, SuccessMessage_Out, path='contact/delete',
+                    http_method='POST', name='contact.delete')
+    def contact_delete(self, req):
+        message = "Contact deleted"
+        success = True
 
-#         tools.getKey(contact_key).delete()
+        tools.getKey(req.contact_key).delete()
 
-#         #Return message to confirm
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def deleteTeam(self, team_key):
-#         message = "Team deleted"
-#         success = True
+    # team.delete
+    @endpoints.method(TeamKey_In, SuccessMessage_Out, path='team/delete',
+                    http_method='POST', name='team.delete')
+    def deleteTeam(self, req):
+        message = "Team deleted"
+        success = True
 
-#         tools.getKey(team_key).delete()
+        tools.getKey(req.team_key).delete()
 
-#         #Return message to confirm
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
-#     def semi_deleteIndividual(self, individual_key):
-#         message = "Individual deleted"
-#         success = True
+    # individual.delete
+    @endpoints.method(IndividualKey_In, SuccessMessage_Out, path='individual/delete',
+                    http_method='POST', name='individual.delete')
+    def individual_delete(self, req):
+        message = "Individual deleted"
+        success = True
 
-#         user_key = tools.getUserKey(self)
+        user_key = tools.getUserKey(self)
+        isAdmin = user_key.get().admin
+
+        i_key = tools.getKey(req.individual_key)
         
-#         i_key = tools.getKey(individual_key)
-#         isAdmin = user_key.get().admin
+        if isAdmin == True:
+            i_key.delete()
+        else:
+            if user_key == individual_key:
+                i_key.delete()
+            else:
+                #Access denied - non-admin trying to delete someone else
+                message = "Failed - Access denied"
+                success = False
 
-#         if isAdmin == True:
-#             i_key.delete()
-#         else:
-#             if user_key == individual_key:
-#                 i_key.delete()
-#             else:
-#                 #Access denied - non-admin trying to delete someone else
-#                 message = "Failed - Access denied"
-#                 success = False
-
-#         #Return message to confirm 
-#         return_vals = [success, message]
-#         return return_vals
+        return SuccessMessage_Out(success=success, message=message)
 
 app = endpoints.api_server([EndpointsAPI],
-                                   restricted=False)
+                            restricted=False)

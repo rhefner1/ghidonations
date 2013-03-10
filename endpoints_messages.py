@@ -1,6 +1,6 @@
 from protorpc import messages
 
-# Common entity definitions
+### Common entity definitions
 class Contact_Data(messages.Message):
     key = messages.StringField(1, required=True)
     name = messages.StringField(2, required=True)
@@ -8,7 +8,7 @@ class Contact_Data(messages.Message):
 
 class Contacts_Out(messages.Message):
     contacts = messages.MessageField(Contact_Data, 1, repeated=True)
-    new_cursor = messages.StringField(2, required=True)
+    new_cursor = messages.StringField(2)
 
 class Deposit_Data(messages.Message):
     key = messages.StringField(1, required=True)
@@ -16,7 +16,7 @@ class Deposit_Data(messages.Message):
 
 class Deposits_Out(messages.Message):
     deposits = messages.MessageField(Deposit_Data, 1, repeated=True)
-    new_cursor = messages.StringField(2, required=True)
+    new_cursor = messages.StringField(2)
 
 class Donation_Data(messages.Message):
     key = messages.StringField(1, required=True)
@@ -28,7 +28,7 @@ class Donation_Data(messages.Message):
 
 class Donations_Out(messages.Message):
     donations = messages.MessageField(Donation_Data, 1, repeated=True)
-    new_cursor = messages.StringField(2, required=True)
+    new_cursor = messages.StringField(2)
 
 class Individual_Data(messages.Message):
     key = messages.StringField(1, required=True)
@@ -38,7 +38,7 @@ class Individual_Data(messages.Message):
 
 class Individuals_Out(messages.Message):
     individuals = messages.MessageField(Individual_Data, 1, repeated=True)
-    new_cursor = messages.StringField(2, required=True)
+    new_cursor = messages.StringField(2)
 
 class Team_Data(messages.Message):
     name = messages.StringField(1, required=True)
@@ -46,16 +46,30 @@ class Team_Data(messages.Message):
 
 class Teams_Out(messages.Message):
     teams = messages.MessageField(Team_Data, 1, repeated=True)
-    new_cursor = messages.StringField(2, required=True)
+    new_cursor = messages.StringField(2)
 
 class Query_In(messages.Message):
     query_cursor = messages.StringField(1)
-    query = messages.StringField(2, required=True)
+    query = messages.StringField(2)
 
 class SuccessMessage_Out(messages.Message):
     success = messages.BooleanField(1, required=True)
     message = messages.StringField(2, required=True)
 
+### Single key arguments
+class ContactKey_In(messages.Message):
+    contact_key = messages.StringField(1, required=True)
+
+class DonationKey_In(messages.Message):
+    donation_key = messages.StringField(1, required=True)
+
+class IndividualKey_In(messages.Message):
+    individual_key = messages.StringField(1, required=True)
+
+class TeamKey_In(messages.Message):
+    team_key = messages.StringField(1, required=True)
+
+### Method specific classes
 # public.all_teams
 class AllTeams_In(messages.Message):
     settings_key = messages.StringField(1, required=True)
@@ -89,7 +103,7 @@ class TeamInfo_Out(messages.Message):
 
 # get.contact_donations
 class GetContactDonations_In(messages.Message):
-    query_cursor = messages.StringField(1, required=True)
+    query_cursor = messages.StringField(1)
     contact_key = messages.StringField(2, required=True)
 
 # mailchimp.lists
@@ -104,12 +118,12 @@ class MailchimpLists_Out(messages.Message):
 
 # get.team_members
 class GetTeamMembers_In(messages.Message):
-    query_cursor = messages.StringField(1, required=True)
+    query_cursor = messages.StringField(1)
     team_key = messages.StringField(2, required=True)
 
 # semi.get.individual_donations
 class GetIndividualDonations_In(messages.Message):
-    query_cursor = messages.StringField(1, required=True)
+    query_cursor = messages.StringField(1)
     individual_key = messages.StringField(2, required=True)
 
 # semi.get.team_members
@@ -123,9 +137,6 @@ class SemiGetTeamMembers_Data(messages.Message):
 class SemiGetTeamMembers_Out(messages.Message):
     members = messages.MessageField(SemiGetTeamMembers_Data, 1, repeated=True)
 
-# donation.mark_unreviewed
-class DonationMarkUnreviewed_In(messages.Message):
-    donation_key = messages.StringField(1, required=True)
 
 # new.contact
 class AddressInfo(messages.Message):
@@ -163,7 +174,7 @@ class NewTeam_In(messages.Message):
 class NewOfflineDonation_In(messages.Message):
     name = messages.StringField(1, required=True)
     email = messages.StringField(2, required=True)
-    amount_donated = messages.StringField(3, required=True)
+    amount_donated = messages.FloatField(3, required=True)
     notes = messages.StringField(4, required=True)
     address = messages.MessageField(AddressInfo, 5, required=True)
     team_key = messages.StringField(6, required=True)
@@ -177,3 +188,58 @@ class UpdateDonation_In(messages.Message):
     team_key = messages.StringField(3, required=True)
     individual_key = messages.StringField(4, required=True)
     add_deposit = messages.BooleanField(5, required=True)
+
+# update.contact
+class UpdateContact_In(messages.Message):
+    contact_key = messages.StringField(1, required=True)
+    name = messages.StringField(2, required=True)
+    email = messages.StringField(3, required=True)
+    phone = messages.StringField(4, required=True)
+    notes = messages.StringField(5, required=True)
+    address = messages.MessageField(AddressInfo, 6, required=True)
+
+# update.settings
+class UpdateSettings_In(messages.Message):
+    name = messages.StringField(1, required=True)
+    email = messages.StringField(2, required=True)
+    mc_use = messages.BooleanField(3, required=True)
+    mc_apikey = messages.StringField(4, required=True)
+    mc_donorlist = messages.StringField(5, required=True)
+    paypal_id = messages.StringField(6, required=True)
+    impressions = messages.StringField(7, repeated=True)
+    amount1 = messages.IntegerField(8, required=True)
+    amount2 = messages.IntegerField(9, required=True)
+    amount3 = messages.IntegerField(10, required=True)
+    amount4 = messages.IntegerField(11, required=True)
+    use_custom = messages.BooleanField(12, required=True)
+    confirmation_header = messages.StringField(13, required=True)
+    confirmation_info = messages.StringField(14, required=True)
+    confirmation_footer = messages.StringField(15, required=True)
+    confirmation_text = messages.StringField(16, required=True)
+    donor_report_text = messages.StringField(17, required=True)
+
+# update.team
+class UpdateTeam_In(messages.Message):
+    team_key = messages.StringField(1, required=True)
+    name = messages.StringField(2, required=True)
+    show_team = messages.BooleanField(3, required=True)
+
+# merge.contacts
+class MergeContacts_In(messages.Message):
+    contact1 = messages.StringField(1, required=True)
+    contact2 = messages.StringField(2, required=True)
+
+# deposit_donations
+class Deposits_In(messages.Message):
+    donation_keys = messages.StringField(1, repeated=True)
+
+# confirmation.print
+class ConfirmationPrint_Out(messages.Message):
+    success = messages.BooleanField(1, required=True)
+    message = messages.StringField(2, required=True)
+    print_url = messages.StringField(3, required=True)
+
+# confirmation.annual_report
+class ConfirmationAnnualReport_In(messages.Message):
+    contact_key = messages.StringField(1, required=True)
+    year = messages.IntegerField(2, required=True)

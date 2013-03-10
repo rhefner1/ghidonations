@@ -100,11 +100,31 @@ class DelayIndexing(webapp2.RequestHandler):
         e = tools.getKey(entity_key).get()
         e.search.index()
 
+class UpdateContactsJSON(webapp2.RequestHandler):
+    def post(self):
+        s_key = self.request.get("s_key")
+        s = tools.getKey(s_key)
+
+        contacts = []
+
+        for c in s.data.all_contacts:
+            contact = {}
+            contact["label"] = c.name
+            contact["email"] = c.email
+            contact["address"] = json.dumps(c.address)
+            contact["key"] = str(c.websafe)
+            
+            contacts.append(contact)
+  
+        s.contacts_json = json.dumps(contacts)
+        s.put()
+
 app = webapp2.WSGIApplication([
-       ('/tasks/confirmation', Confirmation),
-       ('/tasks/annualreport', AnnualReport),
-       ('/tasks/indexall', IndexAll),
-       ('/tasks/delayindexing', DelayIndexing),
-       ('/tasks/mailchimp', MailchimpAdd)],
-       debug=True)
+        ('/tasks/annualreport', AnnualReport),
+        ('/tasks/confirmation', Confirmation),
+        ('/tasks/delayindexing', DelayIndexing),
+        ('/tasks/indexall', IndexAll),
+        ('/tasks/mailchimp', MailchimpAdd),
+        ('/tasks/contactsjson', UpdateContactsJSON)],
+        debug=True)
 app = appengine_config.recording_add_wsgi_middleware(app)
