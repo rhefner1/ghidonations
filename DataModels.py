@@ -112,7 +112,7 @@ class Contact(ndb.Expando):
         memcache.delete("contacts" + e.settings.urlsafe())
 
         e.settings.get().updateContactsJSON()
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=3, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
     @classmethod
@@ -144,7 +144,7 @@ class DepositReceipt(ndb.Expando):
     @classmethod
     def _post_put_hook(self, future):
         e = future.get_result().get()
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=3, queue_name="delayindexing")
 
      ## -- Before Delete -- ##
     @classmethod
@@ -303,7 +303,7 @@ class Donation(ndb.Expando):
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
 
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=3, queue_name="delayindexing")
 
      ## -- Before Delete -- ##
     @classmethod
@@ -476,7 +476,7 @@ class Individual(ndb.Expando):
             memcache.delete("teammembersdict" + t.team.urlsafe())
             memcache.delete("info" + t.team.urlsafe() + e.websafe)
             
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=3, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
     @classmethod
@@ -620,7 +620,7 @@ class Settings(ndb.Expando):
         s.put()
 
     def updateContactsJSON(self):
-        taskqueue.add(url="/tasks/contactsjson", params={'s_key' : e.websafe}, queue_name="backend")    
+        taskqueue.add(url="/tasks/contactsjson", params={'s_key' : self.websafe}, queue_name="backend")    
 
     @property
     def websafe(self):
@@ -664,7 +664,7 @@ class Team(ndb.Expando):
         memcache.delete("teammembers" + e.websafe)
         memcache.delete("teamsdict" + e.settings.urlsafe())
 
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=5, queue_name="delayindexing")      
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=3, queue_name="delayindexing")      
 
     ## -- Before Deletion -- ##
     @classmethod

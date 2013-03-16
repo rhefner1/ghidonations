@@ -1291,7 +1291,10 @@ class IndividualData(UtilitiesBase):
 
     def getTeamList(self, team):
         query = models.TeamList.gql("WHERE individual = :i AND team = :t", i=self.e.key, t=team)
-        return query.fetch(1)[0]
+        try:
+            return query.fetch(1)[0]
+        except:
+            raise Exception("No individual-team pair found.")
 
     def info(self, team):
         memcache_key = "info" + team.urlsafe() + self.e.websafe

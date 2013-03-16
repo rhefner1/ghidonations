@@ -1,5 +1,5 @@
 #App engine platform
-import logging, webapp2, appengine_config
+import logging, webapp2, appengine_config, json
 
 import GlobalUtilities as tools
 import DataModels as models
@@ -103,7 +103,7 @@ class DelayIndexing(webapp2.RequestHandler):
 class UpdateContactsJSON(webapp2.RequestHandler):
     def post(self):
         s_key = self.request.get("s_key")
-        s = tools.getKey(s_key)
+        s = tools.getKey(s_key).get()
 
         contacts = []
 

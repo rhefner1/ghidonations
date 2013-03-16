@@ -173,7 +173,7 @@ class EndpointsAPI(remote.Service):
         for i in results[0]:
             f = i.fields
 
-            individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value, amount_donated=tools.moneyAmount(f[4].value))
+            individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value, raised=tools.moneyAmount(f[4].value))
             individuals.append(individual)
 
         return Individuals_Out(individuals=individuals, new_cursor=new_cursor)
@@ -218,7 +218,7 @@ class EndpointsAPI(remote.Service):
         return Teams_Out(teams=teams, new_cursor=new_cursor)
 
     # get.team_members
-    @endpoints.method(GetTeamMembers_In, Teams_Out, path='get/team_members',
+    @endpoints.method(GetTeamMembers_In, Individuals_Out, path='get/team_members',
                     http_method='GET', name='get.team_members')
     def get_team_members(self, req):
         s = tools.getSettingsKey(self).get()
@@ -236,7 +236,7 @@ class EndpointsAPI(remote.Service):
             individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value, raised=tools.moneyAmount(f[4].value))
             individuals.append(individual)
 
-        return Individual_Out(individuals=individuals, new_cursor=new_cursor)
+        return Individuals_Out(individuals=individuals, new_cursor=new_cursor)
 
     # get.individual_donations
     @endpoints.method(GetIndividualDonations_In, Donations_Out, path='semi/get/individual_donations',
@@ -271,7 +271,7 @@ class EndpointsAPI(remote.Service):
 
         members = []
         for m in members_list:
-            member = SemiTeamMembers_Data(key=m[0], name=m[2])
+            member = SemiGetTeamMembers_Data(key=m[0], name=m[2])
             members.append(member)
 
         return SemiGetTeamMembers_Out(members=members)
@@ -374,26 +374,19 @@ class EndpointsAPI(remote.Service):
 
         # Make req variables local
         name, email, amount_donated, notes, address, team_key, individual_key, \
-            add_deposit = req.name, req.email, req.amount_donated, req.notes, \
+            add_deposit = req.name, req.email, tools.toDecimal(req.amount_donated), req.notes, \
             req.address, req.team_key, req.individual_key, req.add_deposit \
 
         s = tools.getSettingsKey(self).get()
 
-        if address == "":
-            address = None
-        else:
-            address = json.loads(address)
+        if address:
+            address = [address.street, address.city, address.state, address.zipcode]
 
-        if team_key == "" or team_key == "general":
-            team_key = None
-        else:
+        if team_key:
             team_key = tools.getKey(team_key)
 
-        if individual_key == "" or individual_key == None or individual_key == "none":
-            individual_key = None
-        else:
-            individual_key = tools.getKey(individual_key)
-            
+        if individual_key:
+            individual_key = tools.getKey(individual_key)            
 
         s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "", "offline", False, None)
 
@@ -411,9 +404,7 @@ class EndpointsAPI(remote.Service):
         # Make req variables local
         team_key, individual_key = req.team_key, req.individual_key
 
-        if team_key == "general":
-            team_key = None
-        elif team_key:
+        if team_key:
             team_key = tools.getKey(team_key)
 
         if individual_key:
@@ -431,8 +422,11 @@ class EndpointsAPI(remote.Service):
         success = True
 
         c = tools.getKey(req.contact_key).get()
-        address = json.loads(req.address)
-        c.update(req.name, req.email, req.phone, req.notes, req.address)
+
+        a = req.address
+        address = [a.street, a.city, a.state, a.zipcode]
+
+        c.update(req.name, req.email, req.phone, req.notes, address)
         
         return SuccessMessage_Out(success=success, message=message)
 

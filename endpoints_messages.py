@@ -173,20 +173,20 @@ class NewTeam_In(messages.Message):
 # new.offline_donation
 class NewOfflineDonation_In(messages.Message):
     name = messages.StringField(1, required=True)
-    email = messages.StringField(2, required=True)
-    amount_donated = messages.FloatField(3, required=True)
-    notes = messages.StringField(4, required=True)
-    address = messages.MessageField(AddressInfo, 5, required=True)
-    team_key = messages.StringField(6, required=True)
-    individual_key = messages.StringField(7, required=True)
+    email = messages.StringField(2)
+    amount_donated = messages.StringField(3, required=True)
+    notes = messages.StringField(4)
+    address = messages.MessageField(AddressInfo, 5)
+    team_key = messages.StringField(6)
+    individual_key = messages.StringField(7)
     add_deposit = messages.BooleanField(8, required=True)
 
 # update.donation
 class UpdateDonation_In(messages.Message):
     donation_key = messages.StringField(1, required=True)
     notes = messages.StringField(2, required=True)
-    team_key = messages.StringField(3, required=True)
-    individual_key = messages.StringField(4, required=True)
+    team_key = messages.StringField(3)
+    individual_key = messages.StringField(4)
     add_deposit = messages.BooleanField(5, required=True)
 
 # update.contact
