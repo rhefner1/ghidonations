@@ -5,12 +5,15 @@ $(document).ready(function(){
         var validation_result = $("form").validationEngine('validate')
         if (validation_result == true){
             var name = $("#newteam input[name=name]").val()
-            var params = ["newTeam", name]
 
             //Flash message
             show_flash("setting", "Creating team...", false)
 
-            rpcPost(params, function(data){
+            var params = {'name':name}
+            var request = ghiapi.new.team(params)
+
+            request.execute(function(data){
+                rpcSuccessMessage(response)
                 window.location.hash = "newindividual"
             })
         }            

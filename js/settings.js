@@ -7,9 +7,11 @@ function get_mclists(){
     $("#mclists_container").html("Loading...")
     var mc_apikey = $("input[name=mc_apikey]").val()
 
-    params = {action : "getMailchimpLists", arg0:JSON.stringify(mc_apikey)}
-    rpcGet(params, function(data){
-        if (data[0] == true){
+    params = {'mc_apikey':mc_apikey}
+    var request = ghiapi.mailchimp.lists(params)
+
+    request.execute(function(response){
+        if (response.success == true){
             mcl_c = $("#mclists_container")
             mcl_c.hide()
             mcl_c.html("")
@@ -17,7 +19,7 @@ function get_mclists(){
             var selector = document.createElement("select")
             mcl_c.append(selector)
 
-            var lists_dict = data[1]
+            var lists_dict = response.mc_lists
 
             $.each(lists_dict, function(name, id){
                 var new_option = document.createElement("option")
@@ -42,7 +44,7 @@ function get_mclists(){
             $("#mclists_container").show()
         }
         else{
-            show_flash("undone", data[1], true)
+            show_flash("undone", response.error_message, true)
             $("input[name=mc_apikey]").parent().parent().removeClass("green-highlight")
             $("input[name=mc_apikey]").parent().parent().addClass("red-highlight")
             $("#mclists_container").html("Failed...")
@@ -125,14 +127,18 @@ $(document).ready(function(){
             var confirmation_text = $("textarea[name=confirmation_text]").data("kendoEditor").value()
             var donor_report_text = $("textarea[name=donor_report_text]").data("kendoEditor").value()
 
-            var params = ["updateSettings", name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions,
-                    amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text,
-                    donor_report_text]
-
             //Flash message
             show_flash("setting", "Updating settings...", false)
 
-            rpcPost(params, function(data){
+            var params = {'name':name, 'email':email, 'mc_use':mc_use, 'mc_apikey':mc_apikey, 'mc_donorlist':mc_donorlist, 'paypal_id':paypal_id, 'impressions':impressions,
+                    'amount1':amount1, 'amount2':amount2, 'amount3':amount3, 'amount4':amount4, 'use_custom':use_custom, 'confirmation_header':confirmation_header, 
+                    'confirmation_info':confirmation_info, 'confirmation_footer':confirmation_footer, 'confirmation_text':confirmation_text,
+                    'donor_report_text':donor_report_text}
+
+            var request = ghiapi.settings.update(params)
+
+            request.execute(function(response){
+                rpcSuccessMessage(response)
                 refreshPage()
             })        
         }

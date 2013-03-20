@@ -3,11 +3,11 @@ $(document).ready(function(){
     var contact_email = null
 
     // Autocomplete for contacts
-    params = {"action" : "getContactsJSON"}
-    var url = '/rpc?' + $.param(params)
-    $.getJSON(url, function(data){
+    var request = ghiapi.get.contactsjson({})
+
+    request.execute(function(response) {
         $("input[name=contact]").autocomplete({
-            source: data,
+            source: JSON.parse(response.contacts_json),
             select: function(e, ui){
                 $("input[name=contact]").val(ui.item.name)
                 contact = ui.item.key
@@ -35,10 +35,12 @@ $(document).ready(function(){
     $("#sendemail").click(function(){
         if (contact_email && contact_email != ""){
             var year = $("input[name=year]").val()
-            var params = ["emailAnnualReport", contact, year]
+            var params = {'contact':contact, 'year':year}
 
-            rpcPost(params, function(data){
-                refreshPage()        
+            var request = ghiapi.confirmation.annualreport(params)
+            request.execute(function(response){
+                rpcSuccessMessage(response)
+                refreshPage()
             })
         }
         else{

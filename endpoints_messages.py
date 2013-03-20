@@ -7,7 +7,7 @@ class Contact_Data(messages.Message):
     email = messages.StringField(3, required=True)
 
 class Contacts_Out(messages.Message):
-    contacts = messages.MessageField(Contact_Data, 1, repeated=True)
+    objects = messages.MessageField(Contact_Data, 1, repeated=True)
     new_cursor = messages.StringField(2)
 
 class Deposit_Data(messages.Message):
@@ -15,7 +15,7 @@ class Deposit_Data(messages.Message):
     time_deposited = messages.StringField(2, required=True)
 
 class Deposits_Out(messages.Message):
-    deposits = messages.MessageField(Deposit_Data, 1, repeated=True)
+    objects = messages.MessageField(Deposit_Data, 1, repeated=True)
     new_cursor = messages.StringField(2)
 
 class Donation_Data(messages.Message):
@@ -27,7 +27,7 @@ class Donation_Data(messages.Message):
     amount_donated = messages.StringField(6, required=True)
 
 class Donations_Out(messages.Message):
-    donations = messages.MessageField(Donation_Data, 1, repeated=True)
+    objects = messages.MessageField(Donation_Data, 1, repeated=True)
     new_cursor = messages.StringField(2)
 
 class Individual_Data(messages.Message):
@@ -37,7 +37,7 @@ class Individual_Data(messages.Message):
     raised = messages.StringField(4, required=True)
 
 class Individuals_Out(messages.Message):
-    individuals = messages.MessageField(Individual_Data, 1, repeated=True)
+    objects = messages.MessageField(Individual_Data, 1, repeated=True)
     new_cursor = messages.StringField(2)
 
 class Team_Data(messages.Message):
@@ -45,7 +45,7 @@ class Team_Data(messages.Message):
     key = messages.StringField(2, required=True)
 
 class Teams_Out(messages.Message):
-    teams = messages.MessageField(Team_Data, 1, repeated=True)
+    objects = messages.MessageField(Team_Data, 1, repeated=True)
     new_cursor = messages.StringField(2)
 
 class Query_In(messages.Message):
@@ -75,7 +75,7 @@ class AllTeams_In(messages.Message):
     settings_key = messages.StringField(1, required=True)
 
 class AllTeams_Out(messages.Message):
-	all_teams = messages.MessageField(Team_Data, 1, repeated=True)
+	objects = messages.MessageField(Team_Data, 1, repeated=True)
     
 # public.individual_info
 class IndividualInfo_In(messages.Message):
@@ -228,6 +228,13 @@ class UpdateTeam_In(messages.Message):
 class MergeContacts_In(messages.Message):
     contact1 = messages.StringField(1, required=True)
     contact2 = messages.StringField(2, required=True)
+
+# get.contacts_json
+class NoRequestParams(messages.Message):
+    pass
+
+class GetContactsJson_Out(messages.Message):
+    contacts_json = messages.StringField(1, required=True)
 
 # deposit_donations
 class Deposits_In(messages.Message):

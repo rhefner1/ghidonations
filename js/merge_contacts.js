@@ -3,11 +3,12 @@ $(document).ready(function(){
     var contact2 = null
 
     // Autocomplete for contacts
-    params = {"action" : "getContactsJSON"}
-    var url = '/rpc?' + $.param(params)
-    $.getJSON(url, function(data){
+    var request = ghiapi.get.contactsjson({})
+    request.execute(function(response){
+        var contacts_json = JSON.parse(response.contacts_json)
+
         $("input[name=merge_1]").autocomplete({
-            source: data,
+            source: contacts_json,
             select: function(e, ui){
                 $("input[name=merge_1]").val(ui.item.name)
                 contact1 = ui.item.key
@@ -15,7 +16,7 @@ $(document).ready(function(){
         });
 
         $("input[name=merge_2]").autocomplete({
-            source: data,
+            source: contacts_json,
             select: function(e, ui){
                 $("input[name=merge_2]").val(ui.item.name)
                 contact2 = ui.item.key
@@ -30,9 +31,10 @@ $(document).ready(function(){
                 show_flash("undone", "Select two different contacts to merge them.", true)
             }
             else{
-                var params = ["mergeContacts", contact1, contact2]
-
-                rpcPost(params, function(data){
+                var params = {'contact1':contact1, 'contact2':contact2}
+                var request = ghiapi.merge.contacts(params)
+                request.execute(function(response){
+                    rpcSuccessMessage(response)
                     refreshPage()
                 })
             }

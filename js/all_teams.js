@@ -8,15 +8,15 @@ function dataTableWriter(data_table, d){
 }
 
 function trigger_search(query){
-    data_table.fnClearTable()
+    if (data_table){
+        data_table.fnClearTable()
+    }
     
     //Reinitialize the table with new settings
-    rpc_params = [query]
-    pageThrough(data_table, 0, "getTeams", rpc_params, function(data_table, d){
-        dataTableWriter(data_table, d)
-    })
+    var rpc_request = ghiapi.get.teams
+    var rpc_params = {'query':query}
 
-    data_table = initializeTable(1, "getTeams", rpc_params, function(data_table, d){
+    data_table = initializeTable(1, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 
@@ -27,11 +27,7 @@ $(document).ready(function(){
 
     //Initialize data table
     var query = $("#search_query").val()
-    var rpc_params = [query]
-
-    var data_table = initializeTable(1, "getTeams", rpc_params, function(data_table, d){
-        dataTableWriter(data_table, d)
-    })
+    trigger_search(query)
 
     //When team is clicked, go to its page
     $("#teams").delegate("tr", "click", function(e){

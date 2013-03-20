@@ -17,16 +17,18 @@ $(document).ready(function(){
             var street = $("input[name=street]").val()
             var city = $("input[name=city]").val()
             var state = $("input[name=state]").val()
-            var zip = $("input[name=zip]").val()
+            var zipcode = $("input[name=zip]").val()
 
-            address = $.toJSON([street, city, state, zip])
-            
-            var params = ["newContact", name, email, phone, address, notes]
+            address = {'street':street, 'city':city, 'state':state, 'zipcode':zipcode}
 
             //Flash message
             show_flash("setting", "Creating donor...", false)
+            
+            var params = {'name':name, 'email':email, 'phone':phone, 'address':address, 'notes':notes}
+            var request = ghiapi.new.contact(params)
 
-            rpcPost(params, function(data){
+            request.execute(function(response){
+                rpcSuccessMessage(response)
                 refreshPage()
             })            
         }                

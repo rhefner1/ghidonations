@@ -21,17 +21,18 @@ function getDonations(){
     pages_retrieved += 1
 
     if (query_cursor != "end"){
-        var rpc_params = {"action" : "semi_getIndividualDonations", arg0: JSON.stringify(query_cursor), arg1: JSON.stringify(i_key)}
+        var params = {'individual_key':i_key, 'query_cursor':null}
+        var request = ghiapi.semi.get.individualdonations(params)
     
-        $.getJSON("/rpc?" + $.param(rpc_params), function(data){
+        request.execute(function(response){
 
-            $.each(data[0], function(num){
-                var template = $.tmpl('<li style="font-size:16px"><span>${name}</span> <small class="counter">${amount_donated}</small></a></li>', data[0][num])
+            $.each(response.objects, function(index, d){
+                var template = $.tmpl('<li style="font-size:16px"><span>${name}</span> <small class="counter">${amount_donated}</small></a></li>', d)
                 template.appendTo("#donations_list");
             })
 
             // Saving query cursor for next request
-            var next_cursor = data[1]
+            var next_cursor = response.new_cursor
 
             if (next_cursor == null){
                 next_cursor = "end"
@@ -47,20 +48,24 @@ function getDonations(){
     clickHandler()
 }
 
-// $(document).ready(function(){
+function initializeAPI(){
+    // Load GHI Donations API
+    var ROOT = '/_ah/api';
+    gapi.client.load('ghidonations', 'v1', function() {
+        ghiapi = gapi.client.ghidonations
 
-//Team list dictionary parsed from JSON
-var team_list = JSON.parse($("input[name=team_list]").val())
-var team_names = ""
+        //Team list dictionary parsed from JSON
+        var team_list = JSON.parse($("input[name=team_list]").val())
+        var team_names = ""
 
-//Formatting team field
-$.each(team_list, function(team_key, values){
-    team_names += values[0] + ", "
-})
+        //Formatting team field
+        $.each(team_list, function(team_key, values){
+            team_names += values[0] + ", "
+        })
 
-$("#team_names").text(team_names.substr(0, team_names.length-2))
+        $("#team_names").text(team_names.substr(0, team_names.length-2))
 
-clickHandler()
-getDonations()
-    
-// });
+        clickHandler()
+        getDonations()
+    }, ROOT); 
+}

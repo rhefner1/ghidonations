@@ -13,8 +13,10 @@ function dataTableWriter(data_table, d){
 $(document).ready(function(){
     var contact_key = $("#contact_key").val()
 
-    var rpc_params = [contact_key]
-    var data_table = initializeTable(4, "getContactDonations", rpc_params, function(data_table, d){
+    var rpc_request = ghiapi.get.contactdonations
+    var rpc_params = {'contact_key':contact_key}
+
+    var data_table = initializeTable(4, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 
@@ -82,9 +84,11 @@ $(document).ready(function(){
     //Send RPC request to delete contact
     $("input[name=delete_contact]").click(function(){
         var contact_key = $("#contact_key").val()
-        var params = ["deleteContact", contact_key]
+        var params = {'contact_key':contact_key}
+        var request = ghiapi.contact.delete(params)
 
-        rpcPost(params, function(data){
+        request.execute(function(response){
+            rpcSuccessMessage(response)
             window.location.hash = "allcontacts"
         })
     })
@@ -103,13 +107,17 @@ $(document).ready(function(){
         var street = $("input[name=street]").val()
         var city = $("input[name=city]").val()
         var state = $("input[name=state]").val()
-        var zip = $("input[name=zip]").val()
+        var zipcode = $("input[name=zip]").val()
 
-        address = $.toJSON([street, city, state, zip])
+        address = {'street':street, 'city':city, 'state':state, 'zipcode':zipcode}
 
-        var params = ["updateContact", contact_key, name, email, phone, notes, address]
+        var params = {'contact_key':contact_key, 'name':name, 'email':email,
+                    'phone':phone, 'notes':notes, 'address':address}
 
-        rpcPost(params, function(data){
+        var request = ghiapi.contact.update(params)
+
+        request.execute(function(response){
+            rpcSuccessMessage(response)
             refreshPage()
         })
     })
@@ -119,9 +127,11 @@ $(document).ready(function(){
         var impression = $("#impressions_edit select").val()
         var notes = $("#impressions_edit textarea").val()
 
-        var params = ["newImpression", contact_key, impression, notes]
+        var params = {'contact_key':contact_key, 'impression':impression, 'notes':notes}
+        var request = ghiapi.new.impression(params)
 
-        rpcPost(params, function(data){
+        request.execute(function(response){
+            rpcSuccessMessage(response)
             refreshPage()
         })
     })

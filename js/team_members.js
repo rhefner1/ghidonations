@@ -14,8 +14,10 @@ $(document).ready(function(){
     //Initializing data table
     var team_key = $("#team_key").val()
 
-    var rpc_params = [team_key]
-    var data_table = initializeTable(3, "getTeamMembers", rpc_params, function(data_table, d){
+    var rpc_params = {'team_key':team_key}
+    var rpc_request = ghiapi.get.teammembers
+
+    var data_table = initializeTable(3, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 	
@@ -45,8 +47,14 @@ $(document).ready(function(){
 	    	var name = $("#team_name").val()
 	    	var show_team = $("#toggle_team").is(":checked")
 
-	    	params = ["updateTeam", team_key, name, show_team]
-	    	rpcPost(params, function(){
+            //Flash message
+            show_flash("setting", "Updating team...", false)
+
+	    	var params = {'team_key':team_key, 'name':name, 'show_team':show_team}
+            var request = ghiapi.team.update(params)
+
+	    	request.execute(function(response){
+                rpcSuccessMessage(response)
 	    		refreshPage()
 	    	})
     	}
@@ -58,8 +66,11 @@ $(document).ready(function(){
     	if (confirm(message)){
     		var team_key = $("#team_key").val()
 
-	    	params = ["deleteTeam", team_key]
-	    	rpcPost(params, function(){
+	    	var params = {'team_key':team_key}
+            var request = ghiapi.team.delete(params)
+
+	    	request.execute(function(response){
+                rpcSuccessMessage(response)
 	    		window.location.hash = "allteams"
 	    	})
     	}

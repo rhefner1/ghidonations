@@ -4,7 +4,7 @@ import logging, webapp2, appengine_config, json
 import GlobalUtilities as tools
 import DataModels as models
 
-from google.appengine.api import mail
+from google.appengine.api import mail, taskqueue
 from google.appengine.ext.webapp import template
         
 class Confirmation(webapp2.RequestHandler):
@@ -71,27 +71,27 @@ class IndexAll(webapp2.RequestHandler):
         if mode == "contacts":
             contacts = models.Contact.gql("WHERE settings = :s", s=key)
             for c in contacts:
-                c.search.index()
+                taskqueue.add(url="/tasks/delayindexing", params={'e' : c.websafe}, queue_name="delayindexing")
 
         elif mode == "deposits":
             deposits = models.DepositReceipt.gql("WHERE settings = :s", s=key)
             for de in deposits:
-                de.search.index()
+                taskqueue.add(url="/tasks/delayindexing", params={'e' : de.websafe}, queue_name="delayindexing")
 
         elif mode == "donations":
             donations = models.Donation.gql("WHERE settings = :s", s=key)
             for d in donations:
-                d.search.index()
+                taskqueue.add(url="/tasks/delayindexing", params={'e' : d.websafe}, queue_name="delayindexing")
 
         elif mode == "individuals":
             individuals = models.Individual.gql("WHERE settings = :s", s=key)
             for i in individuals:
-                i.search.index()
+                taskqueue.add(url="/tasks/delayindexing", params={'e' : i.websafe}, queue_name="delayindexing")
 
         elif mode == "teams":
             teams = models.Team.gql("WHERE settings = :s", s=key)
             for t in teams:
-                t.search.index()
+                taskqueue.add(url="/tasks/delayindexing", params={'e' : t.websafe}, queue_name="delayindexing")
 
 class DelayIndexing(webapp2.RequestHandler):
     def post(self):

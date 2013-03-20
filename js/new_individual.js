@@ -10,12 +10,14 @@ $(document).ready(function(){
             var password = $("#newindividual input[name=password]").val()
             var admin = Boolean($("#newindividual input[name=admin]:checked").val())
 
-            var params = ["newIndividual", name, team_key, email, password, admin]
-
             //Flash message
             show_flash("setting", "Creating individual...", false)
 
-            rpcPost(params, function(data){
+            var params = {'name':name, 'team_key':team_key, 'email':email, 'password':password, 'admin':admin}
+            var request = ghiapi.new.individual(params)
+
+            request.execute(function(response){
+                rpcSuccessMessage(response)
                 refreshPage()
             })     
         }  

@@ -5,12 +5,13 @@ $(document).ready(function(){
     $("form").validationEngine()
 
     if (home_page == "dashboard"){
+
         // Autocomplete for contacts
-        params = {"action" : "getContactsJSON"}
-        var url = '/rpc?' + $.param(params)
-        $.getJSON(url, function(data){
+        var request = ghiapi.get.contactsjson({})
+
+        request.execute(function(response) {
             $("input[name=name]").autocomplete({
-                source: data,
+                source: JSON.parse(response.contacts_json),
                 select: function(event, ui){
                     $("input[name=email]").val(ui.item.email)
 
@@ -36,13 +37,14 @@ $(document).ready(function(){
             $("#individual_selector").hide("fast")
         }
         else {
-            params = {action: "semi_getTeamMembers", arg0: JSON.stringify(team_key)}
+            params = {"team_key" : team_key}
+            var request = ghiapi.semi.get.teammembers(params)
             
-            rpcGet(params, function(data){
+            request.execute(function(response){
                 //HTML to be inserted
                 option_html = '<option value="none">None</option>'
 
-                $.each(data, function(name, key) {
+                $.each(response.members, function(name, key) {
                     option_html = option_html + 
                     "<option value=" + key + ">" + name + "</option>"
                 });  
@@ -67,7 +69,7 @@ $(document).ready(function(){
             var state = $("input[name=state]").val()
             var zip = $("input[name=zip]").val()
 
-            address = $.toJSON([street, city, state, zip])
+            address = {'street':street, 'city':city, 'state':state, 'zip':zip}
             
             var team_key = $("#offline select[name=team] option:selected").val()
             var individual_key = $("#offline select[name=individual] option:selected").val()
@@ -75,25 +77,18 @@ $(document).ready(function(){
 
             var home_page = $("#home_page").val()
             var submit_action = ""
-            var params
-
-            if (home_page == "dashboard"){
-                submit_action = "offlineDonation"
-                params = [submit_action, name, email, amount_donated,
-                        notes, address, team_key, individual_key, add_deposit]
-            }
-            else{
-                submit_action = "semi_createDonation"
-                var params = [submit_action, name, email, amount_donated,
-                        notes, address, team_key, individual_key]
-            }
-            
-            
 
             //Flash message
             show_flash("setting", "Saving donation...", false)
 
-            rpcPost(params, function(data){
+            var params = {'name':name, 'email':email, 'amount_donated':amount_donated,
+                        'notes': notes, 'address':address, 'team_key':team_key, 
+                        'individual_key':individual_key, 'add_deposit':add_deposit}
+
+            var request = ghiapi.create.offline_donation(params)
+
+            request.execute(function(response){
+                rpcSuccessMessage(response)
                 refreshPage()
             })
         }

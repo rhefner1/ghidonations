@@ -1,6 +1,7 @@
 var home_page = $("#home_page").val()
 var previous_hash_params = {}
 var previous_hash_base = ""
+var ghiapi = null
 
 // ---- Show flash message ---- //
 function show_flash(type, message, fade){
@@ -181,14 +182,14 @@ var data_loading = false
 var current_page = 0
 var data_table = null
 
-var pub_rpc_action = null
+var pub_rpc_request = null
 var pub_rpc_params = null
 var pub_callback = null
 
-function initializeTable(num_columns, rpc_action, rpc_params, callback){
+function initializeTable(num_columns, rpc_request, rpc_params, callback){
     //Making these variables public
-    pub_rpc_action = rpc_action
     pub_rpc_params = rpc_params
+    pub_rpc_request = rpc_request
     pub_callback = callback
 
     // Reset cursor dict
@@ -246,11 +247,11 @@ function initializeTable(num_columns, rpc_action, rpc_params, callback){
 
             try{
                current_page += 1
-               pageThrough(data_table, current_page, rpc_action, rpc_params, callback)  
+               pageThrough(data_table, current_page, rpc_request, rpc_params, callback)  
             }
             catch(e){
                 current_page -= 1
-                pageThrough(data_table, current_page, rpc_action, rpc_params, callback) 
+                pageThrough(data_table, current_page, rpc_request, rpc_params, callback) 
             }
              
         } 
@@ -264,25 +265,25 @@ function initializeTable(num_columns, rpc_action, rpc_params, callback){
             if (current_page >= 1){
                 try{
                     current_page -= 1 
-                    pageThrough(data_table, current_page, rpc_action, rpc_params, callback) 
+                    pageThrough(data_table, current_page, rpc_request, rpc_params, callback) 
                 }
                 catch(e){
                     current_page += 1
-                    pageThrough(data_table, current_page, rpc_action, rpc_params, callback) 
+                    pageThrough(data_table, current_page, rpc_request, rpc_params, callback) 
                 }
             } 
             else{
                 show_flash("setting", "There isn't any more data to show.", true)
-                pageThrough(data_table, current_page, rpc_action, rpc_params, callback) 
+                pageThrough(data_table, current_page, rpc_request, rpc_params, callback) 
             } 
         }
     })
 
-    pageThrough(data_table, current_page, rpc_action, rpc_params, callback)
+    pageThrough(data_table, current_page, rpc_request, rpc_params, callback)
     return data_table
 }
 
-function pageThrough(data_table, page_number, rpc_action, rpc_params, callback){
+function pageThrough(data_table, page_number, rpc_request, rpc_params, callback){
     try{
         var query_cursor = cursors_dict[page_number]
     }
@@ -300,34 +301,32 @@ function pageThrough(data_table, page_number, rpc_action, rpc_params, callback){
     }
 
     // -- RPC to get donations -- //
-    var params = {action: rpc_action, arg0:query_cursor}
+    var params = {'action':rpc_request, 'query_cursor':query_cursor}
 
     //Adding additional parameters to params dictionary
     if (rpc_params != null){
-        var current_arg = 1
-        for (p in rpc_params){
-            var param_name = "arg" + current_arg.toString()
-            params[param_name] = JSON.stringify(rpc_params[p])
-        }
+        params = $.extend(params, rpc_params)
     }
 
     $("#search_icon").hide()
     $("#search_loading").show()
-    rpcGet(params, function(data){
+
+    var request = rpc_request(params)
+    request.execute(function(response){
         $("#search_loading").hide()
         $("#search_icon").show()
 
         data_table.fnClearTable()
 
-        $.each(data[0], function(status, d){
+        $.each(response.objects, function(index, d){
             callback(data_table, d)
         })
 
-        if (data[1] == null){
+        if (response.new_cursor == null){
             var new_cursor = "end"
         }
         else{
-            var new_cursor = data[1]
+            var new_cursor = response.new_cursor
         }
         
         cursors_dict[page_number + 1] = new_cursor
@@ -383,14 +382,14 @@ function refreshPage(){
         current_page = 0
         data_table = null
 
-        pub_rpc_action = null
+        pub_rpc_request = null
         pub_rpc_params = null
         pub_callback = null
     }    
 }
 
 function refreshTable(){
-    pageThrough(data_table, current_page, pub_rpc_action, pub_rpc_params, pub_callback)
+    pageThrough(data_table, current_page, pub_rpc_request, pub_rpc_params, pub_callback)
 }
 
 function rpcGet(data, callback){
@@ -428,6 +427,26 @@ function rpcPost(data, callback){
         });
 }
 
+function rpcSuccessMessage(response){
+    if (response.success == true){
+        show_flash("done", response.message, true)
+        callback(data)
+    }
+    else{
+        message = response.message
+        try{
+            if (message == ""){
+                message = "An error occurred."
+            }
+        }
+        catch(err){
+            message = "An error occurred."
+        }
+
+        show_flash("undone", message, true)
+    }
+}
+
 // ---- Utilities ---- //
 function diff(obj1,obj2) {
     var newObj = $.extend({},obj1,obj2);
@@ -441,7 +460,23 @@ function diff(obj1,obj2) {
     return result;
 }
 
-$(document).ready(function(){
+function initializeAPI(){
+    // Load GHI Donations API
+    var ROOT = '/_ah/api';
+    gapi.client.load('ghidonations', 'v1', function() {
+        ghiapi = gapi.client.ghidonations
+
+        // Trigger the event to load first page
+        $(window).hashchange();
+    }, ROOT); 
+
+}
+
+$(document).ready(function(){ 
+    if (ghiapi == null){
+        show_flash("setting", "Loading GHI Donations...", false)
+    }
+
     //Function to check if an element exists
     jQuery.fn.exists = function() {
         return jQuery(this).length > 0;
@@ -463,9 +498,6 @@ $(document).ready(function(){
         
     // Bind the event.
     bind_hashchange()
-
-    // Trigger the event (useful on page load).
-    $(window).hashchange();
 
     $("#refresh").click(refreshPage)
 

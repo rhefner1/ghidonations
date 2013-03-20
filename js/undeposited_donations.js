@@ -58,8 +58,11 @@ $(document).ready(function(){
 			show_flash("setting", "Marking checks as deposited...", false)
 		
 			var donation_keys = getCheckedRows()
-			params = ["depositDonations", donation_keys]
-			rpcPost(params, function(data){
+			var params = {'donation_keys':donation_keys}
+			var request = ghiapi.deposits.add(params)
+
+			request.execute(function(response){
+				rpcSuccessMessage(response)
 				window.location.hash = "alldeposits"
 			})
 		}
@@ -75,8 +78,9 @@ $(document).ready(function(){
 			show_flash("setting", "Removing checked deposits...", false)
 		
 			var donation_keys = getCheckedRows()
-			params = ["removeFromDeposits", donation_keys]
-			rpcPost(params, function(data){
+			params = {'donation_keys':donation_keys}
+			request.execute(function(response){
+				rpcSuccessMessage(response)
 				refreshPage()
 			})
 		}

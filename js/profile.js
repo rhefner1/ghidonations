@@ -33,8 +33,10 @@ function refreshCurrentTeams(){
 $(document).ready(function(){
 	var individual_key = $("#individual_key").val()
 
-    var rpc_params = [individual_key]
-    var data_table = initializeTable(5, "semi_getIndividualDonations", rpc_params, function(data_table, d){
+    var rpc_params = {'individual_key':individual_key, 'query_cursor':null}
+    var rpc_request = ghiapi.semi.get.individualdonations
+
+    var data_table = initializeTable(5, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 
@@ -93,9 +95,12 @@ $(document).ready(function(){
     $("form input[name=delete_individual]").click(function(){
     	var r=confirm("Do you want to delete this person?")
 		if (r==true){
-	    	var params = ["semi_deleteIndividual", individual_key]
+	    	var params = {'individual_key':individual_key}
+	    	var request = ghiapi.individual.delete(params)
 
-		    rpcPost(params, function(data){
+		    request.execute(function(response){
+		    	rpcSuccessMessage(response)
+		    	
 		    	var home_page = $("#home_page").val()
 	            if (home_page == "dashboard"){
 	            	window.location.hash = "allteams"

@@ -28,15 +28,19 @@ function toggleSelectionButtons(query){
 }
 
 function trigger_search(query){
-    data_table.fnClearTable()
+    if (data_table){
+        data_table.fnClearTable()
+    }
     
     //Reinitialize the table with new settings
-    rpc_params = [query]
-    pageThrough(data_table, 0, "getDonations", rpc_params, function(data_table, d){
-        dataTableWriter(data_table, d)
-    })
+    var rpc_request = ghiapi.get.donations
+    var rpc_params = {'query':query}
 
-    data_table = initializeTable(5, "getDonations", rpc_params, function(data_table, d){
+    // pageThrough(data_table, 0, rpc_request, rpc_params, function(data_table, d){
+    //     dataTableWriter(data_table, d)
+    // })
+
+    data_table = initializeTable(5, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 
@@ -55,10 +59,7 @@ $(document).ready(function(){
         $("#search_query").val(query)
     }
     
-    var rpc_params = [query]
-    var data_table = initializeTable(5, "getDonations", rpc_params, function(data_table, d){
-        dataTableWriter(data_table, d)
-    })
+    trigger_search(query)
 
     toggleSelectionButtons(query)
 

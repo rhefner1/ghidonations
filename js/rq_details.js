@@ -29,8 +29,10 @@ function showSave(){
 
 // -- Get team members when editing donation -- //
 function getTeamMembers(team_key){
-    var params = {action: "semi_getTeamMembers", arg0:JSON.stringify(team_key)}
-    rpcGet(params, function(data){
+    var params = {'team_key':team_key}
+    var request = ghiapi.semi.get.teammembers(params)
+
+    request.execute(function(response){
             //HTML to be inserted
             individual_key = $("#rq_details #individual_key").val()
 
@@ -41,9 +43,9 @@ function getTeamMembers(team_key){
                 option_html = '<option id="current_individual" value="none">* None</option>'
             }
             
-            $.each(data, function(data) {
-                var key = data[0]
-                var name = data[1]
+            $.each(response.objects, function(index, d) {
+                var key = d.key
+                var name d.name
                 
                 if (individual_key !== key){
                     //Putting them into the individual dropdown
@@ -104,9 +106,11 @@ $(document).ready(function(){
             if (r==true){
                 //Delete donation
                 donation_key = $("#donation_key").val()
-                var params = ["deleteDonation", donation_key]
+                var params = {'donation_key':donation_key}
+                var request = ghiapi.donation.delete(params)
 
-                rpcPost(params, function(data){
+                request.execute(function(response){
+                    rpcSuccessMessage(response)
                     closeColorbox()
                 })
             }
@@ -118,10 +122,12 @@ $(document).ready(function(){
     
     $("#rq_details").delegate("input[name=email]", "click", function(){
         donation_key = $("#donation_key").val()
-        var params = ["emailReceipt", donation_key]
+        var params = {'donation_key':donation_key}
+        var request = ghiapi.confirmation.email(params)
 
-        rpcPost(params, function(data){
-            closeColorbox()        
+        request.execute(function(response){
+            rpcSuccessMessage(response)
+            closeColorbox()
         })
     
     })
@@ -134,11 +140,13 @@ $(document).ready(function(){
     $("#rq_details").delegate("input[name=print]", "click", function(){
         donation_key = $("#donation_key").val()
 
-        var params = ["printReceipt", donation_key]
+        var params = {'donation_key':donation_key}
+        var request = ghiapi.confirmation.print(params)
 
-        rpcPost(params, function(data){
-            window.open(data[2], "_blank")
-            closeColorbox()   
+        request.execute(function(response){
+            rpcSuccessMessage(response)
+            window.open(response.print_url, "_blank")
+            closeColorbox()
         })
     
     })
@@ -146,9 +154,11 @@ $(document).ready(function(){
     $("#rq_details").delegate("input[name=archive]", "click", function(){
         donation_key = $("#rq_details #donation_key").val()
 
-        var params = ["archiveDonation", donation_key]
+        var params = {'donation_key':donation_key}
+        var request = ghiapi.donation.archive(params)
 
-        rpcPost(params, function(data){
+        request.execute(function(response){
+            rpcSuccessMessage(response)
             closeColorbox()
         })
     
@@ -179,10 +189,11 @@ $(document).ready(function(){
 
         var add_deposit = Boolean($("input[name=add_deposit]").val())
         
-        var params = ["updateDonation", donation_key, notes,
-                    team_key, individual_key, add_deposit]
+        var params = {'donation_key':donation_key, 'notes':notes, 'team_key':team_key,
+                     'individual_key':individual_key, 'add_deposit':add_deposit}
 
-        rpcPost(params, function(data){
+        request.execute(function(response){
+            rpcSuccessMessage(response)
             refreshPage()
         })
     

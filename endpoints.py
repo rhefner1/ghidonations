@@ -31,7 +31,7 @@ class EndpointsAPI(remote.Service):
             team = Team_Data(name=t.name, key=t.key.urlsafe())          
             all_teams.append(team)
         
-        return AllTeams_Out(all_teams=all_teams)
+        return AllTeams_Out(objects=all_teams)
 
     # public.individual_info
     @endpoints.method(IndividualInfo_In, IndividualInfo_Out, path='public/individual_info',
@@ -80,7 +80,7 @@ class EndpointsAPI(remote.Service):
             contact = Contact_Data(key=f[0].value, name=f[1].value, email=f[2].value)
             contacts.append(contact)
 
-        return Contacts_Out(contacts=contacts, new_cursor=new_cursor)
+        return Contacts_Out(objects=contacts, new_cursor=new_cursor)
 
     # get.contact_donations
     @endpoints.method(GetContactDonations_In, Donations_Out, path='get/contact_donations',
@@ -103,7 +103,7 @@ class EndpointsAPI(remote.Service):
 
             donations.append(donation)
 
-        return Donations_Out(donations=donations, new_cursor=new_cursor)
+        return Donations_Out(objects=donations, new_cursor=new_cursor)
 
     # get.deposits
     @endpoints.method(Query_In, Deposits_Out, path='get/deposits',
@@ -128,19 +128,20 @@ class EndpointsAPI(remote.Service):
             deposit = Deposit_Data(key=f[0].value, time_deposited=f[1].value)
             deposits.append(deposit)
 
-        return Deposits_Out(deposits=deposits, new_cursor=new_cursor)
+        return Deposits_Out(objects=deposits, new_cursor=new_cursor)
 
     # get.donations
     @endpoints.method(Query_In, Donations_Out, path='get/donations',
                     http_method='GET', name='get.donations')
     def get_donations(self, req):
         s = tools.getSettingsKey(self).get()
+        query = req.query
 
-        if req.query == None:
-            req.query = ""
+        if query == None:
+            query = ""
 
-        results = s.search.donation(req.query, query_cursor=req.query_cursor)
-        logging.info("Getting donations with query: " + req.query)
+        results = s.search.donation(query, query_cursor=req.query_cursor)
+        logging.info("Getting donations with query: " + query)
 
         donations = []
         new_cursor = tools.getWebsafeCursor(results[1])
@@ -153,7 +154,7 @@ class EndpointsAPI(remote.Service):
 
             donations.append(donation)
 
-        return Donations_Out(donations=donations, new_cursor=new_cursor)
+        return Donations_Out(objects=donations, new_cursor=new_cursor)
 
     # get.individuals
     @endpoints.method(Query_In, Individuals_Out, path='get/individuals',
@@ -176,7 +177,7 @@ class EndpointsAPI(remote.Service):
             individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value, raised=tools.moneyAmount(f[4].value))
             individuals.append(individual)
 
-        return Individuals_Out(individuals=individuals, new_cursor=new_cursor)
+        return Individuals_Out(objects=individuals, new_cursor=new_cursor)
 
     # mailchimp.lists
     @endpoints.method(MailchimpLists_In, MailchimpLists_Out, path='mailchimp/lists',
@@ -215,7 +216,7 @@ class EndpointsAPI(remote.Service):
             team = Team_Data(key=f[0].value, name=f[1].value)
             teams.append(team)
 
-        return Teams_Out(teams=teams, new_cursor=new_cursor)
+        return Teams_Out(objects=teams, new_cursor=new_cursor)
 
     # get.team_members
     @endpoints.method(GetTeamMembers_In, Individuals_Out, path='get/team_members',
@@ -236,7 +237,7 @@ class EndpointsAPI(remote.Service):
             individual = Individual_Data(key=f[0].value, name=f[1].value, email=f[2].value, raised=tools.moneyAmount(f[4].value))
             individuals.append(individual)
 
-        return Individuals_Out(individuals=individuals, new_cursor=new_cursor)
+        return Individuals_Out(objects=individuals, new_cursor=new_cursor)
 
     # get.individual_donations
     @endpoints.method(GetIndividualDonations_In, Donations_Out, path='semi/get/individual_donations',
@@ -259,7 +260,7 @@ class EndpointsAPI(remote.Service):
 
             donations.append(donation)
 
-        return Donations_Out(donations=donations, new_cursor=new_cursor)
+        return Donations_Out(objects=donations, new_cursor=new_cursor)
 
     # semi.get.team_members
     @endpoints.method(SemiGetTeamMembers_In, SemiGetTeamMembers_Out, path='semi/get/team_members',
@@ -302,7 +303,7 @@ class EndpointsAPI(remote.Service):
         address = [req.address.street, req.address.city, req.address.state, req.address.zipcode]
 
         if contact_exists[0] == False:
-            s.create.contact(req.name, req.email, req.phone, address, req.notes, True)
+            s.new.contact(req.name, req.email, req.phone, address, req.notes, True)
 
         else:
             #If this email address already exists for a user
@@ -321,7 +322,7 @@ class EndpointsAPI(remote.Service):
         success = True
 
         c = tools.getKey(req.contact_key).get()
-        c.create.impression(req.impression, req.notes)
+        c.new.impression(req.impression, req.notes)
 
         return SuccessMessage_Out(success=success, message=message)
 
@@ -344,7 +345,7 @@ class EndpointsAPI(remote.Service):
             if team_key == "team":
                 team_key = None
 
-            s.create.individual(req.name, tools.getKey(team_key), email, req.password, req.admin)
+            s.new.individual(req.name, tools.getKey(team_key), email, req.password, req.admin)
 
         else:
             #If this email address already exists for a user
@@ -361,7 +362,7 @@ class EndpointsAPI(remote.Service):
         success = True
 
         s = tools.getSettingsKey(self).get()
-        s.create.team(req.name)
+        s.new.team(req.name)
 
         return SuccessMessage_Out(success=success, message=message)
 
@@ -388,7 +389,8 @@ class EndpointsAPI(remote.Service):
         if individual_key:
             individual_key = tools.getKey(individual_key)            
 
-        s.create.donation(name, email, amount_donated, amount_donated, address, team_key, individual_key, add_deposit, "", "", "offline", False, None)
+        s.new.donation(name, email, amount_donated, amount_donated, address, team_key, 
+                            individual_key, add_deposit, "", "", "offline", False, None)
 
         return SuccessMessage_Out(success=success, message=message)
     
@@ -474,11 +476,11 @@ class EndpointsAPI(remote.Service):
 
 #### ---- Search ---- ####
     # get.contacts_json
-    @endpoints.method(MergeContacts_In, SuccessMessage_Out, path='merge/contacts',
-                    http_method='POST', name='merge.contacts')
-    def get_contacts_json(self):
+    @endpoints.method(NoRequestParams, GetContactsJson_Out, path='get/contacts_json',
+                    http_method='GET', name='get.contacts_json')
+    def get_contacts_json(self, req):
         s = tools.getSettingsKey(self).get()
-        return s.data.contactsJSON
+        return GetContactsJson_Out(contacts_json=s.data.contactsJSON)
 
 #### ---- Donation depositing ---- ####
     # deposits.add
