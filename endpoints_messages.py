@@ -135,7 +135,7 @@ class SemiGetTeamMembers_Data(messages.Message):
     name = messages.StringField(2, required=True)
 
 class SemiGetTeamMembers_Out(messages.Message):
-    members = messages.MessageField(SemiGetTeamMembers_Data, 1, repeated=True)
+    objects = messages.MessageField(SemiGetTeamMembers_Data, 1, repeated=True)
 
 
 # new.contact
@@ -203,8 +203,8 @@ class UpdateSettings_In(messages.Message):
     name = messages.StringField(1, required=True)
     email = messages.StringField(2, required=True)
     mc_use = messages.BooleanField(3, required=True)
-    mc_apikey = messages.StringField(4, required=True)
-    mc_donorlist = messages.StringField(5, required=True)
+    mc_apikey = messages.StringField(4)
+    mc_donorlist = messages.StringField(5)
     paypal_id = messages.StringField(6, required=True)
     impressions = messages.StringField(7, repeated=True)
     amount1 = messages.IntegerField(8, required=True)

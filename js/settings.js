@@ -135,7 +135,7 @@ $(document).ready(function(){
                     'confirmation_info':confirmation_info, 'confirmation_footer':confirmation_footer, 'confirmation_text':confirmation_text,
                     'donor_report_text':donor_report_text}
 
-            var request = ghiapi.settings.update(params)
+            var request = ghiapi.update.settings(params)
 
             request.execute(function(response){
                 rpcSuccessMessage(response)

@@ -114,7 +114,7 @@ $(document).ready(function(){
         var params = {'contact_key':contact_key, 'name':name, 'email':email,
                     'phone':phone, 'notes':notes, 'address':address}
 
-        var request = ghiapi.contact.update(params)
+        var request = ghiapi.update.contact(params)
 
         request.execute(function(response){
             rpcSuccessMessage(response)

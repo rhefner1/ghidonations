@@ -272,10 +272,10 @@ class EndpointsAPI(remote.Service):
 
         members = []
         for m in members_list:
-            member = SemiGetTeamMembers_Data(key=m[0], name=m[2])
+            member = SemiGetTeamMembers_Data(key=m[2], name=m[0])
             members.append(member)
 
-        return SemiGetTeamMembers_Out(members=members)
+        return SemiGetTeamMembers_Out(objects=members)
 
 # #### ---- Data creation/updating ---- ####
     # donation.mark_unreviewed
@@ -303,7 +303,7 @@ class EndpointsAPI(remote.Service):
         address = [req.address.street, req.address.city, req.address.state, req.address.zipcode]
 
         if contact_exists[0] == False:
-            s.new.contact(req.name, req.email, req.phone, address, req.notes, True)
+            s.create.contact(req.name, req.email, req.phone, address, req.notes, True)
 
         else:
             #If this email address already exists for a user
@@ -322,7 +322,7 @@ class EndpointsAPI(remote.Service):
         success = True
 
         c = tools.getKey(req.contact_key).get()
-        c.new.impression(req.impression, req.notes)
+        c.create.impression(req.impression, req.notes)
 
         return SuccessMessage_Out(success=success, message=message)
 
@@ -345,7 +345,7 @@ class EndpointsAPI(remote.Service):
             if team_key == "team":
                 team_key = None
 
-            s.new.individual(req.name, tools.getKey(team_key), email, req.password, req.admin)
+            s.create.individual(req.name, tools.getKey(team_key), email, req.password, req.admin)
 
         else:
             #If this email address already exists for a user
@@ -362,7 +362,7 @@ class EndpointsAPI(remote.Service):
         success = True
 
         s = tools.getSettingsKey(self).get()
-        s.new.team(req.name)
+        s.create.team(req.name)
 
         return SuccessMessage_Out(success=success, message=message)
 
@@ -376,7 +376,7 @@ class EndpointsAPI(remote.Service):
         # Make req variables local
         name, email, amount_donated, notes, address, team_key, individual_key, \
             add_deposit = req.name, req.email, tools.toDecimal(req.amount_donated), req.notes, \
-            req.address, req.team_key, req.individual_key, req.add_deposit \
+            req.address, req.team_key, req.individual_key, req.add_deposit
 
         s = tools.getSettingsKey(self).get()
 
@@ -389,7 +389,7 @@ class EndpointsAPI(remote.Service):
         if individual_key:
             individual_key = tools.getKey(individual_key)            
 
-        s.new.donation(name, email, amount_donated, amount_donated, address, team_key, 
+        s.create.donation(name, email, amount_donated, amount_donated, address, team_key, 
                             individual_key, add_deposit, "", "", "offline", False, None)
 
         return SuccessMessage_Out(success=success, message=message)

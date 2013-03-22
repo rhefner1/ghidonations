@@ -85,7 +85,7 @@ $(document).ready(function(){
                         'notes': notes, 'address':address, 'team_key':team_key, 
                         'individual_key':individual_key, 'add_deposit':add_deposit}
 
-            var request = ghiapi.create.offline_donation(params)
+            var request = ghiapi.new.offlinedonation(params)
 
             request.execute(function(response){
                 rpcSuccessMessage(response)

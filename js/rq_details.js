@@ -45,7 +45,7 @@ function getTeamMembers(team_key){
             
             $.each(response.objects, function(index, d) {
                 var key = d.key
-                var name d.name
+                var name = d.name
                 
                 if (individual_key !== key){
                     //Putting them into the individual dropdown
@@ -191,6 +191,8 @@ $(document).ready(function(){
         
         var params = {'donation_key':donation_key, 'notes':notes, 'team_key':team_key,
                      'individual_key':individual_key, 'add_deposit':add_deposit}
+
+        var request = ghiapi.update.donation(params)
 
         request.execute(function(response){
             rpcSuccessMessage(response)

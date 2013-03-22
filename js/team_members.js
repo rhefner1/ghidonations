@@ -51,7 +51,7 @@ $(document).ready(function(){
             show_flash("setting", "Updating team...", false)
 
 	    	var params = {'team_key':team_key, 'name':name, 'show_team':show_team}
-            var request = ghiapi.team.update(params)
+            var request = ghiapi.update.team(params)
 
 	    	request.execute(function(response){
                 rpcSuccessMessage(response)

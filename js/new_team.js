@@ -12,7 +12,7 @@ $(document).ready(function(){
             var params = {'name':name}
             var request = ghiapi.new.team(params)
 
-            request.execute(function(data){
+            request.execute(function(response){
                 rpcSuccessMessage(response)
                 window.location.hash = "newindividual"
             })

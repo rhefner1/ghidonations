@@ -135,7 +135,6 @@ function change_tab(location)
             url: "/ajax/" + location,
             cache: false, 
             success: function(html){
-
                 $("#actualbody").html(html);
                 hide_flash()
 
@@ -146,7 +145,7 @@ function change_tab(location)
                 else {
                     $("#actualbody").fadeIn(300)
                     $("#refresh").attr("href", window.location.hash) 
-                }                
+                }  
             }
         });
     })
@@ -297,7 +296,7 @@ function pageThrough(data_table, page_number, rpc_request, rpc_params, callback)
     }
     
     if (query_cursor != null){
-        query_cursor = JSON.stringify(query_cursor)
+        query_cursor = query_cursor
     }
 
     // -- RPC to get donations -- //
@@ -318,9 +317,13 @@ function pageThrough(data_table, page_number, rpc_request, rpc_params, callback)
 
         data_table.fnClearTable()
 
-        $.each(response.objects, function(index, d){
-            callback(data_table, d)
-        })
+        if (response.objects){
+
+            $.each(response.objects, function(index, d){
+                callback(data_table, d)
+            })
+        }
+        
 
         if (response.new_cursor == null){
             var new_cursor = "end"
@@ -430,20 +433,23 @@ function rpcPost(data, callback){
 function rpcSuccessMessage(response){
     if (response.success == true){
         show_flash("done", response.message, true)
-        callback(data)
     }
     else{
-        message = response.message
+        message = response.error_message
         try{
             if (message == ""){
                 message = "An error occurred."
+            }
+            else if(message == "Internal Server Error"){
+                message = "Uh oh! The server's not playing nice right now. Try again later."
             }
         }
         catch(err){
             message = "An error occurred."
         }
 
-        show_flash("undone", message, true)
+        show_flash("undone", message, false)
+        throw "Server error"
     }
 }
 
