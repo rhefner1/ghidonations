@@ -213,7 +213,7 @@ class EndpointsAPI(remote.Service):
         for t in results[0]:
             f = t.fields
             
-            team = Team_Data(key=f[0].value, name=f[1].value)
+            team = Team_Data(key=f[0].value, name=f[1].value, donation_total="$" + f[2].value)
             teams.append(team)
 
         return Teams_Out(objects=teams, new_cursor=new_cursor)

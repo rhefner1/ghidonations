@@ -5,7 +5,7 @@ from time import strftime
 
 from google.appengine.ext.webapp import template, blobstore_handlers
 from google.appengine.ext import blobstore
-from google.appengine.api import urlfetch
+from google.appengine.api import urlfetch, search
 
 #Excel export
 from xlwt import *
@@ -16,6 +16,8 @@ from gaesessions import get_current_session
 #Application files
 import DataModels as models
 import GlobalUtilities as tools
+
+_TEAM_SEARCH_INDEX = "team"
 
 class BaseHandler(webapp2.RequestHandler):
     def get(self):
@@ -617,7 +619,10 @@ class TeamMembers(BaseHandlerAdmin):
         team_key = self.request.get("t")
         t = tools.getKey(team_key).get()
 
-        template_variables = {"t":t}
+        t_search = tools.getSearchDoc(team_key, search.Index(name=_TEAM_SEARCH_INDEX))
+        donation_total = t_search.fields[2].value
+
+        template_variables = {"t":t, "donation_total":donation_total}
         self.response.write(
            template.render('pages/team_members.html', template_variables))
 

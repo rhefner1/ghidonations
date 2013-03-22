@@ -43,6 +43,7 @@ class Individuals_Out(messages.Message):
 class Team_Data(messages.Message):
     name = messages.StringField(1, required=True)
     key = messages.StringField(2, required=True)
+    donation_total = messages.StringField(3, required=True)
 
 class Teams_Out(messages.Message):
     objects = messages.MessageField(Team_Data, 1, repeated=True)

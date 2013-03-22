@@ -287,8 +287,8 @@ def getSearchDoc(doc_id, index):
         return None
 
     try:
-        response = index.list_documents(
-        start_doc_id=doc_id, limit=1, include_start_doc=True)
+        response = index.get_range(
+        start_id=doc_id, limit=1, include_start_object=True)
 
         if response.results and response.results[0].doc_id == doc_id:
             return response.results[0]
@@ -1478,6 +1478,7 @@ class TeamSearch(UtilitiesBase):
         document = search.Document(doc_id=t.websafe,
             fields=[search.TextField(name='team_key', value=t.websafe),
                     search.TextField(name='name', value=t.name),
+                    search.TextField(name='donation_total', value=str(t.data.donation_total)),
                     search.DateField(name='created', value=t.creation_date),
                     search.TextField(name='settings', value=t.settings.urlsafe()),
                     ])
@@ -1493,7 +1494,7 @@ class TeamSearch(UtilitiesBase):
             doc = self.createDocument()
             index.put(doc)
         except:
-            logging.error("Failed creating index on contact key:" + self.e.websafe)
+            logging.error("Failed creating index on team key:" + self.e.websafe)
 
 ## -- Dictionary Difference Class -- ##
 class DictDiffer(object):
