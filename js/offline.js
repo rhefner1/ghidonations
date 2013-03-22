@@ -44,7 +44,9 @@ $(document).ready(function(){
                 //HTML to be inserted
                 option_html = '<option value="none">None</option>'
 
-                $.each(response.members, function(name, key) {
+                $.each(response.objects, function(index, d) {
+                    var key = d.key
+                    var name = d.name
                     option_html = option_html + 
                     "<option value=" + key + ">" + name + "</option>"
                 });  
@@ -67,9 +69,9 @@ $(document).ready(function(){
             var street = $("input[name=street]").val()
             var city = $("input[name=city]").val()
             var state = $("input[name=state]").val()
-            var zip = $("input[name=zip]").val()
+            var zipcode = $("input[name=zip]").val()
 
-            address = {'street':street, 'city':city, 'state':state, 'zip':zip}
+            address = {'street':street, 'city':city, 'state':state, 'zipcode':zipcode}
             
             var team_key = $("#offline select[name=team] option:selected").val()
             var individual_key = $("#offline select[name=individual] option:selected").val()
@@ -77,6 +79,10 @@ $(document).ready(function(){
 
             var home_page = $("#home_page").val()
             var submit_action = ""
+
+            if (team_key == "general"){
+                team_key = undefined
+            }
 
             //Flash message
             show_flash("setting", "Saving donation...", false)

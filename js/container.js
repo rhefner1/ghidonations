@@ -435,7 +435,13 @@ function rpcSuccessMessage(response){
         show_flash("done", response.message, true)
     }
     else{
-        message = response.error_message
+        if (response.error_message){
+            message = response.error_message
+        }
+        else{
+            message = response.message
+        }
+        
         try{
             if (message == ""){
                 message = "An error occurred."
