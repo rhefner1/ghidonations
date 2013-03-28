@@ -874,7 +874,7 @@ class SettingsMailchimp(UtilitiesBase):
                     if task_queue == False:
                     #This is the original request, so add to task queue.
                         logging.error("An error occured contacting Mailchimp. Added to task queue to try again.")
-                        taskqueue.add(url="/tasks/mailchimp", params={'email' : email, 'name' : name, 'settings' : self.e.websafe})
+                        taskqueue.add(url="/tasks/mailchimp", params={'email' : email, 'name' : name, 'settings' : self.e.websafe}, queue_name="mailchimp")
                         
                     else:
                     #If this is coming from the task queue, fail it (so the task queue retry mechanism works)
