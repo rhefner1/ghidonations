@@ -84,14 +84,18 @@ def getUserKey(self):
 
     return getKey(user_key)
 
-def getSettingsKey(self):
-    try:
-        user_key = getUserKey(self)
-        user = user_key.get()
-        
-        return user.settings
-    except:
-        self.redirect("/login")
+def getSettingsKey(self, endpoints=False):
+    if endpoints == False:
+        try:
+            user_key = getUserKey(self)
+            user = user_key.get()
+            
+            return user.settings
+        except:
+            self.redirect("/login")
+
+    else:
+        return self.session
 
 def RPCcheckAuthentication(self, admin_required):
     try:

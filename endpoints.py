@@ -114,8 +114,6 @@ class EndpointsAPI(remote.Service):
         if req.query == None:
             req.query = ""
 
-        logging.info("************QUERY************: " + str(type(req.query)))
-
         results = s.search.deposit(req.query, query_cursor=req.query_cursor)
         logging.info("Getting deposits with query: " + req.query)
 
@@ -134,7 +132,10 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Donations_Out, path='get/donations',
                     http_method='GET', name='get.donations')
     def get_donations(self, req):
-        s = tools.getSettingsKey(self).get()
+
+        logging.info(str(req.session))
+
+        s = tools.getSettingsKey(self, endpoints=True).get()
         query = req.query
 
         if query == None:
@@ -625,5 +626,5 @@ class EndpointsAPI(remote.Service):
 
         return SuccessMessage_Out(success=success, message=message)
 
-app = endpoints.api_server([EndpointsAPI],
-                            restricted=False)
+app = endpoints.api_server([EndpointsAPI], restricted=False)
+app = appengine_config.webapp_add_wsgi_middleware(app)
