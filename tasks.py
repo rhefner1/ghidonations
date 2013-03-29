@@ -137,7 +137,7 @@ class UpdateAnalytics(webapp2.RequestHandler):
             donations = models.Donation.gql("WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC", 
                         s=s.key, last_week=last_week)
 
-            one_month_history = [["Date", "Amount Donated"]]
+            one_month_history = [["Date", "Amount Donated ($)"]]
             donations_dict = {}
 
             for d in donations:

@@ -6,7 +6,7 @@ function drawChart() {
 
         var options = {
             hAxis : {title:"Date"},
-            vAxis : {title:"Amount Donated"},
+            vAxis : {title:"Amount Donated ($)"},
             title: 'Last 30 days of donations'
         }
 
