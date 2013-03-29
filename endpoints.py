@@ -31,7 +31,7 @@ endpoints_client_id = "AIzaSyB7k0LsUXibTJHkCx_D3MA0HT6tQAtYZAo"
 endpoints_description = "GHI Donations API"
 endpoints_clients = [endpoints_client_id, endpoints.API_EXPLORER_CLIENT_ID]
 
-@endpoints.api(name='ghidonations', version='v1.1',
+@endpoints.api(name='ghidonations', version='v1',
                description=endpoints_description,
                allowed_client_ids=endpoints_clients)
 class EndpointsAPI(remote.Service):
