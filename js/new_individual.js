@@ -13,7 +13,7 @@ $(document).ready(function(){
             //Flash message
             show_flash("setting", "Creating individual...", false)
 
-            var params = add_cookie({'name':name, 'team_key':team_key, 'email':email, 'password':password, 'admin':admin})
+            var params = {'name':name, 'team_key':team_key, 'email':email, 'password':password, 'admin':admin}
             var request = ghiapi.new.individual(params)
 
             request.execute(function(response){

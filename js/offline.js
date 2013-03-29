@@ -7,7 +7,7 @@ $(document).ready(function(){
     if (home_page == "dashboard"){
 
         // Autocomplete for contacts
-        var params = add_cookie({})
+        var params = {}
         var request = ghiapi.get.contactsjson(params)
 
         request.execute(function(response) {
@@ -38,7 +38,7 @@ $(document).ready(function(){
             $("#individual_selector").hide("fast")
         }
         else {
-            params = add_cookie({"team_key" : team_key})
+            params = {"team_key" : team_key}
             var request = ghiapi.semi.get.teammembers(params)
             
             request.execute(function(response){
@@ -88,9 +88,9 @@ $(document).ready(function(){
             //Flash message
             show_flash("setting", "Saving donation...", false)
 
-            var params = add_cookie({'name':name, 'email':email, 'amount_donated':amount_donated,
+            var params = {'name':name, 'email':email, 'amount_donated':amount_donated,
                         'notes': notes, 'address':address, 'team_key':team_key, 
-                        'individual_key':individual_key, 'add_deposit':add_deposit})
+                        'individual_key':individual_key, 'add_deposit':add_deposit}
 
             var request = ghiapi.new.offlinedonation(params)
 

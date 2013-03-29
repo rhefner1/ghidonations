@@ -53,8 +53,6 @@ class Query_In(messages.Message):
     query_cursor = messages.StringField(1)
     query = messages.StringField(2)
 
-    http_cookie = messages.StringField(3, required=True)
-
 class SuccessMessage_Out(messages.Message):
     success = messages.BooleanField(1, required=True)
     message = messages.StringField(2, required=True)
@@ -63,22 +61,14 @@ class SuccessMessage_Out(messages.Message):
 class ContactKey_In(messages.Message):
     contact_key = messages.StringField(1, required=True)
 
-    http_cookie = messages.StringField(2, required=True)
-
 class DonationKey_In(messages.Message):
     donation_key = messages.StringField(1, required=True)
-
-    http_cookie = messages.StringField(2, required=True)
 
 class IndividualKey_In(messages.Message):
     individual_key = messages.StringField(1, required=True)
 
-    http_cookie = messages.StringField(2, required=True)
-
 class TeamKey_In(messages.Message):
     team_key = messages.StringField(1, required=True)
-
-    http_cookie = messages.StringField(2, required=True)
 
 ### Method specific classes
 # public.all_teams
@@ -117,13 +107,9 @@ class GetContactDonations_In(messages.Message):
     query_cursor = messages.StringField(1)
     contact_key = messages.StringField(2, required=True)
 
-    http_cookie = messages.StringField(3, required=True)
-
 # mailchimp.lists
 class MailchimpLists_In(messages.Message):
     mc_apikey = messages.StringField(1, required=True)
-
-    http_cookie = messages.StringField(2, required=True)
 
 class MailchimpLists_Out(messages.Message):
     success = messages.BooleanField(1, required=True)
@@ -136,20 +122,14 @@ class GetTeamMembers_In(messages.Message):
     query_cursor = messages.StringField(1)
     team_key = messages.StringField(2, required=True)
 
-    http_cookie = messages.StringField(3, required=True)
-
 # semi.get.individual_donations
 class GetIndividualDonations_In(messages.Message):
     query_cursor = messages.StringField(1)
     individual_key = messages.StringField(2, required=True)
 
-    http_cookie = messages.StringField(3, required=True)
-
 # semi.get.team_members
 class SemiGetTeamMembers_In(messages.Message):
     team_key = messages.StringField(1, required=True)
-
-    http_cookie = messages.StringField(2, required=True)
 
 class SemiGetTeamMembers_Data(messages.Message):
     key = messages.StringField(1, required=True)
@@ -172,15 +152,11 @@ class NewContact_In(messages.Message):
     address = messages.MessageField(AddressInfo, 4, required=True)
     notes = messages.StringField(5, required=True)
 
-    http_cookie = messages.StringField(6, required=True)
-
 # new.impression
 class NewImpression_In(messages.Message):
     contact_key = messages.StringField(1, required=True)
     impression = messages.StringField(2, required=True)
     notes = messages.StringField(3, required=True)
-
-    http_cookie = messages.StringField(4, required=True)
 
 # new.indvidual
 class NewIndividual_In(messages.Message):
@@ -190,13 +166,9 @@ class NewIndividual_In(messages.Message):
     password = messages.StringField(4, required=True)
     admin = messages.BooleanField(5, required=True)
 
-    http_cookie = messages.StringField(6, required=True)
-
 # new.team
 class NewTeam_In(messages.Message):
     name = messages.StringField(1, required=True)
-
-    http_cookie = messages.StringField(2, required=True)
 
 # new.offline_donation
 class NewOfflineDonation_In(messages.Message):
@@ -209,8 +181,6 @@ class NewOfflineDonation_In(messages.Message):
     individual_key = messages.StringField(7)
     add_deposit = messages.BooleanField(8, required=True)
 
-    http_cookie = messages.StringField(9, required=True)
-
 # update.donation
 class UpdateDonation_In(messages.Message):
     donation_key = messages.StringField(1, required=True)
@@ -218,8 +188,6 @@ class UpdateDonation_In(messages.Message):
     team_key = messages.StringField(3)
     individual_key = messages.StringField(4)
     add_deposit = messages.BooleanField(5, required=True)
-
-    http_cookie = messages.StringField(6, required=True)
 
 # update.contact
 class UpdateContact_In(messages.Message):
@@ -229,8 +197,6 @@ class UpdateContact_In(messages.Message):
     phone = messages.StringField(4, required=True)
     notes = messages.StringField(5, required=True)
     address = messages.MessageField(AddressInfo, 6, required=True)
-
-    http_cookie = messages.StringField(7, required=True)
 
 # update.settings
 class UpdateSettings_In(messages.Message):
@@ -252,26 +218,20 @@ class UpdateSettings_In(messages.Message):
     confirmation_text = messages.StringField(16, required=True)
     donor_report_text = messages.StringField(17, required=True)
 
-    http_cookie = messages.StringField(18, required=True)
-
 # update.team
 class UpdateTeam_In(messages.Message):
     team_key = messages.StringField(1, required=True)
     name = messages.StringField(2, required=True)
     show_team = messages.BooleanField(3, required=True)
 
-    http_cookie = messages.StringField(4, required=True)
-
 # merge.contacts
 class MergeContacts_In(messages.Message):
     contact1 = messages.StringField(1, required=True)
     contact2 = messages.StringField(2, required=True)
 
-    http_cookie = messages.StringField(3, required=True)
-
 # get.contacts_json
 class NoRequestParams(messages.Message):
-    http_cookie = messages.StringField(1, required=True)
+    pass
 
 class JSON_Out(messages.Message):
     json_data = messages.StringField(1, required=True)
@@ -279,8 +239,6 @@ class JSON_Out(messages.Message):
 # deposit_donations
 class Deposits_In(messages.Message):
     donation_keys = messages.StringField(1, repeated=True)
-
-    http_cookie = messages.StringField(2, required=True)
 
 # confirmation.print
 class ConfirmationPrint_Out(messages.Message):
@@ -292,5 +250,3 @@ class ConfirmationPrint_Out(messages.Message):
 class ConfirmationAnnualReport_In(messages.Message):
     contact_key = messages.StringField(1, required=True)
     year = messages.IntegerField(2, required=True)
-
-    http_cookie = messages.StringField(3, required=True)

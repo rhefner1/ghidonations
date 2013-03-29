@@ -9,7 +9,7 @@ $(document).ready(function(){
             //Flash message
             show_flash("setting", "Creating team...", false)
 
-            var params = add_cookie({'name':name})
+            var params = {'name':name}
             var request = ghiapi.new.team(params)
 
             request.execute(function(response){

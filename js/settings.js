@@ -130,10 +130,10 @@ $(document).ready(function(){
             //Flash message
             show_flash("setting", "Updating settings...", false)
 
-            var params = add_cookie({'name':name, 'email':email, 'mc_use':mc_use, 'mc_apikey':mc_apikey, 'mc_donorlist':mc_donorlist, 'paypal_id':paypal_id, 'impressions':impressions,
+            var params = {'name':name, 'email':email, 'mc_use':mc_use, 'mc_apikey':mc_apikey, 'mc_donorlist':mc_donorlist, 'paypal_id':paypal_id, 'impressions':impressions,
                     'amount1':amount1, 'amount2':amount2, 'amount3':amount3, 'amount4':amount4, 'use_custom':use_custom, 'confirmation_header':confirmation_header, 
                     'confirmation_info':confirmation_info, 'confirmation_footer':confirmation_footer, 'confirmation_text':confirmation_text,
-                    'donor_report_text':donor_report_text})
+                    'donor_report_text':donor_report_text}
 
             var request = ghiapi.update.settings(params)
 

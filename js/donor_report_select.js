@@ -3,7 +3,7 @@ $(document).ready(function(){
     var contact_email = null
 
     // Autocomplete for contacts
-    var params = add_cookie({})
+    var params = {}
     var request = ghiapi.get.contactsjson(params)
 
     request.execute(function(response) {

@@ -21,7 +21,7 @@ function getDonations(){
     pages_retrieved += 1
 
     if (query_cursor != "end"){
-        var params = add_cookie({'individual_key':i_key, 'query_cursor':null})
+        var params = {'individual_key':i_key, 'query_cursor':null}
         var request = ghiapi.semi.get.individualdonations(params)
     
         request.execute(function(response){

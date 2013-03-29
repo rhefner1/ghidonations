@@ -24,7 +24,7 @@ $(document).ready(function(){
             //Flash message
             show_flash("setting", "Creating donor...", false)
             
-            var params = add_cookie({'name':name, 'email':email, 'phone':phone, 'address':address, 'notes':notes})
+            var params = {'name':name, 'email':email, 'phone':phone, 'address':address, 'notes':notes}
             var request = ghiapi.new.contact(params)
 
             request.execute(function(response){

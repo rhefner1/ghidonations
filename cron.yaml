@@ -7,4 +7,3 @@ cron:
 - description: Update Analytics
   url: /tasks/updateanalytics
   schedule: every 1 hours
-  target: backend

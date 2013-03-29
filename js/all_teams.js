@@ -15,7 +15,7 @@ function trigger_search(query){
     
     //Reinitialize the table with new settings
     var rpc_request = ghiapi.get.teams
-    var rpc_params = add_cookie({'query':query})
+    var rpc_params = {'query':query}
 
     data_table = initializeTable(2, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)

@@ -14,7 +14,7 @@ $(document).ready(function(){
     var contact_key = $("#contact_key").val()
 
     var rpc_request = ghiapi.get.contactdonations
-    var rpc_params = add_cookie({'contact_key':contact_key})
+    var rpc_params = {'contact_key':contact_key}
 
     var data_table = initializeTable(4, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
@@ -84,7 +84,7 @@ $(document).ready(function(){
     //Send RPC request to delete contact
     $("input[name=delete_contact]").click(function(){
         var contact_key = $("#contact_key").val()
-        var params = add_cookie({'contact_key':contact_key})
+        var params = {'contact_key':contact_key}
         var request = ghiapi.contact.delete(params)
 
         request.execute(function(response){
@@ -111,8 +111,8 @@ $(document).ready(function(){
 
         address = {'street':street, 'city':city, 'state':state, 'zipcode':zipcode}
 
-        var params = add_cookie({'contact_key':contact_key, 'name':name, 'email':email,
-                    'phone':phone, 'notes':notes, 'address':address})
+        var params = {'contact_key':contact_key, 'name':name, 'email':email,
+                    'phone':phone, 'notes':notes, 'address':address}
 
         var request = ghiapi.update.contact(params)
 
@@ -127,7 +127,7 @@ $(document).ready(function(){
         var impression = $("#impressions_edit select").val()
         var notes = $("#impressions_edit textarea").val()
 
-        var params = add_cookie({'contact_key':contact_key, 'impression':impression, 'notes':notes})
+        var params = {'contact_key':contact_key, 'impression':impression, 'notes':notes}
         var request = ghiapi.new.impression(params)
 
         request.execute(function(response){

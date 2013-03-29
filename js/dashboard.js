@@ -1,5 +1,5 @@
 function drawChart() {
-    var params = add_cookie({})
+    var params = {}
     var request = ghiapi.get.monthlychartdata(params)
     request.execute(function(response){
         data = JSON.parse(response.json_data)

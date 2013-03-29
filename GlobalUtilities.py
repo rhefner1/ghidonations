@@ -75,31 +75,26 @@ def getUsername(self):
     except:
         self.redirect("/login")
 
-def getUserKey(self, http_cookie=None):
-    # If coming from Endpoints, pass provided HTTP cookie to gaesessions to create session
-    if http_cookie:
-        session = Session(http_cookie=http_cookie, cookie_key=appengine_config.COOKIE_KEY)
-        user_key = session.get("key")
-
-    else:
-        self.session = get_current_session()
-        user_key = self.session["key"]
+def getUserKey(self):
+    self.session = get_current_session()
+    user_key = self.session["key"]
 
     if user_key == None or user_key == "":
         raise Exception("User key is none")
 
     return getKey(user_key)
 
-def getSettingsKey(self, http_cookie=None):
+def getSettingsKey(self, endpoints=False):
     try:
-        user_key = getUserKey(self, http_cookie=http_cookie)
+        user_key = getUserKey(self)
         user = user_key.get()
         
         return user.settings
+        
     except Exception as e:
         logging.error(str(e))
 
-        if http_cookie:
+        if endpoints:
             raise Exception("Error in getSettingsKey")
         else:
             self.redirect("/login")
@@ -128,10 +123,6 @@ def RPCcheckAuthentication(self, admin_required):
             return True
     except:
         return False
-
-def checkEndpointsAuth(self, req):
-    s = getSettingsKey(self, http_cookie=req.http_cookie).get()
-    return s
 
 ###### ------ Managing entity access w/memcache ------ ######
 
