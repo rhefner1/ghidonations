@@ -58,7 +58,7 @@ $(document).ready(function(){
 			show_flash("setting", "Marking checks as deposited...", false)
 		
 			var donation_keys = getCheckedRows()
-			var params = {'donation_keys':donation_keys}
+			var params = add_cookie({'donation_keys':donation_keys})
 			var request = ghiapi.deposits.add(params)
 
 			request.execute(function(response){
@@ -78,7 +78,7 @@ $(document).ready(function(){
 			show_flash("setting", "Removing checked deposits...", false)
 		
 			var donation_keys = getCheckedRows()
-			params = {'donation_keys':donation_keys}
+			params = add_cookie({'donation_keys':donation_keys})
 			request.execute(function(response){
 				rpcSuccessMessage(response)
 				refreshPage()

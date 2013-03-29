@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import logging, json, time, re, math, os
+import logging, json, time, re, math, os, appengine_config
 from time import gmtime, strftime
 from datetime import *
 from decimal import *
@@ -60,8 +60,8 @@ def checkAuthentication(self, admin_required):
         #Otherwise, good to go
         return u.admin, s_key.get()
 
-    except Exception, e:
-        logging.info("Error in checkAuthentication - kicking out to login page")
+    except Exception as e:
+        logging.info("Error in checkAuthentication - kicking out to login page. " + str(e))
 
         self.redirect("/login")
         return None, None
@@ -75,34 +75,34 @@ def getUsername(self):
     except:
         self.redirect("/login")
 
-def getUserKey(self, endpoints=False):
-    if endpoints == False:
+def getUserKey(self, http_cookie=None):
+    # If coming from Endpoints, pass provided HTTP cookie to gaesessions to create session
+    if http_cookie:
+        session = Session(http_cookie=http_cookie, cookie_key=appengine_config.COOKIE_KEY)
+        user_key = session.get("key")
+
+    else:
         self.session = get_current_session()
         user_key = self.session["key"]
 
-    elif endpoints == True:
-        cookie = os.getenv('HTTP_COOKIE')
-        logging.info("&&&&&&&&&&&- " + str(cookie))
-
-        session = Session(sid=None)
-
-        logging.info(str(session))
-
-        user_key = session.get("key")
-
     if user_key == None or user_key == "":
-            raise Exception("User key is none")
+        raise Exception("User key is none")
 
     return getKey(user_key)
 
-def getSettingsKey(self, endpoints=False):
-    # try:
-    user_key = getUserKey(self, endpoints)
-    user = user_key.get()
-    
-    return user.settings
-    # except:
-    #     self.redirect("/login")
+def getSettingsKey(self, http_cookie=None):
+    try:
+        user_key = getUserKey(self, http_cookie=http_cookie)
+        user = user_key.get()
+        
+        return user.settings
+    except Exception as e:
+        logging.error(str(e))
+
+        if http_cookie:
+            raise Exception("Error in getSettingsKey")
+        else:
+            self.redirect("/login")
 
 def RPCcheckAuthentication(self, admin_required):
     try:
@@ -128,6 +128,10 @@ def RPCcheckAuthentication(self, admin_required):
             return True
     except:
         return False
+
+def checkEndpointsAuth(self, req):
+    s = getSettingsKey(self, http_cookie=req.http_cookie).get()
+    return s
 
 ###### ------ Managing entity access w/memcache ------ ######
 

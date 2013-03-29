@@ -2,6 +2,7 @@ var home_page = $("#home_page").val()
 var previous_hash_params = {}
 var previous_hash_base = ""
 var ghiapi = null
+var http_cookie = null
 
 // ---- Show flash message ---- //
 function show_flash(type, message, fade){
@@ -460,6 +461,11 @@ function rpcSuccessMessage(response){
 }
 
 // ---- Utilities ---- //
+function add_cookie(params){
+    params["http_cookie"] = document.cookie
+    return params
+}
+
 function diff(obj1,obj2) {
     var newObj = $.extend({},obj1,obj2);
     var result = {};

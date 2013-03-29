@@ -14,7 +14,7 @@ $(document).ready(function(){
     //Initializing data table
     var team_key = $("#team_key").val()
 
-    var rpc_params = {'team_key':team_key}
+    var rpc_params = add_cookie({'team_key':team_key})
     var rpc_request = ghiapi.get.teammembers
 
     var data_table = initializeTable(3, rpc_request, rpc_params, function(data_table, d){
@@ -50,7 +50,7 @@ $(document).ready(function(){
             //Flash message
             show_flash("setting", "Updating team...", false)
 
-	    	var params = {'team_key':team_key, 'name':name, 'show_team':show_team}
+	    	var params = add_cookie({'team_key':team_key, 'name':name, 'show_team':show_team})
             var request = ghiapi.update.team(params)
 
 	    	request.execute(function(response){
@@ -66,7 +66,7 @@ $(document).ready(function(){
     	if (confirm(message)){
     		var team_key = $("#team_key").val()
 
-	    	var params = {'team_key':team_key}
+	    	var params = add_cookie({'team_key':team_key})
             var request = ghiapi.team.delete(params)
 
 	    	request.execute(function(response){

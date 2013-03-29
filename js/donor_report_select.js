@@ -3,7 +3,8 @@ $(document).ready(function(){
     var contact_email = null
 
     // Autocomplete for contacts
-    var request = ghiapi.get.contactsjson({})
+    var params = add_cookie({})
+    var request = ghiapi.get.contactsjson(params)
 
     request.execute(function(response) {
         $("input[name=contact]").autocomplete({
@@ -35,7 +36,7 @@ $(document).ready(function(){
     $("#sendemail").click(function(){
         if (contact_email && contact_email != ""){
             var year = $("input[name=year]").val()
-            var params = {'contact_key':contact, 'year':year}
+            var params = add_cookie({'contact_key':contact, 'year':year})
 
             var request = ghiapi.confirmation.annualreport(params)
             request.execute(function(response){

@@ -34,11 +34,7 @@ function trigger_search(query){
     
     //Reinitialize the table with new settings
     var rpc_request = ghiapi.get.donations
-    var rpc_params = {'query':query}
-
-    // pageThrough(data_table, 0, rpc_request, rpc_params, function(data_table, d){
-    //     dataTableWriter(data_table, d)
-    // })
+    var rpc_params = add_cookie({'query':query})
 
     data_table = initializeTable(5, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)

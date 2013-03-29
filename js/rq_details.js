@@ -29,7 +29,7 @@ function showSave(){
 
 // -- Get team members when editing donation -- //
 function getTeamMembers(team_key){
-    var params = {'team_key':team_key}
+    var params = add_cookie({'team_key':team_key})
     var request = ghiapi.semi.get.teammembers(params)
 
     request.execute(function(response){
@@ -106,7 +106,7 @@ $(document).ready(function(){
             if (r==true){
                 //Delete donation
                 donation_key = $("#donation_key").val()
-                var params = {'donation_key':donation_key}
+                var params = add_cookie({'donation_key':donation_key})
                 var request = ghiapi.donation.delete(params)
 
                 request.execute(function(response){
@@ -122,7 +122,7 @@ $(document).ready(function(){
     
     $("#rq_details").delegate("input[name=email]", "click", function(){
         donation_key = $("#donation_key").val()
-        var params = {'donation_key':donation_key}
+        var params = add_cookie({'donation_key':donation_key})
         var request = ghiapi.confirmation.email(params)
 
         request.execute(function(response){
@@ -140,7 +140,7 @@ $(document).ready(function(){
     $("#rq_details").delegate("input[name=print]", "click", function(){
         donation_key = $("#donation_key").val()
 
-        var params = {'donation_key':donation_key}
+        var params = add_cookie({'donation_key':donation_key})
         var request = ghiapi.confirmation.print(params)
 
         request.execute(function(response){
@@ -154,7 +154,7 @@ $(document).ready(function(){
     $("#rq_details").delegate("input[name=archive]", "click", function(){
         donation_key = $("#rq_details #donation_key").val()
 
-        var params = {'donation_key':donation_key}
+        var params = add_cookie({'donation_key':donation_key})
         var request = ghiapi.donation.archive(params)
 
         request.execute(function(response){
@@ -189,8 +189,8 @@ $(document).ready(function(){
 
         var add_deposit = Boolean($("input[name=add_deposit]").val())
         
-        var params = {'donation_key':donation_key, 'notes':notes, 'team_key':team_key,
-                     'individual_key':individual_key, 'add_deposit':add_deposit}
+        var params = add_cookie({'donation_key':donation_key, 'notes':notes, 'team_key':team_key,
+                     'individual_key':individual_key, 'add_deposit':add_deposit})
 
         var request = ghiapi.update.donation(params)
 

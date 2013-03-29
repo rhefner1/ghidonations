@@ -14,7 +14,7 @@ function trigger_search(query){
     }
 
     var rpc_request = ghiapi.get.contacts
-    var rpc_params = {'query':query}
+    var rpc_params = add_cookie({'query':query})
 
     var data_table = initializeTable(2, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)

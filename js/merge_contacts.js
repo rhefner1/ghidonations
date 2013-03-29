@@ -3,7 +3,8 @@ $(document).ready(function(){
     var contact2 = null
 
     // Autocomplete for contacts
-    var request = ghiapi.get.contactsjson({})
+    var params = add_cookie({})
+    var request = ghiapi.get.contactsjson(params)
     request.execute(function(response){
         var contacts_json = JSON.parse(response.json_data)
 
@@ -31,7 +32,7 @@ $(document).ready(function(){
                 show_flash("undone", "Select two different contacts to merge them.", true)
             }
             else{
-                var params = {'contact1':contact1, 'contact2':contact2}
+                var params = add_cookie({'contact1':contact1, 'contact2':contact2})
                 var request = ghiapi.merge.contacts(params)
                 request.execute(function(response){
                     rpcSuccessMessage(response)

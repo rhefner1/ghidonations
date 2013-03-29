@@ -1,5 +1,6 @@
 function drawChart() {
-    var request = ghiapi.get.monthlychartdata({})
+    var params = add_cookie({})
+    var request = ghiapi.get.monthlychartdata(params)
     request.execute(function(response){
         data = JSON.parse(response.json_data)
         var data = google.visualization.arrayToDataTable(data)
