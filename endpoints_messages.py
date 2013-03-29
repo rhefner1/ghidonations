@@ -234,8 +234,8 @@ class MergeContacts_In(messages.Message):
 class NoRequestParams(messages.Message):
     pass
 
-class GetContactsJson_Out(messages.Message):
-    contacts_json = messages.StringField(1, required=True)
+class JSON_Out(messages.Message):
+    json_data = messages.StringField(1, required=True)
 
 # deposit_donations
 class Deposits_In(messages.Message):

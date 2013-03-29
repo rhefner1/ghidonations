@@ -523,7 +523,7 @@ $(document).ready(function(){
             } else if (jqXHR.status == 500) {
                 show_flash("undone", "Uh oh! The server's not playing nice right now. Try again later.", true)
             } else if (exception === 'parsererror') {
-                show_flash("undone", "Uh oh! The server gave me something I don't understand. Try again later.", true)
+                show_flash("undone", "Uh oh! I don't understand something on this page. Try again later.", true)
             } else if (exception === 'timeout') {
                 show_flash("undone", "Hmm... the server's not responding. Try your request again.", true)
             } else {

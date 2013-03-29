@@ -5,7 +5,7 @@ $(document).ready(function(){
     // Autocomplete for contacts
     var request = ghiapi.get.contactsjson({})
     request.execute(function(response){
-        var contacts_json = JSON.parse(response.contacts_json)
+        var contacts_json = JSON.parse(response.json_data)
 
         $("input[name=merge_1]").autocomplete({
             source: contacts_json,
