@@ -71,11 +71,9 @@ handlers:
 - url: /rpc
   script: rpc.app
   secure: always
-
-# Should be always secure
+  
 - url: /_ah/spi/.*
   script: endpoints.app
-  secure: always
 
 - url: /tasks/.*
   script: tasks.app
