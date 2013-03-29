@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import logging, json, time, re, math, os, appengine_config
+import logging, json, time, re, math, appengine_config
 from time import gmtime, strftime
 from datetime import *
 from decimal import *
@@ -90,7 +90,7 @@ def getSettingsKey(self, endpoints=False):
         user = user_key.get()
         
         return user.settings
-        
+
     except Exception as e:
         logging.error(str(e))
 

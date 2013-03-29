@@ -25,9 +25,7 @@ SIG_LEN = 44  # base 64 encoded HMAC-SHA256
 MAX_COOKIE_LEN = 4096
 EXPIRE_COOKIE_FMT = ' %s=; expires=Wed, 01-Jan-1970 00:00:00 GMT; Path=' + COOKIE_PATH
 
-# Need access to cookies via Javascript, so took out HttpOnly header
-# COOKIE_FMT = ' ' + COOKIE_NAME_PREFIX + '%02d="%s"; %sPath=' + COOKIE_PATH + '; HttpOnly'
-COOKIE_FMT = ' ' + COOKIE_NAME_PREFIX + '%02d="%s"; %sPath=' + COOKIE_PATH + ';'
+COOKIE_FMT = ' ' + COOKIE_NAME_PREFIX + '%02d="%s"; %sPath=' + COOKIE_PATH + '; HttpOnly'
 
 COOKIE_FMT_SECURE = COOKIE_FMT + '; Secure'
 COOKIE_DATE_FMT = '%a, %d-%b-%Y %H:%M:%S GMT'
@@ -66,7 +64,7 @@ class Session(object):
     DIRTY_BUT_DONT_PERSIST_TO_DB = 1
 
     def __init__(self, sid=None, lifetime=DEFAULT_LIFETIME, no_datastore=False,
-                 cookie_only_threshold=DEFAULT_COOKIE_ONLY_THRESH, cookie_key=None, http_cookie=None):
+                 cookie_only_threshold=DEFAULT_COOKIE_ONLY_THRESH, cookie_key=None):
         self._accessed = False
         self.sid = None
         self.cookie_keys = []
@@ -83,9 +81,6 @@ class Session(object):
             self.__set_sid(sid, False)
             self.data = None
 
-        elif http_cookie:
-            self.__read_provided_cookie(http_cookie=http_cookie)
-
         else:
             self.__read_cookie()
 
@@ -100,36 +95,6 @@ class Session(object):
         try:
             # check the cookie to see if a session has been started
             cookie = SimpleCookie(os.environ['HTTP_COOKIE'])
-            self.cookie_keys = filter(is_gaesessions_key, cookie.keys())
-            if not self.cookie_keys:
-                return  # no session yet
-            self.cookie_keys.sort()
-            data = ''.join(cookie[k].value for k in self.cookie_keys)
-            i = SIG_LEN + SID_LEN
-            sig, sid, b64pdump = data[:SIG_LEN], data[SIG_LEN:i], data[i:]
-            pdump = b64decode(b64pdump)
-            actual_sig = Session.__compute_hmac(self.base_key, sid, pdump)
-            if sig == actual_sig:
-                self.__set_sid(sid, False)
-                # check for expiration and terminate the session if it has expired
-                if self.get_expiration() != 0 and time.time() > self.get_expiration():
-                    return self.terminate()
-
-                if pdump:
-                    self.data = self.__decode_data(pdump)
-                else:
-                    self.data = None  # data is in memcache/db: load it on-demand
-            else:
-                logging.warn('cookie with invalid sig received from %s: %s' % (os.environ.get('REMOTE_ADDR'), b64pdump))
-        except (CookieError, KeyError, IndexError, TypeError):
-            # there is no cookie (i.e., no session) or the cookie is invalid
-            self.terminate(False)
-
-    def __read_provided_cookie(self, http_cookie=None):
-        """Reads the HTTP Cookie and loads the sid and data from it (if any)."""
-        try:
-        # check the cookie to see if a session has been started
-            cookie = SimpleCookie(str(http_cookie))
             self.cookie_keys = filter(is_gaesessions_key, cookie.keys())
             if not self.cookie_keys:
                 return  # no session yet
