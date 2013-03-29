@@ -502,7 +502,7 @@ $(document).ready(function(){
        colorbox_open = false
 
        if (loading == false & window.location.hash == "#review"){
-            refreshTable()
+            var t=setTimeout(function(){refreshTable()}, 1500)
         }
 
         $("#" + current_container).css("display", "none")
