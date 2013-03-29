@@ -22,7 +22,7 @@ $(document).ready(function(){
             address = {'street':street, 'city':city, 'state':state, 'zipcode':zipcode}
 
             //Flash message
-            show_flash("setting", "Creating donor...", false)
+            show_flash("setting", "Creating contact...", false)
             
             var params = {'name':name, 'email':email, 'phone':phone, 'address':address, 'notes':notes}
             var request = ghiapi.new.contact(params)
