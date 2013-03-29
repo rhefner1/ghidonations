@@ -475,7 +475,7 @@ function diff(obj1,obj2) {
 function initializeAPI(){
     // Load GHI Donations API
     var ROOT = '/_ah/api';
-    gapi.client.load('ghidonations', 'v1', function() {
+    gapi.client.load('ghidonations', 'v1.1', function() {
         ghiapi = gapi.client.ghidonations
 
         // Trigger the event to load first page
