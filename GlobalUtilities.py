@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import logging, json, time, re, math
+import logging, json, time, re, math, os
 from time import gmtime, strftime
 from datetime import *
 from decimal import *
@@ -15,7 +15,7 @@ from google.appengine.datastore.datastore_query import Cursor
 from mailsnake import MailSnake
 
 #Sessions
-from gaesessions import get_current_session
+from gaesessions import get_current_session, Session
 
 #Application files
 import DataModels as models
@@ -75,27 +75,34 @@ def getUsername(self):
     except:
         self.redirect("/login")
 
-def getUserKey(self):
-    self.session = get_current_session()
-    user_key = self.session["key"]
+def getUserKey(self, endpoints=False):
+    if endpoints == False:
+        self.session = get_current_session()
+        user_key = self.session["key"]
+
+    elif endpoints == True:
+        cookie = os.getenv('HTTP_COOKIE')
+        logging.info("&&&&&&&&&&&- " + str(cookie))
+
+        session = Session(sid=None)
+
+        logging.info(str(session))
+
+        user_key = session.get("key")
 
     if user_key == None or user_key == "":
-        raise
+            raise Exception("User key is none")
 
     return getKey(user_key)
 
 def getSettingsKey(self, endpoints=False):
-    # if endpoints == False:
-    try:
-        user_key = getUserKey(self)
-        user = user_key.get()
-        
-        return user.settings
-    except:
-        self.redirect("/login")
-
-    # else:
-    #     return self.session
+    # try:
+    user_key = getUserKey(self, endpoints)
+    user = user_key.get()
+    
+    return user.settings
+    # except:
+    #     self.redirect("/login")
 
 def RPCcheckAuthentication(self, admin_required):
     try:

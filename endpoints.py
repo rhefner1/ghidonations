@@ -64,7 +64,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Contacts_Out, path='get/contacts',
                     http_method='GET', name='get.contacts')
     def get_contacts(self, req):
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
 
         if req.query == None:
             req.query = ""
@@ -86,7 +86,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(GetContactDonations_In, Donations_Out, path='get/contact_donations',
                     http_method='GET', name='get.contact_donations')
     def get_contact_donations(self, req):
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
         query = "contact_key:" + str(req.contact_key)
 
         results = s.search.donation(query, query_cursor=req.query_cursor)
@@ -109,7 +109,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Deposits_Out, path='get/deposits',
                     http_method='GET', name='get.deposits')
     def get_deposits(self, req):
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
 
         if req.query == None:
             req.query = ""
@@ -158,7 +158,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Individuals_Out, path='get/individuals',
                     http_method='GET', name='get.individuals')
     def get_individuals(self, req):
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
 
         if req.query == None:
             req.query = ""
@@ -181,7 +181,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(NoRequestParams, JSON_Out, path='get/monthly_chart_data',
                     http_method='GET', name='get.monthly_chart_data')
     def monthly_chart_data(self, req):
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
 
         json_data = s.one_month_history
 
@@ -207,7 +207,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Teams_Out, path='get/teams',
                     http_method='GET', name='get.teams')
     def getTeams(self, req):
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
 
         if req.query == None:
             req.query = ""
@@ -230,7 +230,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(GetTeamMembers_In, Individuals_Out, path='get/team_members',
                     http_method='GET', name='get.team_members')
     def get_team_members(self, req):
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
         query = "team_key:" + str(req.team_key)
 
         results = s.search.individual(query, query_cursor=req.query_cursor)
@@ -251,7 +251,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(GetIndividualDonations_In, Donations_Out, path='semi/get/individual_donations',
                     http_method='GET', name='semi.get.individual_donations')
     def semi_get_individual_donations(self, req):
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
         query = "individual_key:" + str(req.individual_key)
 
         results = s.search.donation(query, query_cursor=req.query_cursor)
@@ -305,7 +305,7 @@ class EndpointsAPI(remote.Service):
         message = "<b>" + req.name + "</b> created"
         success = True
 
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
         contact_exists = s.exists.contact(req.email)
 
         address = [req.address.street, req.address.city, req.address.state, req.address.zipcode]
@@ -341,7 +341,7 @@ class EndpointsAPI(remote.Service):
         message = "<b>" + req.name + "</b> created"
         success = True
 
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
         exists = s.exists.individual(req.email)
 
         email, team_key = req.email, req.team_key
@@ -369,7 +369,7 @@ class EndpointsAPI(remote.Service):
         message = "<b>" + req.name + "</b> created"
         success = True
 
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
         s.create.team(req.name)
 
         return SuccessMessage_Out(success=success, message=message)
@@ -386,7 +386,7 @@ class EndpointsAPI(remote.Service):
             add_deposit = req.name, req.email, tools.toDecimal(req.amount_donated), req.notes, \
             req.address, req.team_key, req.individual_key, req.add_deposit
 
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
 
         if address:
             address = [address.street, address.city, address.state, address.zipcode]
@@ -447,7 +447,7 @@ class EndpointsAPI(remote.Service):
         message = "Settings have been updated"
         success = True
 
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
         s.update(req.name, req.email, req.mc_use, req.mc_apikey, req.mc_donorlist, 
             req.paypal_id, req.impressions, req.amount1, req.amount2, req.amount3, 
             req.amount4, req.use_custom, req.confirmation_header, req.confirmation_info, 
@@ -487,7 +487,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(NoRequestParams, JSON_Out, path='get/contacts_json',
                     http_method='GET', name='get.contacts_json')
     def get_contacts_json(self, req):
-        s = tools.getSettingsKey(self).get()
+        s = tools.getSettingsKey(self, endpoints=True).get()
         return JSON_Out(json_data=s.data.contactsJSON)
 
 #### ---- Donation depositing ---- ####
@@ -499,7 +499,7 @@ class EndpointsAPI(remote.Service):
         success = True
 
         if req.donation_keys != []:
-            s = tools.getSettingsKey(self).get()
+            s = tools.getSettingsKey(self, endpoints=True).get()
             s.deposits.deposit(req.donation_keys)
 
         else:
@@ -516,7 +516,7 @@ class EndpointsAPI(remote.Service):
         success = True
 
         if req.donation_keys != []:
-            s = tools.getSettingsKey(self).get()
+            s = tools.getSettingsKey(self, endpoints=True).get()
             s.deposits.remove(req.donation_keys)
 
         return SuccessMessage_Out(success=success, message=message)

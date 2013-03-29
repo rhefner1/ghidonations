@@ -115,10 +115,10 @@ class RPCMethods:
 
     def pub_refreshSandbox(self):
         #Local SDK
-        settings = "agxkZXZ-Z2hpY2FsbHNyFgsSCFNldHRpbmdzGICAgICAgICAUAw"
+        settings = "ahBkZXZ-Z2hpZG9uYXRpb25zchYLEghTZXR0aW5ncxiAgICAgICAgFAM"
 
         #GHI Calls sandbox
-        settings = "agpzfmdoaWNhbGxzcg4LEghTZXR0aW5ncxgBDA"
+        #settings = "agpzfmdoaWNhbGxzcg4LEghTZXR0aW5ncxgBDA"
 
         #Production
         # settings = "ag5zfmdoaWRvbmF0aW9uc3IQCxIIU2V0dGluZ3MY9dIWDA"
@@ -190,6 +190,8 @@ class RPCMethods:
         s.create.donation("Sara Ruiz", "sruiz@example.com", "700.00", "700.00", None, None, None, True, None, None, "offline", False, None)
         s.create.donation("Constance Weekley", "cweekley@example.com", "1000.00", "1000.00", None, None, None, True, None, None, "offline", False, None)
         s.create.donation("Constance Weekley", "cweekley@example.com", "6000.00", "6000.00", None, None, None, True, None, None, "offline", False, None)
+
+        taskqueue.add(url="/tasks/updateanalytics", params={}, queue_name="backend")
 
         tools.flushMemcache(self)
         return "Success"

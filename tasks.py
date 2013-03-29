@@ -177,7 +177,7 @@ class UpdateContactsJSON(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
         ('/tasks/annualreport', AnnualReport),
         ('/tasks/confirmation', Confirmation),
-        ('/tasks/contactsjson', UpdateContactsJSON)
+        ('/tasks/contactsjson', UpdateContactsJSON),
         ('/tasks/delayindexing', DelayIndexing),
         ('/tasks/indexall', IndexAll),
         ('/tasks/mailchimp', MailchimpAdd),
