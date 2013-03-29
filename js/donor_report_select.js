@@ -36,7 +36,7 @@ $(document).ready(function(){
     $("#sendemail").click(function(){
         if (contact_email && contact_email != ""){
             var year = $("input[name=year]").val()
-            var params = add_cookie({'contact_key':contact, 'year':year})
+            var params = {'contact_key':contact, 'year':year}
 
             var request = ghiapi.confirmation.annualreport(params)
             request.execute(function(response){
