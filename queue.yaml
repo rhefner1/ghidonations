@@ -5,11 +5,12 @@ queue:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
 
-- name: addcontact
+- name: mailchimp
   rate: 1/s
   retry_parameters:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
+    task_retry_limit: 5
 
 - name: backend
   rate: 1/s
