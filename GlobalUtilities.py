@@ -534,7 +534,8 @@ class SettingsCreate(UtilitiesBase):
             new_donation.deposited = True
 
         if team_key == "" or team_key == "none":
-            team_key = None
+            team_key = None 
+            
         if individual_key == "" or individual_key == "none":
             individual_key = None
 
@@ -542,6 +543,14 @@ class SettingsCreate(UtilitiesBase):
         new_donation.individual = individual_key
             
         new_donation.put()
+
+        # If designated, re-index team and individual
+        if team_key:
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : team_key.urlsafe()}, countdown=5, queue_name="delayindexing")
+
+        if individual_key:
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : individual_key.urlsafe()}, countdown=5, queue_name="delayindexing")
+
 
         if payment_type != "offline":
 
@@ -552,7 +561,7 @@ class SettingsCreate(UtilitiesBase):
                 email.to = self.e.email
 
                 message = """
-A new {payment_type} donation was received from {name} for ${confirmation_amount} with the following note: <br>
+A new note was received from {name} for ${confirmation_amount} ({payment_type} donation): <br>
 
 <strong>{special_notes}</strong> <br><br>
 
@@ -925,10 +934,9 @@ class SettingsSearch(UtilitiesBase):
         return self.search(index_name=_CONTACT_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
 
     def deposit(self, query, **kwargs):
-        default_date = datetime(2012,1,1)
 
         expr_list = [search.SortExpression(
-            expression="created", default_value=default_date,
+            expression="created", default_value=0,
             direction=search.SortExpression.DESCENDING)]
 
         search_function = self.e.search.deposit
@@ -936,10 +944,9 @@ class SettingsSearch(UtilitiesBase):
         return self.search(index_name=_DEPOSIT_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
 
     def donation(self, query, **kwargs):
-        default_date = datetime(2012,1,1)
 
         expr_list = [search.SortExpression(
-            expression="time", default_value=default_date,
+            expression="time", default_value=0,
             direction=search.SortExpression.DESCENDING)]
 
         search_function = self.e.search.donation
@@ -1251,8 +1258,8 @@ class DonationSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-        except:
-            logging.error("Failed creating index on donation key:" + self.e.websafe)
+        except Exception as e:
+            logging.error("Failed creating index on donation key:" + self.e.websafe + " because: " + str(e))
 
 ## -- Individual Classes -- ##
 class IndividualData(UtilitiesBase):
