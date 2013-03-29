@@ -544,6 +544,10 @@ class Settings(ndb.Expando):
     #Contact JSON
     contacts_json = ndb.TextProperty()
 
+    #Analytics
+    one_week_history = ndb.TextProperty()
+    one_month_history = ndb.TextProperty()
+
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)  
 
