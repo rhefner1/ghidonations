@@ -35,7 +35,7 @@ handlers:
 # Should be always secure
 - url: /
   script: mooha.app
-  secure: optional
+  secure: always
 
 - url: /ajax/*.*
   script: mooha.app
@@ -48,12 +48,12 @@ handlers:
 # Should be always secure
 - url: /ipn
   script: mooha.app
-  secure: optional
+  secure: always
 
 # Should be always secure
 - url: /login
   script: mooha.app
-  secure: optional
+  secure: always
 
 - url: /logout
   script: mooha.app
@@ -70,11 +70,12 @@ handlers:
 # Should be always secure
 - url: /rpc
   script: rpc.app
-  secure: optional
+  secure: always
 
-# Endpoints handler
+# Should be always secure
 - url: /_ah/spi/.*
   script: endpoints.app
+  secure: always
 
 - url: /tasks/.*
   script: tasks.app
