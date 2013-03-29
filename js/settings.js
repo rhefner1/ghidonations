@@ -7,7 +7,7 @@ function get_mclists(){
     $("#mclists_container").html("Loading...")
     var mc_apikey = $("input[name=mc_apikey]").val()
 
-    params = add_cookie({'mc_apikey':mc_apikey})
+    params = {'mc_apikey':mc_apikey}
     var request = ghiapi.mailchimp.lists(params)
 
     request.execute(function(response){
