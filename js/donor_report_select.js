@@ -7,7 +7,7 @@ $(document).ready(function(){
 
     request.execute(function(response) {
         $("input[name=contact]").autocomplete({
-            source: JSON.parse(response.contacts_json),
+            source: JSON.parse(response.json_data),
             select: function(e, ui){
                 $("input[name=contact]").val(ui.item.name)
                 contact = ui.item.key

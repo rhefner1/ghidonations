@@ -11,7 +11,7 @@ $(document).ready(function(){
 
         request.execute(function(response) {
             $("input[name=name]").autocomplete({
-                source: JSON.parse(response.contacts_json),
+                source: JSON.parse(response.json_data),
                 select: function(event, ui){
                     $("input[name=email]").val(ui.item.email)
 

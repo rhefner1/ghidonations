@@ -132,9 +132,6 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Donations_Out, path='get/donations',
                     http_method='GET', name='get.donations')
     def get_donations(self, req):
-
-        logging.info(str(req.session))
-
         s = tools.getSettingsKey(self, endpoints=True).get()
         query = req.query
 
@@ -179,6 +176,16 @@ class EndpointsAPI(remote.Service):
             individuals.append(individual)
 
         return Individuals_Out(objects=individuals, new_cursor=new_cursor)
+
+    # get.monthly_chart_data
+    @endpoints.method(NoRequestParams, JSON_Out, path='get/monthly_chart_data',
+                    http_method='GET', name='get.monthly_chart_data')
+    def monthly_chart_data(self, req):
+        s = tools.getSettingsKey(self).get()
+
+        json_data = s.one_month_history
+
+        return JSON_Out(json_data=json_data)
 
     # mailchimp.lists
     @endpoints.method(MailchimpLists_In, MailchimpLists_Out, path='mailchimp/lists',
@@ -477,11 +484,11 @@ class EndpointsAPI(remote.Service):
 
 #### ---- Search ---- ####
     # get.contacts_json
-    @endpoints.method(NoRequestParams, GetContactsJson_Out, path='get/contacts_json',
+    @endpoints.method(NoRequestParams, JSON_Out, path='get/contacts_json',
                     http_method='GET', name='get.contacts_json')
     def get_contacts_json(self, req):
         s = tools.getSettingsKey(self).get()
-        return GetContactsJson_Out(contacts_json=s.data.contactsJSON)
+        return JSON_Out(json_data=s.data.contactsJSON)
 
 #### ---- Donation depositing ---- ####
     # deposits.add

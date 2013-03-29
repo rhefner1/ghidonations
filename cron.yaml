@@ -3,3 +3,8 @@ cron:
   url: /_ah/datastore_admin/backup.create?name=ghi_backup&kind=Contact&kind=DepositReceipt&kind=Donation&kind=Impression&kind=Individual&kind=Settings&kind=Team&kind=TeamList&filesystem=blobstore&queue=backend
   schedule: every 24 hours
   target: ah-builtin-python-bundle
+
+- description: Update Analytics
+  url: /tasks/updateanalytics
+  schedule: every 1 hours
+  target: ah-builtin-python-bundle

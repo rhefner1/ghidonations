@@ -111,7 +111,7 @@ class Contact(ndb.Expando):
         e = future.get_result().get()
         memcache.delete("contacts" + e.settings.urlsafe())
 
-        e.settings.get().updateContactsJSON()
+        e.settings.get().refresh.contactsJSON()
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
@@ -562,6 +562,10 @@ class Settings(ndb.Expando):
         return tools.SettingsMailchimp(self)
 
     @property
+    def refresh(self):
+        return tools.SettingsRefresh(self)
+
+    @property
     def search(self):
         return tools.SettingsSearch(self)
 
@@ -621,9 +625,7 @@ class Settings(ndb.Expando):
             s.donor_report_text = donor_report_text
 
         s.put()
-
-    def updateContactsJSON(self):
-        taskqueue.add(url="/tasks/contactsjson", params={'s_key' : self.websafe}, queue_name="backend")    
+           
 
     @property
     def websafe(self):

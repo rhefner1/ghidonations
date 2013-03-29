@@ -6,27 +6,7 @@ import DataModels as models
 
 from google.appengine.api import mail, taskqueue
 from google.appengine.ext.webapp import template
-        
-class Confirmation(webapp2.RequestHandler):
-    def post(self):
-        donation_key = self.request.get("donation_key")
-        d = tools.getKey(donation_key).get()
-
-        logging.info("Retrying confirmation email through task queue for donation: " + donation_key)
-        
-        d.confirmation.email()
-
-class MailchimpAdd(webapp2.RequestHandler):
-    def post(self):
-        email = self.request.get("email")
-        name = self.request.get("name")
-
-        settings_key = self.request.get("settings")
-        s = tools.getKey(settings_key).get()
-
-        s.mailchimp.add(email, name, True)
-
-        logging.info("Retrying Mailchimp add through task queue for: " + email  + " under settings ID: " + settings_key)
+from datetime import datetime, timedelta
 
 class AnnualReport(webapp2.RequestHandler):
     def post(self):
@@ -60,6 +40,22 @@ class AnnualReport(webapp2.RequestHandler):
 
         else:
             logging.info("Annual report not sent sent because " + c.name + "doesn't have an email.")
+        
+class Confirmation(webapp2.RequestHandler):
+    def post(self):
+        donation_key = self.request.get("donation_key")
+        d = tools.getKey(donation_key).get()
+
+        logging.info("Retrying confirmation email through task queue for donation: " + donation_key)
+        
+        d.confirmation.email()
+
+class DelayIndexing(webapp2.RequestHandler):
+    def post(self):
+        entity_key = self.request.get("e")
+
+        e = tools.getKey(entity_key).get()
+        e.search.index()
 
 class IndexAll(webapp2.RequestHandler):
     def post(self):
@@ -93,12 +89,71 @@ class IndexAll(webapp2.RequestHandler):
             for t in teams:
                 taskqueue.add(url="/tasks/delayindexing", params={'e' : t.websafe}, queue_name="delayindexing")
 
-class DelayIndexing(webapp2.RequestHandler):
+class MailchimpAdd(webapp2.RequestHandler):
     def post(self):
-        entity_key = self.request.get("e")
+        email = self.request.get("email")
+        name = self.request.get("name")
 
-        e = tools.getKey(entity_key).get()
-        e.search.index()
+        settings_key = self.request.get("settings")
+        s = tools.getKey(settings_key).get()
+
+        s.mailchimp.add(email, name, True)
+
+        logging.info("Retrying Mailchimp add through task queue for: " + email  + " under settings ID: " + settings_key)
+
+class UpdateAnalytics(webapp2.RequestHandler):
+    def post(self):
+
+        #Scheduled cron job to update analytics for all settings accounts every hour
+        all_settings = models.Settings.query()
+        for s in all_settings:
+
+            ## Update one_week_history
+            last_week = datetime.today() - timedelta(days=7)
+
+            #Get donations made in the last week
+            donations = models.Donation.gql("WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC", 
+                        s=s.key, last_week=last_week)
+
+            donation_count = 0
+            total_money = tools.toDecimal(0)
+
+            for d in donations:
+                #Counting total money
+                total_money += d.amount_donated
+                
+                #Counting number of donations
+                donation_count += 1
+
+            one_week_history = [donation_count, str(total_money)]
+            s.one_week_history = json.dumps(one_week_history)
+
+            #####################################################################################################
+
+            ## Update one_month_history
+            last_week = datetime.today() - timedelta(days=30)
+
+            #Get donations made in the last week
+            donations = models.Donation.gql("WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC", 
+                        s=s.key, last_week=last_week)
+
+            one_month_history = [["Date", "Amount Donated"]]
+            donations_dict = {}
+
+            for d in donations:
+                day = str(d.donation_date.month) + "/" + str(d.donation_date.day)
+
+                if day in donations_dict:
+                    donations_dict[day] += d.amount_donated
+                else:
+                    donations_dict[day] = d.amount_donated
+
+            for date in sorted(donations_dict.iterkeys()):
+                one_month_history.append([date, float(donations_dict[date])])
+
+            s.one_month_history = json.dumps(one_month_history)
+
+            s.put()
 
 class UpdateContactsJSON(webapp2.RequestHandler):
     def post(self):
@@ -122,9 +177,10 @@ class UpdateContactsJSON(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
         ('/tasks/annualreport', AnnualReport),
         ('/tasks/confirmation', Confirmation),
+        ('/tasks/contactsjson', UpdateContactsJSON)
         ('/tasks/delayindexing', DelayIndexing),
         ('/tasks/indexall', IndexAll),
         ('/tasks/mailchimp', MailchimpAdd),
-        ('/tasks/contactsjson', UpdateContactsJSON)],
+        ('/tasks/updateanalytics', UpdateAnalytics)],
         debug=True)
 app = appengine_config.recording_add_wsgi_middleware(app)

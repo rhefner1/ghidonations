@@ -85,17 +85,17 @@ def getUserKey(self):
     return getKey(user_key)
 
 def getSettingsKey(self, endpoints=False):
-    if endpoints == False:
-        try:
-            user_key = getUserKey(self)
-            user = user_key.get()
-            
-            return user.settings
-        except:
-            self.redirect("/login")
+    # if endpoints == False:
+    try:
+        user_key = getUserKey(self)
+        user = user_key.get()
+        
+        return user.settings
+    except:
+        self.redirect("/login")
 
-    else:
-        return self.session
+    # else:
+    #     return self.session
 
 def RPCcheckAuthentication(self, admin_required):
     try:
@@ -740,6 +740,15 @@ class SettingsData(UtilitiesBase):
         q = models.Donation.gql("WHERE settings = :s AND deposited = :d ORDER BY donation_date DESC", s=self.e.key, d=False)
         return qCache(q)
 
+    ## -- Analytics -- ##
+    @property
+    def one_week_history(self):
+        return json.loads(self.e.one_week_history)
+
+    @property
+    def one_month_history(self):
+        return json.loads(self.e.one_month_history)
+
     ## -- Contact autocomplete -- ##
     @property
     def contactsJSON(self):
@@ -747,32 +756,6 @@ class SettingsData(UtilitiesBase):
 
         def get_item():
             return self.e.contacts_json
-
-        return cache(memcache_key, get_item)
-
-    ## -- Analytics -- ##
-    @property
-    def one_week_history(self):
-        memcache_key = "owh" + self.e.websafe
-
-        def get_item():
-            last_week = datetime.today() - timedelta(days=7)
-
-            #Get donations made in the last week
-            donations = models.Donation.gql("WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC", 
-                        s=self.e.key, last_week=last_week)
-
-            donation_count = 0
-            total_money = toDecimal(0)
-
-            for d in donations:
-                #Counting total money
-                total_money += d.amount_donated
-                
-                #Counting number of donations
-                donation_count += 1
-
-            return [donation_count, str(total_money)]
 
         return cache(memcache_key, get_item)
 
@@ -883,6 +866,10 @@ class SettingsMailchimp(UtilitiesBase):
 
             else:
                 logging.info("Not a valid email address. Not continuing.")
+
+class SettingsRefresh(UtilitiesBase):
+    def contactsJSON(self):
+        taskqueue.add(url="/tasks/contactsjson", params={'s_key' : self.e.websafe}, queue_name="backend") 
 
 class SettingsSearch(UtilitiesBase):
     def search(self, index_name, expr_list, query, search_function, query_cursor=None, entity_return=False, return_all=False):
