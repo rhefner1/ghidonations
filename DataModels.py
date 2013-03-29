@@ -306,7 +306,7 @@ class Donation(ndb.Expando):
             taskqueue.add(url="/tasks/delayindexing", params={'e' : e.team.urlsafe()}, countdown=2, queue_name="delayindexing")
             taskqueue.add(url="/tasks/delayindexing", params={'e' : e.individual.urlsafe()}, countdown=2, queue_name="delayindexing")
 
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=1, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, queue_name="delayindexing")
 
      ## -- Before Delete -- ##
     @classmethod
@@ -479,7 +479,7 @@ class Individual(ndb.Expando):
             memcache.delete("teammembersdict" + t.team.urlsafe())
             memcache.delete("info" + t.team.urlsafe() + e.websafe)
             
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=3, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
     @classmethod
@@ -669,7 +669,7 @@ class Team(ndb.Expando):
         memcache.delete("teammembers" + e.websafe)
         memcache.delete("teamsdict" + e.settings.urlsafe())
 
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=3, queue_name="delayindexing")      
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")      
 
     ## -- Before Deletion -- ##
     @classmethod
