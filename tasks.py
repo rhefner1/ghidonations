@@ -62,35 +62,32 @@ class DelayIndexing(webapp2.RequestHandler):
 
 class IndexAll(webapp2.RequestHandler):
     def post(self):
-        settings_key = self.request.get("settings_key")
-        key = tools.getKey(settings_key)
-
         mode = self.request.get("mode")
 
         if mode == "contacts":
-            contacts = models.Contact.gql("WHERE settings = :s", s=key)
+            contacts = models.Contact.query(keys_only=True)
             for c in contacts:
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : c.websafe}, queue_name="delayindexing")
+                taskqueue.add(url="/tasks/delayindexing", params={'e' : c.urlsafe()}, queue_name="delayindexing")
 
         elif mode == "deposits":
-            deposits = models.DepositReceipt.gql("WHERE settings = :s", s=key)
+            deposits = models.DepositReceipt.query(keys_only=True)
             for de in deposits:
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : de.websafe}, queue_name="delayindexing")
+                taskqueue.add(url="/tasks/delayindexing", params={'e' : de.urlsafe()}, queue_name="delayindexing")
 
         elif mode == "donations":
-            donations = models.Donation.gql("WHERE settings = :s", s=key)
+            donations = Donation.models.query(keys_only=True)
             for d in donations:
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : d.websafe}, queue_name="delayindexing")
+                taskqueue.add(url="/tasks/delayindexing", params={'e' : d.urlsafe()}, queue_name="delayindexing")
 
         elif mode == "individuals":
-            individuals = models.Individual.gql("WHERE settings = :s", s=key)
+            individuals = models.Individual.query(keys_only=True)
             for i in individuals:
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : i.websafe}, queue_name="delayindexing")
+                taskqueue.add(url="/tasks/delayindexing", params={'e' : i.urlsafe()}, queue_name="delayindexing")
 
         elif mode == "teams":
-            teams = models.Team.gql("WHERE settings = :s", s=key)
+            teams = models.Team.query(keys_only=True)
             for t in teams:
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : t.websafe}, queue_name="delayindexing")
+                taskqueue.add(url="/tasks/delayindexing", params={'e' : t.urlsafe()}, queue_name="delayindexing")
 
 class MailchimpAdd(webapp2.RequestHandler):
     def post(self):
