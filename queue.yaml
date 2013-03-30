@@ -1,12 +1,12 @@
 queue:
 - name: default
-  rate: 1/s
+  rate: 10/s
   retry_parameters:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
 
 - name: mailchimp
-  rate: 1/s
+  rate: 10/s
   retry_parameters:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
@@ -19,13 +19,13 @@ queue:
     max_backoff_seconds: 300
 
 - name: annualreport
-  rate: 1/s
+  rate: 10/s
   retry_parameters:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
 
 - name: delayindexing
-  rate: 1/s
+  rate: 10/s
   retry_parameters:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
