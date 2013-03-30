@@ -12,6 +12,10 @@ handlers:
   static_files: images/favicon.ico
   upload: images/favicon\.ico
 
+- url: /apple-touch-icon-precomposed.png
+  static_files: images/icons/apple-touch-icon-precomposed.png
+  upload: images/icons/apple-touch-icon-precomposed.png
+
 - url: /robots.txt
   static_files: robots.txt
   upload: robots.txt
@@ -71,7 +75,7 @@ handlers:
 - url: /rpc
   script: rpc.app
   secure: always
-  
+
 - url: /_ah/spi/.*
   script: endpoints.app
 
