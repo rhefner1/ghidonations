@@ -6,7 +6,6 @@ function dataTableWriter(data_table, d){
         d.key,
         d.formatted_donation_date,
         d.name,
-        d.email,
         d.amount_donated,
         d.payment_type,
         d.team_name
@@ -37,7 +36,7 @@ $(document).ready(function(){
     var rpc_params = {'individual_key':individual_key, 'query_cursor':null}
     var rpc_request = ghiapi.semi.get.individualdonations
 
-    var data_table = initializeTable(6, rpc_request, rpc_params, function(data_table, d){
+    var data_table = initializeTable(5, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 
