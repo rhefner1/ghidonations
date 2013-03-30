@@ -144,7 +144,7 @@ class UpdateAnalytics(webapp2.RequestHandler):
             donations_dict = {}
 
             for d in donations:
-                day = str(d.donation_date.month) + "/" + str(d.donation_date.day)
+                day = str(d.donation_date.month).zfill(2) + "/" + str(d.donation_date.day).zfill(2)
 
                 if day in donations_dict:
                     donations_dict[day] += d.amount_donated
