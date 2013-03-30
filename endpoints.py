@@ -211,7 +211,7 @@ class EndpointsAPI(remote.Service):
     def mailchimp_lists(self, req):
         s = tools.getSettingsKey(self, endpoints=True).get()
 
-        repsonse = tools.getMailchimpLists(self, req.mc_apikey)
+        response = tools.getMailchimpLists(self, req.mc_apikey)
         mc_lists = None
         error_message = None
 
