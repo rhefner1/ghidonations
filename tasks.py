@@ -105,7 +105,7 @@ class MailchimpAdd(webapp2.RequestHandler):
         logging.info("Retrying Mailchimp add through task queue for: " + email  + " under settings ID: " + settings_key)
 
 class UpdateAnalytics(webapp2.RequestHandler):
-    def post(self):
+    def _run(self):
 
         #Scheduled cron job to update analytics for all settings accounts every hour
         all_settings = models.Settings.query()
@@ -157,6 +157,8 @@ class UpdateAnalytics(webapp2.RequestHandler):
             s.one_month_history = json.dumps(one_month_history)
 
             s.put()
+
+    get = post = _run
 
 class UpdateContactsJSON(webapp2.RequestHandler):
     def post(self):
