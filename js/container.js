@@ -499,9 +499,10 @@ $(document).ready(function(){
     });
 
     $(document).bind('cbox_closed', function(){
-       colorbox_open = false
+        colorbox_open = false
 
-       if (loading == false & window.location.hash == "#review"){
+        var on_review_queue = window.location.hash.indexOf("#review")
+        if (loading == false & on_review_queue != -1){
             var t=setTimeout(function(){refreshTable()}, 1000)
         }
 
