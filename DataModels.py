@@ -319,13 +319,15 @@ class Donation(ndb.Expando):
         e = key.get()
 
         if e.team and e.individual:
-            memcache.delete("dtotal" + e.team.urlsafe() + e.individual.urlsafe())
+            # Defer regeneration of individual's team totals
+            deferred.defer(tools.defer.donation_total, e.team, e.individual, _countdown=2, _queue="backend")
+
             memcache.delete("tdtotal" + e.team.urlsafe())
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
 
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.team.urlsafe()}, queue_name="delayindexing")
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.individual.urlsafe()}, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.team.urlsafe()}, countdown=2, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.individual.urlsafe()}, countdown=2, queue_name="delayindexing")
 
         # Delete search index
         index = search.Index(name=_DONATION_SEARCH_INDEX)
