@@ -433,6 +433,21 @@ def toDecimal(number):
     else:
         return Decimal(0).quantize(Decimal("1.00"))
 
+###### ------ Deferred Utilities ------ ######
+class DeferUtilities():
+    def donation_total(self, team_key, individual_key):
+        tl_query = models.TeamList.gql("WHERE team = :t AND individual = :i", t=team_key, i=individual_key)
+        tl = tl_query.fetch(1)[0]
+
+        donations = tl.data.donations            
+        donation_total = toDecimal(0)
+
+        for d in donations:
+            donation_total += d.amount_donated
+
+        tl.donation_total = donation_total
+        tl.put()
+
 ###### ------ Utilities Classes ------ ######
 class UtilitiesBase():
     def __init__(self, base_entity):
@@ -597,6 +612,7 @@ Thanks!"""
         new_tl.fundraise_amt = toDecimal("2700")
         new_tl.sort_name = name
         new_tl.show_donation_page = True
+        new_tl.donation_total = toDecimal("0")
 
         new_tl.put()
 
@@ -1089,7 +1105,7 @@ class DonationAssign(UtilitiesBase):
         if self.e.individual != individual_key:
         #Just to make sure the association is actually changed - instead of marking the same value as it was before
             try:
-                message = "Donation " + self.e.websafe +  " associated with individual" + str(individual_key.urlsafe()) + "."
+                message = "Donation " + self.e.websafe +  " associated with individual " + str(individual_key.urlsafe()) + "."
                 logging.info(message)
             except:
                 pass
@@ -1103,7 +1119,7 @@ class DonationAssign(UtilitiesBase):
         if self.e.team != team_key:
         #Just to make sure the association is actually changed - instead of marking the same value as it was before
             try:
-                message = "Donation " + self.e.websafe +  " associated with team" + str(team_key.urlsafe()) + "."
+                message = "Donation " + self.e.websafe +  " associated with team " + str(team_key.urlsafe()) + "."
                 logging.info(message)
             except:
                 pass
@@ -1116,7 +1132,7 @@ class DonationAssign(UtilitiesBase):
     def disassociateIndividual(self, writeback):
         if self.e.individual != None:
         #Just to make sure the association is actually changed - instead of marking the same value as it was before
-            message = "Donation " + self.e.websafe +  " removed from individual" + str(self.e.individual.urlsafe()) + "."
+            message = "Donation " + self.e.websafe +  " removed from individual " + str(self.e.individual.urlsafe()) + "."
             logging.info(message)
 
             self.e.individual = None
@@ -1127,7 +1143,7 @@ class DonationAssign(UtilitiesBase):
     def disassociateTeam(self, writeback):
         if self.e.team != None:
         #Just to make sure the association is actually changed - instead of marking the same value as it was before
-            message = "Donation " + self.e.websafe +  " removed from team" + str(self.e.team.urlsafe()) + "."
+            message = "Donation " + self.e.websafe +  " removed from team `" + str(self.e.team.urlsafe()) + "."
             logging.info(message)
 
             self.e.team = None
@@ -1496,6 +1512,25 @@ class TeamSearch(UtilitiesBase):
         except:
             logging.error("Failed creating index on team key:" + self.e.websafe)
 
+class TeamListData(UtilitiesBase):
+    @property
+    def donations(self):
+        i = self.e.individual.get()
+        q = models.Donation.gql("WHERE settings = :s AND team = :t AND individual = :i", s=i.settings, t=self.e.team, i=i.key)
+        return qCache(q)
+
+    @property
+    def individual_email(self):
+        return self.individual.get().email
+
+    @property
+    def individual_key(self):
+        return self.individual.urlsafe()
+
+    @property
+    def team_websafe(self):
+        return self.team.urlsafe()
+
 ## -- Dictionary Difference Class -- ##
 class DictDiffer(object):
     """
@@ -1535,3 +1570,7 @@ class UTC(tzinfo):
         return "UTC"
     def dst(self, dt):
         return timedelta(0)
+
+
+###### ------ Namespacing ----- #####
+defer = DeferUtilities()

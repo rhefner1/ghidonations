@@ -6,9 +6,9 @@ function dataTableWriter(data_table, d){
         d.key,
         d.formatted_donation_date,
         d.name,
-        d.email,
         d.amount_donated,
-        d.payment_type
+        d.payment_type,
+        d.team_name
     ])
 
     data_table.fnAdjustColumnSizing()

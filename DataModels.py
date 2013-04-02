@@ -3,7 +3,7 @@ from decimal import *
 
 #App Engine platform
 from google.appengine.api import mail, memcache, datastore_errors, taskqueue
-from google.appengine.ext import ndb, blobstore
+from google.appengine.ext import ndb, blobstore, deferred
 
 #Search
 from google.appengine.api import search
@@ -302,6 +302,10 @@ class Donation(ndb.Expando):
 
         if e.team and e.individual:
             memcache.delete("dtotal" + e.team.urlsafe() + e.individual.urlsafe())
+            
+            # Defer regeneration of individual's team totals
+            deferred.defer(tools.defer.donation_total, e.team, e.individual, _countdown=2, _queue="backend")
+
             memcache.delete("tdtotal" + e.team.urlsafe())
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
@@ -318,13 +322,15 @@ class Donation(ndb.Expando):
         e = key.get()
 
         if e.team and e.individual:
-            memcache.delete("dtotal" + e.team.urlsafe() + e.individual.urlsafe())
+            # Defer regeneration of individual's team totals
+            deferred.defer(tools.defer.donation_total, e.team, e.individual, _countdown=2, _queue="backend")
+
             memcache.delete("tdtotal" + e.team.urlsafe())
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
 
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.team.urlsafe()}, queue_name="delayindexing")
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.individual.urlsafe()}, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.team.urlsafe()}, countdown=2, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.individual.urlsafe()}, countdown=2, queue_name="delayindexing")
 
         # Delete search index
         index = search.Index(name=_DONATION_SEARCH_INDEX)
@@ -439,7 +445,7 @@ class Individual(ndb.Expando):
             query = TeamList.gql("WHERE team = :t AND individual = :i", t=tools.getKey(key), i=self.key)
             tl = query.fetch(1)[0]
 
-            for d in tl.donations:
+            for d in tl.data.donations:
                 d.team = None
                 d.put()
 
@@ -712,44 +718,16 @@ class TeamList(ndb.Model):
     team = ndb.KeyProperty()
     fundraise_amt = DecimalProperty()
 
+    donation_total = DecimalProperty()
+
     #Show in public donation page
     show_donation_page = ndb.BooleanProperty()
 
     sort_name = ndb.StringProperty()
 
     @property
-    def donations(self):
-        i = self.individual.get()
-        q = Donation.gql("WHERE settings = :s AND team = :t AND individual = :i", s=i.settings, t=self.team, i=i.key)
-        return tools.qCache(q)
-
-    @property
-    def donation_total(self):
-        i = self.individual.get()
-        memcache_key = "dtotal" + self.team.urlsafe() + i.key.urlsafe()
-
-        def get_item():
-            q = self.donations
-            # donations = tools.qCache(q)
-            donations = q
-            
-            donation_total = tools.toDecimal(0)
-
-            for d in donations:
-                donation_total += d.amount_donated
-
-            return str(donation_total)
-
-        item = tools.cache(memcache_key, get_item)
-        return tools.toDecimal(item)
-
-    @property
-    def individual_email(self):
-        return self.individual.get().email
-
-    @property
-    def individual_key(self):
-        return self.individual.urlsafe()
+    def data(self):
+        return tools.TeamListData(self)
 
     @property
     def individual_name(self):
@@ -758,10 +736,6 @@ class TeamList(ndb.Model):
     @property 
     def team_name(self):
         return self.team.get().name
-
-    @property
-    def team_websafe(self):
-        return self.team.urlsafe()
 
     @property
     def websafe(self):

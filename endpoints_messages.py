@@ -30,6 +30,7 @@ class Donation_Data(messages.Message):
     email = messages.StringField(4, required=True)
     payment_type = messages.StringField(5, required=True)
     amount_donated = messages.StringField(6, required=True)
+    team_name = messages.StringField(7)
 
 class Donations_Out(messages.Message):
     objects = messages.MessageField(Donation_Data, 1, repeated=True)

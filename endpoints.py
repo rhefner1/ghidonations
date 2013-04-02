@@ -284,7 +284,7 @@ class EndpointsAPI(remote.Service):
             f = d.fields
 
             donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=f[3].value,
-                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value))
+                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value), team_name=f[6].value)
 
             donations.append(donation)
 

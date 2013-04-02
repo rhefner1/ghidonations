@@ -103,15 +103,24 @@
 
                 <div class="col_12" style="margin-top:50px">
                     <h3>Donations <img id="search_loading" style="display:none" height="16" width="16" src="/images/ajax-loader.gif"></h3>
+
+                    <div style="margin-bottom:10px">
+                        <ul>
+                        {% for tl in i.teamlist_entities %}
+                            <li style="margin-bottom:5px"><strong>{{ tl.team_name }}</strong> - ${{ tl.donation_total }}</li>
+                        {% endfor %}
+                        </ul>
+                    </div>
+
                     <table class="dataTable">
                         <thead class="bold">
                             <tr>
                                 <th class="align-left">Key</th>
                                 <th class="align-left">Time Donated</th>
                                 <th class="align-left">Name</th>
-                                <th class="align-left">Email</th>
                                 <th class="align-left">Donation Amount</th>
                                 <th class="align-left">Payment Type</th>
+                                <th class="align-left">Team</th>
                             </tr>
 
                         </thead>
