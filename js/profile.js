@@ -33,7 +33,7 @@ function refreshCurrentTeams(){
 $(document).ready(function(){
 	var individual_key = $("#individual_key").val()
 
-    var rpc_params = {'individual_key':individual_key, 'query_cursor':null}
+    var rpc_params = {'individual_key':individual_key}
     var rpc_request = ghiapi.semi.get.individualdonations
 
     var data_table = initializeTable(5, rpc_request, rpc_params, function(data_table, d){
