@@ -1,4 +1,4 @@
-import logging, json
+import logging, json, datetime
 from decimal import *
 
 #App Engine platform
@@ -255,7 +255,7 @@ class Donation(ndb.Expando):
         return self.key.urlsafe()
 
     ## -- Update donation -- ##
-    def update(self, notes, team_key, individual_key, add_deposit):
+    def update(self, notes, team_key, individual_key, add_deposit, donation_date):
         #Get self data entity from datastore
 
         if team_key == "general":
@@ -286,6 +286,9 @@ class Donation(ndb.Expando):
 
         if add_deposit != self.deposited:
             self.deposited = add_deposit
+
+        if donation_date:
+            self.donation_date = datetime.datetime(donation_date.year, donation_date.month, donation_date.day)
 
         #And now to put that donation back in the datastore
         self.put()

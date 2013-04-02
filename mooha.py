@@ -459,7 +459,10 @@ class ReviewQueueDetails(BaseHandler):
             i_key = tools.getUserKey(self)
             i = i_key.get()
 
-            template_variables = {"d":d, "s":s, "i":i}
+            donation_date = [d.donation_date.day, d.donation_date.month, d.donation_date.year]
+            donation_date = json.dumps(donation_date)
+
+            template_variables = {"d":d, "s":s, "i":i, "donation_date":donation_date}
             self.response.write(
                     template.render('pages/rq_details.html', template_variables))
 
