@@ -356,7 +356,9 @@ def mergeContacts(c1_key, c2_key):
     c1.key.delete()
 
 def moneyAmount(money_string):
-    return "$" + str(toDecimal(money_string))
+    money = toDecimal(money_string)
+    money = "${:,.2f}".format(money)
+    return money
 
 def queryCursorDB(query, encoded_cursor):
     new_cursor = None
