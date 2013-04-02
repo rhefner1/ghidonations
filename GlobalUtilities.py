@@ -92,8 +92,6 @@ def getSettingsKey(self, endpoints=False):
         return user.settings
 
     except Exception as e:
-        logging.error(str(e))
-
         if endpoints:
             raise Exception("Error in getSettingsKey")
         else:
