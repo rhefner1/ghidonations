@@ -43,9 +43,25 @@
                         <div class="input"><input class="large" type="text" name="emailaddress" value="{{ d.email|default_if_none:"" }}" disabled="disabled" title="Click Edit Contact to change" /></div>
                     </div>
 
+                    <div class="clearfix" id="dateshow">
+                        <label>Donation Date</label>
+                        <div class="input">
+                            <input class="large" type="text" name="date" value="{{ d.formatted_donation_date }}" disabled="disabled" />
+                        </div>
+                    </div>
+
+                    <div class="clearfix hidden yellow-highlight" id="date_selector">
+                        <label>Donation Date</label>
+                        <div class="input">
+                            <input id="datepicker" value="" style="width:150px;" />
+                        </div>
+                    </div>
+
                     <div class="clearfix" id="team">
                         <label>Team</label>
-                        <div class="input"><input class="large" type="text" name="team" value="{{ d.data.team_name }}" disabled="disabled" /></div>
+                        <div class="input">
+                            <input class="large" type="text" name="team" value="{{ d.data.team_name }}" disabled="disabled" />
+                        </div>
                     </div>
                     <div class="clearfix hidden yellow-highlight" id="team_selector">
                         <label>Team</label>
@@ -124,6 +140,7 @@
     <input type="hidden" id="individual_key" value = "{{ d.individual.websafe }}">
     <input type="hidden" id="address" value = "{{ d.address }}">
     <input type="hidden" id="contact_url" value = "{{ d.contact_url }}">
+    <input type="hidden" id="donation_date" value = "{{ donation_date }}">
 
 </div>
 

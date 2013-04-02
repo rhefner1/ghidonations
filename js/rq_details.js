@@ -1,5 +1,6 @@
 //Flag to see if we're in edit mode or not
 var save_mode = false
+var date_changed = false
 
 function showSave(){
     //Location of target location (email button)
@@ -91,7 +92,17 @@ $(document).ready(function(){
 
             $("#rq_details #team").hide()
             $("#rq_details #individual").hide()
+            $("#rq_details #dateshow").hide()
             showSave()
+
+            // Donation backdate picker
+            var donation_date = JSON.parse($("#donation_date").val())
+            $("#datepicker").kendoDatePicker({
+                value: new Date(donation_date[2], donation_date[1] - 1, donation_date[0]),
+                change: function(){
+                    date_changed = true
+                }
+            })
 
             $("#rq_details .hidden").fadeIn()
 
@@ -188,9 +199,18 @@ $(document).ready(function(){
         }
 
         var add_deposit = Boolean($("input[name=add_deposit]").val())
+
+        var donation_date = null
+        if (date_changed == true){
+            var donation_string = kendo.toString($("#datepicker").data("kendoDatePicker").value(), "MM/dd/yyyy")
+            donation_date = {"month":parseInt(donation_string.substr(0,2)), 
+                                "day":parseInt(donation_string.substr(3,2)) + 1, 
+                                "year":parseInt(donation_string.substr(6,4))}
+        }
         
         var params = {'donation_key':donation_key, 'notes':notes, 'team_key':team_key,
-                     'individual_key':individual_key, 'add_deposit':add_deposit}
+                     'individual_key':individual_key, 'add_deposit':add_deposit,
+                     'donation_date':donation_date}
 
         var request = ghiapi.update.donation(params)
 

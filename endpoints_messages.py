@@ -10,6 +10,11 @@ class Contacts_Out(messages.Message):
     objects = messages.MessageField(Contact_Data, 1, repeated=True)
     new_cursor = messages.StringField(2)
 
+class Date_Data(messages.Message):
+    day = messages.IntegerField(1, required=True)
+    month = messages.IntegerField(2, required=True)
+    year = messages.IntegerField(3, required=True)
+
 class Deposit_Data(messages.Message):
     key = messages.StringField(1, required=True)
     time_deposited = messages.StringField(2, required=True)
@@ -188,6 +193,7 @@ class UpdateDonation_In(messages.Message):
     team_key = messages.StringField(3)
     individual_key = messages.StringField(4)
     add_deposit = messages.BooleanField(5, required=True)
+    donation_date = messages.MessageField(Date_Data, 6)
 
 # update.contact
 class UpdateContact_In(messages.Message):

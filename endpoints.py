@@ -443,12 +443,15 @@ class EndpointsAPI(remote.Service):
         team_key, individual_key = req.team_key, req.individual_key
 
         if team_key:
-            team_key = tools.getKey(team_key)
+            if team_key == "general":
+                team_key = None
+            else:
+                team_key = tools.getKey(team_key)
 
         if individual_key:
             individual_key = tools.getKey(individual_key)
 
-        d.update(req.notes, team_key, individual_key, req.add_deposit)
+        d.update(req.notes, team_key, individual_key, req.add_deposit, req.donation_date)
 
         return SuccessMessage_Out(success=success, message=message)
 
