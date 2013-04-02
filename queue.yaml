@@ -13,7 +13,7 @@ queue:
     task_retry_limit: 5
 
 - name: backend
-  rate: 1/s
+  rate: 10/s
   retry_parameters:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
