@@ -1039,8 +1039,8 @@ class ContactSearch(UtilitiesBase):
                     search.TextField(name='name', value=c.name),
                     search.TextField(name='email', value=c.email),
 
-                    search.NumberField(name='total_donated', value=float(c.data.total_donated)),
-                    search.NumberField(name='number_donations', value=c.data.number_donations),
+                    search.NumberField(name='total_donated', value=float(c.data.donation_total)),
+                    search.NumberField(name='number_donations', value=int(c.data.number_donations)),
 
                     search.TextField(name='phone', value=c.phone),
 

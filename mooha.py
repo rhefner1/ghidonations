@@ -495,9 +495,11 @@ class SpreadsheetContacts(BaseHandlerAdmin):
         ws0.write(0, 2, "Total Donated")
         ws0.write(0, 3, "Number Donations")
         ws0.write(0, 4, "Phone")
-        ws0.write(0, 5, "City")
-        ws0.write(0, 6, "State")
-        ws0.write(0, 7, "Created")
+        ws0.write(0, 5, "Street")
+        ws0.write(0, 6, "City")
+        ws0.write(0, 7, "State")
+        ws0.write(0, 8, "Zipcode")
+        ws0.write(0, 9, "Created")
 
         current_line = 1
         for c in contacts:
@@ -508,9 +510,13 @@ class SpreadsheetContacts(BaseHandlerAdmin):
             ws0.write(current_line, 2, str(f[3].value))
             ws0.write(current_line, 3, str(f[4].value))
             ws0.write(current_line, 4, f[5].value)
+
             ws0.write(current_line, 5, f[6].value)
             ws0.write(current_line, 6, f[7].value)
-            ws0.write(current_line, 7, str(f[8].value))
+            ws0.write(current_line, 7, f[8].value)
+            ws0.write(current_line, 8, f[9].value)
+
+            ws0.write(current_line, 9, str(f[10].value))
                 
             current_line += 1
  
