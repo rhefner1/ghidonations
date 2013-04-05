@@ -213,10 +213,6 @@ class Donation(ndb.Expando):
         return "#contact?c=" + self.contact.urlsafe()
 
     @property
-    def data(self):
-        return tools.DonationData(self)
-
-    @property
     def designated_individual(self):
         if self.individual:
             return self.individual.get().name
