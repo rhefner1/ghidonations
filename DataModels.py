@@ -3,7 +3,7 @@ from decimal import *
 
 #App Engine platform
 from google.appengine.api import mail, memcache, datastore_errors, taskqueue
-from google.appengine.ext import ndb, blobstore, deferred
+from google.appengine.ext import ndb, blobstore
 
 #Search
 from google.appengine.api import search
@@ -213,10 +213,6 @@ class Donation(ndb.Expando):
         return "#contact?c=" + self.contact.urlsafe()
 
     @property
-    def data(self):
-        return tools.DonationData(self)
-
-    @property
     def designated_individual(self):
         if self.individual:
             return self.individual.get().name
@@ -302,10 +298,6 @@ class Donation(ndb.Expando):
 
         if e.team and e.individual:
             memcache.delete("dtotal" + e.team.urlsafe() + e.individual.urlsafe())
-            
-            # Defer regeneration of individual's team totals
-            deferred.defer(tools.defer.donation_total, e.team, e.individual, _countdown=2, _queue="backend")
-
             memcache.delete("tdtotal" + e.team.urlsafe())
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
@@ -322,9 +314,6 @@ class Donation(ndb.Expando):
         e = key.get()
 
         if e.team and e.individual:
-            # Defer regeneration of individual's team totals
-            deferred.defer(tools.defer.donation_total, e.team, e.individual, _countdown=2, _queue="backend")
-
             memcache.delete("tdtotal" + e.team.urlsafe())
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
@@ -717,8 +706,6 @@ class TeamList(ndb.Model):
     individual = ndb.KeyProperty()
     team = ndb.KeyProperty()
     fundraise_amt = DecimalProperty()
-
-    donation_total = DecimalProperty()
 
     #Show in public donation page
     show_donation_page = ndb.BooleanProperty()

@@ -433,21 +433,6 @@ def toDecimal(number):
     else:
         return Decimal(0).quantize(Decimal("1.00"))
 
-###### ------ Deferred Utilities ------ ######
-class DeferUtilities():
-    def donation_total(self, team_key, individual_key):
-        tl_query = models.TeamList.gql("WHERE team = :t AND individual = :i", t=team_key, i=individual_key)
-        tl = tl_query.fetch(1)[0]
-
-        donations = tl.data.donations            
-        donation_total = toDecimal(0)
-
-        for d in donations:
-            donation_total += d.amount_donated
-
-        tl.donation_total = donation_total
-        tl.put()
-
 ###### ------ Utilities Classes ------ ######
 class UtilitiesBase():
     def __init__(self, base_entity):
@@ -612,7 +597,6 @@ Thanks!"""
         new_tl.fundraise_amt = toDecimal("2700")
         new_tl.sort_name = name
         new_tl.show_donation_page = True
-        new_tl.donation_total = toDecimal("0")
 
         new_tl.put()
 
@@ -1009,16 +993,24 @@ class ContactData(UtilitiesBase):
         q = models.Impression.gql("WHERE contact = :c ORDER BY creation_date DESC", c=self.e.key)
         return q
 
-    def donations(self, query_cursor):
-        query = self.all_donations
-        return queryCursorDB(query, query_cursor)
-
     def annual_donations(self, year):
         year = int(year)
         year_start = datetime(year, 1, 1)
         year_end = datetime(year, 12, 31)
 
         return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
+
+    def donations(self, query_cursor):
+        query = self.all_donations
+        return queryCursorDB(query, query_cursor)
+
+    @property
+    def donation_total(self):
+        donation_total = toDecimal(0)
+        for d in self.all_donations:
+            donation_total += d.confirmation_amount
+
+        return donation_total
 
     @property
     def recurring_donation_total(self):
@@ -1034,28 +1026,29 @@ class ContactData(UtilitiesBase):
         query = self.all_impressions
         return queryCursorDB(query, query_cursor)
 
+    @property
+    def number_donations(self):
+        return int(gqlCount(self.all_donations))
+
 class ContactSearch(UtilitiesBase):
     def createDocument(self):
         c = self.e
-
-        city = c.address[1]
-        state = c.address[2]
-
-        total_donated = toDecimal(0)
-        number_donations = 0
-        for d in c.data.all_donations:
-            total_donated += d.confirmation_amount
-            number_donations += 1
 
         document = search.Document(doc_id=c.websafe,
             fields=[search.TextField(name='contact_key', value=c.websafe),
                     search.TextField(name='name', value=c.name),
                     search.TextField(name='email', value=c.email),
-                    search.NumberField(name='total_donated', value=float(total_donated)),
-                    search.NumberField(name='number_donations', value=int(number_donations)),
+
+                    search.NumberField(name='total_donated', value=float(c.data.donation_total)),
+                    search.NumberField(name='number_donations', value=int(c.data.number_donations)),
+
                     search.TextField(name='phone', value=c.phone),
-                    search.TextField(name='city', value=city),
-                    search.TextField(name='state', value=state),
+
+                    search.TextField(name='street', value=c.address[0]),
+                    search.TextField(name='city', value=c.address[1]),
+                    search.TextField(name='state', value=c.address[2]),
+                    search.TextField(name='zip', value=c.address[3]),
+
                     search.DateField(name='created', value=c.creation_date),
                     search.TextField(name='settings', value=c.settings.urlsafe()),
                     ])
@@ -1211,20 +1204,6 @@ class DonationConfirmation(UtilitiesBase):
         logging.info("Tasking confirmation email.  Delaying for " + str(countdown_secs) + " seconds.")
         taskqueue.add(url="/tasks/confirmation", params={'donation_key' : self.e.websafe}, countdown=int(countdown_secs))
 
-class DonationData(UtilitiesBase):
-    @property
-    def individual_name(self):
-        if self.e.individual != None:
-            return self.e.individual.get().name
-        else:
-            return None
-
-    @property
-    def team_name(self):
-        if self.e.team != None:
-            return self.e.team.get().name
-        else:
-            return None
 
 class DonationReview(UtilitiesBase):
     ## -- Review Queue -- ##
@@ -1244,22 +1223,32 @@ class DonationSearch(UtilitiesBase):
         if d.reviewed == True:
             reviewed = "yes"
 
+        team_key = ""
+        if d.team:
+            team_key = d.team.urlsafe()
+
         individual_key = ""
         if d.individual:
             individual_key = d.individual.urlsafe()
 
         document = search.Document(doc_id=d.websafe,
             fields=[search.TextField(name='donation_key', value=d.websafe),
+
                     search.DateField(name='time', value=d.donation_date),
                     search.TextField(name='name', value=d.contact.get().name),
                     search.TextField(name='email', value=d.contact.get().email),
                     search.NumberField(name='amount', value=float(d.amount_donated)),
                     search.TextField(name='type', value=d.payment_type),
+
                     search.TextField(name='team', value=d.designated_team),
                     search.TextField(name='individual', value=d.designated_individual),
+
                     search.TextField(name='reviewed', value=reviewed),
+
                     search.TextField(name='formatted_donation_date', value=d.formatted_donation_date),
+                    
                     search.TextField(name='contact_key', value=d.contact.urlsafe()),
+                    search.TextField(name='team_key', value=team_key),
                     search.TextField(name='individual_key', value=individual_key),
                     search.TextField(name='settings', value=d.settings.urlsafe()),
                     ])
@@ -1347,6 +1336,15 @@ class IndividualData(UtilitiesBase):
         return photo
 
     @property
+    def readable_team_names(self):
+        team_names = ""
+        tl_list = i.teamlist_entities
+        for tl in tl_list:
+            team_names += tl.team_name + ", "
+
+        return team_names
+
+    @property
     def search_team_list(self):
         search_list = ""
 
@@ -1378,20 +1376,15 @@ class IndividualSearch(UtilitiesBase):
     def createDocument(self):
         i = self.e
 
-        team_names = ""
-        raised = toDecimal(0)
-
-        tl_list = i.teamlist_entities
-        for tl in tl_list:
-            team_names += tl.team_name + ", "
-            raised += tl.donation_total
-
         document = search.Document(doc_id=i.websafe,
             fields=[search.TextField(name='individual_key', value=i.websafe),
+
                     search.TextField(name='name', value=i.name),
                     search.TextField(name='email', value=i.email),
-                    search.TextField(name='team', value=team_names),
+
+                    search.TextField(name='team', value=i.data.readable_team_names),
                     search.NumberField(name='raised', value=float(raised)),
+                    
                     search.DateField(name='created', value=i.creation_date),
                     search.TextField(name='team_key', value=i.data.search_team_list),
                     search.TextField(name='settings', value=i.settings.urlsafe()),
@@ -1520,6 +1513,25 @@ class TeamListData(UtilitiesBase):
         return qCache(q)
 
     @property
+    def donation_total(self):
+        i = self.individual.get()
+        memcache_key = "dtotal" + self.team.urlsafe() + i.key.urlsafe()
+
+        def get_item():
+            q = self.donations
+            # donations = tools.qCache(q)
+            donations = q
+
+            donation_total = tools.toDecimal(0)
+
+            for d in donations:
+                donation_total += d.amount_donated
+                return str(donation_total)
+
+        item = tools.cache(memcache_key, get_item)
+        return tools.toDecimal(item)
+
+    @property
     def individual_email(self):
         return self.individual.get().email
 
@@ -1570,7 +1582,3 @@ class UTC(tzinfo):
         return "UTC"
     def dst(self, dt):
         return timedelta(0)
-
-
-###### ------ Namespacing ----- #####
-defer = DeferUtilities()
