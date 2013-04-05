@@ -433,21 +433,6 @@ def toDecimal(number):
     else:
         return Decimal(0).quantize(Decimal("1.00"))
 
-###### ------ Deferred Utilities ------ ######
-class DeferUtilities():
-    def donation_total(self, team_key, individual_key):
-        tl_query = models.TeamList.gql("WHERE team = :t AND individual = :i", t=team_key, i=individual_key)
-        tl = tl_query.fetch(1)[0]
-
-        donations = tl.data.donations            
-        donation_total = toDecimal(0)
-
-        for d in donations:
-            donation_total += d.amount_donated
-
-        tl.donation_total = donation_total
-        tl.put()
-
 ###### ------ Utilities Classes ------ ######
 class UtilitiesBase():
     def __init__(self, base_entity):
@@ -612,7 +597,6 @@ Thanks!"""
         new_tl.fundraise_amt = toDecimal("2700")
         new_tl.sort_name = name
         new_tl.show_donation_page = True
-        new_tl.donation_total = toDecimal("0")
 
         new_tl.put()
 
@@ -1520,6 +1504,25 @@ class TeamListData(UtilitiesBase):
         return qCache(q)
 
     @property
+    def donation_total(self):
+        i = self.individual.get()
+        memcache_key = "dtotal" + self.team.urlsafe() + i.key.urlsafe()
+
+        def get_item():
+            q = self.donations
+            # donations = tools.qCache(q)
+            donations = q
+
+            donation_total = tools.toDecimal(0)
+
+            for d in donations:
+                donation_total += d.amount_donated
+                return str(donation_total)
+
+        item = tools.cache(memcache_key, get_item)
+        return tools.toDecimal(item)
+
+    @property
     def individual_email(self):
         return self.individual.get().email
 
@@ -1570,7 +1573,3 @@ class UTC(tzinfo):
         return "UTC"
     def dst(self, dt):
         return timedelta(0)
-
-
-###### ------ Namespacing ----- #####
-defer = DeferUtilities()
