@@ -107,7 +107,7 @@
                     <div style="margin-bottom:10px">
                         <ul>
                         {% for tl in i.teamlist_entities %}
-                            <li style="margin-bottom:5px"><strong>{{ tl.team_name }}</strong> - ${{ tl.donation_total }}</li>
+                            <li style="margin-bottom:5px"><strong>{{ tl.team_name }}</strong> - ${{ tl.data.donation_total }}</li>
                         {% endfor %}
                         </ul>
                     </div>
