@@ -74,7 +74,6 @@ class AllIndividuals(BaseHandlerAdmin):
 
 class AllTeams(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
 
         search_query = self.request.get("search")
 
@@ -135,7 +134,6 @@ class Container(BaseHandler):
         
 class Dashboard(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
 
         vals = s.data.one_week_history
 
@@ -148,7 +146,6 @@ class Dashboard(BaseHandlerAdmin):
 
 class Deposit(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
 
         #WARNING - this is a really complicated and kind of a hacked-together
         #solution. I didn't understand it the day after I wrote it.
@@ -228,7 +225,6 @@ class DonatePage(webapp2.RequestHandler):
 class DonorReport(BaseHandlerAdmin):
     def task(self, isAdmin, s):
         try:
-            isAdmin, s = tools.checkAuthentication(self, True)
 
             contact_key = self.request.get("c")
             year = int(self.request.get("y"))
@@ -262,7 +258,6 @@ class DonorReport(BaseHandlerAdmin):
 
 class DonorReportSelect(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
 
         template_variables = {"s" : s}
         self.response.write(
@@ -270,7 +265,6 @@ class DonorReportSelect(BaseHandlerAdmin):
 
 class ExportDonations(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
 
         template_variables = {}
         self.response.write(
@@ -394,7 +388,6 @@ class NewContact(BaseHandlerAdmin):
 
 class NewIndividual(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
 
         template_variables = {"teams":s.data.all_teams}
         self.response.write(
@@ -402,8 +395,6 @@ class NewIndividual(BaseHandlerAdmin):
 
 class NewTeam(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
-
         template_variables = {}
         self.response.write(
                 template.render('pages/new_team.html', template_variables))
@@ -425,7 +416,6 @@ class NotAuthorized(webapp2.RequestHandler):
 
 class OfflineDonation(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        
         i = tools.getUserKey(self).get()
 
         template_variables = {"teams":None, "individual_name" : i.name, 
@@ -436,7 +426,6 @@ class OfflineDonation(BaseHandlerAdmin):
 
 class ReviewQueue(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
 
         search_query = self.request.get("search")
 
@@ -446,8 +435,6 @@ class ReviewQueue(BaseHandlerAdmin):
 
 class ReviewQueueDetails(BaseHandler):
     def task(self, isAdmin, s):
-        
-        
         donation_key = self.request.get("id")
         if donation_key == "":
         #If they didn't type any arguments into the address bar - meaning it didn't come from the app
@@ -468,163 +455,23 @@ class ReviewQueueDetails(BaseHandler):
 
 class Settings(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
 
         template_variables = {"s" : s}
         self.response.write(
            template.render('pages/settings.html', template_variables))
 
-class SpreadsheetContacts(BaseHandlerAdmin):
-    def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
+class SpreadsheetDownload(blobstore_handlers.BlobstoreDownloadHandler):
+    def get(self):
+        blob_key = self.request.get("blob_key")
 
-        #Initialize a xlwt Excel file
-        wb = Workbook()
-        ws0 = wb.add_sheet('Sheet 1')
-
-        query = self.request.get("query")
-        query = urllib.unquote(query)
-
-        logging.info("Exporting contacts spreadsheet with query: " + query)
-    
-        contacts = s.search.contact(query, entity_return=False, return_all=True)
-            
-        #Write headers
-        ws0.write(0, 0, "Name")
-        ws0.write(0, 1, "Email")
-        ws0.write(0, 2, "Total Donated")
-        ws0.write(0, 3, "Number Donations")
-        ws0.write(0, 4, "Phone")
-        ws0.write(0, 5, "Street")
-        ws0.write(0, 6, "City")
-        ws0.write(0, 7, "State")
-        ws0.write(0, 8, "Zipcode")
-        ws0.write(0, 9, "Created")
-
-        current_line = 1
-        for c in contacts:
-            f = c.fields
-
-            ws0.write(current_line, 0, f[1].value)
-            ws0.write(current_line, 1, f[2].value)
-            ws0.write(current_line, 2, str(f[3].value))
-            ws0.write(current_line, 3, str(f[4].value))
-            ws0.write(current_line, 4, f[5].value)
-
-            ws0.write(current_line, 5, f[6].value)
-            ws0.write(current_line, 6, f[7].value)
-            ws0.write(current_line, 7, f[8].value)
-            ws0.write(current_line, 8, f[9].value)
-
-            ws0.write(current_line, 9, str(f[10].value))
-                
-            current_line += 1
- 
-        # HTTP headers to force file download
-        filename = str(s.name) + " Contacts"
-        self.response.headers['Content-Type'] = 'application/ms-excel'
-        self.response.headers['Content-Transfer-Encoding'] = 'Binary'
-        self.response.headers['Content-disposition'] = 'attachment; filename="' + filename + ".xls" +  '"'
- 
-        # output to user
-        wb.save(self.response.out)
-
-class SpreadsheetDonations(BaseHandlerAdmin):
-    def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
-
-        #Initialize a xlwt Excel file
-        wb = Workbook()
-        ws0 = wb.add_sheet('Sheet 1')
-
-        query = self.request.get("query")
-        query = urllib.unquote(query)
-
-        logging.info("Exporting donations spreadsheet with query: " + query)
-        
-        donations = s.search.donation(query, entity_return=False, return_all=True)
-            
-        #Write headers
-        ws0.write(0, 0, "Date")
-        ws0.write(0, 1, "Name")
-        ws0.write(0, 2, "Email")
-        ws0.write(0, 3, "Amount Donated")
-        ws0.write(0, 4, "Payment Type")
-        ws0.write(0, 5, "Team")
-        ws0.write(0, 6, "Individual")
-        ws0.write(0, 7, "Reviewed")
-
-        current_line = 1
-        for d in donations:
-            f = d.fields
-
-            ws0.write(current_line, 0, str(f[1].value))
-            ws0.write(current_line, 1, f[2].value)
-            ws0.write(current_line, 2, f[3].value)
-            ws0.write(current_line, 3, str(f[4].value))
-            ws0.write(current_line, 4, f[5].value)
-            ws0.write(current_line, 5, f[6].value)
-            ws0.write(current_line, 6, f[7].value)
-            ws0.write(current_line, 7, f[8].value)
-                
-            current_line += 1
- 
-        # HTTP headers to force file download
-        filename = str(s.name) + " Donations"
-        self.response.headers['Content-Type'] = 'application/ms-excel'
-        self.response.headers['Content-Transfer-Encoding'] = 'Binary'
-        self.response.headers['Content-disposition'] = 'attachment; filename="' + filename + ".xls" +  '"'
- 
-        # output to user
-        wb.save(self.response.out)
-
-class SpreadsheetIndividuals(BaseHandlerAdmin):
-    def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
-
-        #Initialize a xlwt Excel file
-        wb = Workbook()
-        ws0 = wb.add_sheet('Sheet 1')
-
-        query = self.request.get("query")
-        query = urllib.unquote(query)
-
-        logging.info("Exporting individuals spreadsheet with query: " + query)
-        
-        individuals = s.search.individual(query, entity_return=False, return_all=True)
-            
-        #Write headers
-        ws0.write(0, 0, "Name")
-        ws0.write(0, 1, "Email")
-        ws0.write(0, 2, "Teams")
-        ws0.write(0, 3, "Raised")
-        ws0.write(0, 4, "Date Created")
-
-        current_line = 1
-        for i in individuals:
-            f = i.fields
-
-            ws0.write(current_line, 0, f[1].value)
-            ws0.write(current_line, 1, f[2].value)
-            ws0.write(current_line, 2, f[3].value)
-            ws0.write(current_line, 3, str(f[4].value))
-            ws0.write(current_line, 4, str(f[5].value))
-                
-            current_line += 1
- 
-        # HTTP headers to force file download
-        filename = str(s.name) + " Individuals"
-        self.response.headers['Content-Type'] = 'application/ms-excel'
-        self.response.headers['Content-Transfer-Encoding'] = 'Binary'
-        self.response.headers['Content-disposition'] = 'attachment; filename="' + filename + ".xls" +  '"'
- 
-        # output to user
-        wb.save(self.response.out)
+        if not blobstore.get(blob_key):
+            self.error(404)
+        else:
+            self.send_blob(blob_key)
 
 class TeamMembers(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
-        
+
         team_key = self.request.get("t")
         t = tools.getKey(team_key).get()
 
@@ -683,7 +530,6 @@ class ThankYou(webapp2.RequestHandler):
 
 class UndepositedDonations(BaseHandlerAdmin):
     def task(self, isAdmin, s):
-        isAdmin, s = tools.checkAuthentication(self, True)
 
         template_variables = {"donations" : s.data.undeposited_donations}
         self.response.write(
@@ -944,9 +790,7 @@ app = webapp2.WSGIApplication([
        ('/ajax/review', ReviewQueue),
        ('/ajax/reviewdetails', ReviewQueueDetails),
        ('/ajax/settings', Settings),
-       ('/ajax/spreadsheetcontacts', SpreadsheetContacts),
-       ('/ajax/spreadsheetdonations', SpreadsheetDonations),
-       ('/ajax/spreadsheetindividuals', SpreadsheetIndividuals),
+       ('/ajax/spreadsheet/download', SpreadsheetDownload),
        ('/ajax/teammembers', TeamMembers),
        ('/thanks', ThankYou),
        ('/ajax/undeposited', UndepositedDonations),

@@ -5,23 +5,27 @@ from time import gmtime, strftime
 from datetime import *
 from decimal import *
 
-#App Engine platform
-from google.appengine.api import taskqueue, mail, memcache, images
+# App Engine platform
+from google.appengine.api import taskqueue, mail, memcache, images, files
 from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb
 from google.appengine.datastore.datastore_query import Cursor
 
-#Mailchimp API
+# Mailchimp API
 from mailsnake import MailSnake
 
-#Sessions
+# Sessions
 from gaesessions import get_current_session, Session
 
-#Application files
+# Application files
 import DataModels as models
 
-#Search
+# Search
 from google.appengine.api import search
+
+# Taskqueue API
+from apiclient.discovery import build
+from oauth2client.appengine import OAuth2Decorator
 
 _CONTACT_SEARCH_INDEX = "contact"
 _DEPOSIT_SEARCH_INDEX = "deposit"
@@ -43,27 +47,29 @@ def checkCredentials(self, email, password):
     except:
         return False, None
 
-def checkAuthentication(self, admin_required):
+def checkAuthentication(self, admin_required, endpoints=False):
     try:
         #If the cookie doesn't exist, send them back to login
-        s_key = getSettingsKey(self)
         u_key = getUserKey(self)
-
         u = u_key.get()
 
-        #If the user tries to enter an admin page with standard credentials,
-        #kick them out.
+        # If the user tries to enter an admin page with standard credentials,
+        # kick them out.
         if admin_required == True and u.admin == False:
             logging.info("Not authorized - kicking out")
             self.redirect("/ajax/notauthorized")
 
-        #Otherwise, good to go
-        return u.admin, s_key.get()
+        # Otherwise, good to go
+        return u.admin, u.settings.get()
 
     except Exception as e:
         logging.info("Error in checkAuthentication - kicking out to login page. " + str(e))
 
-        self.redirect("/login")
+        if endpoints:
+            raise Exception("Error in checkAuthentication")
+        else:
+            self.redirect("/login")
+            
         return None, None
 
 def getUsername(self):
@@ -247,6 +253,24 @@ def newSettings(self, name, email):
     new_settings.put()
 
     return new_settings.key
+
+###### ------ Spreadsheet Export Controller Utilities ------ ######
+def newFile(mime_type, file_name):
+    file_key = files.blobstore.create(mime_type=mime_type, _blobinfo_uploaded_filename=file_name)
+    files.finalize(file_key)
+
+    blob_key = files.blobstore.get_blob_key(file_name)
+
+    return file_key, blob_key
+
+def checkTaskCompletion(s, task_key):
+    completed = False
+
+    service = build("tasks", "v1", developerKey=appengine_config.GOOGLE_API_KEY)
+    # result = service.tasks().get(project="ghidonations", taskqueue="spreadsheet", task=task_key).execute()
+    result = service.tasks().list(tasklist='@default').execute()
+
+    return result
 
 ###### ------ Utilities ------ ######
 def currentTime():

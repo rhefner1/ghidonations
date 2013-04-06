@@ -82,7 +82,7 @@ handlers:
 - url: /tasks/.*
   script: tasks.app
   secure: optional
-  login: admin
+  # login: admin
 
 - url: /thanks
   script: mooha.app

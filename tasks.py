@@ -4,9 +4,12 @@ import logging, webapp2, appengine_config, json
 import GlobalUtilities as tools
 import DataModels as models
 
-from google.appengine.api import mail, taskqueue
+from google.appengine.api import mail, taskqueue, files
 from google.appengine.ext.webapp import template
 from datetime import datetime, timedelta
+
+#Excel export
+from xlwt import *
 
 class AnnualReport(webapp2.RequestHandler):
     def post(self):
@@ -101,6 +104,144 @@ class MailchimpAdd(webapp2.RequestHandler):
 
         logging.info("Retrying Mailchimp add through task queue for: " + email  + " under settings ID: " + settings_key)
 
+class SpreadsheetContacts(webapp2.RequestHandler):
+    def post(self):
+        settings_key = self.request.get("settings_key")
+        s = tools.getKey(settings_key).get()
+
+        query = self.request.get("query")
+        file_key = self.request.get("file_key")
+
+        #Initialize a xlwt Excel file
+        wb = Workbook()
+        ws0 = wb.add_sheet('Sheet 1')
+
+        logging.info("Exporting contacts spreadsheet with query: " + query)
+    
+        contacts = s.search.contact(query, entity_return=False, return_all=True)
+            
+        #Write headers
+        ws0.write(0, 0, "Name")
+        ws0.write(0, 1, "Email")
+        ws0.write(0, 2, "Total Donated")
+        ws0.write(0, 3, "Number Donations")
+        ws0.write(0, 4, "Phone")
+        ws0.write(0, 5, "Street")
+        ws0.write(0, 6, "City")
+        ws0.write(0, 7, "State")
+        ws0.write(0, 8, "Zipcode")
+        ws0.write(0, 9, "Created")
+
+        current_line = 1
+        for c in contacts:
+            f = c.fields
+
+            ws0.write(current_line, 0, f[1].value)
+            ws0.write(current_line, 1, f[2].value)
+            ws0.write(current_line, 2, str(f[3].value))
+            ws0.write(current_line, 3, str(f[4].value))
+            ws0.write(current_line, 4, f[5].value)
+
+            ws0.write(current_line, 5, f[6].value)
+            ws0.write(current_line, 6, f[7].value)
+            ws0.write(current_line, 7, f[8].value)
+            ws0.write(current_line, 8, f[9].value)
+
+            ws0.write(current_line, 9, str(f[10].value))
+                
+            current_line += 1
+
+        with files.open(file_key, 'a') as f:
+            wb.save(f)
+
+        files.finalize(file_key)
+
+class SpreadsheetDonations(webapp2.RequestHandler):
+    def post(self):
+        settings_key = self.request.get("settings_key")
+        s = tools.getKey(settings_key).get()
+
+        query = self.request.get("query")
+        file_key = self.request.get("file_key")
+
+        #Initialize a xlwt Excel file
+        wb = Workbook()
+        ws0 = wb.add_sheet('Sheet 1')
+
+        logging.info("Exporting donations spreadsheet with query: " + query)
+    
+        donations = s.search.donation(query, entity_return=False, return_all=True)
+            
+        #Write headers
+        ws0.write(0, 0, "Date")
+        ws0.write(0, 1, "Name")
+        ws0.write(0, 2, "Email")
+        ws0.write(0, 3, "Amount Donated")
+        ws0.write(0, 4, "Payment Type")
+        ws0.write(0, 5, "Team")
+        ws0.write(0, 6, "Individual")
+        ws0.write(0, 7, "Reviewed")
+
+        current_line = 1
+        for d in donations:
+            f = d.fields
+
+            ws0.write(current_line, 0, str(f[1].value))
+            ws0.write(current_line, 1, f[2].value)
+            ws0.write(current_line, 2, f[3].value)
+            ws0.write(current_line, 3, str(f[4].value))
+            ws0.write(current_line, 4, f[5].value)
+            ws0.write(current_line, 5, f[6].value)
+            ws0.write(current_line, 6, f[7].value)
+            ws0.write(current_line, 7, f[8].value)
+                
+            current_line += 1
+
+        with files.open(file_key, 'a') as f:
+            wb.save(f)
+
+        files.finalize(file_key)
+
+class SpreadsheetIndividuals(webapp2.RequestHandler):
+    def post(self):
+        settings_key = self.request.get("settings_key")
+        s = tools.getKey(settings_key).get()
+
+        query = self.request.get("query")
+        file_key = self.request.get("file_key")
+
+        #Initialize a xlwt Excel file
+        wb = Workbook()
+        ws0 = wb.add_sheet('Sheet 1')
+
+        logging.info("Exporting individuals spreadsheet with query: " + query)
+    
+        individuals = s.search.individual(query, entity_return=False, return_all=True)
+            
+        #Write headers
+        ws0.write(0, 0, "Name")
+        ws0.write(0, 1, "Email")
+        ws0.write(0, 2, "Teams")
+        ws0.write(0, 3, "Raised")
+        ws0.write(0, 4, "Date Created")
+
+        current_line = 1
+        for i in individuals:
+            f = i.fields
+
+            ws0.write(current_line, 0, f[1].value)
+            ws0.write(current_line, 1, f[2].value)
+            ws0.write(current_line, 2, f[3].value)
+            ws0.write(current_line, 3, str(f[4].value))
+            ws0.write(current_line, 4, str(f[5].value))
+                
+            current_line += 1
+
+        with files.open(file_key, 'a') as f:
+            wb.save(f)
+
+        files.finalize(file_key)
+
 class UpdateAnalytics(webapp2.RequestHandler):
     def _run(self):
 
@@ -179,10 +320,15 @@ class UpdateContactsJSON(webapp2.RequestHandler):
 app = webapp2.WSGIApplication([
         ('/tasks/annualreport', AnnualReport),
         ('/tasks/confirmation', Confirmation),
-        ('/tasks/contactsjson', UpdateContactsJSON),
         ('/tasks/delayindexing', DelayIndexing),
         ('/tasks/indexall', IndexAll),
         ('/tasks/mailchimp', MailchimpAdd),
-        ('/tasks/updateanalytics', UpdateAnalytics)],
+
+        ('/tasks/spreadsheet/contacts', SpreadsheetContacts),
+        ('/tasks/spreadsheet/donations', SpreadsheetDonations),
+        ('/tasks/spreadsheet/individuals', SpreadsheetIndividuals),
+
+        ('/tasks/updateanalytics', UpdateAnalytics),
+        ('/tasks/contactsjson', UpdateContactsJSON)],
         debug=True)
 app = appengine_config.recording_add_wsgi_middleware(app)
