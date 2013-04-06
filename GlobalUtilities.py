@@ -1310,7 +1310,7 @@ class IndividualData(UtilitiesBase):
                 image_url = "https://ghidonations.appspot.com/images/face150.jpg"
 
             tl = self.getTeamList(team)
-            percentage = int(float(tl.donation_total / tl.fundraise_amt) * 100)
+            percentage = int(float(tl.data.donation_total / tl.fundraise_amt) * 100)
 
             if percentage > 100:
                 percentage = 100
