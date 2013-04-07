@@ -76,7 +76,6 @@ class EndpointsAPI(remote.Service):
 
         return TeamInfo_Out(info_list=info_list)
 
-
 #### ---- Data Access ---- ####
     # get.contacts
     @endpoints.method(Query_In, Contacts_Out, path='get/contacts',
@@ -267,6 +266,21 @@ class EndpointsAPI(remote.Service):
 
         return Individuals_Out(objects=individuals, new_cursor=new_cursor)
 
+    # get.team_totals
+    @endpoints.method(IndividualKey_In, GetTeamTotals_Out, path='get/team_totals',
+                    http_method='GET', name='get.team_totals')
+    def get_team_totals(self, req):
+        s = tools.getSettingsKey(self, endpoints=True).get()
+        
+        i = tools.getKey(req.individual_key).get()
+
+        team_totals = []
+        for tl in i.teamlist_entities:
+            total = GetTeamTotals_Data(team_name=tl.team_name, donation_total=tools.moneyAmount(tl.data.donation_total))
+            team_totals.append(total)
+
+        return GetTeamTotals_Out(team_totals=team_totals)
+
     # get.individual_donations
     @endpoints.method(GetIndividualDonations_In, Donations_Out, path='semi/get/individual_donations',
                     http_method='GET', name='semi.get.individual_donations')
@@ -307,7 +321,7 @@ class EndpointsAPI(remote.Service):
 
         return SemiGetTeamMembers_Out(objects=members)
 
-# #### ---- Data creation/updating ---- ####
+#### ---- Data creation/updating ---- ####
     # donation.mark_unreviewed
     @endpoints.method(DonationKey_In, SuccessMessage_Out, path='donation/mark_unreviewed',
                     http_method='POST', name='donation.mark_unreviewed')

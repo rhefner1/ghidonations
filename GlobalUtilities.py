@@ -1514,22 +1514,22 @@ class TeamListData(UtilitiesBase):
 
     @property
     def donation_total(self):
-        i = self.individual.get()
-        memcache_key = "dtotal" + self.team.urlsafe() + i.key.urlsafe()
+        i = self.e.individual.get()
+        memcache_key = "dtotal" + self.e.team.urlsafe() + i.key.urlsafe()
 
         def get_item():
             q = self.donations
             # donations = tools.qCache(q)
             donations = q
 
-            donation_total = tools.toDecimal(0)
+            donation_total = toDecimal(0)
 
             for d in donations:
                 donation_total += d.amount_donated
                 return str(donation_total)
 
-        item = tools.cache(memcache_key, get_item)
-        return tools.toDecimal(item)
+        item = cache(memcache_key, get_item)
+        return toDecimal(item)
 
     @property
     def individual_email(self):

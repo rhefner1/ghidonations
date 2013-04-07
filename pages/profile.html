@@ -105,10 +105,7 @@
                     <h3>Donations <img id="search_loading" style="display:none" height="16" width="16" src="/images/ajax-loader.gif"></h3>
 
                     <div style="margin-bottom:10px">
-                        <ul>
-                        {% for tl in i.teamlist_entities %}
-                            <li style="margin-bottom:5px"><strong>{{ tl.team_name }}</strong> - ${{ tl.data.donation_total }}</li>
-                        {% endfor %}
+                        <ul id="team_totals_div">
                         </ul>
                     </div>
 
@@ -133,8 +130,9 @@
 
             <!-- Variables -->
             <input type="hidden" name="team_list" value='{{ i.data.team_json|escape }}'>
-            <input type="hidden" name="individual_key" id="individual_key" value="{{ i.websafe }}" />
-            <input type="hidden" name="var_show_donation_page" id="var_show_donation_page" value="{{ i.show_donation_page }}" />
+            <input type="hidden" id="individual_key" value="{{ i.websafe }}" />
+            <input type="hidden" id="var_show_donation_page" value="{{ i.show_donation_page }}" />
+            <input type="hidden" id="team_totals" value="{{ team_totals }}" />
 
             </form>
         </div>
