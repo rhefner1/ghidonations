@@ -1,5 +1,6 @@
 //Global variables
 var team_list = ""
+var individual_key
 
 function dataTableWriter(data_table, d){
     data_table.fnAddData([
@@ -12,6 +13,23 @@ function dataTableWriter(data_table, d){
     ])
 
     data_table.fnAdjustColumnSizing()
+}
+
+function getTeamTotals(){
+	var params = {'individual_key':individual_key}
+	var request = ghiapi.get.teamtotals(params)
+
+	request.execute(function(response){
+
+		$.each(response.team_totals, function(index, tt){
+			html = '<li style="margin-bottom:5px"><strong>%t</strong> - %d</li>'
+			html = html.replace("%t", tt.team_name)
+			html = html.replace("%d", tt.donation_total)
+
+			$("#team_totals_div").append(html)
+		})
+		
+	})
 }
 
 function refreshCurrentTeams(){
@@ -31,7 +49,7 @@ function refreshCurrentTeams(){
 }
 
 $(document).ready(function(){
-	var individual_key = $("#individual_key").val()
+	individual_key = $("#individual_key").val()
 
     var rpc_params = {'individual_key':individual_key}
     var rpc_request = ghiapi.semi.get.individualdonations
@@ -56,6 +74,8 @@ $(document).ready(function(){
 
 	//Populate current teams
 	refreshCurrentTeams()
+
+	getTeamTotals()
 
 	$("form").validationEngine()
 

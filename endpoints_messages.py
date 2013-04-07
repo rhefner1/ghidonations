@@ -243,6 +243,14 @@ class NoRequestParams(messages.Message):
 class JSON_Out(messages.Message):
     json_data = messages.StringField(1, required=True)
 
+# get.team_totals
+class GetTeamTotals_Data(messages.Message):
+    team_name = messages.StringField(1, required=True)
+    donation_total = messages.StringField(2, required=True)
+
+class GetTeamTotals_Out(messages.Message):
+    team_totals = messages.MessageField(GetTeamTotals_Data, 1, repeated=True)
+
 # deposit_donations
 class Deposits_In(messages.Message):
     donation_keys = messages.StringField(1, repeated=True)
