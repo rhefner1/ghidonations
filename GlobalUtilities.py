@@ -1526,7 +1526,8 @@ class TeamListData(UtilitiesBase):
 
             for d in donations:
                 donation_total += d.amount_donated
-                return str(donation_total)
+            
+            return str(donation_total)
 
         item = cache(memcache_key, get_item)
         return toDecimal(item)
