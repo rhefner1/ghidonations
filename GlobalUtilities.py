@@ -1338,7 +1338,7 @@ class IndividualData(UtilitiesBase):
     @property
     def readable_team_names(self):
         team_names = ""
-        tl_list = i.teamlist_entities
+        tl_list = self.e.teamlist_entities
         for tl in tl_list:
             team_names += tl.team_name + ", "
 
@@ -1383,7 +1383,7 @@ class IndividualSearch(UtilitiesBase):
                     search.TextField(name='email', value=i.email),
 
                     search.TextField(name='team', value=i.data.readable_team_names),
-                    search.NumberField(name='raised', value=float(raised)),
+                    search.NumberField(name='raised', value=float(i.data.donation_total)),
                     
                     search.DateField(name='created', value=i.creation_date),
                     search.TextField(name='team_key', value=i.data.search_team_list),
