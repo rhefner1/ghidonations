@@ -8,7 +8,7 @@ from decimal import *
 #App Engine platform
 from google.appengine.api import taskqueue, mail, memcache, images
 from google.appengine.ext.webapp import template
-from google.appengine.ext import ndb
+from google.appengine.ext import ndb, deferred
 from google.appengine.datastore.datastore_query import Cursor
 
 #Mailchimp API
@@ -247,6 +247,17 @@ def newSettings(self, name, email):
     new_settings.put()
 
     return new_settings.key
+
+###### ------ Deferred Utilities ------ ######
+def indexEntitiesFromQuery(query, query_cursor=None):
+    entities, new_cursor, more = query.fetch_page(20, start_cursor=query_cursor, keys_only=True)
+
+    # If there are more results, kick off concurrent request to get things done faster
+    if new_cursor != None:
+        deferred.defer(indexEntitiesFromQuery, query, query_cursor=new_cursor, _queue="backend")
+
+    for e in entities:
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.urlsafe()}, queue_name="delayindexing")
 
 ###### ------ Utilities ------ ######
 def currentTime():
