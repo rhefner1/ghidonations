@@ -1063,8 +1063,10 @@ class ContactSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-        except:
-            logging.error("Failed creating index on contact key:" + self.e.websafe)
+
+        except Exception as e:
+            logging.error("Failed creating index on contact key:" + self.e.websafe + " because: " + str(e))
+            self.error(500)
 
 ## -- Deposit Classes -- ##
 class DepositSearch(UtilitiesBase):
@@ -1088,8 +1090,10 @@ class DepositSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-        except:
-            logging.error("Failed creating index on deposit key:" + self.e.websafe)
+
+        except Exception as e:
+            logging.error("Failed creating index on deposit key:" + self.e.websafe + " because: " + str(e))
+            self.error(500)
 
 ## -- Donation Classes -- ##
 class DonationAssign(UtilitiesBase):
@@ -1263,8 +1267,10 @@ class DonationSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
+            
         except Exception as e:
             logging.error("Failed creating index on donation key:" + self.e.websafe + " because: " + str(e))
+            self.error(500)
 
 ## -- Individual Classes -- ##
 class IndividualData(UtilitiesBase):
@@ -1400,8 +1406,10 @@ class IndividualSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-        except:
-            logging.error("Failed creating index on individual key:" + self.e.websafe)
+
+        except Exception as e:
+            logging.error("Failed creating index on individual key:" + self.e.websafe + " because: " + str(e))
+            self.error(500)
 
 ## -- Team Classes -- ##
 class TeamData(UtilitiesBase):
@@ -1502,8 +1510,10 @@ class TeamSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-        except:
-            logging.error("Failed creating index on team key:" + self.e.websafe)
+
+        except Exception as e:
+            logging.error("Failed creating index on team key:" + self.e.websafe + " because: " + str(e))
+            self.error(500)
 
 class TeamListData(UtilitiesBase):
     @property
