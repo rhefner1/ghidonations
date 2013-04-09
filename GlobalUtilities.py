@@ -414,7 +414,8 @@ def searchReturnAll(query, search_results, settings, search_function, entity_ret
         else:
             all_results.extend(searchToDocuments(results))
 
-        query_cursor = search_results.cursor
+        query_cursor = results.cursor
+
         results = search_function(query, query_cursor=query_cursor, entity_return=entity_return)[0]
 
     return all_results
