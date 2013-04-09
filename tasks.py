@@ -5,6 +5,7 @@ import GlobalUtilities as tools
 import DataModels as models
 
 from google.appengine.api import mail, taskqueue, files, memcache
+from google.appengine.ext import deferred
 from google.appengine.ext.webapp import template
 from datetime import datetime, timedelta
 
@@ -69,28 +70,23 @@ class IndexAll(webapp2.RequestHandler):
 
         if mode == "contacts":
             contacts = models.Contact.query()
-            for c in contacts.iter(keys_only=True):
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : c.urlsafe()}, queue_name="delayindexing")
+            deferred.defer(tools.indexEntitiesFromQuery, contacts, _queue="backend")
 
         elif mode == "deposits":
             deposits = models.DepositReceipt.query()
-            for de in deposits.iter(keys_only=True):
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : de.urlsafe()}, queue_name="delayindexing")
+            deferred.defer(tools.indexEntitiesFromQuery, deposits, _queue="backend")
 
         elif mode == "donations":
             donations = models.Donation.query()
-            for d in donations.iter(keys_only=True):
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : d.urlsafe()}, queue_name="delayindexing")
+            deferred.defer(tools.indexEntitiesFromQuery, donations, _queue="backend")
 
         elif mode == "individuals":
             individuals = models.Individual.query()
-            for i in individuals.iter(keys_only=True):
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : i.urlsafe()}, queue_name="delayindexing")
+            deferred.defer(tools.indexEntitiesFromQuery, individuals, _queue="backend")
 
         elif mode == "teams":
             teams = models.Team.query()
-            for t in teams.iter(keys_only=True):
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : t.urlsafe()}, queue_name="delayindexing")
+            deferred.defer(tools.indexEntitiesFromQuery, teams, _queue="backend")
 
 class MailchimpAdd(webapp2.RequestHandler):
     def post(self):

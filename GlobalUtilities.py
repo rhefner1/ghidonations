@@ -8,7 +8,7 @@ from decimal import *
 # App Engine platform
 from google.appengine.api import taskqueue, mail, memcache, images, files
 from google.appengine.ext.webapp import template
-from google.appengine.ext import ndb
+from google.appengine.ext import ndb, deferred
 from google.appengine.datastore.datastore_query import Cursor
 
 # Mailchimp API
@@ -261,6 +261,17 @@ def checkTaskCompletion(s, job_id):
         return False, None
     else:
         return True, m
+
+###### ------ Deferred Utilities ------ ######
+def indexEntitiesFromQuery(query, query_cursor=None):
+    entities, new_cursor, more = query.fetch_page(20, start_cursor=query_cursor, keys_only=True)
+
+    # If there are more results, kick off concurrent request to get things done faster
+    if new_cursor != None:
+        deferred.defer(indexEntitiesFromQuery, query, query_cursor=new_cursor, _queue="backend")
+
+    for e in entities:
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.urlsafe()}, queue_name="delayindexing")
 
 ###### ------ Utilities ------ ######
 def currentTime():
@@ -1077,8 +1088,10 @@ class ContactSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-        except:
-            logging.error("Failed creating index on contact key:" + self.e.websafe)
+
+        except Exception as e:
+            logging.error("Failed creating index on contact key:" + self.e.websafe + " because: " + str(e))
+            self.error(500)
 
 ## -- Deposit Classes -- ##
 class DepositSearch(UtilitiesBase):
@@ -1102,8 +1115,10 @@ class DepositSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-        except:
-            logging.error("Failed creating index on deposit key:" + self.e.websafe)
+
+        except Exception as e:
+            logging.error("Failed creating index on deposit key:" + self.e.websafe + " because: " + str(e))
+            self.error(500)
 
 ## -- Donation Classes -- ##
 class DonationAssign(UtilitiesBase):
@@ -1277,8 +1292,10 @@ class DonationSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
+            
         except Exception as e:
             logging.error("Failed creating index on donation key:" + self.e.websafe + " because: " + str(e))
+            self.error(500)
 
 ## -- Individual Classes -- ##
 class IndividualData(UtilitiesBase):
@@ -1324,7 +1341,7 @@ class IndividualData(UtilitiesBase):
                 image_url = "https://ghidonations.appspot.com/images/face150.jpg"
 
             tl = self.getTeamList(team)
-            percentage = int(float(tl.donation_total / tl.fundraise_amt) * 100)
+            percentage = int(float(tl.data.donation_total / tl.fundraise_amt) * 100)
 
             if percentage > 100:
                 percentage = 100
@@ -1352,7 +1369,7 @@ class IndividualData(UtilitiesBase):
     @property
     def readable_team_names(self):
         team_names = ""
-        tl_list = i.teamlist_entities
+        tl_list = self.e.teamlist_entities
         for tl in tl_list:
             team_names += tl.team_name + ", "
 
@@ -1397,7 +1414,7 @@ class IndividualSearch(UtilitiesBase):
                     search.TextField(name='email', value=i.email),
 
                     search.TextField(name='team', value=i.data.readable_team_names),
-                    search.NumberField(name='raised', value=float(raised)),
+                    search.NumberField(name='raised', value=float(i.data.donation_total)),
                     
                     search.DateField(name='created', value=i.creation_date),
                     search.TextField(name='team_key', value=i.data.search_team_list),
@@ -1414,8 +1431,10 @@ class IndividualSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-        except:
-            logging.error("Failed creating index on individual key:" + self.e.websafe)
+
+        except Exception as e:
+            logging.error("Failed creating index on individual key:" + self.e.websafe + " because: " + str(e))
+            self.error(500)
 
 ## -- Team Classes -- ##
 class TeamData(UtilitiesBase):
@@ -1516,8 +1535,10 @@ class TeamSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-        except:
-            logging.error("Failed creating index on team key:" + self.e.websafe)
+
+        except Exception as e:
+            logging.error("Failed creating index on team key:" + self.e.websafe + " because: " + str(e))
+            self.error(500)
 
 class TeamListData(UtilitiesBase):
     @property
@@ -1528,22 +1549,23 @@ class TeamListData(UtilitiesBase):
 
     @property
     def donation_total(self):
-        i = self.individual.get()
-        memcache_key = "dtotal" + self.team.urlsafe() + i.key.urlsafe()
+        i = self.e.individual.get()
+        memcache_key = "dtotal" + self.e.team.urlsafe() + i.key.urlsafe()
 
         def get_item():
             q = self.donations
             # donations = tools.qCache(q)
             donations = q
 
-            donation_total = tools.toDecimal(0)
+            donation_total = toDecimal(0)
 
             for d in donations:
                 donation_total += d.amount_donated
-                return str(donation_total)
+            
+            return str(donation_total)
 
-        item = tools.cache(memcache_key, get_item)
-        return tools.toDecimal(item)
+        item = cache(memcache_key, get_item)
+        return toDecimal(item)
 
     @property
     def individual_email(self):
