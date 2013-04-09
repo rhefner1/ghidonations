@@ -7,9 +7,6 @@ from google.appengine.ext.webapp import template, blobstore_handlers
 from google.appengine.ext import blobstore
 from google.appengine.api import urlfetch, search
 
-#Excel export
-from xlwt import *
-
 #Sessions
 from gaesessions import get_current_session
 
