@@ -265,3 +265,20 @@ class ConfirmationPrint_Out(messages.Message):
 class ConfirmationAnnualReport_In(messages.Message):
     contact_key = messages.StringField(1, required=True)
     year = messages.IntegerField(2, required=True)
+
+# spreadsheet.start
+class SpreadsheetStart_In(messages.Message):
+    mode = messages.StringField(1, required=True)
+    filename = messages.StringField(2, required=True)
+    query = messages.StringField(3, required=True)
+
+class SpreadsheetStart_Out(messages.Message):
+    job_id = messages.StringField(1, required=True)
+
+# spreadsheet.check
+class SpreadsheetCheck_In(messages.Message):
+    job_id = messages.StringField(1, required=True)
+
+class SpreadsheetCheck_Out(messages.Message):
+    completed = messages.BooleanField(1, required=True)
+    blob_key = messages.StringField(2)

@@ -39,12 +39,6 @@ $(document).ready(function(){
     });
 
     setupSearchEvents()
-
-    $("#download_query").click(function(){
-        query = $("#search_query").val()
-        data = {"query" : query}
-        url = "/ajax/spreadsheetindividuals?" + $.param(data)
-        window.open(url)
-    })
+    setupDownloadQuery("individuals", "Individuals")
 
 });

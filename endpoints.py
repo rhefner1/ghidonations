@@ -1,5 +1,5 @@
-import logging, json, datetime, appengine_config, webapp2
-from google.appengine.api import taskqueue
+import logging, json, datetime, appengine_config, webapp2, uuid
+from google.appengine.api import taskqueue, memcache
 
 import GlobalUtilities as tools
 import DataModels as models
@@ -36,7 +36,7 @@ endpoints_clients = [endpoints_client_id, endpoints.API_EXPLORER_CLIENT_ID]
                allowed_client_ids=endpoints_clients)
 class EndpointsAPI(remote.Service):
 
-## -- Globalhopeindia.org Utility Functions -- ##
+#### ---- Globalhopeindia.org Utility Functions ---- ####
 
     # public.all_teams
     @endpoints.method(AllTeams_In, AllTeams_Out, path='public/all_teams',
@@ -81,7 +81,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Contacts_Out, path='get/contacts',
                     http_method='GET', name='get.contacts')
     def get_contacts(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         if req.query == None:
             req.query = ""
@@ -103,7 +103,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(GetContactDonations_In, Donations_Out, path='get/contact_donations',
                     http_method='GET', name='get.contact_donations')
     def get_contact_donations(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
         query = "contact_key:" + str(req.contact_key)
 
         results = s.search.donation(query, query_cursor=req.query_cursor)
@@ -126,7 +126,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Deposits_Out, path='get/deposits',
                     http_method='GET', name='get.deposits')
     def get_deposits(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         if req.query == None:
             req.query = ""
@@ -149,7 +149,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Donations_Out, path='get/donations',
                     http_method='GET', name='get.donations')
     def get_donations(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
         query = req.query
 
         if query == None:
@@ -175,7 +175,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Individuals_Out, path='get/individuals',
                     http_method='GET', name='get.individuals')
     def get_individuals(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         if req.query == None:
             req.query = ""
@@ -198,7 +198,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(NoRequestParams, JSON_Out, path='get/monthly_chart_data',
                     http_method='GET', name='get.monthly_chart_data')
     def monthly_chart_data(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         json_data = s.one_month_history
 
@@ -208,7 +208,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(MailchimpLists_In, MailchimpLists_Out, path='mailchimp/lists',
                     http_method='GET', name='mailchimp.lists')
     def mailchimp_lists(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         response = tools.getMailchimpLists(self, req.mc_apikey)
         mc_lists = None
@@ -226,7 +226,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(Query_In, Teams_Out, path='get/teams',
                     http_method='GET', name='get.teams')
     def getTeams(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         if req.query == None:
             req.query = ""
@@ -249,7 +249,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(GetTeamMembers_In, Individuals_Out, path='get/team_members',
                     http_method='GET', name='get.team_members')
     def get_team_members(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
         query = "team_key:" + str(req.team_key)
 
         results = s.search.individual(query, query_cursor=req.query_cursor)
@@ -285,7 +285,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(GetIndividualDonations_In, Donations_Out, path='semi/get/individual_donations',
                     http_method='GET', name='semi.get.individual_donations')
     def semi_get_individual_donations(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, False, endpoints=True)
         query = "individual_key:" + str(req.individual_key)
 
         results = s.search.donation(query, query_cursor=req.query_cursor)
@@ -309,7 +309,7 @@ class EndpointsAPI(remote.Service):
                     http_method='GET', name='semi.get.team_members')
     def semi_get_team_members(self, req):
     # Returns team information
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, False, endpoints=True)
 
         t = tools.getKey(req.team_key).get()
         members_list = t.data.members_list
@@ -329,7 +329,7 @@ class EndpointsAPI(remote.Service):
         message = "Donation marked as unreviewed"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         d = tools.getKey(req.donation_key).get()
         d.review.markUnreviewed()
@@ -343,7 +343,7 @@ class EndpointsAPI(remote.Service):
         message = "<b>" + req.name + "</b> created"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
         contact_exists = s.exists.contact(req.email)
 
         address = [req.address.street, req.address.city, req.address.state, req.address.zipcode]
@@ -367,7 +367,7 @@ class EndpointsAPI(remote.Service):
         message = "Impression saved"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         c = tools.getKey(req.contact_key).get()
         c.create.impression(req.impression, req.notes)
@@ -381,7 +381,7 @@ class EndpointsAPI(remote.Service):
         message = "<b>" + req.name + "</b> created"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
         exists = s.exists.individual(req.email)
 
         email, team_key = req.email, req.team_key
@@ -409,7 +409,7 @@ class EndpointsAPI(remote.Service):
         message = "<b>" + req.name + "</b> created"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
         s.create.team(req.name)
 
         return SuccessMessage_Out(success=success, message=message)
@@ -421,7 +421,7 @@ class EndpointsAPI(remote.Service):
         message = "Offline donation created"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         # Make req variables local
         name, email, amount_donated, notes, address, team_key, individual_key, \
@@ -445,11 +445,11 @@ class EndpointsAPI(remote.Service):
     # update.donation
     @endpoints.method(UpdateDonation_In, SuccessMessage_Out, path='update/donation',
                     http_method='POST', name='update.donation')
-    def updateDonation(self, req):
+    def update_donation(self, req):
         message = "Donation has been saved"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         d = tools.getKey(req.donation_key).get()
 
@@ -472,11 +472,11 @@ class EndpointsAPI(remote.Service):
     # update.contact
     @endpoints.method(UpdateContact_In, SuccessMessage_Out, path='update/contact',
                     http_method='POST', name='update.contact')
-    def update_ontact(self, req):
+    def update_contact(self, req):
         message = "Contact has been saved"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         c = tools.getKey(req.contact_key).get()
 
@@ -490,11 +490,11 @@ class EndpointsAPI(remote.Service):
     # update.settings
     @endpoints.method(UpdateSettings_In, SuccessMessage_Out, path='update/settings',
                     http_method='POST', name='update.settings')
-    def updateSettings(self, req):
+    def update_settings(self, req):
         message = "Settings have been updated"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         s.update(req.name, req.email, req.mc_use, req.mc_apikey, req.mc_donorlist, 
             req.paypal_id, req.impressions, req.amount1, req.amount2, req.amount3, 
@@ -506,11 +506,11 @@ class EndpointsAPI(remote.Service):
     # update.team
     @endpoints.method(UpdateTeam_In, SuccessMessage_Out, path='update/team',
                     http_method='POST', name='update.team')
-    def updateTeam(self, req):
+    def update_team(self, req):
         message = "Team has been updated"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         t = tools.getKey(req.team_key).get()
         t.update(req.name, req.show_team)
@@ -521,11 +521,11 @@ class EndpointsAPI(remote.Service):
     # merge.contacts
     @endpoints.method(MergeContacts_In, SuccessMessage_Out, path='merge/contacts',
                     http_method='POST', name='merge.contacts')
-    def mergeContacts(self, req):
+    def merge_contacts(self, req):
         message = "Contacts merged"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         c1 = tools.getKey(req.contact1)
         c2 = tools.getKey(req.contact2)
@@ -539,7 +539,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(NoRequestParams, JSON_Out, path='get/contacts_json',
                     http_method='GET', name='get.contacts_json')
     def get_contacts_json(self, req):
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         return JSON_Out(json_data=s.data.contactsJSON)
 
@@ -551,7 +551,7 @@ class EndpointsAPI(remote.Service):
         message = "Donations deposited."
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         if req.donation_keys != []:
             s.deposits.deposit(req.donation_keys)
@@ -569,7 +569,7 @@ class EndpointsAPI(remote.Service):
         message = "Donations removed from deposits."
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         if req.donation_keys != []:
             s.deposits.remove(req.donation_keys)
@@ -585,7 +585,7 @@ class EndpointsAPI(remote.Service):
         message = "Email sent"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         d = tools.getKey(req.donation_key).get()
 
@@ -602,7 +602,7 @@ class EndpointsAPI(remote.Service):
         message = "Receipt open for printing"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
         d = tools.getKey(req.donation_key).get()
 
         #Print receipt to donor
@@ -618,7 +618,7 @@ class EndpointsAPI(remote.Service):
         message = "Annual report sent"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         taskqueue.add(queue_name="annualreport", url="/tasks/annualreport", params={'contact_key' : req.contact_key, 'year' : req.year})
 
@@ -631,7 +631,7 @@ class EndpointsAPI(remote.Service):
         message = "Donation archived"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         d = tools.getKey(req.donation_key).get()
         d.review.archive()
@@ -645,7 +645,7 @@ class EndpointsAPI(remote.Service):
         message = "Donation deleted"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         tools.getKey(req.donation_key).delete()
 
@@ -658,7 +658,7 @@ class EndpointsAPI(remote.Service):
         message = "Contact deleted"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         tools.getKey(req.contact_key).delete()
 
@@ -671,7 +671,7 @@ class EndpointsAPI(remote.Service):
         message = "Team deleted"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         tools.getKey(req.team_key).delete()
 
@@ -684,7 +684,7 @@ class EndpointsAPI(remote.Service):
         message = "Individual deleted"
         success = True
 
-        s = tools.getSettingsKey(self, endpoints=True).get()
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
         user_key = tools.getUserKey(self)
         isAdmin = user_key.get().admin
@@ -702,6 +702,49 @@ class EndpointsAPI(remote.Service):
                 success = False
 
         return SuccessMessage_Out(success=success, message=message)
+
+#### ---- Spreadsheet Export Controllers ---- ####
+
+    # spreadsheet.start
+    @endpoints.method(SpreadsheetStart_In, SpreadsheetStart_Out, path='spreadsheet/start',
+                    http_method='POST', name='spreadsheet.start')
+    def spreadsheet_start(self, req):
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
+
+        file_name = s.name + "-" + req.filename + ".xls"
+
+        m = req.mode
+        if m == "contacts":  
+            url = "/tasks/spreadsheet/contacts"  
+
+        elif m == "donations":
+            url = "/tasks/spreadsheet/donations"
+
+        elif m == "individuals":
+            url = "/tasks/spreadsheet/individuals"
+        else:
+            # Error
+            raise endpoints.NotFoundException("Incorrect spreadsheet mode")
+
+        # Create unique identifier for this job
+        job_id = str(uuid.uuid4())
+
+        params = {'file_name':file_name, 'job_id':job_id, 'settings_key':s.websafe, 'query':req.query}
+        taskqueue.add(url=url, params=params, queue_name="spreadsheet")
+
+        memcache.set(job_id, 0)
+
+        return SpreadsheetStart_Out(job_id=job_id)
+
+    # spreadsheet.check
+    @endpoints.method(SpreadsheetCheck_In, SpreadsheetCheck_Out, path='spreadsheet/check',
+                    http_method='POST', name='spreadsheet.check')
+    def spreadsheet_check(self, req):
+        isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
+
+        completed, blob_key = tools.checkTaskCompletion(s, req.job_id)
+
+        return SpreadsheetCheck_Out(completed=completed, blob_key=blob_key)
 
 app = endpoints.api_server([EndpointsAPI], restricted=False)
 app = appengine_config.webapp_add_wsgi_middleware(app)

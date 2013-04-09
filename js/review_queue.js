@@ -81,10 +81,5 @@ $(document).ready(function(){
         }
     })
     
-    $("#download_query").click(function(){
-        query = $("#search_query").val()
-        data = {"query" : query}
-        url = "/ajax/spreadsheetdonations?" + $.param(data)
-        window.open(url)
-    })
+    setupDownloadQuery("donations", "Donations")
 });

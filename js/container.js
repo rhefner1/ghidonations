@@ -459,6 +459,53 @@ function rpcSuccessMessage(response){
     }
 }
 
+// ---- Spreadsheet Download Controllers ---- //
+function checkTaskStatus(response){
+    var params2 = {"job_id":response.job_id}
+    var request2 = ghiapi.spreadsheet.check(params2)
+
+    request2.execute(function(response2){
+
+        if (response2.completed == true){
+            var url = "/ajax/spreadsheet/download?blob_key=" + response2.blob_key
+            window.open(url)
+
+            $("#download_query").html('Downloading now...')
+            setTimeout(function(){
+                $("#download_query").html('<button class="small button">Download query as a spreadsheet</button>')
+            }, 5000)
+        }
+        else{
+            // If the report isn't done generating, check again in 10 sec.
+            timeoutCheckStatus(response)
+        }
+
+    })
+}
+
+function setupDownloadQuery(mode, file_name){
+    $("#download_query").delegate("button", "click", function(){
+        $(this).hide()
+        $("#download_query").html("Generating report - this may take a moment. <img src='/images/ajax-loader.gif'>")
+
+        query = $("#search_query").val()
+        params = {"mode":mode, "filename":file_name, "query" : query}
+        var request = ghiapi.spreadsheet.start(params)
+
+        request.execute(function(response){
+            timeoutCheckStatus(response)
+        })
+
+
+    })
+}
+
+function timeoutCheckStatus(response){
+    setTimeout(function(){
+        checkTaskStatus(response)
+    }, 5000)
+}
+
 // ---- Utilities ---- //
 function diff(obj1,obj2) {
     var newObj = $.extend({},obj1,obj2);

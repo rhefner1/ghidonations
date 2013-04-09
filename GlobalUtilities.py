@@ -5,22 +5,22 @@ from time import gmtime, strftime
 from datetime import *
 from decimal import *
 
-#App Engine platform
-from google.appengine.api import taskqueue, mail, memcache, images
+# App Engine platform
+from google.appengine.api import taskqueue, mail, memcache, images, files
 from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb, deferred
 from google.appengine.datastore.datastore_query import Cursor
 
-#Mailchimp API
+# Mailchimp API
 from mailsnake import MailSnake
 
-#Sessions
+# Sessions
 from gaesessions import get_current_session, Session
 
-#Application files
+# Application files
 import DataModels as models
 
-#Search
+# Search
 from google.appengine.api import search
 
 _CONTACT_SEARCH_INDEX = "contact"
@@ -43,27 +43,29 @@ def checkCredentials(self, email, password):
     except:
         return False, None
 
-def checkAuthentication(self, admin_required):
+def checkAuthentication(self, admin_required, endpoints=False):
     try:
         #If the cookie doesn't exist, send them back to login
-        s_key = getSettingsKey(self)
         u_key = getUserKey(self)
-
         u = u_key.get()
 
-        #If the user tries to enter an admin page with standard credentials,
-        #kick them out.
+        # If the user tries to enter an admin page with standard credentials,
+        # kick them out.
         if admin_required == True and u.admin == False:
             logging.info("Not authorized - kicking out")
             self.redirect("/ajax/notauthorized")
 
-        #Otherwise, good to go
-        return u.admin, s_key.get()
+        # Otherwise, good to go
+        return u.admin, u.settings.get()
 
     except Exception as e:
         logging.info("Error in checkAuthentication - kicking out to login page. " + str(e))
 
-        self.redirect("/login")
+        if endpoints:
+            raise Exception("Error in checkAuthentication")
+        else:
+            self.redirect("/login")
+            
         return None, None
 
 def getUsername(self):
@@ -247,6 +249,18 @@ def newSettings(self, name, email):
     new_settings.put()
 
     return new_settings.key
+
+###### ------ Spreadsheet Export Controller Utilities ------ ######
+def newFile(mime_type, file_name):
+    file_key = files.blobstore.create(mime_type=mime_type, _blobinfo_uploaded_filename=file_name)
+    return str(file_key)
+
+def checkTaskCompletion(s, job_id):
+    m = memcache.get(job_id)
+    if m == None or m == 0:
+        return False, None
+    else:
+        return True, m
 
 ###### ------ Deferred Utilities ------ ######
 def indexEntitiesFromQuery(query, query_cursor=None):
