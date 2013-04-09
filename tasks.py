@@ -144,7 +144,10 @@ class SpreadsheetContacts(webapp2.RequestHandler):
             ws0.write(current_line, 7, f[8].value)
             ws0.write(current_line, 8, f[9].value)
 
-            ws0.write(current_line, 9, str(f[10].value))
+            try:
+                ws0.write(current_line, 9, str(f[10].value))
+            except:
+                ws0.write(current_line, 9, "")
                 
             current_line += 1
 
