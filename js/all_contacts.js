@@ -38,12 +38,6 @@ $(document).ready(function(){
     });
 
    setupSearchEvents()
-
-    $("#download_query").click(function(){
-        query = $("#search_query").val()
-        data = {"query" : query}
-        url = "/ajax/spreadsheetcontacts?" + $.param(data)
-        window.open(url)
-    })
+   setupDownloadQuery("contacts", "Contacts")
 
 });

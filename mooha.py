@@ -462,12 +462,15 @@ class Settings(BaseHandlerAdmin):
 
 class SpreadsheetDownload(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self):
-        blob_key = self.request.get("blob_key")
+        isAdmin, s = tools.checkAuthentication(self, True)
 
-        if not blobstore.get(blob_key):
+        str_blob_key = self.request.get("blob_key")
+        blob_key = blobstore.BlobInfo.get(str_blob_key)
+
+        if not blobstore.get(str_blob_key):
             self.error(404)
         else:
-            self.send_blob(blob_key)
+            self.send_blob(blob_key, save_as=True)
 
 class TeamMembers(BaseHandlerAdmin):
     def task(self, isAdmin, s):

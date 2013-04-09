@@ -23,10 +23,6 @@ import DataModels as models
 # Search
 from google.appengine.api import search
 
-# Taskqueue API
-from apiclient.discovery import build
-from oauth2client.appengine import OAuth2Decorator
-
 _CONTACT_SEARCH_INDEX = "contact"
 _DEPOSIT_SEARCH_INDEX = "deposit"
 _DONATION_SEARCH_INDEX = "donation"
@@ -257,20 +253,14 @@ def newSettings(self, name, email):
 ###### ------ Spreadsheet Export Controller Utilities ------ ######
 def newFile(mime_type, file_name):
     file_key = files.blobstore.create(mime_type=mime_type, _blobinfo_uploaded_filename=file_name)
-    files.finalize(file_key)
+    return str(file_key)
 
-    blob_key = files.blobstore.get_blob_key(file_name)
-
-    return file_key, blob_key
-
-def checkTaskCompletion(s, task_key):
-    completed = False
-
-    service = build("tasks", "v1", developerKey=appengine_config.GOOGLE_API_KEY)
-    # result = service.tasks().get(project="ghidonations", taskqueue="spreadsheet", task=task_key).execute()
-    result = service.tasks().list(tasklist='@default').execute()
-
-    return result
+def checkTaskCompletion(s, job_id):
+    m = memcache.get(job_id)
+    if m == None or m == 0:
+        return False, None
+    else:
+        return True, m
 
 ###### ------ Utilities ------ ######
 def currentTime():

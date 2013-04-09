@@ -4,7 +4,7 @@ import logging, webapp2, appengine_config, json
 import GlobalUtilities as tools
 import DataModels as models
 
-from google.appengine.api import mail, taskqueue, files
+from google.appengine.api import mail, taskqueue, files, memcache
 from google.appengine.ext.webapp import template
 from datetime import datetime, timedelta
 
@@ -110,7 +110,8 @@ class SpreadsheetContacts(webapp2.RequestHandler):
         s = tools.getKey(settings_key).get()
 
         query = self.request.get("query")
-        file_key = self.request.get("file_key")
+        file_name = self.request.get("file_name")
+        job_id = self.request.get("job_id")
 
         #Initialize a xlwt Excel file
         wb = Workbook()
@@ -151,10 +152,15 @@ class SpreadsheetContacts(webapp2.RequestHandler):
                 
             current_line += 1
 
+        file_key = tools.newFile("application/vnd.ms-excel", file_name)
+
         with files.open(file_key, 'a') as f:
             wb.save(f)
 
         files.finalize(file_key)
+        blob_key = files.blobstore.get_blob_key(file_key)
+
+        memcache.set(job_id, str(blob_key))
 
 class SpreadsheetDonations(webapp2.RequestHandler):
     def post(self):
@@ -162,7 +168,8 @@ class SpreadsheetDonations(webapp2.RequestHandler):
         s = tools.getKey(settings_key).get()
 
         query = self.request.get("query")
-        file_key = self.request.get("file_key")
+        file_name = self.request.get("file_name")
+        job_id = self.request.get("job_id")
 
         #Initialize a xlwt Excel file
         wb = Workbook()
@@ -197,10 +204,15 @@ class SpreadsheetDonations(webapp2.RequestHandler):
                 
             current_line += 1
 
+        file_key = tools.newFile("application/vnd.ms-excel", file_name)
+
         with files.open(file_key, 'a') as f:
             wb.save(f)
 
         files.finalize(file_key)
+        blob_key = files.blobstore.get_blob_key(file_key)
+
+        memcache.set(job_id, str(blob_key))
 
 class SpreadsheetIndividuals(webapp2.RequestHandler):
     def post(self):
@@ -208,7 +220,8 @@ class SpreadsheetIndividuals(webapp2.RequestHandler):
         s = tools.getKey(settings_key).get()
 
         query = self.request.get("query")
-        file_key = self.request.get("file_key")
+        file_name = self.request.get("file_name")
+        job_id = self.request.get("job_id")
 
         #Initialize a xlwt Excel file
         wb = Workbook()
@@ -237,10 +250,15 @@ class SpreadsheetIndividuals(webapp2.RequestHandler):
                 
             current_line += 1
 
+        file_key = tools.newFile("application/vnd.ms-excel", file_name)
+
         with files.open(file_key, 'a') as f:
             wb.save(f)
 
         files.finalize(file_key)
+        blob_key = files.blobstore.get_blob_key(file_key)
+
+        memcache.set(job_id, str(blob_key))
 
 class UpdateAnalytics(webapp2.RequestHandler):
     def _run(self):

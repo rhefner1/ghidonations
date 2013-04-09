@@ -265,12 +265,12 @@ class SpreadsheetStart_In(messages.Message):
     query = messages.StringField(3, required=True)
 
 class SpreadsheetStart_Out(messages.Message):
-    task_key = messages.StringField(1, required=True)
-    blob_key = messages.StringField(2, required=True)
+    job_id = messages.StringField(1, required=True)
 
 # spreadsheet.check
 class SpreadsheetCheck_In(messages.Message):
-    task_key = messages.StringField(1, required=True)
+    job_id = messages.StringField(1, required=True)
 
-class SpreadsheetStart_Out(messages.Message):
+class SpreadsheetCheck_Out(messages.Message):
     completed = messages.BooleanField(1, required=True)
+    blob_key = messages.StringField(2)

@@ -1,5 +1,5 @@
-import logging, json, datetime, appengine_config, webapp2
-from google.appengine.api import taskqueue
+import logging, json, datetime, appengine_config, webapp2, uuid
+from google.appengine.api import taskqueue, memcache
 
 import GlobalUtilities as tools
 import DataModels as models
@@ -430,7 +430,7 @@ class EndpointsAPI(remote.Service):
     # update.donation
     @endpoints.method(UpdateDonation_In, SuccessMessage_Out, path='update/donation',
                     http_method='POST', name='update.donation')
-    def updateDonation(self, req):
+    def update_donation(self, req):
         message = "Donation has been saved"
         success = True
 
@@ -457,7 +457,7 @@ class EndpointsAPI(remote.Service):
     # update.contact
     @endpoints.method(UpdateContact_In, SuccessMessage_Out, path='update/contact',
                     http_method='POST', name='update.contact')
-    def update_ontact(self, req):
+    def update_contact(self, req):
         message = "Contact has been saved"
         success = True
 
@@ -475,7 +475,7 @@ class EndpointsAPI(remote.Service):
     # update.settings
     @endpoints.method(UpdateSettings_In, SuccessMessage_Out, path='update/settings',
                     http_method='POST', name='update.settings')
-    def updateSettings(self, req):
+    def update_settings(self, req):
         message = "Settings have been updated"
         success = True
 
@@ -491,7 +491,7 @@ class EndpointsAPI(remote.Service):
     # update.team
     @endpoints.method(UpdateTeam_In, SuccessMessage_Out, path='update/team',
                     http_method='POST', name='update.team')
-    def updateTeam(self, req):
+    def update_team(self, req):
         message = "Team has been updated"
         success = True
 
@@ -506,7 +506,7 @@ class EndpointsAPI(remote.Service):
     # merge.contacts
     @endpoints.method(MergeContacts_In, SuccessMessage_Out, path='merge/contacts',
                     http_method='POST', name='merge.contacts')
-    def mergeContacts(self, req):
+    def merge_contacts(self, req):
         message = "Contacts merged"
         success = True
 
@@ -696,7 +696,7 @@ class EndpointsAPI(remote.Service):
     def spreadsheet_start(self, req):
         isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
-        file_key, blob_key = tools.newFile(mime_type="application/ms-excel", file_name=req.filename)
+        file_name = s.name + "-" + req.filename + ".xls"
 
         m = req.mode
         if m == "contacts":  
@@ -711,11 +711,15 @@ class EndpointsAPI(remote.Service):
             # Error
             raise endpoints.NotFoundException("Incorrect spreadsheet mode")
 
-        task_key = "ss_" + blob_key
-        params = {'file_key':file_key, 'settings_key':s.websafe, 'query':req.query}
-        taskqueue.add(url=url, params=params, queue_name="spreadsheet", name=task_key)
+        # Create unique identifier for this job
+        job_id = str(uuid.uuid4())
 
-        return SpreadsheetStart_Out(task_key=task_key, blob_key=blob_key)
+        params = {'file_name':file_name, 'job_id':job_id, 'settings_key':s.websafe, 'query':req.query}
+        taskqueue.add(url=url, params=params, queue_name="spreadsheet")
+
+        memcache.set(job_id, 0)
+
+        return SpreadsheetStart_Out(job_id=job_id)
 
     # spreadsheet.check
     @endpoints.method(SpreadsheetCheck_In, SpreadsheetCheck_Out, path='spreadsheet/check',
@@ -723,9 +727,9 @@ class EndpointsAPI(remote.Service):
     def spreadsheet_check(self, req):
         isAdmin, s = tools.checkAuthentication(self, True, endpoints=True)
 
-        completed = tools.checkTaskCompletion(s, req.task_key)
+        completed, blob_key = tools.checkTaskCompletion(s, req.job_id)
 
-        return SpreadsheetCheck_Out(completed=completed)
+        return SpreadsheetCheck_Out(completed=completed, blob_key=blob_key)
 
 app = endpoints.api_server([EndpointsAPI], restricted=False)
 app = appengine_config.webapp_add_wsgi_middleware(app)
