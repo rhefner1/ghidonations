@@ -1,5 +1,5 @@
 #App engine platform
-import logging, webapp2, appengine_config, json
+import logging, webapp2, appengine_config, json, gc
 
 import GlobalUtilities as tools
 import DataModels as models
@@ -151,6 +151,9 @@ class SpreadsheetContacts(webapp2.RequestHandler):
                 
             current_line += 1
 
+            # Call the garbage handler
+            gc.collect()
+
         file_key = tools.newFile("application/vnd.ms-excel", file_name)
 
         with files.open(file_key, 'a') as f:
@@ -203,6 +206,9 @@ class SpreadsheetDonations(webapp2.RequestHandler):
                 
             current_line += 1
 
+            # Call the garbage handler
+            gc.collect()
+
         file_key = tools.newFile("application/vnd.ms-excel", file_name)
 
         with files.open(file_key, 'a') as f:
@@ -248,6 +254,9 @@ class SpreadsheetIndividuals(webapp2.RequestHandler):
             ws0.write(current_line, 4, str(f[5].value))
                 
             current_line += 1
+
+            # Call the garbage handler
+            gc.collect()
 
         file_key = tools.newFile("application/vnd.ms-excel", file_name)
 
