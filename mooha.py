@@ -598,7 +598,7 @@ class IPN(BaseHandlerAdmin):
 
         # Check payment is completed, not Pending or Failed.
         if payment_status == "Failed" or payment_status == "Pending":
-           logging.error("Payment status is " + payment_status ", so not continuing.")
+           logging.error("Payment status is " + payment_status + ", so not continuing.")
            
         else:
             logging.info("All parameters: " + str(parameters))
