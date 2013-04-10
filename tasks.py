@@ -105,7 +105,6 @@ class SpreadsheetContacts(webapp2.RequestHandler):
         settings_key = self.request.get("settings_key")
         s = tools.getKey(settings_key).get()
 
-        query = self.request.get("query")
         file_name = self.request.get("file_name")
         job_id = self.request.get("job_id")
 
@@ -113,13 +112,9 @@ class SpreadsheetContacts(webapp2.RequestHandler):
         wb = Workbook()
         ws0 = wb.add_sheet('Sheet 1')
 
-        logging.info("Exporting contacts spreadsheet with query: " + query)
+        logging.info("Exporting contacts spreadsheet")
 
-        if query == "":
-            contacts = tools.getAllSearchDocs(tools._CONTACT_SEARCH_INDEX)
-    
-        else:
-            contacts = s.search.contact(query, entity_return=False, return_all=True)
+        contacts = s.data.all_contacts
             
         #Write headers
         ws0.write(0, 0, "Name")
@@ -137,20 +132,18 @@ class SpreadsheetContacts(webapp2.RequestHandler):
         for c in contacts:
 
             try:
-                f = c.fields
+                ws0.write(current_line, 0, c.name)
+                ws0.write(current_line, 1, c.email)
+                ws0.write(current_line, 2, c.data.donation_total)
+                ws0.write(current_line, 3, c.data.number_donations)
+                ws0.write(current_line, 4, c.phone)
 
-                ws0.write(current_line, 0, f[1].value)
-                ws0.write(current_line, 1, f[2].value)
-                ws0.write(current_line, 2, str(f[3].value))
-                ws0.write(current_line, 3, str(f[4].value))
-                ws0.write(current_line, 4, f[5].value)
+                ws0.write(current_line, 5, c.address[0])
+                ws0.write(current_line, 6, c.address[1])
+                ws0.write(current_line, 7, c.address[2])
+                ws0.write(current_line, 8, c.address[3])
 
-                ws0.write(current_line, 5, f[6].value)
-                ws0.write(current_line, 6, f[7].value)
-                ws0.write(current_line, 7, f[8].value)
-                ws0.write(current_line, 8, f[9].value)
-
-                ws0.write(current_line, 9, str(f[10].value))
+                ws0.write(current_line, 9, str(c.creation_date))
 
                 current_line += 1
 
@@ -176,7 +169,6 @@ class SpreadsheetDonations(webapp2.RequestHandler):
         settings_key = self.request.get("settings_key")
         s = tools.getKey(settings_key).get()
 
-        query = self.request.get("query")
         file_name = self.request.get("file_name")
         job_id = self.request.get("job_id")
 
@@ -184,13 +176,9 @@ class SpreadsheetDonations(webapp2.RequestHandler):
         wb = Workbook()
         ws0 = wb.add_sheet('Sheet 1')
 
-        logging.info("Exporting donations spreadsheet with query: " + query)
+        logging.info("Exporting donations spreadsheet")
 
-        if query == "":
-            donations = tools.getAllSearchDocs(tools._DONATION_SEARCH_INDEX)
-    
-        else:
-            donations = s.search.donation(query, entity_return=False, return_all=True)
+        donations = s.data.all_donations
             
         #Write headers
         ws0.write(0, 0, "Date")
@@ -206,16 +194,14 @@ class SpreadsheetDonations(webapp2.RequestHandler):
         for d in donations:
 
             try:
-                f = d.fields
-
-                ws0.write(current_line, 0, str(f[1].value))
-                ws0.write(current_line, 1, f[2].value)
-                ws0.write(current_line, 2, f[3].value)
-                ws0.write(current_line, 3, str(f[4].value))
-                ws0.write(current_line, 4, f[5].value)
-                ws0.write(current_line, 5, f[6].value)
-                ws0.write(current_line, 6, f[7].value)
-                ws0.write(current_line, 7, f[8].value)
+                ws0.write(current_line, 0, str(d.donation_date))
+                ws0.write(current_line, 1, d.name)
+                ws0.write(current_line, 2, d.email)
+                ws0.write(current_line, 3, str(d.amount_donated))
+                ws0.write(current_line, 4, d.payment_type)
+                ws0.write(current_line, 5, d.designated_team)
+                ws0.write(current_line, 6, d.designated_individual)
+                ws0.write(current_line, 7, str(d.reviewed))
                     
                 current_line += 1
 
@@ -241,7 +227,6 @@ class SpreadsheetIndividuals(webapp2.RequestHandler):
         settings_key = self.request.get("settings_key")
         s = tools.getKey(settings_key).get()
 
-        query = self.request.get("query")
         file_name = self.request.get("file_name")
         job_id = self.request.get("job_id")
 
@@ -249,13 +234,9 @@ class SpreadsheetIndividuals(webapp2.RequestHandler):
         wb = Workbook()
         ws0 = wb.add_sheet('Sheet 1')
 
-        logging.info("Exporting individuals spreadsheet with query: " + query)
+        logging.info("Exporting individuals spreadsheet")
 
-        if query == "":
-            individuals = tools.getAllSearchDocs(tools._INDIVIDUAL_SEARCH_INDEX)
-    
-        else:
-            individuals = s.search.individual(query, entity_return=False, return_all=True)
+        individuals = s.data.all_individuals
             
         #Write headers
         ws0.write(0, 0, "Name")
@@ -266,14 +247,12 @@ class SpreadsheetIndividuals(webapp2.RequestHandler):
 
         current_line = 1
         for i in individuals:
-            try:
-                f = i.fields
-
-                ws0.write(current_line, 0, f[1].value)
-                ws0.write(current_line, 1, f[2].value)
-                ws0.write(current_line, 2, f[3].value)
-                ws0.write(current_line, 3, str(f[4].value))
-                ws0.write(current_line, 4, str(f[5].value))
+            try:                
+                ws0.write(current_line, 0, i.name)
+                ws0.write(current_line, 1, i.email)
+                ws0.write(current_line, 2, i.data.readable_team_names)
+                ws0.write(current_line, 3, str(i.data.donation_total))
+                ws0.write(current_line, 4, str(i.creation_date))
                     
                 current_line += 1
 
