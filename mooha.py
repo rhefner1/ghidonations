@@ -14,8 +14,6 @@ from gaesessions import get_current_session
 import DataModels as models
 import GlobalUtilities as tools
 
-_TEAM_SEARCH_INDEX = "team"
-
 class BaseHandler(webapp2.RequestHandler):
     def get(self):
         #By default, need admin priveleges to view
@@ -475,7 +473,7 @@ class TeamMembers(BaseHandlerAdmin):
         team_key = self.request.get("t")
         t = tools.getKey(team_key).get()
 
-        t_search = tools.getSearchDoc(team_key, search.Index(name=_TEAM_SEARCH_INDEX))
+        t_search = tools.getSearchDoc(team_key, search.Index(name=tools._TEAM_SEARCH_INDEX))
         donation_total = t_search.fields[2].value
 
         template_variables = {"t":t, "donation_total":donation_total}
