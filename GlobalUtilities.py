@@ -401,13 +401,12 @@ def queryCursorDB(query, encoded_cursor):
     return [entities, new_cursor]
 
 def searchReturnAll(query, search_results, settings, search_function, entity_return=True):
-    total_results = search_results.number_found
-    num_cursors_needed = int(math.ceil(float(total_results) / float(_NUM_RESULTS)))
-
     all_results = []
     results = search_results
+
+    end_of_results = False
     
-    for x in range(0, num_cursors_needed):
+    while (end_of_results == False):
         if entity_return == True:
             all_results += searchToEntities(results)
 
@@ -415,8 +414,13 @@ def searchReturnAll(query, search_results, settings, search_function, entity_ret
             all_results.extend(searchToDocuments(results))
 
         query_cursor = results.cursor
+        if query_cursor == None:
+            # Stop the loop
+            end_of_results = True
 
-        results = search_function(query, query_cursor=query_cursor, entity_return=entity_return)[0]
+        else:
+            # Otherwise, fetch the next results
+            results = search_function(query, query_cursor=query_cursor, entity_return=entity_return)[0]
 
     return all_results
 
