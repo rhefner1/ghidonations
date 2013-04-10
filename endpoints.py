@@ -9,24 +9,6 @@ from google.appengine.ext import endpoints
 from protorpc import remote
 from endpoints_messages import *
 
-## Cloud Endpoints Cookies - monkey patch
-from google.appengine.ext.endpoints import api_config
-
-class PatchedApiConfigGenerator(api_config.ApiConfigGenerator):
-  def pretty_print_config_to_json(self, services, hostname=None):
-    logging.warn('TODO: remove this monkey patch after GAE version 1.7.7')
-    # Sorry, the next line is not PEP8 compatible :(
-    json_string = super(PatchedApiConfigGenerator, self).pretty_print_config_to_json(
-        services, hostname=hostname)
-    to_patch = json.loads(json_string)
-    to_patch['auth'] = {'allowCookieAuth': True}
-    return json.dumps(to_patch, sort_keys=True, indent=2)
- 
- 
-api_config.ApiConfigGenerator = PatchedApiConfigGenerator
-
-## End monkey patch
-
 endpoints_client_id = "AIzaSyB7k0LsUXibTJHkCx_D3MA0HT6tQAtYZAo"
 endpoints_description = "GHI Donations API"
 endpoints_clients = [endpoints_client_id, endpoints.API_EXPLORER_CLIENT_ID]
