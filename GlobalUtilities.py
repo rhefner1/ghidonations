@@ -251,16 +251,35 @@ def newSettings(self, name, email):
     return new_settings.key
 
 ###### ------ Spreadsheet Export Controller Utilities ------ ######
-def newFile(mime_type, file_name):
-    file_key = files.blobstore.create(mime_type=mime_type, _blobinfo_uploaded_filename=file_name)
-    return str(file_key)
-
 def checkTaskCompletion(s, job_id):
     m = memcache.get(job_id)
     if m == None or m == 0:
         return False, None
     else:
         return True, m
+
+def getAllSearchDocs(index_name):
+    index = search.Index(name=index_name)
+
+    documents = []
+    last_doc_id = None
+    completed = False
+
+    while (completed == False):
+        docs_query = index.get_range(start_id=last_doc_id, limit=1000, include_start_object=False)
+
+        if docs_query.results != []:
+            documents.extend(docs_query.results)
+            last_doc_id = docs_query.results[-1].doc_id
+
+        else:
+            completed = True
+
+    return documents
+
+def newFile(mime_type, file_name):
+    file_key = files.blobstore.create(mime_type=mime_type, _blobinfo_uploaded_filename=file_name)
+    return str(file_key)
 
 ###### ------ Deferred Utilities ------ ######
 def indexEntitiesFromQuery(query, query_cursor=None):
@@ -401,13 +420,12 @@ def queryCursorDB(query, encoded_cursor):
     return [entities, new_cursor]
 
 def searchReturnAll(query, search_results, settings, search_function, entity_return=True):
-    total_results = search_results.number_found
-    num_cursors_needed = int(math.ceil(float(total_results) / float(_NUM_RESULTS)))
-
     all_results = []
     results = search_results
+
+    end_of_results = False
     
-    for x in range(0, num_cursors_needed):
+    while (end_of_results == False):
         if entity_return == True:
             all_results += searchToEntities(results)
 
@@ -415,8 +433,13 @@ def searchReturnAll(query, search_results, settings, search_function, entity_ret
             all_results.extend(searchToDocuments(results))
 
         query_cursor = results.cursor
+        if query_cursor == None:
+            # Stop the loop
+            end_of_results = True
 
-        results = search_function(query, query_cursor=query_cursor, entity_return=entity_return)[0]
+        else:
+            # Otherwise, fetch the next results
+            results = search_function(query, query_cursor=query_cursor, entity_return=entity_return)[0]
 
     return all_results
 
