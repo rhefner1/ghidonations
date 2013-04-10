@@ -597,171 +597,171 @@ class IPN(BaseHandlerAdmin):
         logging.info("Payment status: " + payment_status)
 
         # Check payment is completed, not Pending or Failed.
-        # if self.request.get('payment_status') == 'Completed':
-        # else:
-        #     self.response.write('Error, sorry. The parameter payment_status was not Completed.')
-
-        logging.info("All parameters: " + str(parameters))
-
-        # Check the IPN POST request came from real PayPal, not from a fraudster.
-        if parameters:
-            parameters['cmd']='_notify-validate'
-            params = urllib.urlencode(parameters)
-            status = urlfetch.fetch(
-                        url = PP_URL,
-                        method = urlfetch.POST,
-                        payload = params,
-                       ).content
-            if not status == "VERIFIED":
-                logging.debug("PayPal returned status:" + str(status))
-                logging.debug('Error. The request could not be verified, check for fraud.')
-                parameters['homemadeParameterValidity']=False
-
-        #Comparing receiver email to list of allowed email addresses
-        try:
-            receiver_email = parameters['receiver_email']
-            authenticated = False
-            settings = None
-        
-            #If the receiver_email isn't in the database, this will fail
-            settings = all_account_emails[receiver_email]
-            authenticated = True
-            logging.info("Getting payment to account: " + receiver_email + ", #: " + settings)
-
-        except:
-            authenticated = False
-            logging.info("No match for incoming payment email address. Not continuing.")
-
-        # Make sure money is going to the correct account - otherwise fraudulent
-        if authenticated == True:
-            #Currency of the donation
-            #currency = parameters['mc_currency']
-
-            s = tools.getKey(settings).get()
-            ipn_data = str(parameters)
-
-            #Email and payer ID  numbers
+        if payment_status == "Failed" or payment_status == "Pending":
+           logging.error("Payment status is " + payment_status ", so not continuing.")
+           
+        else:
+            logging.info("All parameters: " + str(parameters))
+    
+            # Check the IPN POST request came from real PayPal, not from a fraudster.
+            if parameters:
+                parameters['cmd']='_notify-validate'
+                params = urllib.urlencode(parameters)
+                status = urlfetch.fetch(
+                            url = PP_URL,
+                            method = urlfetch.POST,
+                            payload = params,
+                           ).content
+                if not status == "VERIFIED":
+                    logging.debug("PayPal returned status:" + str(status))
+                    logging.debug('Error. The request could not be verified, check for fraud.')
+                    parameters['homemadeParameterValidity']=False
+    
+            #Comparing receiver email to list of allowed email addresses
             try:
-                email = parameters['payer_email']
-            except:
-                email = None
+                receiver_email = parameters['receiver_email']
+                authenticated = False
+                settings = None
             
-            try:
-                name = parameters['first_name'] + " " + parameters['last_name']
+                #If the receiver_email isn't in the database, this will fail
+                settings = all_account_emails[receiver_email]
+                authenticated = True
+                logging.info("Getting payment to account: " + receiver_email + ", #: " + settings)
+    
             except:
-                name = "Anonymous Donor"
-
-            #Check if an address was given by the donor
-            try:
-                #Stich all the address stuff together
-                address = [parameters['address_street'], parameters['address_city'], parameters['address_state'], parameters['address_zip']]
-                
-            except:
-                address = None
-
-            #Reading designation and notes values encoded in JSON from
-            #donate form
-            decoded_custom = None
-
-            try:
-                decoded_custom = json.loads(parameters["custom"])
-
-                team_key = tools.getKey(decoded_custom[0])
-                individual_key = tools.getKey(decoded_custom[1])
-                special_notes = decoded_custom[2]
-
-                if s.exists.entity(team_key) == False:
-                    team_key = None
-                if s.exists.entity(individual_key) == False:
-                    individual_key = None
-
-            except:
-                logging.info("Excepted on designation.")
-                team_key = None
-                individual_key = None
-                special_notes = None
-
-            try:
-                cover_trans = decoded_custom[3]
-                email_subscr = decoded_custom[4]
-            except:
-                cover_trans = False
-                email_subscr = False
-
-
-            confirmation_amount = tools.toDecimal(0)
-            amount_donated = tools.toDecimal(0)
-            try:
-                confirmation_amount = parameters['mc_gross']
-                amount_donated = float(parameters['mc_gross']) - float(parameters['mc_fee'])
-
-            except:
-                pass
-                
-            #Find out what kind of payment this was - recurring, one-time, etc.
-            try:
-                payment_type = parameters['txn_type']
-                logging.info("Txn_type not available, so continuing with payment status")
-            except:
-                payment_type = payment_status
-
-            if payment_type == "recurring_payment_profile_created" or payment_type == "subscr_signup":
-                logging.info("This is the start of a recurring payment. Create info object.")
-
-                payment_id = parameters['subscr_id']
-
-                #Duration between payments
-                duration = "recurring"
-
-                # s.create.recurring_donation(payment_id, duration, ipn_data)
-                
-            elif payment_type == "recurring_payment" or payment_type == "subscr_payment":
-                logging.info("This is a recurring donation payment.")
-                
-                payment_id = parameters['subscr_id']
-                payment_type = "recurring"
-                
-                #Create a new donation
-                s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, True, payment_id, special_notes, payment_type, email_subscr, ipn_data)
-
-            elif payment_type == "web_accept":
-                logging.info("This is a one-time donation.")
-
-                if payment_status == "Completed":
-                    payment_id = parameters['txn_id']
-
-                    #Create a new donation
-                    s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, True, payment_id, special_notes, "one-time", email_subscr, ipn_data)
-
-                else:
-                    logging.info("Payment status not complete.  Not logging the donation.")
-
-            elif payment_type == "subscr_cancel":
-                logging.info("A subscriber has cancelled.")
-                amount_donated = "N/A"
-            
-            elif payment_type == "subscr_failed":
-                logging.info("A subscriber payment has failed.")
-                amount_donated = "N/A"
-
-            elif payment_type == "Refunded":
+                authenticated = False
+                logging.info("No match for incoming payment email address. Not continuing.")
+    
+            # Make sure money is going to the correct account - otherwise fraudulent
+            if authenticated == True:
+                #Currency of the donation
+                #currency = parameters['mc_currency']
+    
+                s = tools.getKey(settings).get()
+                ipn_data = str(parameters)
+    
+                #Email and payer ID  numbers
                 try:
-                    donation = models.Donation.gql("WHERE payment_id = :t", t=parameters["txn_id"])
-                    donation_key = donation[0].key()
-
-                    donation_key.delete()
-                    logging.info("Refund detected and donation deleted. (" + donation_key.urlsafe() + ")")
+                    email = parameters['payer_email']
                 except:
-                    logging.info("Donation tried to be deleted, but failed. Most likely already deleted.")
+                    email = None
                 
-            try:
-                logging.info("Recording IPN")
-                logging.info("Payment type: " + payment_type)
-                logging.info("Name: " + name)
-                logging.info("Email: " + email)
-                logging.info("Amount donated: " + str(amount_donated))
-            except:
-                logging.error("Failed somewhere in the logs.")
+                try:
+                    name = parameters['first_name'] + " " + parameters['last_name']
+                except:
+                    name = "Anonymous Donor"
+    
+                #Check if an address was given by the donor
+                try:
+                    #Stich all the address stuff together
+                    address = [parameters['address_street'], parameters['address_city'], parameters['address_state'], parameters['address_zip']]
+                    
+                except:
+                    address = None
+    
+                #Reading designation and notes values encoded in JSON from
+                #donate form
+                decoded_custom = None
+    
+                try:
+                    decoded_custom = json.loads(parameters["custom"])
+    
+                    team_key = tools.getKey(decoded_custom[0])
+                    individual_key = tools.getKey(decoded_custom[1])
+                    special_notes = decoded_custom[2]
+    
+                    if s.exists.entity(team_key) == False:
+                        team_key = None
+                    if s.exists.entity(individual_key) == False:
+                        individual_key = None
+    
+                except:
+                    logging.info("Excepted on designation.")
+                    team_key = None
+                    individual_key = None
+                    special_notes = None
+    
+                try:
+                    cover_trans = decoded_custom[3]
+                    email_subscr = decoded_custom[4]
+                except:
+                    cover_trans = False
+                    email_subscr = False
+    
+    
+                confirmation_amount = tools.toDecimal(0)
+                amount_donated = tools.toDecimal(0)
+                try:
+                    confirmation_amount = parameters['mc_gross']
+                    amount_donated = float(parameters['mc_gross']) - float(parameters['mc_fee'])
+    
+                except:
+                    pass
+                    
+                #Find out what kind of payment this was - recurring, one-time, etc.
+                try:
+                    payment_type = parameters['txn_type']
+                except:
+                    logging.info("Txn_type not available, so continuing with payment status")
+                    payment_type = payment_status
+    
+                if payment_type == "recurring_payment_profile_created" or payment_type == "subscr_signup":
+                    logging.info("This is the start of a recurring payment. Create info object.")
+    
+                    payment_id = parameters['subscr_id']
+    
+                    #Duration between payments
+                    duration = "recurring"
+    
+                    # s.create.recurring_donation(payment_id, duration, ipn_data)
+                    
+                elif payment_type == "recurring_payment" or payment_type == "subscr_payment":
+                    logging.info("This is a recurring donation payment.")
+                    
+                    payment_id = parameters['subscr_id']
+                    payment_type = "recurring"
+                    
+                    #Create a new donation
+                    s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, True, payment_id, special_notes, payment_type, email_subscr, ipn_data)
+    
+                elif payment_type == "web_accept":
+                    logging.info("This is a one-time donation.")
+    
+                    if payment_status == "Completed":
+                        payment_id = parameters['txn_id']
+    
+                        #Create a new donation
+                        s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, True, payment_id, special_notes, "one-time", email_subscr, ipn_data)
+    
+                    else:
+                        logging.info("Payment status not complete.  Not logging the donation.")
+    
+                elif payment_type == "subscr_cancel":
+                    logging.info("A subscriber has cancelled.")
+                    amount_donated = "N/A"
+                
+                elif payment_type == "subscr_failed":
+                    logging.info("A subscriber payment has failed.")
+                    amount_donated = "N/A"
+    
+                elif payment_type == "Refunded":
+                    try:
+                        donation = models.Donation.gql("WHERE payment_id = :t", t=parameters["txn_id"])
+                        donation_key = donation[0].key()
+    
+                        donation_key.delete()
+                        logging.info("Refund detected and donation deleted. (" + donation_key.urlsafe() + ")")
+                    except:
+                        logging.info("Donation tried to be deleted, but failed. Most likely already deleted.")
+                    
+                try:
+                    logging.info("Recording IPN")
+                    logging.info("Payment type: " + payment_type)
+                    logging.info("Name: " + name)
+                    logging.info("Email: " + email)
+                    logging.info("Amount donated: " + str(amount_donated))
+                except:
+                    logging.error("Failed somewhere in the logs.")
             
 app = webapp2.WSGIApplication([
        ('/ajax/allcontacts', AllContacts),
