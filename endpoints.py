@@ -729,7 +729,7 @@ class EndpointsAPI(remote.Service):
         # Create unique identifier for this job
         job_id = str(uuid.uuid4())
 
-        params = {'file_name':file_name, 'job_id':job_id, 'settings_key':s.websafe, 'query':req.query}
+        params = {'file_name':file_name, 'job_id':job_id, 'settings_key':s.websafe}
         taskqueue.add(url=url, params=params, queue_name="spreadsheet")
 
         memcache.set(job_id, 0)

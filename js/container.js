@@ -489,7 +489,7 @@ function setupDownloadQuery(mode, file_name){
         $("#download_query").html("Generating report - this may take a moment. <img src='/images/ajax-loader.gif'>")
 
         query = $("#search_query").val()
-        params = {"mode":mode, "filename":file_name, "query" : query}
+        params = {"mode":mode, "filename":file_name}
         var request = ghiapi.spreadsheet.start(params)
 
         request.execute(function(response){
