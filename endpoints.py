@@ -438,7 +438,7 @@ class EndpointsAPI(remote.Service):
             individual_key = tools.getKey(individual_key)            
 
         s.create.donation(name, email, amount_donated, amount_donated, address, team_key, 
-                            individual_key, add_deposit, "", "", "offline", False, None)
+                            individual_key, add_deposit, "", notes, "offline", False, None)
 
         return SuccessMessage_Out(success=success, message=message)
     
