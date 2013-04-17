@@ -43,7 +43,7 @@ def checkCredentials(self, email, password):
     except:
         return False, None
 
-def checkAuthentication(self, admin_required, endpoints=False):
+def checkAuthentication(self, admin_required, from_endpoints=False):
     try:
         #If the cookie doesn't exist, send them back to login
         u_key = getUserKey(self)
@@ -62,7 +62,7 @@ def checkAuthentication(self, admin_required, endpoints=False):
         message = "Error in checkAuthentication - kicking out to login page. " + str(e)
         logging.info(message)
 
-        if endpoints:
+        if from_endpoints:
             raise endpoints.ForbiddenException(message)
         else:
             self.redirect("/login")
