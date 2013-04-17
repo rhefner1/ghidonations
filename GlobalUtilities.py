@@ -59,10 +59,11 @@ def checkAuthentication(self, admin_required, endpoints=False):
         return u.admin, u.settings.get()
 
     except Exception as e:
-        logging.info("Error in checkAuthentication - kicking out to login page. " + str(e))
+        message = "Error in checkAuthentication - kicking out to login page. " + str(e)
+        logging.info(message)
 
         if endpoints:
-            raise Exception("Error in checkAuthentication")
+            raise endpoints.ForbiddenException(message)
         else:
             self.redirect("/login")
             
