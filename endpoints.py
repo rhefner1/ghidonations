@@ -285,7 +285,7 @@ class EndpointsAPI(remote.Service):
     @endpoints.method(GetIndividualDonations_In, Donations_Out, path='semi/get/individual_donations',
                     http_method='GET', name='semi.get.individual_donations')
     def semi_get_individual_donations(self, req):
-        isAdmin, s = tools.checkAuthentication(self, False, endpoints=True)
+        isAdmin, s = tools.checkAuthentication(self, False, from_endpoints=True)
         query = "individual_key:" + str(req.individual_key)
 
         results = s.search.donation(query, query_cursor=req.query_cursor)
@@ -309,7 +309,7 @@ class EndpointsAPI(remote.Service):
                     http_method='GET', name='semi.get.team_members')
     def semi_get_team_members(self, req):
     # Returns team information
-        isAdmin, s = tools.checkAuthentication(self, False, endpoints=True)
+        isAdmin, s = tools.checkAuthentication(self, False, from_endpoints=True)
 
         t = tools.getKey(req.team_key).get()
         members_list = t.data.members_list
