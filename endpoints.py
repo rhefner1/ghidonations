@@ -1,5 +1,5 @@
 import logging, json, datetime, appengine_config, webapp2, uuid
-from google.appengine.api import taskqueue, memcache
+from google.appengine.api import taskqueue, memcache, search
 
 import GlobalUtilities as tools
 import DataModels as models
@@ -225,7 +225,7 @@ class EndpointsAPI(remote.Service):
     # get.teams
     @endpoints.method(Query_In, Teams_Out, path='get/teams',
                     http_method='GET', name='get.teams')
-    def getTeams(self, req):
+    def get_teams(self, req):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
         if req.query == None:
@@ -244,6 +244,17 @@ class EndpointsAPI(remote.Service):
             teams.append(team)
 
         return Teams_Out(objects=teams, new_cursor=new_cursor)
+
+    # get.team_donation_total
+    @endpoints.method(TeamKey_In, GetTeamDonationTotal_Out, path='get/team_donation_total',
+                    http_method='GET', name='get.team_donation_total')
+    def get_team_donation_total(self, req):
+        isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
+
+        t_search = tools.getSearchDoc(req.team_key, search.Index(name=tools._TEAM_SEARCH_INDEX))
+        donation_total = tools.moneyAmount(t_search.fields[2].value)
+
+        return GetTeamDonationTotal_Out(donation_total=donation_total)
 
     # get.team_members
     @endpoints.method(GetTeamMembers_In, Individuals_Out, path='get/team_members',
