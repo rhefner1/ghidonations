@@ -5,7 +5,7 @@ from time import strftime
 
 from google.appengine.ext.webapp import template, blobstore_handlers
 from google.appengine.ext import blobstore
-from google.appengine.api import urlfetch, search
+from google.appengine.api import urlfetch
 
 #Sessions
 from gaesessions import get_current_session
@@ -473,10 +473,7 @@ class TeamMembers(BaseHandlerAdmin):
         team_key = self.request.get("t")
         t = tools.getKey(team_key).get()
 
-        t_search = tools.getSearchDoc(team_key, search.Index(name=tools._TEAM_SEARCH_INDEX))
-        donation_total = t_search.fields[2].value
-
-        template_variables = {"t":t, "donation_total":donation_total}
+        template_variables = {"t":t}
         self.response.write(
            template.render('pages/team_members.html', template_variables))
 

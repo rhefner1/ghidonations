@@ -77,4 +77,10 @@ $(document).ready(function(){
     	
     	
     })
+
+    var params = {"team_key":team_key}
+    var request = ghiapi.get.teamdonationtotal(params)
+    request.execute(function(response){
+        $("#donation_total").text(response.donation_total)
+    })
 })

@@ -113,6 +113,10 @@ class GetContactDonations_In(messages.Message):
     query_cursor = messages.StringField(1)
     contact_key = messages.StringField(2, required=True)
 
+# get.team_donation_total
+class GetTeamDonationTotal_Out(messages.Message):
+    donation_total = messages.StringField(1, required=True)
+
 # mailchimp.lists
 class MailchimpLists_In(messages.Message):
     mc_apikey = messages.StringField(1, required=True)
