@@ -20,6 +20,7 @@ function get_mclists(){
             mcl_c.append(selector)
 
             var lists_dict = response.mc_lists
+            lists_dict = JSON.parse(lists_dict)
 
             $.each(lists_dict, function(name, id){
                 var new_option = document.createElement("option")
