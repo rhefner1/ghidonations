@@ -3,6 +3,7 @@ from google.appengine.api import taskqueue, memcache, search
 
 import GlobalUtilities as tools
 import DataModels as models
+import spreadsheet_pipelines
 
 # Cloud Endpoints
 from google.appengine.ext import endpoints
@@ -722,28 +723,15 @@ class EndpointsAPI(remote.Service):
     def spreadsheet_start(self, req):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
-        file_name = s.name + "-" + req.filename + ".xls"
-
-        m = req.mode
-        if m == "contacts":  
-            url = "/tasks/spreadsheet/contacts"  
-
-        elif m == "donations":
-            url = "/tasks/spreadsheet/donations"
-
-        elif m == "individuals":
-            url = "/tasks/spreadsheet/individuals"
-        else:
-            # Error
+        if req.mode not in ["contacts", "donations", "individuals"]: 
             raise endpoints.NotFoundException("Incorrect spreadsheet mode")
 
         # Create unique identifier for this job
         job_id = str(uuid.uuid4())
-
-        params = {'file_name':file_name, 'job_id':job_id, 'settings_key':s.websafe}
-        taskqueue.add(url=url, params=params, queue_name="spreadsheet")
-
         memcache.set(job_id, 0)
+        
+        stage = spreadsheet_pipelines.GenerateReport(s.websafe, req.mode, job_id)
+        stage.start(queue_name='spreadsheet')
 
         return SpreadsheetStart_Out(job_id=job_id)
 

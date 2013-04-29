@@ -325,10 +325,10 @@ def getFlash(self):
     return message
 
 def giveError(self, error_code):
-    checkAuthentication(self, False)
+    # checkAuthentication(self, False)
 
     self.error(error_code)
-    self.response.out.write(
+    self.response.write(
                    template.render('pages/error.html', {}))
 
 def getSearchDoc(doc_id, index):
@@ -403,15 +403,23 @@ def moneyAmount(money_string):
     money = "${:,.2f}".format(money)
     return money
 
-def queryCursorDB(query, encoded_cursor):
+def ndbKeyToUrlsafe(keys):
+    urlsafe_keys = []
+
+    for k in keys:
+        urlsafe_keys.append(k.urlsafe())
+
+    return urlsafe_keys
+
+def queryCursorDB(query, encoded_cursor, keys_only=False, num_results=_NUM_RESULTS):
     new_cursor = None
     more = None
 
     if encoded_cursor:
         query_cursor = Cursor.from_websafe_string(encoded_cursor)
-        entities, cursor, more = query.fetch_page(_NUM_RESULTS, start_cursor=query_cursor)
+        entities, cursor, more = query.fetch_page(num_results, start_cursor=query_cursor, keys_only=keys_only)
     else:
-        entities, cursor, more = query.fetch_page(_NUM_RESULTS)
+        entities, cursor, more = query.fetch_page(num_results, keys_only=keys_only)
 
     if more:
         new_cursor = cursor.to_websafe_string()

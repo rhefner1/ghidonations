@@ -1,4 +1,4 @@
-#App engine platform
+# App engine platform
 import webapp2, appengine_config, logging, json, quopri, urllib
 from datetime import datetime
 from time import strftime
@@ -7,10 +7,10 @@ from google.appengine.ext.webapp import template, blobstore_handlers
 from google.appengine.ext import blobstore
 from google.appengine.api import urlfetch
 
-#Sessions
+# Sessions
 from gaesessions import get_current_session
 
-#Application files
+# Application files
 import DataModels as models
 import GlobalUtilities as tools
 
