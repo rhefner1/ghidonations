@@ -5,7 +5,7 @@ import GlobalUtilities as tools
 import DataModels as models
 
 from google.appengine.api import mail, taskqueue, files, memcache
-from google.appengine.ext import deferred
+from google.appengine.ext import deferred, blobstore
 from google.appengine.ext.webapp import template
 from datetime import datetime, timedelta
 
@@ -63,6 +63,16 @@ class DelayIndexing(webapp2.RequestHandler):
             e.search.index()
         except:
             self.error(500)
+
+class DeleteSpreadsheet(webapp2.RequestHandler):
+    def post(self):
+        blob_key = self.request.get("k")
+
+        try:
+            blob = blobstore.BlobInfo.get(blob_key)
+            blob.delete()
+        except:
+            pass
 
 class IndexAll(webapp2.RequestHandler):
     def post(self):
@@ -353,6 +363,7 @@ app = webapp2.WSGIApplication([
         ('/tasks/annualreport', AnnualReport),
         ('/tasks/confirmation', Confirmation),
         ('/tasks/delayindexing', DelayIndexing),
+        ('/tasks/deletespreadsheet', DeleteSpreadsheet),
         ('/tasks/indexall', IndexAll),
         ('/tasks/mailchimp', MailchimpAdd),
 

@@ -1,7 +1,7 @@
 # App Engine platform
 import logging, csv, gc
 from google.appengine.ext import blobstore
-from google.appengine.api import files, memcache
+from google.appengine.api import files, memcache, taskqueue
 
 # Application files
 import DataModels as models
@@ -92,9 +92,11 @@ class HeaderCSV(pipeline.Pipeline):
 			writer.writerow(header_data)
 
 		files.finalize(file_key)
-		blob_key = files.blobstore.get_blob_key(file_key)
+		blob_key = str(files.blobstore.get_blob_key(file_key))
 
-		return str(blob_key)
+		taskqueue.add(url="/tasks/deletespreadsheet", params={'k':blob_key}, countdown=3600, queue_name="deletespreadsheet")
+
+		return blob_key
 
 class CreateCSV(pipeline.Pipeline):
 	def run(self, mode, file_name, keys):
@@ -150,10 +152,12 @@ class CreateCSV(pipeline.Pipeline):
 				gc.collect()
 
 		files.finalize(file_key)
-		blob_key = files.blobstore.get_blob_key(file_key)
+		blob_key = str(files.blobstore.get_blob_key(file_key))
 
-		return str(blob_key)
+		taskqueue.add(url="/tasks/deletespreadsheet", params={'k':blob_key}, countdown=3600, queue_name="deletespreadsheet")
 
+		return blob_key
+		
 class ConcatCSV(pipeline.Pipeline):
 	def run(self, job_id, file_name, *blobs):
 		file_key = tools.newFile("text/csv", file_name)
@@ -170,9 +174,11 @@ class ConcatCSV(pipeline.Pipeline):
 				gc.collect()
 
 		files.finalize(file_key)
-		blob_key = files.blobstore.get_blob_key(file_key)
+		blob_key = str(files.blobstore.get_blob_key(file_key))
 
-		return str(blob_key)
+		taskqueue.add(url="/tasks/deletespreadsheet", params={'k':blob_key}, countdown=3600, queue_name="deletespreadsheet")
+
+		return blob_key
 
 class ConfirmCompletion(pipeline.Pipeline):
 	def run(self, job_id, final_blob):

@@ -36,3 +36,10 @@ queue:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
     task_retry_limit: 3
+
+- name: deletespreadsheet
+  rate: 1/s
+  retry_parameters:
+    min_backoff_seconds: 30
+    max_backoff_seconds: 300
+    task_retry_limit: 3
