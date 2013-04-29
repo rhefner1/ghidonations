@@ -23,6 +23,9 @@ class GenerateReport(pipeline.Pipeline):
 
 		elif mode == "individuals":
 			query = s.data.all_individuals
+
+		else:
+			raise Exception("Unidentified mode in GenerateReport")
 		
 		blobs = []
 		cursor = None
