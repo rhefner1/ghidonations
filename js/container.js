@@ -476,8 +476,10 @@ function checkTaskStatus(response){
             }, 5000)
         }
         else{
+            // If the report isn't done generating, show status from server
             $("#download_progress").text(response2.status)
-            // If the report isn't done generating, check again later
+            
+            // Check again later
             timeoutCheckStatus(response)
         }
 
