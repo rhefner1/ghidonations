@@ -1,4 +1,4 @@
-gvar home_page = $("#home_page").val()
+var home_page = $("#home_page").val()
 var previous_hash_params = {}
 var previous_hash_base = ""
 var ghiapi = null
