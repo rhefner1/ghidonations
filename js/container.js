@@ -476,7 +476,7 @@ function checkTaskStatus(response){
             }, 5000)
         }
         else{
-            $("#download_progress").text(response.status)
+            $("#download_progress").text(response2.status)
             // If the report isn't done generating, check again later
             timeoutCheckStatus(response)
         }
@@ -489,8 +489,8 @@ function setupDownloadQuery(mode, file_name){
         $(this).hide()
         $("#download_query").html("Generating report - <span id='download_progress'>0</span>% finished. <img style='margin-left:5px' src='/images/ajax-loader.gif'>")
 
-        query = $("#search_query").val()
-        params = {"mode":mode, "filename":file_name}
+        var query = $("#search_query").val()
+        var params = {"mode":mode, "filename":file_name}
         var request = ghiapi.spreadsheet.start(params)
 
         request.execute(function(response){
