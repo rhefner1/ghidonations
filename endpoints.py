@@ -733,6 +733,9 @@ class EndpointsAPI(remote.Service):
         stage = spreadsheet_pipelines.GenerateReport(s.websafe, req.mode, job_id)
         stage.start(queue_name='spreadsheet')
 
+        pipeline_id = stage.pipeline_id
+        memcache.set("id" + job_id, pipeline_id)
+
         return SpreadsheetStart_Out(job_id=job_id)
 
     # spreadsheet.check
@@ -742,8 +745,9 @@ class EndpointsAPI(remote.Service):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
         completed, blob_key = tools.checkTaskCompletion(s, req.job_id)
+        status = tools.pipelineStatus(job_id)
 
-        return SpreadsheetCheck_Out(completed=completed, blob_key=blob_key)
+        return SpreadsheetCheck_Out(completed=completed, blob_key=blob_key, status=status)
 
 app = endpoints.api_server([EndpointsAPI], restricted=False)
 app = appengine_config.webapp_add_wsgi_middleware(app)
