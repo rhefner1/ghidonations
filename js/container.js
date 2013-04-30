@@ -506,7 +506,7 @@ function setupDownloadQuery(mode, file_name){
 function timeoutCheckStatus(response){
     setTimeout(function(){
         checkTaskStatus(response)
-    }, 1000)
+    }, 3000)
 }
 
 // ---- Utilities ---- //
