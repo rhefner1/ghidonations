@@ -745,7 +745,7 @@ class EndpointsAPI(remote.Service):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
         completed, blob_key = tools.checkTaskCompletion(s, req.job_id)
-        status = tools.pipelineStatus(job_id)
+        status = tools.pipelineStatus(req.job_id)
 
         return SpreadsheetCheck_Out(completed=completed, blob_key=blob_key, status=status)
 

@@ -35,7 +35,7 @@ class GenerateReport(pipeline.Pipeline):
 		blobs.append( (yield HeaderCSV(mode, header_file_name)) )
 
 		while True:
-			results = tools.queryCursorDB(query, cursor, keys_only=True, num_results=1)
+			results = tools.queryCursorDB(query, cursor, keys_only=True, num_results=2)
 			keys, cursor = results[0], results[1]
 			file_name = job_id + "-" + str( len(blobs) ) + ".csv"
 

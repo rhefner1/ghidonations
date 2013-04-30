@@ -413,25 +413,29 @@ def ndbKeyToUrlsafe(keys):
 
 def pipelineStatus(job_id):
     pipeline_id = memcache.get("id" + job_id)
+    logging.debug(pipeline_id)
 
     if pipeline_id:
         status_tree = pipeline.get_status_tree(pipeline_id)
-        logging.debug(status_tree)
 
         total_pipelines = 0
         pipelines_finished = 0
 
         for pipe in status_tree["pipelines"].values():
 
-            if pipe["status"] == "done":
+            status = pipe['status']
+            logging.info(status)
+
+            if status == "filled" or status == "done":
                 pipelines_finished += 1
 
             total_pipelines += 1
 
-        percentage = pipelines_finished / total_pipelines
+        percentage = float(pipelines_finished) / float(total_pipelines)
         return int(percentage * 100)
 
     else:
+        logging.debug("Could not find pipeline_id, defaulting to status=0")
         return 0
 
 def queryCursorDB(query, encoded_cursor, keys_only=False, num_results=_NUM_RESULTS):
