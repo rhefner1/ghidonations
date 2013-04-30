@@ -37,19 +37,19 @@ handlers:
 # Secured Endpoints
 - url: /
   script: mooha.app
-  secure: optional
+  secure: always
 
 - url: /ipn
   script: mooha.app
-  secure: optional
+  secure: always
 
 - url: /login
   script: mooha.app
-  secure: optional
+  secure: always
 
 - url: /rpc
   script: rpc.app
-  secure: optional
+  secure: always
 
 
 # Unsecured Endpoints
