@@ -5,7 +5,7 @@ import GlobalUtilities as tools
 import DataModels as models
 
 from google.appengine.api import mail, taskqueue, files, memcache
-from google.appengine.ext import deferred
+from google.appengine.ext import deferred, blobstore
 from google.appengine.ext.webapp import template
 from datetime import datetime, timedelta
 
@@ -64,6 +64,16 @@ class DelayIndexing(webapp2.RequestHandler):
         except:
             self.error(500)
 
+class DeleteSpreadsheet(webapp2.RequestHandler):
+    def post(self):
+        blob_key = self.request.get("k")
+
+        try:
+            blob = blobstore.BlobInfo.get(blob_key)
+            blob.delete()
+        except:
+            pass
+
 class IndexAll(webapp2.RequestHandler):
     def post(self):
         mode = self.request.get("mode")
@@ -99,179 +109,6 @@ class MailchimpAdd(webapp2.RequestHandler):
         s.mailchimp.add(email, name, True)
 
         logging.info("Retrying Mailchimp add through task queue for: " + email  + " under settings ID: " + settings_key)
-
-class SpreadsheetContacts(webapp2.RequestHandler):
-    def post(self):
-        settings_key = self.request.get("settings_key")
-        s = tools.getKey(settings_key).get()
-
-        file_name = self.request.get("file_name")
-        job_id = self.request.get("job_id")
-
-        #Initialize a xlwt Excel file
-        wb = Workbook()
-        ws0 = wb.add_sheet('Sheet 1')
-
-        logging.info("Exporting contacts spreadsheet")
-
-        contacts = s.data.all_contacts
-            
-        #Write headers
-        ws0.write(0, 0, "Name")
-        ws0.write(0, 1, "Email")
-        ws0.write(0, 2, "Total Donated")
-        ws0.write(0, 3, "Number Donations")
-        ws0.write(0, 4, "Phone")
-        ws0.write(0, 5, "Street")
-        ws0.write(0, 6, "City")
-        ws0.write(0, 7, "State")
-        ws0.write(0, 8, "Zipcode")
-        ws0.write(0, 9, "Created")
-
-        current_line = 1
-        for c in contacts:
-
-            try:
-                ws0.write(current_line, 0, c.name)
-                ws0.write(current_line, 1, c.email)
-                ws0.write(current_line, 2, c.data.donation_total)
-                ws0.write(current_line, 3, c.data.number_donations)
-                ws0.write(current_line, 4, c.phone)
-
-                ws0.write(current_line, 5, c.address[0])
-                ws0.write(current_line, 6, c.address[1])
-                ws0.write(current_line, 7, c.address[2])
-                ws0.write(current_line, 8, c.address[3])
-
-                ws0.write(current_line, 9, str(c.creation_date))
-
-                current_line += 1
-
-            except Exception, e:
-                logging.error("Failed on key " + c.doc_id + " because " + str(e))
-                current_line += 1
-
-            # Call the garbage handler
-            gc.collect()
-
-        file_key = tools.newFile("application/vnd.ms-excel", file_name)
-
-        with files.open(file_key, 'a') as f:
-            wb.save(f)
-
-        files.finalize(file_key)
-        blob_key = files.blobstore.get_blob_key(file_key)
-
-        memcache.set(job_id, str(blob_key))
-
-class SpreadsheetDonations(webapp2.RequestHandler):
-    def post(self):
-        settings_key = self.request.get("settings_key")
-        s = tools.getKey(settings_key).get()
-
-        file_name = self.request.get("file_name")
-        job_id = self.request.get("job_id")
-
-        #Initialize a xlwt Excel file
-        wb = Workbook()
-        ws0 = wb.add_sheet('Sheet 1')
-
-        logging.info("Exporting donations spreadsheet")
-
-        donations = s.data.all_donations
-            
-        #Write headers
-        ws0.write(0, 0, "Date")
-        ws0.write(0, 1, "Name")
-        ws0.write(0, 2, "Email")
-        ws0.write(0, 3, "Amount Donated")
-        ws0.write(0, 4, "Payment Type")
-        ws0.write(0, 5, "Team")
-        ws0.write(0, 6, "Individual")
-        ws0.write(0, 7, "Reviewed")
-
-        current_line = 1
-        for d in donations:
-
-            try:
-                ws0.write(current_line, 0, str(d.donation_date))
-                ws0.write(current_line, 1, d.name)
-                ws0.write(current_line, 2, d.email)
-                ws0.write(current_line, 3, str(d.amount_donated))
-                ws0.write(current_line, 4, d.payment_type)
-                ws0.write(current_line, 5, d.designated_team)
-                ws0.write(current_line, 6, d.designated_individual)
-                ws0.write(current_line, 7, str(d.reviewed))
-                    
-                current_line += 1
-
-            except Exception, e:
-                logging.error("Failed on key " + d.doc_id + " because " + str(e))
-                current_line += 1
-
-            # Call the garbage handler
-            gc.collect()
-
-        file_key = tools.newFile("application/vnd.ms-excel", file_name)
-
-        with files.open(file_key, 'a') as f:
-            wb.save(f)
-
-        files.finalize(file_key)
-        blob_key = files.blobstore.get_blob_key(file_key)
-
-        memcache.set(job_id, str(blob_key))
-
-class SpreadsheetIndividuals(webapp2.RequestHandler):
-    def post(self):
-        settings_key = self.request.get("settings_key")
-        s = tools.getKey(settings_key).get()
-
-        file_name = self.request.get("file_name")
-        job_id = self.request.get("job_id")
-
-        #Initialize a xlwt Excel file
-        wb = Workbook()
-        ws0 = wb.add_sheet('Sheet 1')
-
-        logging.info("Exporting individuals spreadsheet")
-
-        individuals = s.data.all_individuals
-            
-        #Write headers
-        ws0.write(0, 0, "Name")
-        ws0.write(0, 1, "Email")
-        ws0.write(0, 2, "Teams")
-        ws0.write(0, 3, "Raised")
-        ws0.write(0, 4, "Date Created")
-
-        current_line = 1
-        for i in individuals:
-            try:                
-                ws0.write(current_line, 0, i.name)
-                ws0.write(current_line, 1, i.email)
-                ws0.write(current_line, 2, i.data.readable_team_names)
-                ws0.write(current_line, 3, str(i.data.donation_total))
-                ws0.write(current_line, 4, str(i.creation_date))
-                    
-                current_line += 1
-
-            except Exception, e:
-                logging.error("Failed on key " + i.doc_id + " because " + str(e))
-                current_line += 1
-
-            # Call the garbage handler
-            gc.collect()
-
-        file_key = tools.newFile("application/vnd.ms-excel", file_name)
-
-        with files.open(file_key, 'a') as f:
-            wb.save(f)
-
-        files.finalize(file_key)
-        blob_key = files.blobstore.get_blob_key(file_key)
-
-        memcache.set(job_id, str(blob_key))
 
 class UpdateAnalytics(webapp2.RequestHandler):
     def _run(self):
@@ -353,12 +190,9 @@ app = webapp2.WSGIApplication([
         ('/tasks/annualreport', AnnualReport),
         ('/tasks/confirmation', Confirmation),
         ('/tasks/delayindexing', DelayIndexing),
+        ('/tasks/deletespreadsheet', DeleteSpreadsheet),
         ('/tasks/indexall', IndexAll),
         ('/tasks/mailchimp', MailchimpAdd),
-
-        ('/tasks/spreadsheet/contacts', SpreadsheetContacts),
-        ('/tasks/spreadsheet/donations', SpreadsheetDonations),
-        ('/tasks/spreadsheet/individuals', SpreadsheetIndividuals),
 
         ('/tasks/updateanalytics', UpdateAnalytics),
         ('/tasks/contactsjson', UpdateContactsJSON)],

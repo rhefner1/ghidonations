@@ -476,7 +476,10 @@ function checkTaskStatus(response){
             }, 5000)
         }
         else{
-            // If the report isn't done generating, check again in 10 sec.
+            // If the report isn't done generating, show status from server
+            $("#download_progress").text(response2.status)
+            
+            // Check again later
             timeoutCheckStatus(response)
         }
 
@@ -486,10 +489,10 @@ function checkTaskStatus(response){
 function setupDownloadQuery(mode, file_name){
     $("#download_query").delegate("button", "click", function(){
         $(this).hide()
-        $("#download_query").html("Generating report - this may take a moment. <img src='/images/ajax-loader.gif'>")
+        $("#download_query").html("Generating report - <span id='download_progress'>0</span>% finished. <img style='margin-left:5px' src='/images/ajax-loader.gif'>")
 
-        query = $("#search_query").val()
-        params = {"mode":mode, "filename":file_name}
+        var query = $("#search_query").val()
+        var params = {"mode":mode, "filename":file_name}
         var request = ghiapi.spreadsheet.start(params)
 
         request.execute(function(response){
@@ -503,7 +506,7 @@ function setupDownloadQuery(mode, file_name){
 function timeoutCheckStatus(response){
     setTimeout(function(){
         checkTaskStatus(response)
-    }, 5000)
+    }, 3000)
 }
 
 // ---- Utilities ---- //

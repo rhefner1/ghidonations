@@ -1,5 +1,5 @@
 application: ghidonations
-version: 5d
+version: 5e
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -8,6 +8,7 @@ default_expiration: "30d"
 
 handlers:
 
+# Static Files
 - url: /favicon\.ico
   static_files: images/favicon.ico
   upload: images/favicon\.ico
@@ -32,15 +33,26 @@ handlers:
 - url: /js
   static_dir: js
 
-- url: /admin/.*
-  script: google.appengine.ext.admin.application
-  login: admin
 
-# Should be always secure
+# Secured Endpoints
 - url: /
   script: mooha.app
   secure: always
 
+- url: /ipn
+  script: mooha.app
+  secure: always
+
+- url: /login
+  script: mooha.app
+  secure: always
+
+- url: /rpc
+  script: rpc.app
+  secure: always
+
+
+# Unsecured Endpoints
 - url: /ajax/*.*
   script: mooha.app
   secure: optional
@@ -48,16 +60,6 @@ handlers:
 - url: /donate
   script: mooha.app
   secure: optional
-
-# Should be always secure
-- url: /ipn
-  script: mooha.app
-  secure: always
-
-# Should be always secure
-- url: /login
-  script: mooha.app
-  secure: always
 
 - url: /logout
   script: mooha.app
@@ -71,27 +73,36 @@ handlers:
   script: mooha.app
   secure: optional
 
-# Should be always secure
-- url: /rpc
-  script: rpc.app
-  secure: always
-
-- url: /_ah/spi/.*
-  script: endpoints.app
-
-- url: /tasks/.*
-  script: tasks.app
-  secure: optional
-  login: admin
-
 - url: /thanks
   script: mooha.app
   secure: optional
 
 
-- url: /.*
-  script: error.app
+# Task queue
+- url: /tasks/.*
+  script: tasks.app
   secure: optional
+  login: admin
+
+
+# API endpoints
+- url: /_ah/pipeline(/.*)?
+  script: pipeline.handlers.app
+
+- url: /_ah/spi/.*
+  script: endpoints.app
+
+
+# Admin Console
+- url: /admin/.*
+  script: google.appengine.ext.admin.application
+  login: admin
+
+
+# If nothing else matches, throw 404
+# - url: /.*
+#   script: error.app
+#   secure: optional
 
 error_handlers:
   - file: pages/error.html

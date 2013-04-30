@@ -285,3 +285,4 @@ class SpreadsheetCheck_In(messages.Message):
 class SpreadsheetCheck_Out(messages.Message):
     completed = messages.BooleanField(1, required=True)
     blob_key = messages.StringField(2)
+    status = messages.IntegerField(3)

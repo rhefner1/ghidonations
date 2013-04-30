@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import logging, json, time, re, math, appengine_config
+import logging, json, time, re, math, appengine_config, pipeline
 from time import gmtime, strftime
 from datetime import *
 from decimal import *
@@ -325,10 +325,10 @@ def getFlash(self):
     return message
 
 def giveError(self, error_code):
-    checkAuthentication(self, False)
+    # checkAuthentication(self, False)
 
     self.error(error_code)
-    self.response.out.write(
+    self.response.write(
                    template.render('pages/error.html', {}))
 
 def getSearchDoc(doc_id, index):
@@ -403,15 +403,50 @@ def moneyAmount(money_string):
     money = "${:,.2f}".format(money)
     return money
 
-def queryCursorDB(query, encoded_cursor):
+def ndbKeyToUrlsafe(keys):
+    urlsafe_keys = []
+
+    for k in keys:
+        urlsafe_keys.append(k.urlsafe())
+
+    return urlsafe_keys
+
+def pipelineStatus(job_id):
+    pipeline_id = memcache.get("id" + job_id)
+    logging.debug(pipeline_id)
+
+    if pipeline_id:
+        status_tree = pipeline.get_status_tree(pipeline_id)
+
+        total_pipelines = 0
+        pipelines_finished = 0
+
+        for pipe in status_tree["pipelines"].values():
+
+            status = pipe['status']
+            logging.info(status)
+
+            if status == "filled" or status == "done":
+                pipelines_finished += 1
+
+            total_pipelines += 1
+
+        percentage = float(pipelines_finished) / float(total_pipelines)
+        return int(percentage * 100)
+
+    else:
+        logging.debug("Could not find pipeline_id, defaulting to status=0")
+        return 0
+
+def queryCursorDB(query, encoded_cursor, keys_only=False, num_results=_NUM_RESULTS):
     new_cursor = None
     more = None
 
     if encoded_cursor:
         query_cursor = Cursor.from_websafe_string(encoded_cursor)
-        entities, cursor, more = query.fetch_page(_NUM_RESULTS, start_cursor=query_cursor)
+        entities, cursor, more = query.fetch_page(num_results, start_cursor=query_cursor, keys_only=keys_only)
     else:
-        entities, cursor, more = query.fetch_page(_NUM_RESULTS)
+        entities, cursor, more = query.fetch_page(num_results, keys_only=keys_only)
 
     if more:
         new_cursor = cursor.to_websafe_string()
