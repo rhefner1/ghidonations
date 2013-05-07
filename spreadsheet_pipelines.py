@@ -17,12 +17,15 @@ class GenerateReport(pipeline.Pipeline):
 
 		if mode == "contacts":
 			query = s.data.all_contacts
+			num_results = 30
 
 		elif mode == "donations":
 			query = s.data.all_donations
+			num_results = 50
 
 		elif mode == "individuals":
 			query = s.data.all_individuals
+			num_results = 15
 
 		else:
 			raise Exception("Unidentified mode in GenerateReport")
@@ -35,7 +38,7 @@ class GenerateReport(pipeline.Pipeline):
 		blobs.append( (yield HeaderCSV(mode, header_file_name)) )
 
 		while True:
-			results = tools.queryCursorDB(query, cursor, keys_only=True, num_results=30)
+			results = tools.queryCursorDB(query, cursor, keys_only=True, num_results=num_results)
 			keys, cursor = results[0], results[1]
 			file_name = job_id + "-" + str( len(blobs) ) + ".csv"
 

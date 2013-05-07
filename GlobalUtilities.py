@@ -413,7 +413,6 @@ def ndbKeyToUrlsafe(keys):
 
 def pipelineStatus(job_id):
     pipeline_id = memcache.get("id" + job_id)
-    logging.debug(pipeline_id)
 
     if pipeline_id:
         status_tree = pipeline.get_status_tree(pipeline_id)
@@ -426,6 +425,9 @@ def pipelineStatus(job_id):
             status = pipe['status']
             logging.info(status)
 
+            if status == "aborted":
+                logging.error("Error in pipelineStatus with job_id: " + job_id)
+                
             if status == "filled" or status == "done":
                 pipelines_finished += 1
 
