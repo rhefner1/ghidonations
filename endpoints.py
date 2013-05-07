@@ -252,8 +252,8 @@ class EndpointsAPI(remote.Service):
     def get_team_donation_total(self, req):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
-        t_search = tools.getSearchDoc(req.team_key, search.Index(name=tools._TEAM_SEARCH_INDEX))
-        donation_total = tools.moneyAmount(t_search.fields[2].value)
+        t = tools.getKey(req.team_key).get()
+        donation_total = tools.moneyAmount(t.data.donation_total)
 
         return GetTeamDonationTotal_Out(donation_total=donation_total)
 
