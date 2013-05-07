@@ -4,6 +4,7 @@ queue:
   retry_parameters:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
+    task_retry_limit: 3
 
 - name: mailchimp
   rate: 10/s
@@ -23,12 +24,14 @@ queue:
   retry_parameters:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
+    task_retry_limit: 3
 
 - name: delayindexing
   rate: 100/s
   retry_parameters:
     min_backoff_seconds: 30
     max_backoff_seconds: 300
+    task_retry_limit: 3
 
 - name: spreadsheet
   rate: 100/s
