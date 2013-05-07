@@ -296,9 +296,11 @@ class Donation(ndb.Expando):
         memcache.delete("numopen" + e.settings.urlsafe())
         memcache.delete("owh" + e.settings.urlsafe())
 
+        if e.team:
+            memcache.delete("tdtotal" + e.team.urlsafe())
+
         if e.team and e.individual:
             memcache.delete("dtotal" + e.team.urlsafe() + e.individual.urlsafe())
-            memcache.delete("tdtotal" + e.team.urlsafe())
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
 
