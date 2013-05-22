@@ -1240,44 +1240,49 @@ class DonationConfirmation(UtilitiesBase):
     def email(self):
         d = self.e
 
-        message = mail.EmailMessage()
-        message.to = d.email
+        if d.email:
 
-        ## TODO - is there any other way to get an organization's email address to appear if it's not verified?
-        settings_name = d.settings.get().name
-        if settings_name == "GHI":
-            message.sender = "donate@globalhopeindia.org"
-            message.subject = "Thanks for your donation!"
+            message = mail.EmailMessage()
+            message.to = d.email
+
+            ## TODO - is there any other way to get an organization's email address to appear if it's not verified?
+            settings_name = d.settings.get().name
+            if settings_name == "GHI":
+                message.sender = "donate@globalhopeindia.org"
+                message.subject = "Thanks for your donation!"
+            else:
+                message.sender = "mailer@ghidonations.appspotmail.com"
+                message.subject = settings_name + " - Thanks for your donation!"
+
+            date = convertTime(d.donation_date).strftime("%B %d, %Y")
+            s = d.settings.get()
+
+            if d.individual:
+                individual_name = d.individual.get().name
+            elif d.team:
+                individual_name = d.team.get().name
+            else:
+                individual_name = None
+
+            template_variables = {"s": s, "d" : d, "date" : date, "individual_name" : individual_name}
+
+            who = "http://ghidonations.appspot.com"
+
+            template_variables["see_url"] = d.confirmation.see_url(who)
+            template_variables["print_url"] = d.confirmation.print_url(who)
+     
+            #Message body/HTML here
+            message.html = template.render("pages/letters/thanks_email.html", template_variables)
+
+            logging.info("Sending confirmation email to: " + d.email)
+
+            #Adding to history
+            logging.info("Confirmation email sent at " + currentTime())
+
+            message.send()
+
         else:
-            message.sender = "mailer@ghidonations.appspotmail.com"
-            message.subject = settings_name + " - Thanks for your donation!"
-
-        date = convertTime(d.donation_date).strftime("%B %d, %Y")
-        s = d.settings.get()
-
-        if d.individual:
-            individual_name = d.individual.get().name
-        elif d.team:
-            individual_name = d.team.get().name
-        else:
-            individual_name = None
-
-        template_variables = {"s": s, "d" : d, "date" : date, "individual_name" : individual_name}
-
-        who = "http://ghidonations.appspot.com"
-
-        template_variables["see_url"] = d.confirmation.see_url(who)
-        template_variables["print_url"] = d.confirmation.print_url(who)
- 
-        #Message body/HTML here
-        message.html = template.render("pages/letters/thanks_email.html", template_variables)
-
-        logging.info("Sending confirmation email to: " + d.email)
-
-        #Adding to history
-        logging.info("Confirmation email sent at " + currentTime())
-
-        message.send()
+            logging.info("No email address to send confirmation.  Not continuing.")
 
     def print_url(self, who):
         if not who:
@@ -1294,7 +1299,6 @@ class DonationConfirmation(UtilitiesBase):
     def task(self, countdown_secs):
         logging.info("Tasking confirmation email.  Delaying for " + str(countdown_secs) + " seconds.")
         taskqueue.add(url="/tasks/confirmation", params={'donation_key' : self.e.websafe}, countdown=int(countdown_secs))
-
 
 class DonationReview(UtilitiesBase):
     ## -- Review Queue -- ##
