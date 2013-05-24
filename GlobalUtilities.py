@@ -513,7 +513,7 @@ def strArrayToKey(self, str_array):
 def toDecimal(number):
     if number != None:
         #Stripping amount donated from commas, etc
-        non_decimal = re.compile(r'[^\d.]+')
+        non_decimal = re.compile(r'[^\d.-]+')
         number = non_decimal.sub('', str(number))
 
         return Decimal(number).quantize(Decimal("1.00"))
