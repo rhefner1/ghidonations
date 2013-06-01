@@ -520,6 +520,22 @@ def toDecimal(number):
     else:
         return Decimal(0).quantize(Decimal("1.00"))
 
+def truncateEmail(email):
+    truncation_length = 20
+    if len(email) > truncation_length:
+        email = email[0:truncation_length]
+        email = email.replace(' ', ', ')
+        email += "..."
+
+    return email
+
+def writeEntities(e_key):
+  e = e_key.get()
+  if isinstance(e.email, str):
+      email = e.email
+      e.email = [email]
+      e.put()
+
 ###### ------ Utilities Classes ------ ######
 class UtilitiesBase():
     def __init__(self, base_entity):
@@ -540,7 +556,9 @@ class SettingsCreate(UtilitiesBase):
             if notes == None or notes == "None":
                 notes = ""
             if email == None or email == "None":
-                email = ""
+                email = [""]
+            if isinstance(email, str):
+                email = [email]
             if phone == None or phone == "None":
                 phone = ""
 
@@ -554,9 +572,11 @@ class SettingsCreate(UtilitiesBase):
 
             new_contact.put()
 
-            if add_mc == True and email:
-                #Add new contact to Mailchimp
-                self.e.mailchimp.add(email, name, False)
+            if add_mc == True:
+                for e in email:
+                    if e != "" and e != None: 
+                        #Add new contact to Mailchimp
+                        self.e.mailchimp.add(email, name, False)
 
             return new_contact.key
         else:
@@ -592,7 +612,7 @@ class SettingsCreate(UtilitiesBase):
             c.update(name, email, None, None, address)
             return c.key
 
-        query = models.Contact.gql("WHERE settings = :s AND email = :e", s=self.e.key, e=email)
+        query = models.Contact.gql("WHERE settings = :s AND email IN :e", s=self.e.key, e=email)
         query2 = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
 
         if gqlCount(query) != 0 and email:
@@ -884,14 +904,14 @@ class SettingsDeposits(UtilitiesBase):
 
 class SettingsExists(UtilitiesBase):
     ## -- Check existences -- ##
-    def contact(self, name):
+    def contact(self, email):
         #Check if a user exists in the database - when creating new users
         try:
-            #Try checking by name 
-            user = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
+        #Try checking by name 
+            query = models.Contact.gql("WHERE settings = :s AND email IN :e", s=self.e.key, e=email)
 
-            if user.fetch(1)[0]:
-                return [True, user[0]]
+            if gqlCount(query) != 0:
+                return [True, query.fetch(1)[0]]
             else:
                 return [False, None]
 
@@ -1121,10 +1141,12 @@ class ContactSearch(UtilitiesBase):
     def createDocument(self):
         c = self.e
 
+        email = ' '.join(c.email)
+
         document = search.Document(doc_id=c.websafe,
             fields=[search.TextField(name='contact_key', value=c.websafe),
                     search.TextField(name='name', value=c.name),
-                    search.TextField(name='email', value=c.email),
+                    search.TextField(name='email', value=email),
 
                     search.NumberField(name='total_donated', value=float(c.data.donation_total)),
                     search.NumberField(name='number_donations', value=int(c.data.number_donations)),
@@ -1137,7 +1159,7 @@ class ContactSearch(UtilitiesBase):
                     search.TextField(name='zip', value=c.address[3]),
 
                     search.DateField(name='created', value=c.creation_date),
-                    search.TextField(name='settings', value=c.settings.urlsafe()),
+                    search.TextField(name='settings', value=c.settings.urlsafe())
                     ])
 
         return document
@@ -1313,6 +1335,8 @@ class DonationReview(UtilitiesBase):
 class DonationSearch(UtilitiesBase):
     def createDocument(self):
         d = self.e
+        c = d.contact.get()
+        email = ' '.join(c.email)
 
         reviewed = "no"
         if d.reviewed == True:
@@ -1330,8 +1354,8 @@ class DonationSearch(UtilitiesBase):
             fields=[search.TextField(name='donation_key', value=d.websafe),
 
                     search.DateField(name='time', value=d.donation_date),
-                    search.TextField(name='name', value=d.contact.get().name),
-                    search.TextField(name='email', value=d.contact.get().email),
+                    search.TextField(name='name', value=c.name),
+                    search.TextField(name='email', value=email),
                     search.NumberField(name='amount', value=float(d.amount_donated)),
                     search.TextField(name='type', value=d.payment_type),
 

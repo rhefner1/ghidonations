@@ -1,12 +1,13 @@
 $(document).ready(function(){
 
     $("form").validationEngine()
+    add_email_handler()
     
     $("#save").click(function(){
         var validation_result = $("form").validationEngine('validate')
         if (validation_result == true){
             var name = $("#newcontact input[name=name]").val()
-            var email = $("#newcontact input[name=email]").val()
+            var email = $(".email_address").map(function(){return $(this).val();}).get()
             var notes = $("#newcontact textarea[name=notes]").val()
 
             var phone_1 = $("input[name=phone_1]").val()

@@ -22,8 +22,23 @@
                         <div class="input"><input class="large validate[required]" type="text" name="name" /></div>
                     </div>
                     <div class="clearfix">
-                        <label>Email</label>
-                        <div class="input"><input class="large validate[custom[email]]" type="text" name="email" /></div>
+
+                            <div id="email_div">
+                                <label class="email1">Email</label>
+                                <div class="input email1">
+                                    <input class="large validate[custom[email]] email_address" style="float:left" type="text" name="email1" value="" />
+                                </div>
+
+                            </div>
+
+                            <label style="clear:both"></label>
+                            <div class="input" style="margin-top:10px" id="add_email_container">
+                                <a href="#" id="add_email">
+                                    <span style="margin-right:3px; float:left" class="ui-icon ui-icon-circle-plus"></span>
+                                    <span style="float:left; margin-top:2px">Add another address...</span>
+                                </a>
+                            </div>
+
                     </div>
                     <div class="clearfix">
                             <label>Phone</label>

@@ -95,7 +95,7 @@ class EndpointsAPI(remote.Service):
 
         for c in results[0]:
             f = c.fields
-            contact = Contact_Data(key=f[0].value, name=f[1].value, email=f[2].value)
+            contact = Contact_Data(key=f[0].value, name=f[1].value, email=tools.truncateEmail(f[2].value))
             contacts.append(contact)
 
         return Contacts_Out(objects=contacts, new_cursor=new_cursor)
@@ -116,7 +116,7 @@ class EndpointsAPI(remote.Service):
         for d in results[0]:
             f = d.fields
 
-            donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=f[3].value,
+            donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=tools.truncateEmail(f[3].value),
                  payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value))
 
             donations.append(donation)
@@ -165,7 +165,7 @@ class EndpointsAPI(remote.Service):
         for d in results[0]:
             f = d.fields
 
-            donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=f[3].value,
+            donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=tools.truncateEmail(f[3].value),
                  payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value))
 
             donations.append(donation)
@@ -309,7 +309,7 @@ class EndpointsAPI(remote.Service):
         for d in results[0]:
             f = d.fields
 
-            donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=f[3].value,
+            donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=tools.truncateEmail(f[3].value),
                  payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value), team_name=f[6].value)
 
             donations.append(donation)
@@ -366,9 +366,7 @@ class EndpointsAPI(remote.Service):
         else:
             #If this email address already exists for a user
             message = "This contact already exists, but we updated their information."
-
-            c = exists[1].get()
-            contact.update(name, email, phone, notes, address)
+            contact_exists[1].update(req.name, req.email, req.phone, req.notes, address)
 
         return SuccessMessage_Out(success=success, message=message)
 

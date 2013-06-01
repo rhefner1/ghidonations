@@ -58,8 +58,13 @@ $(document).ready(function(){
 
         $("#save_contact_changes").fadeIn()
 
+        $(".remove_email").css("display", "block")
+        $("#add_email_container").fadeIn()
+
         $(".unlockable").removeAttr("disabled")
     })
+
+    add_email_handler()
 
     //Change to impression adding mode
     $("#add_impression").click(function(){
@@ -83,20 +88,26 @@ $(document).ready(function(){
 
     //Send RPC request to delete contact
     $("input[name=delete_contact]").click(function(){
-        var contact_key = $("#contact_key").val()
-        var params = {'contact_key':contact_key}
-        var request = ghiapi.contact.delete(params)
+        var r=confirm("Do you want to delete this contact?")
+        if (r==true){
+            var contact_key = $("#contact_key").val()
+            var params = {'contact_key':contact_key}
+            var request = ghiapi.contact.delete(params)
 
-        request.execute(function(response){
-            rpcSuccessMessage(response)
-            window.location.hash = "allcontacts"
-        })
+            request.execute(function(response){
+                rpcSuccessMessage(response)
+                window.location.hash = "allcontacts"
+            })
+        }
+        else{
+            return
+        }  
     })
 
     //Save contact and post it to RPC
     $("input[name=save_contact]").click(function(){
         var name = $("input[name=name]").val()
-        var email = $("input[name=email]").val()
+        var email = $(".email_address").map(function(){return $(this).val();}).get()
         var notes = $("textarea[name=notes]").val()
 
         var phone_1 = $("input[name=phone_1]").val()

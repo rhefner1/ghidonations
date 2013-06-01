@@ -539,3 +539,4 @@ footer {background: #ddd; padding-top: 20px}
 .donate_normal { padding: 5px 5px; width:200px;}
 .donate_selected {border-width:2px; border-style:solid; padding:3px 3px; background-color:rgba(0, 128, 0, 0.4);}
 .team { margin-right:10px;}
+.remove_email {float:left; margin-left:4px}

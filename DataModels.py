@@ -33,7 +33,7 @@ class DecimalProperty(ndb.StringProperty):
 class Contact(ndb.Expando):
     #Standard information we need to know
     name = ndb.StringProperty()
-    email = ndb.StringProperty()
+    email = ndb.StringProperty(repeated=True)
     phone = ndb.StringProperty()
     address = ndb.StringProperty(repeated=True)
     notes = ndb.TextProperty(indexed=True)
@@ -79,15 +79,18 @@ class Contact(ndb.Expando):
         if name == "":
             name = None
         if email == None:
-            email = ""
+            email = [""]
 
         if name != self.name and name != None:
             self.name = name
 
         if email != self.email:
             self.email = email
-            if settings.mc_use and email != "" and email != None:
-                settings.mailchimp.add(email, name, False)
+            
+            if settings.mc_use:
+                for e in email:
+                    if e != "" and e != None:
+                        settings.mailchimp.add(e, name, False)
 
         if phone != self.phone:
             self.phone = phone
