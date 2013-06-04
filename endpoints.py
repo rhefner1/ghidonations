@@ -356,7 +356,7 @@ class EndpointsAPI(remote.Service):
         success = True
 
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
-        contact_exists = s.exists.contact(req.email)
+        contact_exists = s.exists.contact(email=req.email)
 
         address = [req.address.street, req.address.city, req.address.state, req.address.zipcode]
 
@@ -365,8 +365,8 @@ class EndpointsAPI(remote.Service):
 
         else:
             #If this email address already exists for a user
-            message = "This contact already exists, but we updated their information."
-            contact_exists[1].update(req.name, req.email, req.phone, req.notes, address)
+            message = "Whoops! You entered an email address already in use by another contact."
+            success = False
 
         return SuccessMessage_Out(success=success, message=message)
 
@@ -493,7 +493,16 @@ class EndpointsAPI(remote.Service):
         a = req.address
         address = [a.street, a.city, a.state, a.zipcode]
 
-        c.update(req.name, req.email, req.phone, req.notes, address)
+        # Check to see if a new email was added and see if it already exists
+        list_diff = set(req.email) - set(c.email)
+        if list_diff:
+            email_exists = s.exists.contact(email=list_diff)[0]
+
+        if email_exists == True:
+            success = False
+            message = "Whoops! You entered an email address already in use by another contact."
+        else:
+            c.update(req.name, req.email, req.phone, req.notes, address)
         
         return SuccessMessage_Out(success=success, message=message)
 

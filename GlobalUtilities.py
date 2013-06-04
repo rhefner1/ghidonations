@@ -603,29 +603,15 @@ class SettingsCreate(UtilitiesBase):
         new_donation.given_name = name
         new_donation.given_email = email
 
-        contact_key = None
-
-        def write_contact(query):
-            c = query.fetch(1)[0]
+        exists = s.exists.contact(email=email, name=name)
+        if exists[0]:
+            c = exists[1]
             new_donation.contact = c.key
-
-            c.update(name, email, None, None, address)
-            return c.key
-
-        query = models.Contact.gql("WHERE settings = :s AND email IN :e", s=self.e.key, e=email)
-        query2 = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
-
-        if gqlCount(query) != 0 and email:
-            contact_key = write_contact(query)
-
-        elif gqlCount(query2) != 0:
-            contact_key = write_contact(query2)
 
         else:
             #Add new contact
             c_key = self.contact(name, email, None, address, None, email_subscr)
             new_donation.contact = c_key
-            contact_key = c_key
 
         if payment_type == "recurring":
             new_donation.isRecurring = True
@@ -675,7 +661,7 @@ A new note was received from {name} for ${confirmation_amount} ({payment_type} d
 You can view this donation at <a href="https://ghidonations.appspot.com/#contact?c={contact_key}">https://ghidonations.appspot.com/contact?c={contact_key}</a>.<br><br>
 Thanks!"""
 
-                message = message.format(payment_type=payment_type, name=name, confirmation_amount=confirmation_amount, special_notes=special_notes, contact_key=contact_key.urlsafe())
+                message = message.format(payment_type=payment_type, name=name, confirmation_amount=confirmation_amount, special_notes=special_notes, contact_key=new_donation.contact_key.urlsafe())
 
                 email.html = message
                 email.send()
@@ -904,11 +890,10 @@ class SettingsDeposits(UtilitiesBase):
 
 class SettingsExists(UtilitiesBase):
     ## -- Check existences -- ##
-    def contact(self, email):
-        #Check if a user exists in the database - when creating new users
-        try:
-        #Try checking by name 
-            query = models.Contact.gql("WHERE settings = :s AND email IN :e", s=self.e.key, e=email)
+    def _check_contact_email(self, email):
+        try: 
+            query = models.Contact.query(models.Contact.settings == self.e.key,
+                                            models.Contact.email == email)
 
             if gqlCount(query) != 0:
                 return [True, query.fetch(1)[0]]
@@ -917,6 +902,56 @@ class SettingsExists(UtilitiesBase):
 
         except:
             return [False, None]
+
+    def _check_contact_name(self, name):
+        try: 
+            query = models.Contact.query(models.Contact.settings == self.e.key,
+                                            models.Contact.name == name)
+
+            if gqlCount(query) != 0:
+                return [True, query.fetch(1)[0]]
+            else:
+                return [False, None]
+
+        except:
+            return [False, None]
+
+    def contact(self, email=None, name=None):
+        # Email can be either a str or a list. Name must be str
+
+        if not email and not name:
+            raise Exception("Must have either a name or email to determine if contact exists.")
+
+        exists = [False, None]
+
+        # Check by email first
+        if email:
+            if isinstance(email, str):
+                exists = self._check_contact_email(email)
+
+            elif isinstance(email, list):
+                for e in email:
+                    # Check if the contact exists by email
+                    email_exists = self._check_contact_email(e)
+
+                    if email_exists[0]:
+                        exists[0] = True
+
+                        # Add matched contact
+                        if isinstance(exists[1], list):
+                            exists[1].append(email_exists[1])
+                        else:
+                            exists[1] = [email_exists[1]]
+
+        # If the first test fails and a name was provided, try matching by name
+        if exists[0] == False and name:
+            exists = self._check_contact_name(name)
+
+        # If matched contact list only contains one item, take it out of list
+        if isinstance(exists[1], list) and len(exists[1]) == 1:
+            exists[1] = exists[1][0]
+
+        return exists
 
     def entity(self, key):
         exists = True
