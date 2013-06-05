@@ -531,7 +531,7 @@ def truncateEmail(email):
 
 def writeEntities(e_key):
   e = e_key.get()
-  if isinstance(e.email, str):
+  if isinstance(e.email, basestring):
       email = e.email
       e.email = [email]
       e.put()
@@ -557,7 +557,7 @@ class SettingsCreate(UtilitiesBase):
                 notes = ""
             if email == None or email == "None":
                 email = [""]
-            if isinstance(email, str):
+            if isinstance(email, basestring):
                 email = [email]
             if phone == None or phone == "None":
                 phone = ""
@@ -603,7 +603,7 @@ class SettingsCreate(UtilitiesBase):
         new_donation.given_name = name
         new_donation.given_email = email
 
-        exists = s.exists.contact(email=email, name=name)
+        exists = self.e.exists.contact(email=email, name=name)
         if exists[0]:
             c = exists[1]
             new_donation.contact = c.key
@@ -927,7 +927,7 @@ class SettingsExists(UtilitiesBase):
 
         # Check by email first
         if email:
-            if isinstance(email, str):
+            if isinstance(email, basestring):
                 exists = self._check_contact_email(email)
 
             elif isinstance(email, list):
@@ -943,6 +943,9 @@ class SettingsExists(UtilitiesBase):
                             exists[1].append(email_exists[1])
                         else:
                             exists[1] = [email_exists[1]]
+
+            else:
+                raise Exception("Wrong variable type for email.")
 
         # If name provided and the first test fails, try matching by name
         if name and exists[0] == False:
@@ -1031,7 +1034,7 @@ class SettingsSearch(UtilitiesBase):
 
         if query_cursor == None:
             query_cursor = search.Cursor()
-        elif isinstance(query_cursor, (str, unicode)):
+        elif isinstance(query_cursor, (str, unicode, basestring)):
             query_cursor = search.Cursor(web_safe_string=query_cursor)
 
         # construct the sort options
