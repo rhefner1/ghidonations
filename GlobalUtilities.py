@@ -1304,7 +1304,7 @@ class DonationConfirmation(UtilitiesBase):
         if d.email:
 
             message = mail.EmailMessage()
-            message.to = d.email
+            message.to = d.email[0]
 
             ## TODO - is there any other way to get an organization's email address to appear if it's not verified?
             settings_name = d.settings.get().name
@@ -1335,7 +1335,7 @@ class DonationConfirmation(UtilitiesBase):
             #Message body/HTML here
             message.html = template.render("pages/letters/thanks_email.html", template_variables)
 
-            logging.info("Sending confirmation email to: " + d.email)
+            logging.info("Sending confirmation email to: " + d.email[0])
 
             #Adding to history
             logging.info("Confirmation email sent at " + currentTime())
