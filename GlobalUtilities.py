@@ -520,6 +520,22 @@ def toDecimal(number):
     else:
         return Decimal(0).quantize(Decimal("1.00"))
 
+def truncateEmail(email):
+    truncation_length = 35
+    if len(email) > truncation_length:
+        email = email[0:truncation_length]
+        email = email.replace(' ', ', ')
+        email += "..."
+
+    return email
+
+def writeEntities(e_key):
+  e = e_key.get()
+  if isinstance(e.email, str):
+      email = e.email
+      e.email = [email]
+      e.put()
+
 ###### ------ Utilities Classes ------ ######
 class UtilitiesBase():
     def __init__(self, base_entity):
@@ -540,7 +556,9 @@ class SettingsCreate(UtilitiesBase):
             if notes == None or notes == "None":
                 notes = ""
             if email == None or email == "None":
-                email = ""
+                email = [""]
+            if isinstance(email, str):
+                email = [email]
             if phone == None or phone == "None":
                 phone = ""
 
@@ -554,9 +572,11 @@ class SettingsCreate(UtilitiesBase):
 
             new_contact.put()
 
-            if add_mc == True and email:
-                #Add new contact to Mailchimp
-                self.e.mailchimp.add(email, name, False)
+            if add_mc == True:
+                for e in email:
+                    if e and e != "": 
+                        #Add new contact to Mailchimp
+                        self.e.mailchimp.add(email, name, False)
 
             return new_contact.key
         else:
@@ -583,29 +603,15 @@ class SettingsCreate(UtilitiesBase):
         new_donation.given_name = name
         new_donation.given_email = email
 
-        contact_key = None
-
-        def write_contact(query):
-            c = query.fetch(1)[0]
+        exists = s.exists.contact(email=email, name=name)
+        if exists[0]:
+            c = exists[1]
             new_donation.contact = c.key
-
-            c.update(name, email, None, None, address)
-            return c.key
-
-        query = models.Contact.gql("WHERE settings = :s AND email = :e", s=self.e.key, e=email)
-        query2 = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
-
-        if gqlCount(query) != 0 and email:
-            contact_key = write_contact(query)
-
-        elif gqlCount(query2) != 0:
-            contact_key = write_contact(query2)
 
         else:
             #Add new contact
             c_key = self.contact(name, email, None, address, None, email_subscr)
             new_donation.contact = c_key
-            contact_key = c_key
 
         if payment_type == "recurring":
             new_donation.isRecurring = True
@@ -655,7 +661,7 @@ A new note was received from {name} for ${confirmation_amount} ({payment_type} d
 You can view this donation at <a href="https://ghidonations.appspot.com/#contact?c={contact_key}">https://ghidonations.appspot.com/contact?c={contact_key}</a>.<br><br>
 Thanks!"""
 
-                message = message.format(payment_type=payment_type, name=name, confirmation_amount=confirmation_amount, special_notes=special_notes, contact_key=contact_key.urlsafe())
+                message = message.format(payment_type=payment_type, name=name, confirmation_amount=confirmation_amount, special_notes=special_notes, contact_key=new_donation.contact_key.urlsafe())
 
                 email.html = message
                 email.send()
@@ -884,19 +890,69 @@ class SettingsDeposits(UtilitiesBase):
 
 class SettingsExists(UtilitiesBase):
     ## -- Check existences -- ##
-    def contact(self, name):
-        #Check if a user exists in the database - when creating new users
-        try:
-            #Try checking by name 
-            user = models.Contact.gql("WHERE settings = :s AND name = :n", s=self.e.key, n=name)
+    def _check_contact_email(self, email):
+        try: 
+            query = models.Contact.query(models.Contact.settings == self.e.key,
+                                            models.Contact.email == email)
 
-            if user.fetch(1)[0]:
-                return [True, user[0]]
+            if gqlCount(query) != 0:
+                return [True, query.fetch(1)[0]]
             else:
                 return [False, None]
 
         except:
             return [False, None]
+
+    def _check_contact_name(self, name):
+        try: 
+            query = models.Contact.query(models.Contact.settings == self.e.key,
+                                            models.Contact.name == name)
+
+            if gqlCount(query) != 0:
+                return [True, query.fetch(1)[0]]
+            else:
+                return [False, None]
+
+        except:
+            return [False, None]
+
+    def contact(self, email=None, name=None):
+        # Email can be either a str or a list. Name must be str
+
+        if not email and not name:
+            raise Exception("Must have either a name or email to determine if contact exists.")
+
+        # Default doesn't exist response
+        exists = [False, None]
+
+        # Check by email first
+        if email:
+            if isinstance(email, str):
+                exists = self._check_contact_email(email)
+
+            elif isinstance(email, list):
+                for e in email:
+                    # Check if the contact exists by email
+                    email_exists = self._check_contact_email(e)
+
+                    if email_exists[0]:
+                        exists[0] = True
+
+                        # Add matched contact
+                        if isinstance(exists[1], list):
+                            exists[1].append(email_exists[1])
+                        else:
+                            exists[1] = [email_exists[1]]
+
+        # If name provided and the first test fails, try matching by name
+        if name and exists[0] == False:
+            exists = self._check_contact_name(name)
+
+        # If matched contact list only contains one item, take it out of list
+        if isinstance(exists[1], list) and len(exists[1]) == 1:
+            exists[1] = exists[1][0]
+
+        return exists
 
     def entity(self, key):
         exists = True
@@ -1121,10 +1177,12 @@ class ContactSearch(UtilitiesBase):
     def createDocument(self):
         c = self.e
 
+        email = ' '.join(c.email)
+
         document = search.Document(doc_id=c.websafe,
             fields=[search.TextField(name='contact_key', value=c.websafe),
                     search.TextField(name='name', value=c.name),
-                    search.TextField(name='email', value=c.email),
+                    search.TextField(name='email', value=email),
 
                     search.NumberField(name='total_donated', value=float(c.data.donation_total)),
                     search.NumberField(name='number_donations', value=int(c.data.number_donations)),
@@ -1137,7 +1195,7 @@ class ContactSearch(UtilitiesBase):
                     search.TextField(name='zip', value=c.address[3]),
 
                     search.DateField(name='created', value=c.creation_date),
-                    search.TextField(name='settings', value=c.settings.urlsafe()),
+                    search.TextField(name='settings', value=c.settings.urlsafe())
                     ])
 
         return document
@@ -1313,6 +1371,8 @@ class DonationReview(UtilitiesBase):
 class DonationSearch(UtilitiesBase):
     def createDocument(self):
         d = self.e
+        c = d.contact.get()
+        email = ' '.join(c.email)
 
         reviewed = "no"
         if d.reviewed == True:
@@ -1330,8 +1390,8 @@ class DonationSearch(UtilitiesBase):
             fields=[search.TextField(name='donation_key', value=d.websafe),
 
                     search.DateField(name='time', value=d.donation_date),
-                    search.TextField(name='name', value=d.contact.get().name),
-                    search.TextField(name='email', value=d.contact.get().email),
+                    search.TextField(name='name', value=c.name),
+                    search.TextField(name='email', value=email),
                     search.NumberField(name='amount', value=float(d.amount_donated)),
                     search.TextField(name='type', value=d.payment_type),
 

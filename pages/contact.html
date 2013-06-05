@@ -19,8 +19,39 @@
                         </div>
 
                         <div class="clearfix">
-                            <label>Email</label>
-                            <div class="input"><input class="large unlockable validate[custom[email]]" type="text" name="email" value="{{ c.email|default_if_none:"" }}" disabled="disabled" /></div>
+
+                            <div id="email_div">
+                            
+                                {% for e in c.email %}
+
+                                {% if forloop.first %}
+                                <label class="email1">Email</label>
+                                <div class="input email1">
+
+                                {% else %}
+                                <label style="clear:both" class="email{{ forloop.counter }}"></label>
+                                <div class="input email{{ forloop.counter }}" style="margin-top:5px">
+
+                                {% endif %}
+
+                                    <input class="large unlockable validate[custom[email]] email_address" style="float:left" type="text" name="email{{ forloop.counter }}" value="{{ e|default_if_none:"" }}" disabled="disabled" />
+
+                                {% if not forloop.first %}
+                                    <span style="margin-top:5px; cursor:pointer" data-number="{{ forloop.counter }}" class="ui-icon ui-icon-minus remove_email hidden"></span>
+                                {% endif %}
+
+                                </div>
+                                {% endfor %}
+
+                            </div>
+
+                            <label style="clear:both"></label>
+                            <div class="input hidden" style="margin-top:10px" id="add_email_container">
+                                <a href="#" id="add_email">
+                                    <span style="margin-right:3px; float:left" class="ui-icon ui-icon-circle-plus"></span>
+                                    <span style="float:left; margin-top:2px">Add another address...</span>
+                                </a>
+                            </div>
                         </div>
 
                         <div class="clearfix">

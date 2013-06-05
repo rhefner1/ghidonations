@@ -157,7 +157,7 @@ class AddressInfo(messages.Message):
 
 class NewContact_In(messages.Message):
     name = messages.StringField(1, required=True)
-    email = messages.StringField(2, required=True)
+    email = messages.StringField(2, repeated=True)
     phone = messages.StringField(3, required=True)
     address = messages.MessageField(AddressInfo, 4, required=True)
     notes = messages.StringField(5, required=True)
@@ -204,7 +204,7 @@ class UpdateDonation_In(messages.Message):
 class UpdateContact_In(messages.Message):
     contact_key = messages.StringField(1, required=True)
     name = messages.StringField(2, required=True)
-    email = messages.StringField(3, required=True)
+    email = messages.StringField(3, repeated=True)
     phone = messages.StringField(4, required=True)
     notes = messages.StringField(5, required=True)
     address = messages.MessageField(AddressInfo, 6, required=True)

@@ -510,6 +510,27 @@ function timeoutCheckStatus(response){
 }
 
 // ---- Utilities ---- //
+function add_email_handler(){
+    $("#add_email").click(function(e){
+        e.preventDefault()
+        var to_add = '<label style="clear:both" class="email~"></label>'
+                    + '<div class="input email~" style="margin-top:5px">'
+                    + '<input class="large validate[custom[email]] email_address" style="float:left" type="text" name="email~" value="" />'
+                    + '<span style="margin-top:5px; cursor:pointer" data-number="~" class="ui-icon ui-icon-minus remove_email"></span>'
+                    + '</div>'
+
+        iteration_number = $(".email_address").size() + 1
+        to_add = to_add.replace(/~/g, iteration_number)
+        $("#email_div").append(to_add)
+    })
+
+    $("#email_div").delegate('.remove_email', 'click', function(e){
+
+        var number = $(this).attr('data-number')
+        $("#email_div .email" + number).remove()
+    })
+}
+
 function diff(obj1,obj2) {
     var newObj = $.extend({},obj1,obj2);
     var result = {};
