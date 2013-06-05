@@ -497,6 +497,8 @@ class EndpointsAPI(remote.Service):
         list_diff = set(req.email) - set(c.email)
         if list_diff:
             email_exists = s.exists.contact(email=list_diff)[0]
+        else:
+            email_exists = False
 
         if email_exists == True:
             success = False

@@ -1177,7 +1177,7 @@ class ContactSearch(UtilitiesBase):
     def createDocument(self):
         c = self.e
 
-        email = ', '.join(c.email)
+        email = ' '.join(c.email)
 
         document = search.Document(doc_id=c.websafe,
             fields=[search.TextField(name='contact_key', value=c.websafe),
@@ -1372,7 +1372,7 @@ class DonationSearch(UtilitiesBase):
     def createDocument(self):
         d = self.e
         c = d.contact.get()
-        email = ', '.join(c.email)
+        email = ' '.join(c.email)
 
         reviewed = "no"
         if d.reviewed == True:
