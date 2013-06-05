@@ -894,7 +894,6 @@ class SettingsExists(UtilitiesBase):
         try: 
             if email == None or email == "":
                 return [False, None]
-                
             else:
                 query = models.Contact.query(models.Contact.settings == self.e.key,
                                                 models.Contact.email == email)
@@ -929,6 +928,9 @@ class SettingsExists(UtilitiesBase):
         # Default doesn't exist response
         exists = [False, None]
 
+        if isinstance(email, set):
+            email = list(email)
+
         # Check by email first
         if email:
             if isinstance(email, basestring):
@@ -949,6 +951,7 @@ class SettingsExists(UtilitiesBase):
                             exists[1] = [email_exists[1]]
 
             else:
+                logging.error("Email is of type: " + str(type(email)))
                 raise Exception("Wrong variable type for email.")
 
         # If name provided and the first test fails, try matching by name
