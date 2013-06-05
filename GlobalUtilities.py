@@ -521,7 +521,7 @@ def toDecimal(number):
         return Decimal(0).quantize(Decimal("1.00"))
 
 def truncateEmail(email):
-    truncation_length = 20
+    truncation_length = 35
     if len(email) > truncation_length:
         email = email[0:truncation_length]
         email = email.replace(' ', ', ')
@@ -574,7 +574,7 @@ class SettingsCreate(UtilitiesBase):
 
             if add_mc == True:
                 for e in email:
-                    if e != "" and e != None: 
+                    if e and e != "": 
                         #Add new contact to Mailchimp
                         self.e.mailchimp.add(email, name, False)
 
@@ -922,6 +922,7 @@ class SettingsExists(UtilitiesBase):
         if not email and not name:
             raise Exception("Must have either a name or email to determine if contact exists.")
 
+        # Default doesn't exist response
         exists = [False, None]
 
         # Check by email first
@@ -943,8 +944,8 @@ class SettingsExists(UtilitiesBase):
                         else:
                             exists[1] = [email_exists[1]]
 
-        # If the first test fails and a name was provided, try matching by name
-        if exists[0] == False and name:
+        # If name provided and the first test fails, try matching by name
+        if name and exists[0] == False:
             exists = self._check_contact_name(name)
 
         # If matched contact list only contains one item, take it out of list

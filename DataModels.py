@@ -89,7 +89,7 @@ class Contact(ndb.Expando):
             
             if settings.mc_use:
                 for e in email:
-                    if e != "" and e != None:
+                    if e and e != "":
                         settings.mailchimp.add(e, name, False)
 
         if phone != self.phone:
