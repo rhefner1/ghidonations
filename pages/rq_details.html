@@ -40,7 +40,7 @@
                     </div>
                     <div class="clearfix">
                         <label>Email</label>
-                        <div class="input"><input class="large" type="text" name="emailaddress" value="{{ d.email|default_if_none:"" }}" disabled="disabled" title="Click Edit Contact to change" /></div>
+                        <div class="input"><input class="large" type="text" name="emailaddress" value="{% for e in d.email%}{{ e|default_if_none:"" }}{% if not forloop.last %}, {% endif %}{% endfor %}" disabled="disabled" title="Click Edit Contact to change" /></div>
                     </div>
 
                     <div class="clearfix" id="dateshow">
