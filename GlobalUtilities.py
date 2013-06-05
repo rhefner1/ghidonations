@@ -892,13 +892,17 @@ class SettingsExists(UtilitiesBase):
     ## -- Check existences -- ##
     def _check_contact_email(self, email):
         try: 
-            query = models.Contact.query(models.Contact.settings == self.e.key,
-                                            models.Contact.email == email)
-
-            if gqlCount(query) != 0:
-                return [True, query.fetch(1)[0]]
-            else:
+            if email == None or email == "":
                 return [False, None]
+                
+            else:
+                query = models.Contact.query(models.Contact.settings == self.e.key,
+                                                models.Contact.email == email)
+
+                if gqlCount(query) != 0:
+                    return [True, query.fetch(1)[0]]
+                else:
+                    return [False, None]
 
         except:
             return [False, None]
