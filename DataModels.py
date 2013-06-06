@@ -695,8 +695,9 @@ class Team(ndb.Expando):
         logging.info("Deleting team:" + t.name)
 
         for tl in t.data.members:
+            if tl:
             #Delete this team from all
-            tl.key.delete()
+                tl.key.delete()
 
         for d in t.data.donations:
             d.individual = None
