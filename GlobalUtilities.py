@@ -148,7 +148,7 @@ def deserializeEntity(data):
         # Getting entity fro protobuf
         return ndb.model_from_protobuf(data)
 
-def flushMemcache(self):
+def flushMemcache():
     return memcache.flush_all()
 
 def getKey(entity_key):
@@ -368,15 +368,32 @@ def isEmail(email):
     else:
         return False
 
+def listDiff(list1, list2):
+    # Typically old value is list1, new value is list2
+    list_diff = list(set(list2) - set(list1))
+
+    try:
+        list_diff.remove('')
+    except:
+        pass
+
+    return list_diff
+
 def mergeContacts(c1_key, c2_key):
     c1 = c1_key.get()
     c2 = c2_key.get()
 
-    #if contact 2 doesn't have an value and contact 1 does,
-    #replace c2's value with c1's
+    # Ff contact 2 doesn't have an value and contact 1 does,
+    # replace c2's value with c1's
 
-    if c2.email == "" and c1.email != "":
-        c2.email = c1.email
+    combined_emails = c2.email + c1.email
+
+    try:
+        combined_emails.remove("")
+    except:
+        pass
+
+    c2.email = combined_emails
 
     if c2.phone == "" and c1.phone != "":
         c2.phone = c1.phone
@@ -387,15 +404,15 @@ def mergeContacts(c1_key, c2_key):
     if c2.address == ['', '', '', ''] and c1.address != ['', '', '', '']:
         c2.address = c1.address
 
-    #Merge the donations from c1 all to c2
+    # Merge the donations from c1 all to c2
     for d in c1.data.all_donations:
         d.contact = c2_key
         d.put()
 
-    #Save c2
+    # Save c2
     c2.put()
 
-    #Finally, delete c1
+    # Finally, delete c1
     c1.key.delete()
 
 def moneyAmount(money_string):

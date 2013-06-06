@@ -494,7 +494,8 @@ class EndpointsAPI(remote.Service):
         address = [a.street, a.city, a.state, a.zipcode]
 
         # Check to see if a new email was added and see if it already exists
-        list_diff = set(req.email) - set(c.email)
+        list_diff = tools.listDiff(c.email, req.email)
+
         if list_diff:
             email_exists = s.exists.contact(email=list_diff)[0]
         else:
