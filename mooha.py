@@ -49,6 +49,15 @@ class AllContacts(BaseHandlerAdmin):
         self.response.write(
            template.render('pages/all_contacts.html', template_variables))
 
+class AllContactGroups(BaseHandlerAdmin):
+    def task(self, isAdmin, s):
+
+        search_query = self.request.get("search")
+
+        template_variables = {"search_query" : search_query}
+        self.response.write(
+                template.render('pages/all_contact_groups.html', template_variables))
+
 class AllDeposits(BaseHandlerAdmin):
     def task(self, isAdmin, s):
 
@@ -84,6 +93,15 @@ class Contact(BaseHandlerAdmin):
         template_variables = {"c" : c, "s" : s}
         self.response.write(
            template.render('pages/contact.html', template_variables))
+
+class ContactGroup(BaseHandlerAdmin):
+    def task(self, isAdmin, s):
+        group_key = self.request.get("g")
+        g = tools.getKey(group_key).get()
+
+        template_variables = {"g":g}
+        self.response.write(
+           template.render('pages/cgroup_members.html', template_variables))
 
 class Container(BaseHandler):
     def task(self, isAdmin, s):
@@ -380,6 +398,12 @@ class NewContact(BaseHandlerAdmin):
         template_variables = {}
         self.response.write(
            template.render('pages/new_contact.html', template_variables))
+
+class NewContactGroup(BaseHandlerAdmin):
+    def task(self, isAdmin, s):
+        template_variables = {}
+        self.response.write(
+                template.render('pages/new_contact_group.html', template_variables))
 
 class NewIndividual(BaseHandlerAdmin):
     def task(self, isAdmin, s):
@@ -760,10 +784,12 @@ class IPN(BaseHandlerAdmin):
             
 app = webapp2.WSGIApplication([
        ('/ajax/allcontacts', AllContacts),
+       ('/ajax/allcontactgroups', AllContactGroups),
        ('/ajax/alldeposits', AllDeposits),
        ('/ajax/allindividuals', AllIndividuals),
        ('/ajax/allteams', AllTeams),       
-       ('/ajax/contact', Contact),       
+       ('/ajax/contact', Contact),  
+       ('/ajax/contactgroup', ContactGroup),     
        ('/', Container),      
        ('/ajax/dashboard', Dashboard),       
        ('/ajax/deposit', Deposit),       
@@ -777,6 +803,7 @@ app = webapp2.WSGIApplication([
        ('/ajax/mergecontacts', MergeContacts),
        ('/m', Mobile),
        ('/ajax/newcontact', NewContact),
+       ('/ajax/newcontactgroup', NewContactGroup),
        ('/ajax/newindividual', NewIndividual),
        ('/ajax/newteam', NewTeam),
        ('/m/redirect', MobileRedirectSetting),

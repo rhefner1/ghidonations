@@ -37,6 +37,8 @@ class Contact(ndb.Expando):
     phone = ndb.StringProperty()
     address = ndb.StringProperty(repeated=True)
     notes = ndb.TextProperty(indexed=True)
+
+    groups = ndb.KeyProperty(repeated=True)
     
     settings = ndb.KeyProperty()
 
@@ -125,6 +127,54 @@ class Contact(ndb.Expando):
         # Delete search index
         index = search.Index(name=_CONTACT_SEARCH_INDEX)
         index.delete(e.websafe)
+
+class ContactGroup(ndb.Expando):
+    #Standard information we need to know
+    name = ndb.StringProperty()
+    
+    settings = ndb.KeyProperty()
+
+    #Sets creation date
+    creation_date = ndb.DateTimeProperty(auto_now_add=True)
+
+    @property
+    def data(self):
+        return tools.ContactGroupData(self)
+
+    @property
+    def websafe(self):
+        return self.key.urlsafe()
+
+    ## -- Update contact -- ##
+    def update(self, name):
+        settings = self.settings.get()
+
+        #Changing blank values to None
+        if name == "":
+            name = None
+
+        if name != self.name and name != None:
+            self.name = name
+
+        #And now to put it back in the datastore
+        self.put()
+
+    ## -- After Put -- ##
+    @classmethod
+    def _post_put_hook(self, future):
+        e = future.get_result().get()
+        
+        for c in e.data.contacts:
+            c.search.index()
+
+    ## -- Before Delete -- ##
+    @classmethod
+    def _pre_delete_hook(cls, key):
+        e = key.get()
+
+        for c in e.data.contacts:
+            c.groups.remove(key)
+            c.put()
 
 class DepositReceipt(ndb.Expando):
     entity_keys = ndb.KeyProperty(repeated=True)

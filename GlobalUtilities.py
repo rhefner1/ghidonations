@@ -24,6 +24,7 @@ import DataModels as models
 from google.appengine.api import search
 
 _CONTACT_SEARCH_INDEX = "contact"
+_CONTACT_GROUP_SEARCH_INDEX = "contactgroup"
 _DEPOSIT_SEARCH_INDEX = "deposit"
 _DONATION_SEARCH_INDEX = "donation"
 _INDIVIDUAL_SEARCH_INDEX = "individual"
@@ -582,6 +583,12 @@ class SettingsCreate(UtilitiesBase):
         else:
             logging.error("Cannot create contact because there is not a name.")
 
+    def contact_group(self, name):
+        new_group = models.ContactGroup()
+        new_group.name = name
+
+        new_group.put()
+
     def deposit_receipt(self, entity_keys):
         new_deposit = models.DepositReceipt()
 
@@ -1086,6 +1093,15 @@ class SettingsSearch(UtilitiesBase):
 
         return self.search(index_name=_CONTACT_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
 
+    def contact_group(self, query, **kwargs):
+        expr_list = [search.SortExpression(
+            expression="name", default_value='',
+            direction=search.SortExpression.ASCENDING)]
+
+        search_function = self.e.search.contact_group
+
+        return self.search(index_name=_CONTACT_GROUP_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
+
     def deposit(self, query, **kwargs):
 
         expr_list = [search.SortExpression(
@@ -1222,6 +1238,13 @@ class ContactSearch(UtilitiesBase):
         except Exception as e:
             logging.error("Failed creating index on contact key:" + self.e.websafe + " because: " + str(e))
             self.error(500)
+
+class ContactGroupData(UtilitiesBase):
+    @property
+    def contacts(self):
+        q = models.ContactGroup.query(models.Contact.settings == self.e.key,
+                                        models.Contact.groups == self.key)
+        return qCache(q)
 
 ## -- Deposit Classes -- ##
 class DepositSearch(UtilitiesBase):

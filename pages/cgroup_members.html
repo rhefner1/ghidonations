@@ -1,0 +1,51 @@
+<div class="row" id="team_members">
+    <div class="widget clearfix">
+        <h2>{{ g.name }}</h2>
+        <div class="widget_inside">
+            <div class="col_12">
+            <div class="col_4">
+                <div id="edit_container" class="hidden">
+
+                    <div class="clearfix">
+                        <label>Group Name</label>
+                        <div class="input">
+                            <input type="input" id="team_name" value="{{ g.name }}" />
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <div class="input">
+                    <input id="edit_group" data-state="edit" type="button" class="large black button" value="Edit Group" />
+                </div>
+
+                <br><br>
+
+                <div class="input hidden" id="delete_container">
+                    <p style="cursor:pointer; color:red">
+                        Delete this group...
+                    </p>
+                </div>
+
+            </div>
+            <div class="col_8 last">
+                <h3>Group Members <img id="search_loading" style="display:none" height="16" width="16" src="/images/ajax-loader.gif"></h3>
+                <table class="dataTable">
+                    <thead class="bold">
+                        <tr>
+                            <th class="align-left">Key</th>
+                            <th class="align-left">Name</th>
+                            <th class="align-left">Email</th>
+                        </tr>
+                    </thead>
+                    <tbody id="members">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
+    </div>   
+</div>
+
+<input type="hidden" id="group_key" value="{{ g.websafe }}" />
+<script src="/js/contact_group.js"></script>

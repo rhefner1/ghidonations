@@ -1,0 +1,47 @@
+<div class="row" id="all_teams">
+    <div class="widget clearfix">
+        <h2>All Contact Groups</h2>
+        <div class="widget_inside">
+        	<p class="m_bottom15">Click any of the groups below to see its members.</p>
+
+            <div style="width:100%; margin-bottom:10px; clear:both">
+                <div style="float:right">
+                    <span style="width:15px"></span>
+                    <button class="button" id="search_go" style="margin-left:15px">
+                        <span id="search_icon" class="ui-icon ui-icon-search">Search</span>
+                        <img id="search_loading" style="display:none" height="16" width="16" src="/images/ajax-loader.gif">
+                    </button>
+                </div>
+
+                <div style="display:block; overflow:hidden">
+                    <input type="text" id="search_query" placeholder="Search..." value="{{ search_query }}" style="width:100%; font-size:17">
+                </div>
+            </div>
+
+            <div id="search_help" style="display:none; margin-bottom:10px">
+                <p>
+                    Try queries like these: <code>august 2012</code> &nbsp;|&nbsp; <code>created > 2012-8-15</code>
+                </p>
+
+                <p>
+                    Here's everything you can use: <code>name</code> &nbsp;|&nbsp; <code>created</code>
+                </p>
+            </div>
+
+            <div class="col_12">
+                <table class="dataTable">
+                    <thead class="bold">
+                        <tr>
+                            <th class="align-left">Key</th>
+                            <th class="align-left">Name</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contactgroups">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/js/all_contact_groups.js"></script>

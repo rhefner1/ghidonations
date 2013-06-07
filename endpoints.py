@@ -123,6 +123,28 @@ class EndpointsAPI(remote.Service):
 
         return Donations_Out(objects=donations, new_cursor=new_cursor)
 
+    # get.contact_groups
+    @endpoints.method(Query_In, Contacts_Out, path='get/contact_groups',
+                    http_method='GET', name='get.contacts_groups')
+    def get_contact_groups(self, req):
+        isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
+
+        if req.query == None:
+            req.query = ""
+
+        results = s.search.contact_group(req.query, query_cursor=req.query_cursor)
+        logging.info("Getting contact groups with query: " + req.query)
+
+        contacts = []
+        new_cursor = tools.getWebsafeCursor(results[1])
+
+        for c in results[0]:
+            f = c.fields
+            contact_group = ContactGroups_Data(key=f[0].value, name=f[1].value)
+            contact_groups.append(contact_group)
+
+        return GetContactGroups_Out(objects=contact_groups, new_cursor=new_cursor)
+
     # get.deposits
     @endpoints.method(Query_In, Deposits_Out, path='get/deposits',
                     http_method='GET', name='get.deposits')
@@ -370,6 +392,19 @@ class EndpointsAPI(remote.Service):
 
         return SuccessMessage_Out(success=success, message=message)
 
+    # new.contact_group
+    @endpoints.method(NewContactGroup_In, SuccessMessage_Out, path='new/contact_group',
+                    http_method='POST', name='new.contact_group')
+    def new_contact_group(self, req):
+        message = "<b>" + req.name + "</b> created"
+        success = True
+
+        isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
+
+        s.create.contact_group(req.name)
+
+        return SuccessMessage_Out(success=success, message=message)
+
     # new.impression
     @endpoints.method(NewImpression_In, SuccessMessage_Out, path='new/impression',
                     http_method='POST', name='new.impression')
@@ -452,33 +487,6 @@ class EndpointsAPI(remote.Service):
 
         return SuccessMessage_Out(success=success, message=message)
     
-    # update.donation
-    @endpoints.method(UpdateDonation_In, SuccessMessage_Out, path='update/donation',
-                    http_method='POST', name='update.donation')
-    def update_donation(self, req):
-        message = "Donation has been saved"
-        success = True
-
-        isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
-
-        d = tools.getKey(req.donation_key).get()
-
-        # Make req variables local
-        team_key, individual_key = req.team_key, req.individual_key
-
-        if team_key:
-            if team_key == "general":
-                team_key = None
-            else:
-                team_key = tools.getKey(team_key)
-
-        if individual_key:
-            individual_key = tools.getKey(individual_key)
-
-        d.update(req.notes, team_key, individual_key, req.add_deposit, req.donation_date)
-
-        return SuccessMessage_Out(success=success, message=message)
-
     # update.contact
     @endpoints.method(UpdateContact_In, SuccessMessage_Out, path='update/contact',
                     http_method='POST', name='update.contact')
@@ -506,6 +514,47 @@ class EndpointsAPI(remote.Service):
         else:
             c.update(req.name, req.email, req.phone, req.notes, address)
         
+        return SuccessMessage_Out(success=success, message=message)
+
+    # update.contact_group
+    @endpoints.method(UpdateContactGroup_In, SuccessMessage_Out, path='update/contact_group',
+                    http_method='POST', name='update.contact_group')
+    def update_contact_group(self, req):
+        message = "Group has been saved"
+        success = True
+
+        isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
+
+        g = tools.getKey(req.group_key).get()
+        g.update(req.name)
+        
+        return SuccessMessage_Out(success=success, message=message)
+
+    # update.donation
+    @endpoints.method(UpdateDonation_In, SuccessMessage_Out, path='update/donation',
+                    http_method='POST', name='update.donation')
+    def update_donation(self, req):
+        message = "Donation has been saved"
+        success = True
+
+        isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
+
+        d = tools.getKey(req.donation_key).get()
+
+        # Make req variables local
+        team_key, individual_key = req.team_key, req.individual_key
+
+        if team_key:
+            if team_key == "general":
+                team_key = None
+            else:
+                team_key = tools.getKey(team_key)
+
+        if individual_key:
+            individual_key = tools.getKey(individual_key)
+
+        d.update(req.notes, team_key, individual_key, req.add_deposit, req.donation_date)
+
         return SuccessMessage_Out(success=success, message=message)
 
     # update.settings
@@ -682,6 +731,19 @@ class EndpointsAPI(remote.Service):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
         tools.getKey(req.contact_key).delete()
+
+        return SuccessMessage_Out(success=success, message=message)
+
+    # contact_group.delete
+    @endpoints.method(ContactGroupKey_In, SuccessMessage_Out, path='contact_group/delete',
+                    http_method='POST', name='contact_group.delete')
+    def contact_group_delete(self, req):
+        message = "Group deleted"
+        success = True
+
+        isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
+
+        tools.getKey(req.group_key).delete()
 
         return SuccessMessage_Out(success=success, message=message)
 
