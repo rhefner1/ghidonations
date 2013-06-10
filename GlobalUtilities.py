@@ -586,6 +586,7 @@ class SettingsCreate(UtilitiesBase):
     def contact_group(self, name):
         new_group = models.ContactGroup()
         new_group.name = name
+        new_group.settings = self.e.key
 
         new_group.put()
 
@@ -1237,14 +1238,37 @@ class ContactSearch(UtilitiesBase):
 
         except Exception as e:
             logging.error("Failed creating index on contact key:" + self.e.websafe + " because: " + str(e))
-            self.error(500)
 
 class ContactGroupData(UtilitiesBase):
     @property
     def contacts(self):
-        q = models.ContactGroup.query(models.Contact.settings == self.e.key,
-                                        models.Contact.groups == self.key)
+        q = models.ContactGroup.query(models.Contact.settings == self.e.settings,
+                                        models.Contact.groups == self.e.key)
         return qCache(q)
+
+class ContactGroupSearch(UtilitiesBase):
+    def createDocument(self):
+        g = self.e
+
+        document = search.Document(doc_id=g.websafe,
+            fields=[search.TextField(name='group_key', value=g.websafe),
+                    search.TextField(name='name', value=g.name),
+                    search.TextField(name='settings', value=g.settings.urlsafe())
+                    ])
+
+        return document
+
+    def index(self):
+        # Updates search index of this entity or creates new one if it doesn't exist
+        index = search.Index(name=_CONTACT_GROUP_SEARCH_INDEX)
+
+        # Creating the new index
+        try:
+            doc = self.createDocument()
+            index.put(doc)
+
+        except Exception as e:
+            logging.error("Failed creating index on contact group key:" + self.e.websafe + " because: " + str(e))
 
 ## -- Deposit Classes -- ##
 class DepositSearch(UtilitiesBase):
@@ -1271,7 +1295,6 @@ class DepositSearch(UtilitiesBase):
 
         except Exception as e:
             logging.error("Failed creating index on deposit key:" + self.e.websafe + " because: " + str(e))
-            self.error(500)
 
 ## -- Donation Classes -- ##
 class DonationAssign(UtilitiesBase):
@@ -1454,7 +1477,6 @@ class DonationSearch(UtilitiesBase):
             
         except Exception as e:
             logging.error("Failed creating index on donation key:" + self.e.websafe + " because: " + str(e))
-            self.error(500)
 
 ## -- Individual Classes -- ##
 class IndividualData(UtilitiesBase):
@@ -1593,7 +1615,6 @@ class IndividualSearch(UtilitiesBase):
 
         except Exception as e:
             logging.error("Failed creating index on individual key:" + self.e.websafe + " because: " + str(e))
-            self.error(500)
 
 ## -- Team Classes -- ##
 class TeamData(UtilitiesBase):
@@ -1697,7 +1718,6 @@ class TeamSearch(UtilitiesBase):
 
         except Exception as e:
             logging.error("Failed creating index on team key:" + self.e.websafe + " because: " + str(e))
-            self.error(500)
 
 class TeamListData(UtilitiesBase):
     @property

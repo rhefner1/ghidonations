@@ -124,8 +124,8 @@ class EndpointsAPI(remote.Service):
         return Donations_Out(objects=donations, new_cursor=new_cursor)
 
     # get.contact_groups
-    @endpoints.method(Query_In, Contacts_Out, path='get/contact_groups',
-                    http_method='GET', name='get.contacts_groups')
+    @endpoints.method(Query_In, GetContactGroups_Out, path='get/contact_groups',
+                    http_method='GET', name='get.contact_groups')
     def get_contact_groups(self, req):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
@@ -135,11 +135,12 @@ class EndpointsAPI(remote.Service):
         results = s.search.contact_group(req.query, query_cursor=req.query_cursor)
         logging.info("Getting contact groups with query: " + req.query)
 
-        contacts = []
+        contact_groups = []
         new_cursor = tools.getWebsafeCursor(results[1])
 
         for c in results[0]:
             f = c.fields
+
             contact_group = ContactGroups_Data(key=f[0].value, name=f[1].value)
             contact_groups.append(contact_group)
 

@@ -131,7 +131,6 @@ class Contact(ndb.Expando):
 class ContactGroup(ndb.Expando):
     #Standard information we need to know
     name = ndb.StringProperty()
-    
     settings = ndb.KeyProperty()
 
     #Sets creation date
@@ -140,6 +139,10 @@ class ContactGroup(ndb.Expando):
     @property
     def data(self):
         return tools.ContactGroupData(self)
+
+    @property
+    def search(self):
+        return tools.ContactGroupSearch(self)
 
     @property
     def websafe(self):
@@ -163,6 +166,8 @@ class ContactGroup(ndb.Expando):
     @classmethod
     def _post_put_hook(self, future):
         e = future.get_result().get()
+
+        e.search.index()
         
         for c in e.data.contacts:
             c.search.index()
@@ -171,6 +176,10 @@ class ContactGroup(ndb.Expando):
     @classmethod
     def _pre_delete_hook(cls, key):
         e = key.get()
+
+        # Delete search index
+        index = search.Index(name=_CONTACT_GROUP_SEARCH_INDEX)
+        index.delete(e.websafe)
 
         for c in e.data.contacts:
             c.groups.remove(key)
