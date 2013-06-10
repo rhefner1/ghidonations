@@ -146,6 +146,26 @@ class EndpointsAPI(remote.Service):
 
         return GetContactGroups_Out(objects=contact_groups, new_cursor=new_cursor)
 
+    # get.contact_group_members
+    @endpoints.method(GetContactGroupMembers_In, Contacts_Out, path='get/contact_group_members',
+                    http_method='GET', name='get.contact_group_members')
+    def get_contact_group_members(self, req):
+        isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
+        query = "group_key:" + str(req.group_key)
+
+        results = s.search.contact(query, query_cursor=req.query_cursor)
+        logging.info("Getting contact group members with query: " + query)
+
+        contacts = []
+        new_cursor = tools.getWebsafeCursor(results[1])
+
+        for c in results[0]:
+            f = c.fields
+            contact = Contact_Data(key=f[0].value, name=f[1].value, email=tools.truncateEmail(f[2].value))
+            contacts.append(contact)
+
+        return Contacts_Out(objects=contacts, new_cursor=new_cursor)
+
     # get.deposits
     @endpoints.method(Query_In, Deposits_Out, path='get/deposits',
                     http_method='GET', name='get.deposits')
@@ -383,8 +403,10 @@ class EndpointsAPI(remote.Service):
 
         address = [req.address.street, req.address.city, req.address.state, req.address.zipcode]
 
+        groups = tools.urlsafeToKeys(groups)
+
         if contact_exists[0] == False:
-            s.create.contact(req.name, req.email, req.phone, address, req.notes, True)
+            s.create.contact(req.name, req.email, req.phone, address, req.notes, groups, True)
 
         else:
             #If this email address already exists for a user
@@ -513,7 +535,7 @@ class EndpointsAPI(remote.Service):
             success = False
             message = "Whoops! You entered an email address already in use by another contact."
         else:
-            c.update(req.name, req.email, req.phone, req.notes, address)
+            c.update(req.name, req.email, req.phone, req.notes, address, req.groups)
         
         return SuccessMessage_Out(success=success, message=message)
 

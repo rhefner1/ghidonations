@@ -14,7 +14,7 @@ $(document).ready(function(){
     var group_key = $("#group_key").val()
 
     var rpc_params = {'group_key':group_key}
-    var rpc_request = ghiapi.get.teammembers
+    var rpc_request = ghiapi.get.contactgroupmembers
 
     var data_table = initializeTable(2, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
@@ -32,7 +32,7 @@ $(document).ready(function(){
         change_hash(e, "contact?c=" + clicked_id)
     })
     
-    $("#edit_team").click(function(){
+    $("#edit_group").click(function(){
     	if ($("#edit_group").attr("data-state") == "edit"){
 			$("#edit_group").attr("data-state", "save")
     		$(this).removeClass("black").addClass("blue")
@@ -42,7 +42,7 @@ $(document).ready(function(){
 	    	$("#delete_container").slideDown()
     	}
     	else{
-    		var team_key = $("#group_key").val()
+    		var group_key = $("#group_key").val()
 	    	var name = $("#group_name").val()
 
             //Flash message

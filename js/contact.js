@@ -38,6 +38,10 @@ $(document).ready(function(){
         $("input[name=phone_3]").val(phone.substr(6,4))
     }
 
+    //Deserialize the groups list
+    var groups = $("#groups").val()
+    groups = JSON.parse(groups)
+
     //Initialize the validation engine
     $("form").validationEngine()
 

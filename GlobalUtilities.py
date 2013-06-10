@@ -530,6 +530,13 @@ def truncateEmail(email):
 
     return email
 
+def urlsafeToKeys(urlsafe_keys):
+    keys = []
+    for u in urlsafe_keys:
+        keys.append(getKey(u))
+
+    return keys
+
 def writeEntities(e_key):
   e = e_key.get()
   if isinstance(e.email, basestring):
@@ -545,7 +552,7 @@ class UtilitiesBase():
 
 ## -- Settings Classes -- ##
 class SettingsCreate(UtilitiesBase):
-    def contact(self, name, email, phone, address, notes, add_mc):
+    def contact(self, name, email, phone, address, notes, groups, add_mc):
         logging.info("Creating contact for: " + name)
         if name:
             new_contact = models.Contact()
@@ -562,11 +569,14 @@ class SettingsCreate(UtilitiesBase):
                 email = [email]
             if phone == None or phone == "None":
                 phone = ""
+            if groups == None:
+                groups = []
 
             new_contact.email = email
             new_contact.phone = phone
             new_contact.address = address
             new_contact.notes = notes
+            new_contact.groups = groups
 
             #Log the contact
             logging.info("Contact created.")
@@ -618,7 +628,7 @@ class SettingsCreate(UtilitiesBase):
 
         else:
             #Add new contact
-            c_key = self.contact(name, email, None, address, None, email_subscr)
+            c_key = self.contact(name, email, None, address, None, None, email_subscr)
             new_donation.contact = c_key
 
         if payment_type == "recurring":
@@ -1033,7 +1043,7 @@ class SettingsMailchimp(UtilitiesBase):
                         
                     else:
                     #If this is coming from the task queue, fail it (so the task queue retry mechanism works)
-                        raise
+                        raise Exception("Mailchimp add failed.")
                         logging.info("Request from task queue failed. Sending back 500 error.")
 
             else:
@@ -1183,6 +1193,20 @@ class ContactData(UtilitiesBase):
         return donation_total
 
     @property
+    def group_keys(self):
+        g_keys = ""
+
+        for g in self.e.groups:
+            g_keys += g.urlsafe() + " "
+
+        return g_keys.rstrip()
+
+    @property
+    def groups_json(self):
+        groups = ndbKeyToUrlsafe(self.groups)
+        return json.dumps(groups)
+
+    @property
     def recurring_donation_total(self):
         donation_total = toDecimal(0)
 
@@ -1222,7 +1246,9 @@ class ContactSearch(UtilitiesBase):
                     search.TextField(name='zip', value=c.address[3]),
 
                     search.DateField(name='created', value=c.creation_date),
-                    search.TextField(name='settings', value=c.settings.urlsafe())
+                    search.TextField(name='settings', value=c.settings.urlsafe()),
+
+                    search.TextField(name='groups', value=c.data.group_keys)
                     ])
 
         return document

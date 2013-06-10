@@ -125,9 +125,15 @@ class GetContactGroups_Out(messages.Message):
     objects = messages.MessageField(ContactGroups_Data, 1, repeated=True)
     new_cursor = messages.StringField(2)
 
+# get.contact_group_members
+class GetContactGroupMembers_In(messages.Message):
+    query_cursor = messages.StringField(1)
+    group_key = messages.StringField(2, required=True)
+
 # update.contact_group
 class UpdateContactGroup_In(messages.Message):
     name = messages.StringField(1, required=True)
+    group_key = messages.StringField(2, required=True)
 
 # get.team_donation_total
 class GetTeamDonationTotal_Out(messages.Message):
@@ -177,6 +183,7 @@ class NewContact_In(messages.Message):
     phone = messages.StringField(3, required=True)
     address = messages.MessageField(AddressInfo, 4, required=True)
     notes = messages.StringField(5, required=True)
+    groups = messages.StringField(6, repeated=True)
 
 # new.contact_group
 class NewContactGroup_In(messages.Message):
@@ -228,6 +235,7 @@ class UpdateContact_In(messages.Message):
     phone = messages.StringField(4, required=True)
     notes = messages.StringField(5, required=True)
     address = messages.MessageField(AddressInfo, 6, required=True)
+    groups = messages.StringField(7, repeated=True)
 
 # update.settings
 class UpdateSettings_In(messages.Message):

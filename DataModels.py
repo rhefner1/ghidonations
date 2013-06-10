@@ -74,7 +74,7 @@ class Contact(ndb.Expando):
         return self.key.urlsafe()
 
     ## -- Update contact -- ##
-    def update(self, name, email, phone, notes, address):
+    def update(self, name, email, phone, notes, address, groups):
         settings = self.settings.get()
 
         #Changing blank values to None
@@ -106,6 +106,9 @@ class Contact(ndb.Expando):
             if address != None and address != "" and address != "None":
                 #If the address is something and is different than that on file
                 self.address = address
+
+        if groups != self.groups:
+            self.groups = groups
 
         #And now to put that contact back in the datastore
         self.put()
