@@ -593,7 +593,7 @@ class SettingsCreate(UtilitiesBase):
                 for e in email:
                     if e and e != "": 
                         #Add new contact to Mailchimp
-                        self.e.mailchimp.add(email, name, False)
+                        self.e.mailchimp.add(e, name, False)
 
             return new_contact.key
         else:
