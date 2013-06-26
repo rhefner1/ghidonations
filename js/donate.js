@@ -184,7 +184,8 @@ $(document).ready(function() {
     }
 
     $("#designate #start_designate").click(function(){
-        loadTeams()      
+        loadTeams()
+        $("#designate_message").fadeIn()
     })
 
     $("#designate").delegate(".team", "click", function(){
