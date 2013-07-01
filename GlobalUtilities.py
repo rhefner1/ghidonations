@@ -280,7 +280,7 @@ def getAllSearchDocs(index_name):
 
 def newFile(mime_type, file_name):
     gcs_file_key = appengine_config.GCS_BUCKET + "/" + file_name
-    writable_file_key = files.gs.create("/gs" + gcs_file_key, mime_type=mime_type)
+    writable_file_key = files.gs.create("/gs" + gcs_file_key, mime_type=mime_type, acl='public-read-write')
 
     return gcs_file_key, writable_file_key
 
