@@ -14,6 +14,7 @@ function rpcGet(data, callback){
 }
 
 function loadTeams(){
+    $("#designate_message").fadeIn()
     $("#designate").css("height", "auto")
     $("#designate_label").html("<strong>Select one:</strong>")
     $("#designate").html(loading_message)
@@ -185,7 +186,6 @@ $(document).ready(function() {
 
     $("#designate #start_designate").click(function(){
         loadTeams()
-        $("#designate_message").fadeIn()
     })
 
     $("#designate").delegate(".team", "click", function(){
