@@ -279,8 +279,10 @@ def getAllSearchDocs(index_name):
     return documents
 
 def newFile(mime_type, file_name):
-    file_key = files.blobstore.create(mime_type=mime_type, _blobinfo_uploaded_filename=file_name)
-    return str(file_key)
+    gcs_file_key = appengine_config.GCS_BUCKET + "/" + file_name
+    writable_file_key = files.gs.create("/gs" + gcs_file_key, mime_type=mime_type)
+
+    return gcs_file_key, writable_file_key
 
 ###### ------ Deferred Utilities ------ ######
 def indexEntitiesFromQuery(query, query_cursor=None):

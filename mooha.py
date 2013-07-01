@@ -10,6 +10,9 @@ from google.appengine.api import urlfetch
 # Sessions
 from gaesessions import get_current_session
 
+# Google Cloud Storage
+import cloudstorage as gcs
+
 # Application files
 import DataModels as models
 import GlobalUtilities as tools
@@ -459,7 +462,7 @@ class SpreadsheetDownload(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
-        str_blob_key = self.request.get("blob_key")
+        str_blob_key = urllib.unquote( self.request.get("blob_key") )
         blob_key = blobstore.BlobInfo.get(str_blob_key)
 
         if not blobstore.get(str_blob_key):
