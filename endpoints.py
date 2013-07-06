@@ -308,9 +308,12 @@ class EndpointsAPI(remote.Service):
 
         for d in results[0]:
             f = d.fields
+            
+            team_name = f[6].value
+            if team_name == ""
 
             donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=tools.truncateEmail(f[3].value),
-                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value), team_name=f[6].value)
+                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value), team_name=team_name)
 
             donations.append(donation)
 
