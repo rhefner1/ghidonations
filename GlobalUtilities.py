@@ -1649,7 +1649,7 @@ class TeamData(UtilitiesBase):
         memcache_key = "teammembers" +  self.e.websafe
         
         def get_item():
-            members = self.members_public_donation_page
+            members = self.members
             all_members = []
 
             for tl in members:
