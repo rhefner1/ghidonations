@@ -758,10 +758,15 @@ class EndpointsAPI(remote.Service):
     def spreadsheet_check(self, req):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
-        completed, blob_key = tools.checkTaskCompletion(s, req.job_id)
+        completed, gcs_file_key = tools.checkTaskCompletion(s, req.job_id)
         status = tools.pipelineStatus(req.job_id)
 
-        return SpreadsheetCheck_Out(completed=completed, blob_key=blob_key, status=status)
+        if completed:
+            download_url = "http://commondatastorage.googleapis.com/" + gcs_file_key[1:]
+        else:
+            download_url = None
+
+        return SpreadsheetCheck_Out(completed=completed, download_url=download_url, status=status)
 
 app = endpoints.api_server([EndpointsAPI], restricted=False)
 app = appengine_config.webapp_add_wsgi_middleware(app)

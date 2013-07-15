@@ -11,6 +11,9 @@ from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb, deferred, endpoints
 from google.appengine.datastore.datastore_query import Cursor
 
+# Google Cloud Storage
+import cloudstorage as gcs
+
 # Mailchimp API
 from mailsnake import MailSnake
 
@@ -279,8 +282,13 @@ def getAllSearchDocs(index_name):
     return documents
 
 def newFile(mime_type, file_name):
-    file_key = files.blobstore.create(mime_type=mime_type, _blobinfo_uploaded_filename=file_name)
-    return str(file_key)
+    gcs_file_key = appengine_config.GCS_BUCKET + "/" + file_name
+
+    write_retry_params = gcs.RetryParams(backoff_factor=1.1)
+    gcs_file = gcs.open(gcs_file_key, 'w', content_type=mime_type,
+                            retry_params=write_retry_params)
+
+    return gcs_file_key, gcs_file
 
 ###### ------ Deferred Utilities ------ ######
 def indexEntitiesFromQuery(query, query_cursor=None):
