@@ -757,7 +757,10 @@ class EndpointsAPI(remote.Service):
         completed, gcs_file_key = tools.checkTaskCompletion(s, req.job_id)
         status = tools.pipelineStatus(req.job_id)
 
-        download_url = "http://commondatastorage.googleapis.com/" + gcs_file_key
+        if completed:
+            download_url = "http://commondatastorage.googleapis.com/" + gcs_file_key
+        else:
+            download_url = None
 
         return SpreadsheetCheck_Out(completed=completed, download_url=download_url, status=status)
 
