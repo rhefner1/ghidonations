@@ -758,7 +758,7 @@ class EndpointsAPI(remote.Service):
         status = tools.pipelineStatus(req.job_id)
 
         if completed:
-            download_url = "http://commondatastorage.googleapis.com/" + gcs_file_key
+            download_url = "http://commondatastorage.googleapis.com/" + gcs_file_key[1:]
         else:
             download_url = None
 
