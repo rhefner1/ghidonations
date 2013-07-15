@@ -1,5 +1,5 @@
 # App Engine platform
-import logging, csv, gc, appengine_config, urllib
+import logging, csv, gc, appengine_config, urllib, cStringIO
 from google.appengine.ext import blobstore
 from google.appengine.api import files, memcache, taskqueue
 
@@ -58,53 +58,53 @@ class GenerateReport(pipeline.Pipeline):
                 break
 
         final_file_name = s.name + "-" + mode.title() + ".csv"
-        final_blob = yield ConcatCSV(job_id, final_file_name, *blobs)
-        yield ConfirmCompletion(job_id, final_blob)
+        gcs_file_key = yield ConcatCSV(job_id, final_file_name, *blobs)
+        yield ConfirmCompletion(job_id, gcs_file_key)
 
 class HeaderCSV(pipeline.Pipeline):
     def run(self, mode, file_name):
         # Open GCS file for writing
-        gcs_file_key, writable_file_key = tools.newFile("text/csv", file_name)
+        gcs_file_key, gcs_file = tools.newFile("text/csv", file_name)
 
-        with files.open(writable_file_key, 'a') as f:
-            writer = csv.writer(f)
+        si = cStringIO.StringIO()
+        writer = csv.writer(si)
 
-            # Write headers
-            header_data = []
+        # Write headers
+        header_data = []
 
-            if mode == "contacts":
-                header_data.append("Name")
-                header_data.append("Total Donated")
-                header_data.append("Number Donations")
-                header_data.append("Phone")
-                header_data.append("Street")
-                header_data.append("City")
-                header_data.append("State")
-                header_data.append("Zipcode")
-                header_data.append("Created")
-                header_data.append("Email")
+        if mode == "contacts":
+            header_data.append("Name")
+            header_data.append("Total Donated")
+            header_data.append("Number Donations")
+            header_data.append("Phone")
+            header_data.append("Street")
+            header_data.append("City")
+            header_data.append("State")
+            header_data.append("Zipcode")
+            header_data.append("Created")
+            header_data.append("Email")
 
-            if mode == "donations":
-                header_data.append("Date")
-                header_data.append("Name")
-                header_data.append("Email")
-                header_data.append("Amount Donated")
-                header_data.append("Payment Type")
-                header_data.append("Team")
-                header_data.append("Individual")
-                header_data.append("Reviewed")
+        if mode == "donations":
+            header_data.append("Date")
+            header_data.append("Name")
+            header_data.append("Email")
+            header_data.append("Amount Donated")
+            header_data.append("Payment Type")
+            header_data.append("Team")
+            header_data.append("Individual")
+            header_data.append("Reviewed")
 
-            elif mode == "individuals":
-                header_data.append("Name")
-                header_data.append("Email")
-                header_data.append("Teams")
-                header_data.append("Raised")
-                header_data.append("Date Created")
+        elif mode == "individuals":
+            header_data.append("Name")
+            header_data.append("Email")
+            header_data.append("Teams")
+            header_data.append("Raised")
+            header_data.append("Date Created")
 
-            writer.writerow(header_data)
+        writer.writerow(header_data)
 
-        files.finalize(writable_file_key)
-        # blob_key = str(files.blobstore.get_blob_key(file_key))
+        gcs_file.write( si.getvalue() )
+        gcs_file.close()
 
         taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_file_key}, countdown=3600, queue_name="deletespreadsheet")
 
@@ -113,85 +113,84 @@ class HeaderCSV(pipeline.Pipeline):
 class CreateCSV(pipeline.Pipeline):
     def run(self, mode, file_name, keys):
         # Open GCS file for writing
-        gcs_file_key, writable_file_key = tools.newFile("text/csv", file_name)
+        gcs_file_key, gcs_file = tools.newFile("text/csv", file_name)
 
-        with files.open(writable_file_key, 'a') as f:
-            writer = csv.writer(f)
+        si = cStringIO.StringIO()
+        writer = csv.writer(si)
 
-            for k in keys:
-                try:
-                    e = tools.getKey(k).get()
+        for k in keys:
+            try:
+                e = tools.getKey(k).get()
 
-                    row_data = []
+                row_data = []
 
-                    if mode == "contacts":
-                        c = e
-                        row_data.append(c.name)
-                        row_data.append(c.data.donation_total)
-                        row_data.append(c.data.number_donations)
-                        row_data.append(c.phone)
-                        row_data.append(c.address[0])
-                        row_data.append(c.address[1])
-                        row_data.append(c.address[2])
-                        row_data.append(c.address[3])
-                        row_data.append(str(c.creation_date))
+                if mode == "contacts":
+                    c = e
+                    row_data.append(c.name)
+                    row_data.append(c.data.donation_total)
+                    row_data.append(c.data.number_donations)
+                    row_data.append(c.phone)
+                    row_data.append(c.address[0])
+                    row_data.append(c.address[1])
+                    row_data.append(c.address[2])
+                    row_data.append(c.address[3])
+                    row_data.append(str(c.creation_date))
 
-                        for e in c.email:
-                            row_data.append(e)
+                    for e in c.email:
+                        row_data.append(e)
 
-                    elif mode == "donations":
-                        d = e
-                        row_data.append(str(d.donation_date))
-                        row_data.append(d.name)
-                        row_data.append(d.email)
-                        row_data.append(str(d.amount_donated))
-                        row_data.append(d.payment_type)
-                        row_data.append(d.designated_team)
-                        row_data.append(d.designated_individual)
-                        row_data.append(str(d.reviewed))
+                elif mode == "donations":
+                    d = e
+                    row_data.append(str(d.donation_date))
+                    row_data.append(d.name)
+                    row_data.append(d.email)
+                    row_data.append(str(d.amount_donated))
+                    row_data.append(d.payment_type)
+                    row_data.append(d.designated_team)
+                    row_data.append(d.designated_individual)
+                    row_data.append(str(d.reviewed))
 
-                    elif mode == "individuals":
-                        i = e
-                        row_data.append(i.name)
-                        row_data.append(i.email)
-                        row_data.append(i.data.readable_team_names)
-                        row_data.append(str(i.data.donation_total))
-                        row_data.append(str(i.creation_date))
+                elif mode == "individuals":
+                    i = e
+                    row_data.append(i.name)
+                    row_data.append(i.email)
+                    row_data.append(i.data.readable_team_names)
+                    row_data.append(str(i.data.donation_total))
+                    row_data.append(str(i.creation_date))
 
-                    writer.writerow(row_data)
+                writer.writerow(row_data)
 
-                except Exception, e:
-                    logging.error("Failed on key " + k + " because " + str(e))
+            except Exception, e:
+                logging.error("Failed on key " + k + " because " + str(e))
 
-                # Call the garbage handler
-                gc.collect()
+            # Call the garbage handler
+            gc.collect()
 
-        files.finalize(writable_file_key)
+        gcs_file.write( si.getvalue() )
+        gcs_file.close()
+
         taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_file_key}, countdown=3600, queue_name="deletespreadsheet")
 
         return gcs_file_key
         
 class ConcatCSV(pipeline.Pipeline):
     def run(self, job_id, file_name, *blobs):
-        gcs_file_key, writable_file_key = tools.newFile("text/csv", file_name)
+        gcs_writer_key, gcs_writer = tools.newFile("text/csv", file_name)
 
-        with files.open(writable_file_key, 'a') as f:
+        for b in blobs:
+            gcs_reader = gcs.open(b)
+            data = gcs_reader.read()
 
-            for b in blobs:
-                gcs_file = gcs.open(b)
-                data = gcs_file.read()
-                f.write(data)
+            gcs_writer.write(data)
 
-                # Call the garbage handler
-                gc.collect()
+            # Call the garbage handler
+            gc.collect()
 
-        files.finalize(writable_file_key)
-        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_file_key}, countdown=3600, queue_name="deletespreadsheet")
+        gcs_writer.close()
+        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_writer_key}, countdown=3600, queue_name="deletespreadsheet")
 
-        blob_key = blobstore.create_gs_key("/gs/" + gcs_file_key)
-        logging.info("###############" + blob_key)
-        return urllib.quote( blob_key )
+        return gcs_writer_key
 
 class ConfirmCompletion(pipeline.Pipeline):
-    def run(self, job_id, final_blob):
-        memcache.set(job_id, final_blob)
+    def run(self, job_id, gcs_file_key):
+        memcache.set(job_id, gcs_file_key)

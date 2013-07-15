@@ -466,8 +466,10 @@ class SpreadsheetDownload(blobstore_handlers.BlobstoreDownloadHandler):
         blob_key = blobstore.BlobInfo.get(str_blob_key)
 
         if not blobstore.get(str_blob_key):
+            logging.error("404 on blob key: " + str_blob_key)
             self.error(404)
         else:
+            logging.info("Serving blob: " + str_blob_key)
             self.send_blob(blob_key, save_as=True)
 
 class TeamMembers(BaseHandlerAdmin):
