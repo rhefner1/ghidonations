@@ -537,6 +537,8 @@ class Settings(ndb.Expando):
     amount4 = ndb.IntegerProperty()
     use_custom = ndb.BooleanProperty()
 
+    donate_parent = ndb.StringProperty()
+
     #Confirmation letters
     confirmation_text = ndb.TextProperty()
     confirmation_info = ndb.TextProperty()
@@ -587,7 +589,7 @@ class Settings(ndb.Expando):
         return tools.SettingsSearch(self)
 
     ## -- Update -- ##
-    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
+    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, donate_parent, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
         s = self
 
         if name != s.name:
@@ -610,6 +612,9 @@ class Settings(ndb.Expando):
 
         if impressions != s.impressions:
             s.impressions = impressions
+
+        if donate_parent != s.donate_parent:
+            s.donate_parent = donate_parent
 
         if int(amount1) != s.amount1:
             s.amount1 = int(amount1)

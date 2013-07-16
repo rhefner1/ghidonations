@@ -523,7 +523,7 @@ class EndpointsAPI(remote.Service):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
         s.update(req.name, req.email, req.mc_use, req.mc_apikey, req.mc_donorlist, 
-            req.paypal_id, req.impressions, req.amount1, req.amount2, req.amount3, 
+            req.paypal_id, req.impressions, req.donate_parent, req.amount1, req.amount2, req.amount3, 
             req.amount4, req.use_custom, req.confirmation_header, req.confirmation_info, 
             req.confirmation_footer, req.confirmation_text, req.donor_report_text)
 

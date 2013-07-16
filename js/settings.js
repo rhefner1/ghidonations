@@ -116,6 +116,8 @@ $(document).ready(function(){
             
             var paypal_id = $("input[name=paypal_id]").val()
 
+            var donate_parent = $("input[name=donate_parent]").val()
+
             var amount1 = $("input[name=amount1]").val()
             var amount2 = $("input[name=amount2]").val()
             var amount3 = $("input[name=amount3]").val()
@@ -132,7 +134,7 @@ $(document).ready(function(){
             show_flash("setting", "Updating settings...", false)
 
             var params = {'name':name, 'email':email, 'mc_use':mc_use, 'mc_apikey':mc_apikey, 'mc_donorlist':mc_donorlist, 'paypal_id':paypal_id, 'impressions':impressions,
-                    'amount1':amount1, 'amount2':amount2, 'amount3':amount3, 'amount4':amount4, 'use_custom':use_custom, 'confirmation_header':confirmation_header, 
+                    'donate_parent' : donate_parent, 'amount1':amount1, 'amount2':amount2, 'amount3':amount3, 'amount4':amount4, 'use_custom':use_custom, 'confirmation_header':confirmation_header, 
                     'confirmation_info':confirmation_info, 'confirmation_footer':confirmation_footer, 'confirmation_text':confirmation_text,
                     'donor_report_text':donor_report_text}
 

@@ -6,6 +6,19 @@ var settings_key = null
 var loader = '<img id="loading_gif" style="margin-left:15px; display:none" src="/images/ajax-loader.gif">'
 var loading_message = '<p>Loading...<img style="margin-left:15px" src="/images/ajax-loader.gif"></p>'
 
+function getUrlVars()
+{
+    var vars = [], hash;
+    var hashes = document.referrer.slice(document.referrer.indexOf('?') + 1).split('&');
+    for(var i = 0; i < hashes.length; i++)
+    {
+        hash = hashes[i].split('=');
+        vars.push(hash[0]);
+        vars[hash[0]] = hash[1];
+    }
+    return vars;
+}
+
 function rpcGet(data, callback){
     var url = '/rpc?' + $.param(data)
     $.getJSON(url, function(data){
@@ -244,6 +257,24 @@ $(document).ready(function() {
         $("#designate_label").html("<strong>Select one:</strong>")
         hideInfo()
     })
+
+    // Check if team & individual keys are embedded in URL
+    var url_params = getUrlVars()
+    var team_key = url_params['t']
+    var individual_key = url_params['i']
+
+    if (team_key != null && individual_key != null){
+        $("#designate_label").html("<strong>Select one:</strong>")
+        $("#designate").css("height", "300px")
+        $("#designate").css("overflow", "auto")
+
+        selected_team = team_key
+        selected_individual = individual_key
+
+        showInfo(team_key, individual_key)
+
+        $("#backtolist_button").hide()
+    }
 
     //Set up AJAX
     $.ajaxSetup({

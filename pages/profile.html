@@ -66,6 +66,19 @@
                         </div>
 
                         <div class="clearfix">
+                            <label><strong>Support URLs:</strong></label>
+                            <div class="input">
+                                <div id="support_urls"></div>
+                                <span class="info">
+                                    Right click & copy link address to share with family/friends.
+                                </span>
+                                <span class="info">
+                                    <strong>Pro tip:</strong> Shorten & track the link at <a href="//goo.gl" target="_blank">goo.gl</a>.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="clearfix">
                             <label><strong>Description:</strong></label>
                             <div class="input"><textarea class="xxlarge unlockable" name="description" disabled="disabled">{{ i.description }}</textarea></div>
                         </div>
@@ -129,10 +142,10 @@
             </div>
 
             <!-- Variables -->
+            <input type="hidden" name="donate_parent" value='{{ s.donate_parent }}'>
             <input type="hidden" name="team_list" value='{{ i.data.team_json|escape }}'>
             <input type="hidden" id="individual_key" name="individual_key" value="{{ i.websafe }}" />
             <input type="hidden" id="var_show_donation_page" name="var_show_donation_page" value="{{ i.show_donation_page }}" />
-            <input type="hidden" id="team_totals" value="{{ team_totals }}" />
 
             </form>
         </div>
