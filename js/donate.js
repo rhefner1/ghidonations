@@ -9,7 +9,7 @@ var loading_message = '<p>Loading...<img style="margin-left:15px" src="/images/a
 function getUrlVars()
 {
     var vars = [], hash;
-    var hashes = window.parent.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+    var hashes = document.referrer.slice(document.referrer.indexOf('?') + 1).split('&');
     for(var i = 0; i < hashes.length; i++)
     {
         hash = hashes[i].split('=');
@@ -191,6 +191,8 @@ function submitForm(){
 $(document).ready(function() {
 
     settings_key = $("#settings_key").val()
+
+    alert(document.referrer.href)
 
     //Function to check if an element exists
     jQuery.fn.exists = function() {
