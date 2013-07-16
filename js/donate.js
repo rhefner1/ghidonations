@@ -192,8 +192,6 @@ $(document).ready(function() {
 
     settings_key = $("#settings_key").val()
 
-    alert(document.referrer.href)
-
     //Function to check if an element exists
     jQuery.fn.exists = function() {
         return jQuery(this).length > 0;
