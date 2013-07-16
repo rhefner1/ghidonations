@@ -50,6 +50,7 @@ function refreshCurrentTeams(){
 
 $(document).ready(function(){
 	individual_key = $("#individual_key").val()
+	var donate_parent = $("input[name=donate_parent]").val()
 
     var rpc_params = {'individual_key':individual_key}
     var rpc_request = ghiapi.semi.get.individualdonations
@@ -67,9 +68,17 @@ $(document).ready(function(){
 		$("input[name=show_donation_page]").attr("checked", "checked")
 	}
 
-	//Formatting team field
+	//Formatting team fields
 	$.each(team_list, function(team_key, values){
 		team_names += values[0] + ", "
+
+        var support_url = '<a href="donate_parent?t=team_key&i=individual_key" target="_blank">team_name</a><br><br>'
+        support_url = support_url.replace("donate_parent", donate_parent)
+        support_url = support_url.replace("team_key", team_key)
+        support_url = support_url.replace("individual_key", individual_key)
+        support_url = support_url.replace("team_name", values[0])
+
+        $("#support_urls").append(support_url)
 	})
 
 	//Populate current teams
