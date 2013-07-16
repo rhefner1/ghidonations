@@ -66,6 +66,22 @@
                         </div>
 
                         <div class="clearfix">
+                            <label><strong>Support URLs:</strong></label>
+                            <div class="input">
+                                {% for t in s.data.all_teams %}
+                                    <a href="{{ s.donate_parent }}?t={{ t.websafe }}&i={{ i.websafe }}" target="_blank">{{ t.name }}</a>
+                                    <br><br>
+                                {% endfor %}
+                                <span class="info">
+                                    Right click & copy link address to share with family/friends.
+                                </span>
+                                <span class="info">
+                                    <strong>Pro tip:</strong> Shorten & track the link at <a href="//goo.gl" target="_blank">goo.gl</a>.
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="clearfix">
                             <label><strong>Description:</strong></label>
                             <div class="input"><textarea class="xxlarge unlockable" name="description" disabled="disabled">{{ i.description }}</textarea></div>
                         </div>
