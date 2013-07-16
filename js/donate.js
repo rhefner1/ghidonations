@@ -268,6 +268,9 @@ $(document).ready(function() {
         $("#designate").css("height", "300px")
         $("#designate").css("overflow", "auto")
 
+        selected_team = team_key
+        selected_individual = individual_key
+
         showInfo(team_key, individual_key)
 
         $("#backtolist_button").hide()
