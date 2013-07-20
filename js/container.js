@@ -144,7 +144,11 @@ function change_tab(location)
                 }
                 else {
                     $("#actualbody").fadeIn(300)
-                    $("#refresh").attr("href", window.location.hash) 
+                    $("#refresh").attr("href", window.location.hash)
+
+                    // Put page title in title bar
+                    var page_title = $("h2").text()
+                    document.title = page_title + " | GHI Donations"
                 }  
             }
         });
