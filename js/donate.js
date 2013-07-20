@@ -102,24 +102,31 @@ function showInfo(team_key, individual_key){
     $("#designate_label").html("<strong>Your donation will be designated to:</strong>")
     var params = {action: "pub_individualInfo", arg0: JSON.stringify(team_key), arg1: JSON.stringify(individual_key)}
 
-    rpcGet(params, function(data){  
-        var photo_url = data[0]
-        var name = data[1]
-        var description = data[2]
-        var percentage = data[3]
-        var message = data[4]
+    rpcGet(params, function(data){
+        if (data == null){
+            $("#designate_label").html("Designate donation?")
+            $("#loading_gif").hide()
+        }
+        else{
+            var photo_url = data[0]
+            var name = data[1]
+            var description = data[2]
+            var percentage = data[3]
+            var message = data[4]
 
-        $("#info_container img").attr("src", photo_url)
-        $("#info_name").text(name)
-        $("#info_description").text(description)
+            $("#info_container img").attr("src", photo_url)
+            $("#info_name").text(name)
+            $("#info_description").text(description)
 
-        $("#info_progressbar div").css("width", percentage + "%")
-        $("#info_message").text(message)
+            $("#info_progressbar div").css("width", percentage + "%")
+            $("#info_message").text(message)
 
-        $("#designate").hide()
-        $("#info_container").fadeIn()
+            $("#designate").hide()
+            $("#info_container").fadeIn()
 
-        $("#loading_gif").hide()
+            $("#loading_gif").hide()
+        }
+            
     })  
 }
 
@@ -264,7 +271,6 @@ $(document).ready(function() {
     var individual_key = url_params['i']
 
     if (team_key != null && individual_key != null){
-        $("#designate_label").html("<strong>Select one:</strong>")
         $("#designate").css("height", "300px")
         $("#designate").css("overflow", "auto")
 

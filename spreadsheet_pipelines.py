@@ -106,7 +106,7 @@ class HeaderCSV(pipeline.Pipeline):
         gcs_file.write( si.getvalue() )
         gcs_file.close()
 
-        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_file_key}, countdown=3600, queue_name="deletespreadsheet")
+        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_file_key}, countdown=1800, queue_name="deletespreadsheet")
 
         return gcs_file_key
 
@@ -169,7 +169,7 @@ class CreateCSV(pipeline.Pipeline):
         gcs_file.write( si.getvalue() )
         gcs_file.close()
 
-        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_file_key}, countdown=3600, queue_name="deletespreadsheet")
+        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_file_key}, countdown=1800, queue_name="deletespreadsheet")
 
         return gcs_file_key
         
@@ -187,7 +187,7 @@ class ConcatCSV(pipeline.Pipeline):
             gc.collect()
 
         gcs_writer.close()
-        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_writer_key}, countdown=3600, queue_name="deletespreadsheet")
+        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_writer_key}, countdown=1800, queue_name="deletespreadsheet")
 
         return gcs_writer_key
 
