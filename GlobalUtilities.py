@@ -1026,7 +1026,7 @@ class SettingsMailchimp(UtilitiesBase):
                     #listSubscribe(string apikey, string id, string email_address, array merge_vars, string email_type, 
                     #bool double_optin, bool update_existing, bool replace_interests, bool send_welcome)
                     name_split = name.split()
-                    merge_vars = {"FNAME":name_split[0], "LNAME":" ".join(name_split[1:])}
+                    merge_vars = {"FNAME":name_split[0], "LNAME":" ".join(name_split[1:]), "MMERGE3": ""}
 
                     response = ms.listSubscribe(id=self.e.mc_donorlist, email_address=email, merge_vars=merge_vars)
 
