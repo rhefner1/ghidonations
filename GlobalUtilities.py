@@ -1344,7 +1344,7 @@ class DonationConfirmation(UtilitiesBase):
                 message.sender = "donate@globalhopeindia.org"
                 message.subject = "Thanks for your donation!"
             else:
-                message.sender = "mailer@ghidonations.appspotmail.com"
+                message.sender = settings_name + " <mailer@ghidonations.appspotmail.com>"
                 message.subject = settings_name + " - Thanks for your donation!"
 
             date = convertTime(d.donation_date).strftime("%B %d, %Y")
