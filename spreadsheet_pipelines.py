@@ -143,7 +143,7 @@ class CreateCSV(pipeline.Pipeline):
                     d = e
                     row_data.append(str(d.donation_date))
                     row_data.append(d.name)
-                    row_data.append(d.email)
+                    row_data.append(d.given_email)
                     row_data.append(str(d.amount_donated))
                     row_data.append(d.payment_type)
                     row_data.append(d.designated_team)
