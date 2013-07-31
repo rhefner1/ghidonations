@@ -165,8 +165,16 @@ class EndpointsAPI(remote.Service):
         for d in results[0]:
             f = d.fields
 
+            team_name = f[6].value
+            if not team_name:
+                team_name = " "
+
+            individual_name = f[7].value
+            if not individual_name:
+                individual_name = " "
+
             donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=tools.truncateEmail(f[3].value),
-                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value))
+                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value), team_name=team_name, individual_name=individual_name)
 
             donations.append(donation)
 
