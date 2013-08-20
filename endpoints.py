@@ -487,7 +487,7 @@ class EndpointsAPI(remote.Service):
         if individual_key:
             individual_key = tools.getKey(individual_key)
 
-        d.update(req.notes, team_key, individual_key, d.deposited, req.donation_date)
+        d.update(req.notes, team_key, individual_key, None, req.donation_date)
 
         return SuccessMessage_Out(success=success, message=message)
 
