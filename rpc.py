@@ -115,7 +115,7 @@ class RPCMethods:
 
     def pub_refreshSandbox(self):
         #Local SDK
-        settings = "ahBkZXZ-Z2hpZG9uYXRpb25zchYLEghTZXR0aW5ncxiAgICAgICAgFAM"
+        settings = "ahBkZXZ-Z2hpZG9uYXRpb25zchULEghTZXR0aW5ncxiAgICAgICACgw"
 
         #GHI Calls sandbox
         #settings = "agpzfmdoaWNhbGxzcg4LEghTZXR0aW5ncxgBDA"

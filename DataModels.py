@@ -279,12 +279,12 @@ class Donation(ndb.Expando):
                 notes = "None"
             self.special_notes = notes
 
-        if add_deposit == False:
-            #Make this value none to remove it from deposits window
-            add_deposit = None
+        # if add_deposit == False:
+        #     #Make this value none to remove it from deposits window
+        #     add_deposit = None
 
-        if add_deposit != self.deposited:
-            self.deposited = add_deposit
+        # if add_deposit != self.deposited:
+        #     self.deposited = add_deposit
 
         if donation_date:
             self.donation_date = datetime.datetime(donation_date.year, donation_date.month, donation_date.day)
