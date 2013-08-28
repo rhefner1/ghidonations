@@ -234,6 +234,10 @@ class Donation(ndb.Expando):
         return self.contact.get().email
 
     @property
+    def email_formatted(self):
+        return tools.truncateEmail(self.email)
+
+    @property
     def formatted_donation_date(self):
         return tools.convertTime(self.donation_date).strftime("%b %d, %Y")
 
