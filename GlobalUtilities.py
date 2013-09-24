@@ -8,7 +8,8 @@ from decimal import *
 # App Engine platform
 from google.appengine.api import taskqueue, mail, memcache, images, files
 from google.appengine.ext.webapp import template
-from google.appengine.ext import ndb, deferred, endpoints
+from google.appengine.ext import ndb, deferred
+import endpoints
 from google.appengine.datastore.datastore_query import Cursor
 
 # Google Cloud Storage

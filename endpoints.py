@@ -6,7 +6,8 @@ import DataModels as models
 import spreadsheet_pipelines
 
 # Cloud Endpoints
-from google.appengine.ext import endpoints
+import endpoints
+#from google.appengine.ext import endpoints
 from protorpc import remote
 from endpoints_messages import *
 

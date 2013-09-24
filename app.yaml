@@ -1,5 +1,5 @@
 application: ghidonations
-version: 5h
+version: 5i
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -110,6 +110,10 @@ error_handlers:
 builtins:
 - deferred: on
 - appstats: on
+
+libraries:
+- name: endpoints
+  version: latest
 
 inbound_services:
 - mail
