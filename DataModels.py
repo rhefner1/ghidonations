@@ -235,7 +235,7 @@ class Donation(ndb.Expando):
 
     @property
     def email_formatted(self):
-        return tools.truncateEmail(self.email)
+        return tools.truncateEmail(self.email, is_list=True)
 
     @property
     def formatted_donation_date(self):

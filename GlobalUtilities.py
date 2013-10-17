@@ -8,7 +8,8 @@ from decimal import *
 # App Engine platform
 from google.appengine.api import taskqueue, mail, memcache, images, files
 from google.appengine.ext.webapp import template
-from google.appengine.ext import ndb, deferred
+from google.appengine.ext import ndb, deferred#, endpoints
+
 import endpoints
 from google.appengine.datastore.datastore_query import Cursor
 
@@ -546,7 +547,15 @@ def toDecimal(number):
     else:
         return Decimal(0).quantize(Decimal("1.00"))
 
-def truncateEmail(email):
+def truncateEmail(email, is_list=False):
+
+    if is_list == True:
+        new_email = ""
+        for e in email:
+            new_email += e + " "
+
+        email = new_email
+
     truncation_length = 35
     if len(email) > truncation_length:
         email = email[0:truncation_length]
