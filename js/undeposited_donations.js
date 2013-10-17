@@ -9,15 +9,21 @@ function getCheckedRows(){
 }
 
 function calculateCurrentlyChecked(){
-	total_amount = parseFloat("0")
+	total_gross = parseFloat("0")
+	total_net = parseFloat("0")
 
 	$("input[type=checkbox]:checked").each(function(index){
-		var amount = $(this).parent().parent().children()[4].innerHTML.substr(1)
-		amount = parseFloat(amount)
-		total_amount += amount
+		var gross = $(this).parent().parent().children()[4].innerHTML.substr(1)
+		var net = $(this).parent().parent().children()[5].innerHTML.substr(1)
+		gross = parseFloat(gross)
+		net = parseFloat(net)
+
+		total_gross += gross
+		total_net += net
 	})
 
-	$("#aggregate_amount").text(total_amount.toFixed(2).toString()) 
+	$("#gross_amount").text(total_gross.toFixed(2).toString())
+	$("#net_amount").text(total_net.toFixed(2).toString())  
 }
 
 $(document).ready(function(){

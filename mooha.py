@@ -145,7 +145,7 @@ class Dashboard(BaseHandlerAdmin):
 class Deposit(BaseHandlerAdmin):
     def task(self, isAdmin, s):
 
-        #WARNING - this is a really complicated and kind of a hacked-together
+        #WARNING - this is a complicated and kind of a hacked-together
         #solution. I didn't understand it the day after I wrote it.
         # ... But it works. 
 
@@ -153,7 +153,8 @@ class Deposit(BaseHandlerAdmin):
         deposit = tools.getKey(deposit_key).get()
 
         entity_keys = deposit.entity_keys
-        total_amount = tools.toDecimal(0)
+        gross_amount = tools.toDecimal(0)
+        net_amount = tools.toDecimal(0)
         general_fund = tools.toDecimal(0)
 
         donations = []
@@ -164,7 +165,8 @@ class Deposit(BaseHandlerAdmin):
             if d != None:
                 donations.append(d)
 
-                total_amount += d.amount_donated
+                gross_amount += d.confirmation_amount
+                net_amount += d.amount_donated
 
                 if d.team:
                     t = d.team.get()
@@ -200,7 +202,7 @@ class Deposit(BaseHandlerAdmin):
             new_team_breakout[str(name) + " ($" + str(amount_donated) + ")"] = new_array
 
         template_variables = {"d" : deposit, "donations" : donations, "team_breakout" : new_team_breakout,
-                "total_amount" : total_amount}
+                "gross_amount" : gross_amount, "net_amount" : net_amount}
         self.response.write(
                 template.render('pages/deposit.html', template_variables))
 
