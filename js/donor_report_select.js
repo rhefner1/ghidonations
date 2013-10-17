@@ -4,7 +4,7 @@ $(document).ready(function(){
 
     // Autocomplete for contacts
     var params = {}
-    var request = ghiapi.get.contactsjson(params)
+    var request = ghiapi.get.contacts_json(params)
 
     request.execute(function(response) {
         $("input[name=contact]").autocomplete({
@@ -38,7 +38,7 @@ $(document).ready(function(){
             var year = $("input[name=year]").val()
             var params = {'contact_key':contact, 'year':year}
 
-            var request = ghiapi.confirmation.annualreport(params)
+            var request = ghiapi.confirmation.annual_report(params)
             request.execute(function(response){
                 rpcSuccessMessage(response)
                 refreshPage()

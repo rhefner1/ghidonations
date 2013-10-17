@@ -4,7 +4,7 @@ $(document).ready(function(){
 
     // Autocomplete for contacts
     var params = {}
-    var request = ghiapi.get.contactsjson(params)
+    var request = ghiapi.get.contacts_json(params)
     request.execute(function(response){
         var contacts_json = JSON.parse(response.json_data)
 

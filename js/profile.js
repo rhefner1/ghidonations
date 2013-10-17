@@ -17,7 +17,7 @@ function dataTableWriter(data_table, d){
 
 function getTeamTotals(){
 	var params = {'individual_key':individual_key}
-	var request = ghiapi.get.teamtotals(params)
+	var request = ghiapi.get.team_totals(params)
 
 	request.execute(function(response){
 
@@ -53,7 +53,7 @@ $(document).ready(function(){
 	var donate_parent = $("input[name=donate_parent]").val()
 
     var rpc_params = {'individual_key':individual_key}
-    var rpc_request = ghiapi.semi.get.individualdonations
+    var rpc_request = ghiapi.semi.get.individual_donations
 
     var data_table = initializeTable(5, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)

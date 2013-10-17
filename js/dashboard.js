@@ -1,6 +1,6 @@
 function drawChart() {
     var params = {}
-    var request = ghiapi.get.monthlychartdata(params)
+    var request = ghiapi.get.monthly_chart_data(params)
     request.execute(function(response){
         data = JSON.parse(response.json_data)
         var data = google.visualization.arrayToDataTable(data)
