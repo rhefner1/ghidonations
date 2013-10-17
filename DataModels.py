@@ -3,7 +3,7 @@ from decimal import *
 
 #App Engine platform
 from google.appengine.api import mail, memcache, datastore_errors, taskqueue
-from google.appengine.ext import ndb, blobstore
+from google.appengine.ext import ndb, blobstore, deferred
 
 #Search
 from google.appengine.api import search
@@ -491,10 +491,7 @@ class Individual(ndb.Expando):
     def _post_put_hook(self, future):
         e = future.get_result().get()
 
-        for t in e.data.teams:
-            memcache.delete("teammembers" + t.team.urlsafe())
-            memcache.delete("teammembersdict" + t.team.urlsafe())
-            memcache.delete("info" + t.team.urlsafe() + e.websafe)
+        deferred.defer(clear_team_memcache, e, _queue="backend")
             
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")
 
@@ -742,3 +739,10 @@ class TeamList(ndb.Model):
     @property
     def websafe(self):
         return self.key.urlsafe()
+
+## -- Utilities -- ##
+def clear_team_memcache(e):
+    for t in e.data.teams:
+        memcache.delete("teammembers" + t.team.urlsafe())
+        memcache.delete("teammembersdict" + t.team.urlsafe())
+        memcache.delete("info" + t.team.urlsafe() + e.websafe)
