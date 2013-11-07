@@ -49,58 +49,5 @@ names = [
 
   {
     "TeamName":"Team M",
-  },
-
-  {
-    "TeamName":"Team N",
-  },
-
-  {
-    "TeamName":"Team O",
-  },
-
-  {
-    "TeamName":"Team P",
-  },
-
-  {
-    "TeamName":"Team Q",
-  },
-
-  {
-    "TeamName":"Team R",
-  },
-
-  {
-    "TeamName":"Team S",
-  },
-
-  {
-    "TeamName":"Team T",
-  },
-
-  {
-    "TeamName":"Team U",
-  },
-
-  {
-    "TeamName":"Team V",
-  },
-
-  {
-    "TeamName":"Team W",
-  },
-
-  {
-    "TeamName":"Team X",
-  },
-
-  {
-    "TeamName":"Team Y",
-  },
-
-  {
-    "TeamName":"Team Z",
-  },
-
+  }
 ]

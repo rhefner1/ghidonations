@@ -10,7 +10,7 @@ def createTestSandbox():
 	return s
 
 ###  --- Sandbox --- ###
-def populateTestSandbox(settings_key=None, num_teams=26, num_individuals=500, num_contacts=9500):
+def populateTestSandbox(settings_key=None, num_teams=13, num_individuals=500, num_contacts=2500):
 	if not settings_key:
 		settings_key = createTestSandbox()
 		s = settings_key.get()
@@ -70,13 +70,13 @@ def populateTestSandbox(settings_key=None, num_teams=26, num_individuals=500, nu
 	for i in itertools.islice(individual_names.names, 0, num_individuals):
 		team_key = team_keys[ random.randint(0, len(team_keys)-1 ) ]
 
-		key = s.create.individual( i["GivenName"], team_key, i["EmailAddress"], "password", True)
+		key = s.create.individual( i["GivenName"] + " " + i["Surname"], team_key, i["EmailAddress"], "password", True)
 		individual_keys.append(key)
 
 	for c in itertools.islice(contact_names.names, 0, num_contacts):
 		phone = c["TelephoneNumber"].replace("-", "")
 		address = json.dumps( [ c["StreetAddress"], c["City"], c["State"], c["ZipCode"] ] )
-		s.create.contact( c["GivenName"], c["EmailAddress"], phone, None, address, False)
+		s.create.contact( c["GivenName"] + " " + c["Surname"], c["EmailAddress"], phone, None, address, False)
 
 		# Choose how many donations this contact should have
 		for i in range(0,12):
@@ -110,7 +110,7 @@ def populateTestSandbox(settings_key=None, num_teams=26, num_individuals=500, nu
 			else:
 				amount_donated = confirmation_amount - confirmation_amount * .022
 
-			s.create.donation( c["GivenName"], c["EmailAddress"], str(amount_donated), str(confirmation_amount), None, team_key, individual_key, True, None, None, payment_type, False, None)
+			s.create.donation( c["GivenName"] + " " + c["Surname"], c["EmailAddress"], str(amount_donated), str(confirmation_amount), None, team_key, individual_key, True, None, None, payment_type, False, None)
 
 	taskqueue.add(url="/tasks/updateanalytics", params={}, queue_name="backend")
 	tools.flushMemcache(self)
