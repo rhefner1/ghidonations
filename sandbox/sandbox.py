@@ -102,7 +102,7 @@ def populateTestSandbox(settings_key=None, num_teams=13, num_individuals=500, nu
 				individual_key = None
 
 			# Choose the value of this donation
-			confirmation_amount = random.randint(1000, 1000000) / 100
+			confirmation_amount = float(random.randint(1000, 1000000)) / 100
 
 			# If PayPal, take away 2.2%
 			if payment_type == "offline":
