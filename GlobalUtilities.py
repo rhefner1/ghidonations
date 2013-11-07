@@ -235,7 +235,7 @@ def getMailchimpLists(self, mc_apikey):
             return [False, "Unknown error"]
 
 ###### ------ Data Creation ------ ######
-def newSettings(self, name, email):
+def newSettings(name, email):
     new_settings = models.Settings()
     new_settings.name = name
     new_settings.email = email
