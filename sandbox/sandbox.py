@@ -1,19 +1,37 @@
 import json, random, itertools
+import GlobalUtilities as tools
 
 ### --- Execute this first --- ###
 def createTestSandbox():
 	name = "Testing"
 	email = "tester@example.com"
-	s = tools.newSettings(self, name, email)
+	s = tools.newSettings(name, email)
 
-	return s.key
+	return s
 
 ###  --- Sandbox --- ###
-def populateTestSandbox(settings_key=None, num_teams=26, num_individuals=500, num_contact=9500):
+def populateTestSandbox(settings_key=None, num_teams=26, num_individuals=500, num_contacts=9500):
 	if not settings_key:
 		settings_key = createTestSandbox()
+		s = settings_key.get()
 
-	s = settings_key.get()
+	else:
+		s = settings_key.get()
+		# Clearing out existing data
+
+		for i in s.data.all_individuals:
+		    i.key.delete()
+		for t in s.data.all_teams:
+		    t.key.delete()
+		for d in s.data.all_deposits:
+		    d.key.delete()
+		for c in s.data.all_contacts:
+		    for i in c.data.all_impressions:
+		        i.key.delete()
+		    c.key.delete()
+		for d in s.data.all_donations:
+		    d.key.delete()
+
 
 	# Reset default settings values
 	s.name = "Testing"
@@ -38,23 +56,9 @@ def populateTestSandbox(settings_key=None, num_teams=26, num_individuals=500, nu
 
 	s.put()
 
-	# Clearing out existing data
-
-	for i in s.data.all_individuals:
-	    i.key.delete()
-	for t in s.data.all_teams:
-	    t.key.delete()
-	for d in s.data.all_deposits:
-	    d.key.delete()
-	for c in s.data.all_contacts:
-	    for i in c.data.all_impressions:
-	        i.key.delete()
-	    c.key.delete()
-	for d in s.data.all_donations:
-	    d.key.delete()
 
 	# Importing test data
-	from docs import contact_names, individual_names, team_names
+	import contact_names, individual_names, team_names
 
 	# Creating new data
 	team_keys = []
@@ -64,14 +68,14 @@ def populateTestSandbox(settings_key=None, num_teams=26, num_individuals=500, nu
 
 	individual_keys = []
 	for i in itertools.islice(individual_names.names, 0, num_individuals):
-		team_key = team_keys[ random.randint(0, len(team_keys)) ]
+		team_key = team_keys[ random.randint(0, len(team_keys)-1 ) ]
 
-		key = s.create.individual( i["GivenName", team_key, i["EmailAddress"], "password", True)
+		key = s.create.individual( i["GivenName"], team_key, i["EmailAddress"], "password", True)
 		individual_keys.append(key)
 
 	for c in itertools.islice(contact_names.names, 0, num_contacts):
 		phone = c["TelephoneNumber"].replace("-", "")
-		address = [ c["StreetAddress"], c["City"], c["State"], c["ZipCode"] ]
+		address = json.dumps( [ c["StreetAddress"], c["City"], c["State"], c["ZipCode"] ] )
 		s.create.contact( c["GivenName"], c["EmailAddress"], phone, None, address, False)
 
 		# Choose how many donations this contact should have
@@ -85,8 +89,13 @@ def populateTestSandbox(settings_key=None, num_teams=26, num_individuals=500, nu
 
 			# Choose if this donations should have a designation
 			if random.randint(0,1) == 1: 
-				individual_key = individual_keys [ random.randint( 0, len(individual_keys) ) ]
-				team_key = individual_key.get().team.key
+				try:
+					individual_key = individual_keys [ random.randint( 0, len(individual_keys)-1 ) ]
+					team_key = individual_key.get().data.teams.fetch(1)[0].key
+
+				except:
+					team_key = None
+					individual_key = None
 
 			else:
 				team_key = None

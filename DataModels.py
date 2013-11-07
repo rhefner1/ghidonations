@@ -647,8 +647,7 @@ class Settings(ndb.Expando):
         if donor_report_text != s.donor_report_text:
             s.donor_report_text = donor_report_text
 
-        s.put()
-           
+        s.put()       
 
     @property
     def websafe(self):
