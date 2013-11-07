@@ -647,13 +647,8 @@ class Settings(ndb.Expando):
         if donor_report_text != s.donor_report_text:
             s.donor_report_text = donor_report_text
 
-<<<<<<< HEAD
         s.put()
-           
-=======
-        s.put()       
-
->>>>>>> issue-52
+              
     @property
     def websafe(self):
         return self.key.urlsafe()
