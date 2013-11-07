@@ -115,6 +115,8 @@ class Contact(ndb.Expando):
         memcache.delete("contacts" + e.settings.urlsafe())
 
         e.settings.get().refresh.contactsJSON()
+
+        deferred.defer( self.search.updateDonations, _queue="backend" )
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
@@ -691,6 +693,7 @@ class Team(ndb.Expando):
         memcache.delete("teammembers" + e.websafe)
         memcache.delete("teamsdict" + e.settings.urlsafe())
 
+        deferred.defer( self.search.updateDonations, _queue="backend" )
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")      
 
     ## -- Before Deletion -- ##

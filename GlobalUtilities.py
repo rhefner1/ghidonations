@@ -1258,6 +1258,11 @@ class ContactSearch(UtilitiesBase):
             logging.error("Failed creating index on contact key:" + self.e.websafe + " because: " + str(e))
             self.error(500)
 
+    def updateDonations(self):
+        # Donations refer back to contact data and need to have their search documents updated when a contact is updated
+        for d in self.e.data.all_donations:
+            d.search.index()
+
 ## -- Deposit Classes -- ##
 class DepositSearch(UtilitiesBase):
     def createDocument(self):
@@ -1712,6 +1717,11 @@ class TeamSearch(UtilitiesBase):
         except Exception as e:
             logging.error("Failed creating index on team key:" + self.e.websafe + " because: " + str(e))
             self.error(500)
+
+    def updateDonations(self):
+        # Donations refer back to team data and need to have their search documents updated when a team is updated
+        for d in self.e.data.donations:
+            d.search.index()
 
 class TeamListData(UtilitiesBase):
     @property
