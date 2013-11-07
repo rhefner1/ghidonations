@@ -649,7 +649,6 @@ class Settings(ndb.Expando):
 
         s.put()
            
-
     @property
     def websafe(self):
         return self.key.urlsafe()
