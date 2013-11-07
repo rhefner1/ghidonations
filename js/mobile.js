@@ -22,7 +22,7 @@ function getDonations(){
 
     if (query_cursor != "end"){
         var params = {'individual_key':i_key, 'query_cursor':null}
-        var request = ghiapi.semi.get.individual_donations(params)
+        var request = ghiapi.semi.get.individualdonations(params)
     
         request.execute(function(response){
 

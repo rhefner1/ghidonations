@@ -23,7 +23,7 @@
                 </p>
             </div>
             <div class="col_8 last">
-            <h4><strong>Gross:</strong> ${{ gross_amount }} <strong style="margin-left:15px">Net:</strong> ${{ net_amount }}</h4>
+            <h4><strong>Total:</strong> ${{ total_amount }}</h4>
             <br>
                 <table class="regular">
                     <thead class="bold">
@@ -31,8 +31,7 @@
                             <th class="align-left">Time Donated</th>
                             <th class="align-left">Name</th>
                             <th class="align-left">Email</th>
-                            <th class="align-left">Gross Amount</th>
-                            <th class="align-left">Net Amount</th>
+                            <th class="align-left">Donation Amount</th>
                             <th class="align-left">Payment Type</th>
                             </tr>
                     </thead>
@@ -41,9 +40,8 @@
                         <tr data-id="{{ d.websafe }}">
                             <td>{{ d.formatted_donation_date }}</td>
                             <td>{{ d.name }}</td>
-                            <td>{{ d.given_email }}</td>
+                            <td>{{ d.email }}</td>
                             <td>${{ d.amount_donated }}</td>
-                            <td>${{ d.confirmation_amount }}</td>
                             <td>{{ d.payment_type }}</td>
                         </tr>
                         {% endfor %}

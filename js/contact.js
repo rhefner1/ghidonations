@@ -13,7 +13,7 @@ function dataTableWriter(data_table, d){
 $(document).ready(function(){
     var contact_key = $("#contact_key").val()
 
-    var rpc_request = ghiapi.get.contact_donations
+    var rpc_request = ghiapi.get.contactdonations
     var rpc_params = {'contact_key':contact_key}
 
     var data_table = initializeTable(4, rpc_request, rpc_params, function(data_table, d){

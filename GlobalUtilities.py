@@ -8,13 +8,8 @@ from decimal import *
 # App Engine platform
 from google.appengine.api import taskqueue, mail, memcache, images, files
 from google.appengine.ext.webapp import template
-from google.appengine.ext import ndb, deferred
-
-import endpoints
+from google.appengine.ext import ndb, deferred, endpoints
 from google.appengine.datastore.datastore_query import Cursor
-
-# Google Cloud Storage
-import cloudstorage as gcs
 
 # Mailchimp API
 from mailsnake import MailSnake
@@ -153,7 +148,7 @@ def deserializeEntity(data):
         # Getting entity fro protobuf
         return ndb.model_from_protobuf(data)
 
-def flushMemcache():
+def flushMemcache(self):
     return memcache.flush_all()
 
 def getKey(entity_key):
@@ -284,13 +279,8 @@ def getAllSearchDocs(index_name):
     return documents
 
 def newFile(mime_type, file_name):
-    gcs_file_key = appengine_config.GCS_BUCKET + "/" + file_name
-
-    write_retry_params = gcs.RetryParams(backoff_factor=1.1)
-    gcs_file = gcs.open(gcs_file_key, 'w', content_type=mime_type,
-                            retry_params=write_retry_params)
-
-    return gcs_file_key, gcs_file
+    file_key = files.blobstore.create(mime_type=mime_type, _blobinfo_uploaded_filename=file_name)
+    return str(file_key)
 
 ###### ------ Deferred Utilities ------ ######
 def indexEntitiesFromQuery(query, query_cursor=None):
@@ -378,32 +368,15 @@ def isEmail(email):
     else:
         return False
 
-def listDiff(list1, list2):
-    # Typically old value is list1, new value is list2
-    list_diff = list(set(list2) - set(list1))
-
-    try:
-        list_diff.remove('')
-    except:
-        pass
-
-    return list_diff
-
 def mergeContacts(c1_key, c2_key):
     c1 = c1_key.get()
     c2 = c2_key.get()
 
-    # Ff contact 2 doesn't have an value and contact 1 does,
-    # replace c2's value with c1's
+    #if contact 2 doesn't have an value and contact 1 does,
+    #replace c2's value with c1's
 
-    combined_emails = c2.email + c1.email
-
-    try:
-        combined_emails.remove("")
-    except:
-        pass
-
-    c2.email = combined_emails
+    if c2.email == "" and c1.email != "":
+        c2.email = c1.email
 
     if c2.phone == "" and c1.phone != "":
         c2.phone = c1.phone
@@ -414,15 +387,15 @@ def mergeContacts(c1_key, c2_key):
     if c2.address == ['', '', '', ''] and c1.address != ['', '', '', '']:
         c2.address = c1.address
 
-    # Merge the donations from c1 all to c2
+    #Merge the donations from c1 all to c2
     for d in c1.data.all_donations:
         d.contact = c2_key
         d.put()
 
-    # Save c2
+    #Save c2
     c2.put()
 
-    # Finally, delete c1
+    #Finally, delete c1
     c1.key.delete()
 
 def moneyAmount(money_string):
@@ -547,15 +520,7 @@ def toDecimal(number):
     else:
         return Decimal(0).quantize(Decimal("1.00"))
 
-def truncateEmail(email, is_list=False):
-
-    if is_list == True:
-        new_email = ""
-        for e in email:
-            new_email += e + " "
-
-        email = new_email
-
+def truncateEmail(email):
     truncation_length = 35
     if len(email) > truncation_length:
         email = email[0:truncation_length]
@@ -611,7 +576,7 @@ class SettingsCreate(UtilitiesBase):
                 for e in email:
                     if e and e != "": 
                         #Add new contact to Mailchimp
-                        self.e.mailchimp.add(e, name, False)
+                        self.e.mailchimp.add(email, name, False)
 
             return new_contact.key
         else:
@@ -722,7 +687,7 @@ Thanks!"""
         new_tl = models.TeamList()
         new_tl.individual = new_individual.key
         new_tl.team = team_key
-        new_tl.fundraise_amt = toDecimal("2800")
+        new_tl.fundraise_amt = toDecimal("2700")
         new_tl.sort_name = name
         new_tl.show_donation_page = True
 
@@ -1354,7 +1319,7 @@ class DonationConfirmation(UtilitiesBase):
                 message.sender = "donate@globalhopeindia.org"
                 message.subject = "Thanks for your donation!"
             else:
-                message.sender = settings_name + " <mailer@ghidonations.appspotmail.com>"
+                message.sender = "mailer@ghidonations.appspotmail.com"
                 message.subject = settings_name + " - Thanks for your donation!"
 
             date = convertTime(d.donation_date).strftime("%B %d, %Y")
@@ -1667,7 +1632,7 @@ class TeamData(UtilitiesBase):
         memcache_key = "teammembers" +  self.e.websafe
         
         def get_item():
-            members = self.members
+            members = self.members_public_donation_page
             all_members = []
 
             for tl in members:

@@ -3,7 +3,7 @@ from decimal import *
 
 #App Engine platform
 from google.appengine.api import mail, memcache, datastore_errors, taskqueue
-from google.appengine.ext import ndb, blobstore, deferred
+from google.appengine.ext import ndb, blobstore
 
 #Search
 from google.appengine.api import search
@@ -234,10 +234,6 @@ class Donation(ndb.Expando):
         return self.contact.get().email
 
     @property
-    def email_formatted(self):
-        return tools.truncateEmail(self.email, is_list=True)
-
-    @property
     def formatted_donation_date(self):
         return tools.convertTime(self.donation_date).strftime("%b %d, %Y")
 
@@ -283,12 +279,12 @@ class Donation(ndb.Expando):
                 notes = "None"
             self.special_notes = notes
 
-        # if add_deposit == False:
-        #     #Make this value none to remove it from deposits window
-        #     add_deposit = None
+        if add_deposit == False:
+            #Make this value none to remove it from deposits window
+            add_deposit = None
 
-        # if add_deposit != self.deposited:
-        #     self.deposited = add_deposit
+        if add_deposit != self.deposited:
+            self.deposited = add_deposit
 
         if donation_date:
             self.donation_date = datetime.datetime(donation_date.year, donation_date.month, donation_date.day)
@@ -491,7 +487,10 @@ class Individual(ndb.Expando):
     def _post_put_hook(self, future):
         e = future.get_result().get()
 
-        deferred.defer(clear_team_memcache, e, _queue="backend")
+        for t in e.data.teams:
+            memcache.delete("teammembers" + t.team.urlsafe())
+            memcache.delete("teammembersdict" + t.team.urlsafe())
+            memcache.delete("info" + t.team.urlsafe() + e.websafe)
             
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")
 
@@ -537,8 +536,6 @@ class Settings(ndb.Expando):
     amount3 = ndb.IntegerProperty()
     amount4 = ndb.IntegerProperty()
     use_custom = ndb.BooleanProperty()
-
-    donate_parent = ndb.StringProperty()
 
     #Confirmation letters
     confirmation_text = ndb.TextProperty()
@@ -590,7 +587,7 @@ class Settings(ndb.Expando):
         return tools.SettingsSearch(self)
 
     ## -- Update -- ##
-    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, donate_parent, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
+    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
         s = self
 
         if name != s.name:
@@ -613,9 +610,6 @@ class Settings(ndb.Expando):
 
         if impressions != s.impressions:
             s.impressions = impressions
-
-        if donate_parent != s.donate_parent:
-            s.donate_parent = donate_parent
 
         if int(amount1) != s.amount1:
             s.amount1 = int(amount1)
@@ -700,9 +694,8 @@ class Team(ndb.Expando):
         logging.info("Deleting team:" + t.name)
 
         for tl in t.data.members:
-            if tl:
             #Delete this team from all
-                tl.key.delete()
+            tl.key.delete()
 
         for d in t.data.donations:
             d.individual = None
@@ -738,10 +731,3 @@ class TeamList(ndb.Model):
     @property
     def websafe(self):
         return self.key.urlsafe()
-
-## -- Utilities -- ##
-def clear_team_memcache(e):
-    for t in e.data.teams:
-        memcache.delete("teammembers" + t.team.urlsafe())
-        memcache.delete("teammembersdict" + t.team.urlsafe())
-        memcache.delete("info" + t.team.urlsafe() + e.websafe)

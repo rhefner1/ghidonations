@@ -6,19 +6,6 @@ var settings_key = null
 var loader = '<img id="loading_gif" style="margin-left:15px; display:none" src="/images/ajax-loader.gif">'
 var loading_message = '<p>Loading...<img style="margin-left:15px" src="/images/ajax-loader.gif"></p>'
 
-function getUrlVars()
-{
-    var vars = [], hash;
-    var hashes = document.referrer.slice(document.referrer.indexOf('?') + 1).split('&');
-    for(var i = 0; i < hashes.length; i++)
-    {
-        hash = hashes[i].split('=');
-        vars.push(hash[0]);
-        vars[hash[0]] = hash[1];
-    }
-    return vars;
-}
-
 function rpcGet(data, callback){
     var url = '/rpc?' + $.param(data)
     $.getJSON(url, function(data){
@@ -27,7 +14,6 @@ function rpcGet(data, callback){
 }
 
 function loadTeams(){
-    $("#designate_message").fadeIn()
     $("#designate").css("height", "auto")
     $("#designate_label").html("<strong>Select one:</strong>")
     $("#designate").html(loading_message)
@@ -102,31 +88,24 @@ function showInfo(team_key, individual_key){
     $("#designate_label").html("<strong>Your donation will be designated to:</strong>")
     var params = {action: "pub_individualInfo", arg0: JSON.stringify(team_key), arg1: JSON.stringify(individual_key)}
 
-    rpcGet(params, function(data){
-        if (data == null){
-            $("#designate_label").html("Designate donation?")
-            $("#loading_gif").hide()
-        }
-        else{
-            var photo_url = data[0]
-            var name = data[1]
-            var description = data[2]
-            var percentage = data[3]
-            var message = data[4]
+    rpcGet(params, function(data){  
+        var photo_url = data[0]
+        var name = data[1]
+        var description = data[2]
+        var percentage = data[3]
+        var message = data[4]
 
-            $("#info_container img").attr("src", photo_url)
-            $("#info_name").text(name)
-            $("#info_description").text(description)
+        $("#info_container img").attr("src", photo_url)
+        $("#info_name").text(name)
+        $("#info_description").text(description)
 
-            $("#info_progressbar div").css("width", percentage + "%")
-            $("#info_message").text(message)
+        $("#info_progressbar div").css("width", percentage + "%")
+        $("#info_message").text(message)
 
-            $("#designate").hide()
-            $("#info_container").fadeIn()
+        $("#designate").hide()
+        $("#info_container").fadeIn()
 
-            $("#loading_gif").hide()
-        }
-            
+        $("#loading_gif").hide()
     })  
 }
 
@@ -205,7 +184,7 @@ $(document).ready(function() {
     }
 
     $("#designate #start_designate").click(function(){
-        loadTeams()
+        loadTeams()      
     })
 
     $("#designate").delegate(".team", "click", function(){
@@ -264,23 +243,6 @@ $(document).ready(function() {
         $("#designate_label").html("<strong>Select one:</strong>")
         hideInfo()
     })
-
-    // Check if team & individual keys are embedded in URL
-    var url_params = getUrlVars()
-    var team_key = url_params['t']
-    var individual_key = url_params['i']
-
-    if (team_key != null && individual_key != null){
-        $("#designate").css("height", "300px")
-        $("#designate").css("overflow", "auto")
-
-        selected_team = team_key
-        selected_individual = individual_key
-
-        showInfo(team_key, individual_key)
-
-        $("#backtolist_button").hide()
-    }
 
     //Set up AJAX
     $.ajaxSetup({

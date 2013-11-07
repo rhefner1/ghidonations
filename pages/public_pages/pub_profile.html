@@ -1,0 +1,89 @@
+<html lang="en-us">
+
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1" >
+	<meta charset="utf-8" />
+
+    <title>Profile</title>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0">
+
+	<!-- The Columnal Grid and mobile stylesheet -->
+	<link rel="stylesheet" href="/css/columnal/columnal.css" type="text/css" media="screen" />
+
+	<!-- Fixes for IE -->
+        
+	<!--[if lt IE 9]>
+            <link rel="stylesheet" href="/css/columnal/ie.css" type="text/css" media="screen" />
+            <link rel="stylesheet" href="/css/ie8.css" type="text/css" media="screen" />
+            <script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script>
+	<![endif]-->        
+        
+	
+	<!-- Now that all the grids are loaded, we can move on to the actual styles. --> 
+    <link rel="stylesheet" href="/js/muse/jqueryui/jqueryui.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/css/style.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/css/global.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/css/config.css" type="text/css" media="screen" />
+
+    <script type="text/javascript">
+      // var _gaq = _gaq || [];
+      // _gaq.push(['_setAccount', 'UA-27802293-1']);
+      // _gaq.push(['_setDomainName', 'ghidonations.appspot.com']);
+      // _gaq.push(['_trackPageview']);
+
+      // (function() {
+      //   var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+      //   ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+      //   var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      // })();
+    </script>
+
+</head>
+<body style="background-color:#F9F9F9; height:100%">
+
+    <div class="col_12">
+        <div class="widget clearfix">
+            <div class="widget_inside">
+                <div class="form">
+
+                    <div class="clearfix">
+                        <div class="input">
+                            <img alt="Profile Picture - {{ i.name }}" src="{{ photo }}" style="margin-left:auto; margin-right:auto; display:block">
+                            <h3 class="center" style="margin-top:15px">{{ i.name }}</h3>
+                        </div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label><strong>Money Raised:</strong></label>
+                        <div class="input"><p>${{ i.donation_totals }}</p></div>
+                    </div>
+
+                    <div class="clearfix">
+                        <label><strong>Description:</strong></label>
+                        <div class="input"><p>{{ i.description }}</p></div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Variables -->
+            <input type="hidden" name="team_list" value='{{ i.team_list }}'>
+            <input type="hidden" name="individual_key" id="individual_key" value="{{ i.key }}" />
+            <input type="hidden" id="team_name" value="{{ team_name }}" />
+
+            </form>
+        </div>
+    </div>
+
+    <!-- Variables -->
+    <input type="hidden" id="i_key" value="{{ i_key }}" />
+
+    <!-- Scripts -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+
+    <!-- JSON encoder -->
+    <script src="/js/muse/jquery.json-2.3.min.js"></script>
+
+    <script type="text/javascript" src="/js/pub_profile.js"></script>
+</body>
+</html>

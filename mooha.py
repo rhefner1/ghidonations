@@ -10,9 +10,6 @@ from google.appengine.api import urlfetch
 # Sessions
 from gaesessions import get_current_session
 
-# Google Cloud Storage
-import cloudstorage as gcs
-
 # Application files
 import DataModels as models
 import GlobalUtilities as tools
@@ -145,7 +142,7 @@ class Dashboard(BaseHandlerAdmin):
 class Deposit(BaseHandlerAdmin):
     def task(self, isAdmin, s):
 
-        #WARNING - this is a complicated and kind of a hacked-together
+        #WARNING - this is a really complicated and kind of a hacked-together
         #solution. I didn't understand it the day after I wrote it.
         # ... But it works. 
 
@@ -153,8 +150,7 @@ class Deposit(BaseHandlerAdmin):
         deposit = tools.getKey(deposit_key).get()
 
         entity_keys = deposit.entity_keys
-        gross_amount = tools.toDecimal(0)
-        net_amount = tools.toDecimal(0)
+        total_amount = tools.toDecimal(0)
         general_fund = tools.toDecimal(0)
 
         donations = []
@@ -165,8 +161,7 @@ class Deposit(BaseHandlerAdmin):
             if d != None:
                 donations.append(d)
 
-                gross_amount += d.confirmation_amount
-                net_amount += d.amount_donated
+                total_amount += d.amount_donated
 
                 if d.team:
                     t = d.team.get()
@@ -202,7 +197,7 @@ class Deposit(BaseHandlerAdmin):
             new_team_breakout[str(name) + " ($" + str(amount_donated) + ")"] = new_array
 
         template_variables = {"d" : deposit, "donations" : donations, "team_breakout" : new_team_breakout,
-                "gross_amount" : gross_amount, "net_amount" : net_amount}
+                "total_amount" : total_amount}
         self.response.write(
                 template.render('pages/deposit.html', template_variables))
 
@@ -464,14 +459,12 @@ class SpreadsheetDownload(blobstore_handlers.BlobstoreDownloadHandler):
     def get(self):
         isAdmin, s = tools.checkAuthentication(self, True)
 
-        str_blob_key = urllib.unquote( self.request.get("blob_key") )
+        str_blob_key = self.request.get("blob_key")
         blob_key = blobstore.BlobInfo.get(str_blob_key)
 
         if not blobstore.get(str_blob_key):
-            logging.error("404 on blob key: " + str_blob_key)
             self.error(404)
         else:
-            logging.info("Serving blob: " + str_blob_key)
             self.send_blob(blob_key, save_as=True)
 
 class TeamMembers(BaseHandlerAdmin):

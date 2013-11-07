@@ -31,7 +31,7 @@ function showSave(){
 // -- Get team members when editing donation -- //
 function getTeamMembers(team_key){
     var params = {'team_key':team_key}
-    var request = ghiapi.semi.get.team_members(params)
+    var request = ghiapi.semi.get.teammembers(params)
 
     request.execute(function(response){
             //HTML to be inserted

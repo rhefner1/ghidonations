@@ -5,9 +5,7 @@ function dataTableWriter(data_table, d){
         d.name,
         d.email,
         d.amount_donated,
-        d.payment_type,
-        d.team_name,
-        d.individual_name
+        d.payment_type
     ])
 
     data_table.fnAdjustColumnSizing()
@@ -38,7 +36,7 @@ function trigger_search(query){
     var rpc_request = ghiapi.get.donations
     var rpc_params = {'query':query}
 
-    data_table = initializeTable(7, rpc_request, rpc_params, function(data_table, d){
+    data_table = initializeTable(5, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
     })
 

@@ -15,7 +15,7 @@ $(document).ready(function(){
     var team_key = $("#team_key").val()
 
     var rpc_params = {'team_key':team_key}
-    var rpc_request = ghiapi.get.team_members
+    var rpc_request = ghiapi.get.teammembers
 
     var data_table = initializeTable(3, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
@@ -79,7 +79,7 @@ $(document).ready(function(){
     })
 
     var params = {"team_key":team_key}
-    var request = ghiapi.get.team_donation_total(params)
+    var request = ghiapi.get.teamdonationtotal(params)
     request.execute(function(response){
         $("#donation_total").text(response.donation_total)
     })

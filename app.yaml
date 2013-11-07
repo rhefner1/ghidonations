@@ -90,7 +90,7 @@ handlers:
   script: pipeline.handlers.app
 
 - url: /_ah/spi/.*
-  script: ghiendpoints.app
+  script: endpoints.app
 
 
 # Admin Console
@@ -110,10 +110,6 @@ error_handlers:
 builtins:
 - deferred: on
 - appstats: on
-
-libraries:
-- name: endpoints
-  version: latest
 
 inbound_services:
 - mail

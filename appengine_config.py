@@ -8,8 +8,6 @@ from google.appengine.ext.appstats import recording
 # deploy, or update your app!
 
 COOKIE_KEY = '\xdaQ\x14\x9f\x86\xc4j\xe3\x02]\xf5\xdd\xd7\xfd\x0e\xfbiXij,\x87\xfc\xb3\xa6\xff\xa4\xf0\xcbdZ\xedE\xa4]\xd6\xd4\x8f\x1b\xb3\xf6Ty6\xa8\xd2\x11kQ\xc3\xd4\x0b\xdf+\x8e\xe4`3g1\x1b\xe6\xad\x17'
-GCS_BUCKET = "/ghidonationsreports"
-
 
 def webapp_add_wsgi_middleware(app):
 	app = SessionMiddleware(app, cookie_key=COOKIE_KEY)

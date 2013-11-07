@@ -17,7 +17,7 @@ function dataTableWriter(data_table, d){
 
 function getTeamTotals(){
 	var params = {'individual_key':individual_key}
-	var request = ghiapi.get.team_totals(params)
+	var request = ghiapi.get.teamtotals(params)
 
 	request.execute(function(response){
 
@@ -50,10 +50,9 @@ function refreshCurrentTeams(){
 
 $(document).ready(function(){
 	individual_key = $("#individual_key").val()
-	var donate_parent = $("input[name=donate_parent]").val()
 
     var rpc_params = {'individual_key':individual_key}
-    var rpc_request = ghiapi.semi.get.individual_donations
+    var rpc_request = ghiapi.semi.get.individualdonations
 
     var data_table = initializeTable(5, rpc_request, rpc_params, function(data_table, d){
         dataTableWriter(data_table, d)
@@ -68,17 +67,9 @@ $(document).ready(function(){
 		$("input[name=show_donation_page]").attr("checked", "checked")
 	}
 
-	//Formatting team fields
+	//Formatting team field
 	$.each(team_list, function(team_key, values){
 		team_names += values[0] + ", "
-
-        var support_url = '<a href="donate_parent?t=team_key&i=individual_key" target="_blank">team_name</a><br><br>'
-        support_url = support_url.replace("donate_parent", donate_parent)
-        support_url = support_url.replace("team_key", team_key)
-        support_url = support_url.replace("individual_key", individual_key)
-        support_url = support_url.replace("team_name", values[0])
-
-        $("#support_urls").append(support_url)
 	})
 
 	//Populate current teams
@@ -107,7 +98,7 @@ $(document).ready(function(){
     	var team_name = $("#all_teams option[value=" + team_key + "]").text()
 
     	//Add team to dictionary
-		team_list[team_key] = [team_name, 2800]
+		team_list[team_key] = [team_name, 20]
 
 		refreshCurrentTeams()
 	})

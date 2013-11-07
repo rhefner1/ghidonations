@@ -144,11 +144,7 @@ function change_tab(location)
                 }
                 else {
                     $("#actualbody").fadeIn(300)
-                    $("#refresh").attr("href", window.location.hash)
-
-                    // Put page title in title bar
-                    var page_title = $("h2").text()
-                    document.title = page_title + " | GHI Donations"
+                    $("#refresh").attr("href", window.location.hash) 
                 }  
             }
         });
@@ -471,7 +467,7 @@ function checkTaskStatus(response){
     request2.execute(function(response2){
 
         if (response2.completed == true){
-            var url = response2.download_url
+            var url = "/ajax/spreadsheet/download?blob_key=" + response2.blob_key
             window.open(url)
 
             $("#download_query").html('Downloading now...')

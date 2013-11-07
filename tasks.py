@@ -12,9 +12,6 @@ from datetime import datetime, timedelta
 #Excel export
 from xlwt import *
 
-# Google Cloud Storage
-import cloudstorage as gcs
-
 class AnnualReport(webapp2.RequestHandler):
     def post(self):
         contact_key = self.request.get("contact_key")
@@ -69,10 +66,11 @@ class DelayIndexing(webapp2.RequestHandler):
 
 class DeleteSpreadsheet(webapp2.RequestHandler):
     def post(self):
-        file_key = self.request.get("k")
+        blob_key = self.request.get("k")
 
         try:
-            gcs.delete(file_key)
+            blob = blobstore.BlobInfo.get(blob_key)
+            blob.delete()
         except:
             pass
 
