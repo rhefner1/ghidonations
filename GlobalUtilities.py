@@ -1417,7 +1417,9 @@ class DonationSearch(UtilitiesBase):
     def createDocument(self):
         d = self.e
         c = d.contact.get()
-        email = ' '.join(c.email)
+        email = d.given_email
+        if not email:
+            email = ""
 
         reviewed = "no"
         if d.reviewed == True:
