@@ -31,6 +31,7 @@ class Donation_Data(messages.Message):
     payment_type = messages.StringField(5, required=True)
     amount_donated = messages.StringField(6, required=True)
     team_name = messages.StringField(7)
+    individual_name = messages.StringField(8)
 
 class Donations_Out(messages.Message):
     objects = messages.MessageField(Donation_Data, 1, repeated=True)
@@ -218,16 +219,17 @@ class UpdateSettings_In(messages.Message):
     mc_donorlist = messages.StringField(5)
     paypal_id = messages.StringField(6, required=True)
     impressions = messages.StringField(7, repeated=True)
-    amount1 = messages.IntegerField(8, required=True)
-    amount2 = messages.IntegerField(9, required=True)
-    amount3 = messages.IntegerField(10, required=True)
-    amount4 = messages.IntegerField(11, required=True)
-    use_custom = messages.BooleanField(12, required=True)
-    confirmation_header = messages.StringField(13, required=True)
-    confirmation_info = messages.StringField(14, required=True)
-    confirmation_footer = messages.StringField(15, required=True)
-    confirmation_text = messages.StringField(16, required=True)
-    donor_report_text = messages.StringField(17, required=True)
+    donate_parent = messages.StringField(8, required=True)
+    amount1 = messages.IntegerField(9, required=True)
+    amount2 = messages.IntegerField(10, required=True)
+    amount3 = messages.IntegerField(11, required=True)
+    amount4 = messages.IntegerField(12, required=True)
+    use_custom = messages.BooleanField(13, required=True)
+    confirmation_header = messages.StringField(14, required=True)
+    confirmation_info = messages.StringField(15, required=True)
+    confirmation_footer = messages.StringField(16, required=True)
+    confirmation_text = messages.StringField(17, required=True)
+    donor_report_text = messages.StringField(18, required=True)
 
 # update.team
 class UpdateTeam_In(messages.Message):
@@ -284,5 +286,5 @@ class SpreadsheetCheck_In(messages.Message):
 
 class SpreadsheetCheck_Out(messages.Message):
     completed = messages.BooleanField(1, required=True)
-    blob_key = messages.StringField(2)
+    download_url = messages.StringField(2)
     status = messages.IntegerField(3)

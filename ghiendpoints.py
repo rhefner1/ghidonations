@@ -6,25 +6,26 @@ import DataModels as models
 import spreadsheet_pipelines
 
 # Cloud Endpoints
-from google.appengine.ext import endpoints
+import endpoints
+
 from protorpc import remote
 from endpoints_messages import *
 
 ## Cloud Endpoints Cookies - monkey patch
-from google.appengine.ext.endpoints import api_config
+# from google.appengine.ext.endpoints import api_config
 
-class PatchedApiConfigGenerator(api_config.ApiConfigGenerator):
-  def pretty_print_config_to_json(self, services, hostname=None):
-    logging.warn('TODO: remove this monkey patch after GAE version 1.7.7')
-    # Sorry, the next line is not PEP8 compatible :(
-    json_string = super(PatchedApiConfigGenerator, self).pretty_print_config_to_json(
-        services, hostname=hostname)
-    to_patch = json.loads(json_string)
-    to_patch['auth'] = {'allowCookieAuth': True}
-    return json.dumps(to_patch, sort_keys=True, indent=2)
+# class PatchedApiConfigGenerator(api_config.ApiConfigGenerator):
+#   def pretty_print_config_to_json(self, services, hostname=None):
+#     logging.warn('TODO: remove this monkey patch after GAE version 1.7.7')
+#     # Sorry, the next line is not PEP8 compatible :(
+#     json_string = super(PatchedApiConfigGenerator, self).pretty_print_config_to_json(
+#         services, hostname=hostname)
+#     to_patch = json.loads(json_string)
+#     to_patch['auth'] = {'allowCookieAuth': True}
+#     return json.dumps(to_patch, sort_keys=True, indent=2)
  
  
-api_config.ApiConfigGenerator = PatchedApiConfigGenerator
+# api_config.ApiConfigGenerator = PatchedApiConfigGenerator
 
 ## End monkey patch
 
@@ -165,8 +166,16 @@ class EndpointsAPI(remote.Service):
         for d in results[0]:
             f = d.fields
 
+            team_name = f[6].value
+            if not team_name:
+                team_name = " "
+
+            individual_name = f[7].value
+            if not individual_name:
+                individual_name = " "
+
             donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=tools.truncateEmail(f[3].value),
-                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value))
+                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value), team_name=team_name, individual_name=individual_name)
 
             donations.append(donation)
 
@@ -308,9 +317,13 @@ class EndpointsAPI(remote.Service):
 
         for d in results[0]:
             f = d.fields
+            
+            team_name = f[6].value
+            if team_name == None:
+                team_name = ""
 
             donation = Donation_Data(key=f[0].value, formatted_donation_date=f[9].value, name=f[2].value, email=tools.truncateEmail(f[3].value),
-                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value), team_name=f[6].value)
+                 payment_type=f[5].value, amount_donated=tools.moneyAmount(f[4].value), team_name=team_name)
 
             donations.append(donation)
 
@@ -475,7 +488,7 @@ class EndpointsAPI(remote.Service):
         if individual_key:
             individual_key = tools.getKey(individual_key)
 
-        d.update(req.notes, team_key, individual_key, req.add_deposit, req.donation_date)
+        d.update(req.notes, team_key, individual_key, None, req.donation_date)
 
         return SuccessMessage_Out(success=success, message=message)
 
@@ -494,7 +507,8 @@ class EndpointsAPI(remote.Service):
         address = [a.street, a.city, a.state, a.zipcode]
 
         # Check to see if a new email was added and see if it already exists
-        list_diff = set(req.email) - set(c.email)
+        list_diff = tools.listDiff(c.email, req.email)
+
         if list_diff:
             email_exists = s.exists.contact(email=list_diff)[0]
         else:
@@ -518,7 +532,7 @@ class EndpointsAPI(remote.Service):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
         s.update(req.name, req.email, req.mc_use, req.mc_apikey, req.mc_donorlist, 
-            req.paypal_id, req.impressions, req.amount1, req.amount2, req.amount3, 
+            req.paypal_id, req.impressions, req.donate_parent, req.amount1, req.amount2, req.amount3, 
             req.amount4, req.use_custom, req.confirmation_header, req.confirmation_info, 
             req.confirmation_footer, req.confirmation_text, req.donor_report_text)
 
@@ -753,10 +767,15 @@ class EndpointsAPI(remote.Service):
     def spreadsheet_check(self, req):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
-        completed, blob_key = tools.checkTaskCompletion(s, req.job_id)
+        completed, gcs_file_key = tools.checkTaskCompletion(s, req.job_id)
         status = tools.pipelineStatus(req.job_id)
 
-        return SpreadsheetCheck_Out(completed=completed, blob_key=blob_key, status=status)
+        if completed:
+            download_url = "http://commondatastorage.googleapis.com/" + gcs_file_key[1:]
+        else:
+            download_url = None
+
+        return SpreadsheetCheck_Out(completed=completed, download_url=download_url, status=status)
 
 app = endpoints.api_server([EndpointsAPI], restricted=False)
 app = appengine_config.webapp_add_wsgi_middleware(app)

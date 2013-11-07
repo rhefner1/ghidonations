@@ -8,7 +8,7 @@ $(document).ready(function(){
 
         // Autocomplete for contacts
         var params = {}
-        var request = ghiapi.get.contactsjson(params)
+        var request = ghiapi.get.contacts_json(params)
 
         request.execute(function(response) {
             $("input[name=name]").autocomplete({
@@ -39,7 +39,7 @@ $(document).ready(function(){
         }
         else {
             params = {"team_key" : team_key}
-            var request = ghiapi.semi.get.teammembers(params)
+            var request = ghiapi.semi.get.team_members(params)
             
             request.execute(function(response){
                 //HTML to be inserted
@@ -92,7 +92,7 @@ $(document).ready(function(){
                         'notes': notes, 'address':address, 'team_key':team_key, 
                         'individual_key':individual_key, 'add_deposit':add_deposit}
 
-            var request = ghiapi.new.offlinedonation(params)
+            var request = ghiapi.new.offline_donation(params)
 
             request.execute(function(response){
                 rpcSuccessMessage(response)

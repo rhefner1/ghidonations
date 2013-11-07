@@ -18,9 +18,8 @@
                 </div>
             </div>
             <div class="col_8 last">
-                <h4 style="float:left">
-                    Currently checked: $<span id="aggregate_amount">0.00</span>
-                </h4>
+                <h4><strong>Gross:</strong> $<span id="gross_amount">0.00</span> <strong style="margin-left:15px">Net:</strong> $<span id="net_amount">0.00</span></h4>
+                
                 <input type="button" class="small button right" style="margin-bottom:10px" id="deselect_all" value="Deselect All">
                 <input type="button" class="small button right" style="margin-bottom:10px; margin-right:10px" id="select_all" value="Select All">
 
@@ -31,7 +30,8 @@
                             <th class="align-left">Time Donated</th>
                             <th class="align-left">Name</th>
                             <th class="align-left">Email</th>
-                            <th class="align-left">Donation Amount</th>
+                            <th class="align-left">Gross Amount</th>
+                            <th class="align-left">Net Amount</th>
                             <th class="align-left">Payment Type</th>
                         </tr>
                     </thead>
@@ -41,7 +41,8 @@
                             <td><input type="checkbox" /></td>
                             <td>{{ d.formatted_donation_date }}</td>
                             <td>{{ d.name }}</td>
-                            <td>{{ d.email }}</td>
+                            <td>{{ d.given_email }}</td>
+                            <td>${{ d.confirmation_amount }}</td>
                             <td>${{ d.amount_donated }}</td>
                             <td>{{ d.payment_type }}</td>
                         </tr>
