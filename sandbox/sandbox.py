@@ -76,7 +76,7 @@ def populateTestSandbox(settings_key=None, num_teams=13, num_individuals=500, nu
 	for c in itertools.islice(contact_names.names, 0, num_contacts):
 		phone = c["TelephoneNumber"].replace("-", "")
 		address = json.dumps( [ c["StreetAddress"], c["City"], c["State"], c["ZipCode"] ] )
-		s.create.contact( c["GivenName"] + " " + c["Surname"], c["EmailAddress"], phone, None, address, False)
+		s.create.contact( c["GivenName"] + " " + c["Surname"], c["EmailAddress"], phone, address, None, False)
 
 		# Choose how many donations this contact should have
 		for i in range(0,12):
