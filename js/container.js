@@ -338,6 +338,7 @@ function pageThrough(data_table, page_number, rpc_request, rpc_params, callback)
         
         cursors_dict[page_number + 1] = new_cursor
 
+        data_table.fnTruncateCells()
         data_table.fnAdjustColumnSizing()
 
         data_loading = false
