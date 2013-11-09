@@ -905,12 +905,12 @@ class SettingsDeposits(UtilitiesBase):
         for key in unicode_keys:
             donation_keys.append(getKey(key))
 
+        self.e.create.deposit_receipt(donation_keys)
+
         for key in donation_keys:
             d = key.get()
             d.deposited = True
             d.put()
-
-        self.e.create.deposit_receipt(donation_keys)
 
     def remove(self, unicode_keys):
         #Changing all unicode keys into Key objects
