@@ -484,6 +484,11 @@ def queryCursorDB(query, encoded_cursor, keys_only=False, num_results=_NUM_RESUL
 
     return [entities, new_cursor]
 
+def reindexEntities(entity_list):
+    # Donations refer back to contact data and need to have their search documents updated when a contact is updated
+    for e in entity_list:
+        e.search.index()
+
 def searchReturnAll(query, search_results, settings, search_function, entity_return=True):
     all_results = []
     results = search_results
@@ -1258,11 +1263,6 @@ class ContactSearch(UtilitiesBase):
             logging.error("Failed creating index on contact key:" + self.e.websafe + " because: " + str(e))
             self.error(500)
 
-    def updateDonations(self):
-        # Donations refer back to contact data and need to have their search documents updated when a contact is updated
-        for d in self.e.data.all_donations:
-            d.search.index()
-
 ## -- Deposit Classes -- ##
 class DepositSearch(UtilitiesBase):
     def createDocument(self):
@@ -1717,11 +1717,6 @@ class TeamSearch(UtilitiesBase):
         except Exception as e:
             logging.error("Failed creating index on team key:" + self.e.websafe + " because: " + str(e))
             self.error(500)
-
-    def updateDonations(self):
-        # Donations refer back to team data and need to have their search documents updated when a team is updated
-        for d in self.e.data.donations:
-            d.search.index()
 
 class TeamListData(UtilitiesBase):
     @property

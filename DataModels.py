@@ -116,7 +116,9 @@ class Contact(ndb.Expando):
 
         e.settings.get().refresh.contactsJSON()
 
-        deferred.defer( self.search.updateDonations, _queue="backend" )
+        all_donations = Donation.query(Donation.settings == e.settings, Donation.contact == e.key)
+        deferred.defer( tools.reindexEntities, entity_list=all_donations, _queue="backend" )
+
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
@@ -693,7 +695,7 @@ class Team(ndb.Expando):
         memcache.delete("teammembers" + e.websafe)
         memcache.delete("teamsdict" + e.settings.urlsafe())
 
-        deferred.defer( self.search.updateDonations, _queue="backend" )
+        #deferred.defer( tools.TeamSearch.updateDonations, base_entity=self, _queue="backend" )
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")      
 
     ## -- Before Deletion -- ##
