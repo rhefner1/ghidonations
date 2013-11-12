@@ -117,7 +117,7 @@ class Contact(ndb.Expando):
         e.settings.get().refresh.contactsJSON()
 
         all_donations = Donation.query(Donation.settings == e.settings, Donation.contact == e.key)
-        deferred.defer( tools.reindexEntities, entity_list=all_donations, _queue="backend" )
+        deferred.defer( tools.reindexEntities, entity_list=all_donations, countdown=2, _queue="backend" )
 
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, queue_name="delayindexing")
 
