@@ -724,7 +724,9 @@ class IPN(BaseHandlerAdmin):
                     payment_type = "recurring"
                     
                     #Create a new donation
-                    s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, True, payment_id, special_notes, payment_type, email_subscr, ipn_data)
+                    s.create.donation(name, email, amount_donated, payment_type, confirmation_amount=confirmation_amount,
+                                    address=address, team_key=team_key, individual_key=individual_key, payment_id=payment_id,
+                                    special_notes=special_notes, email_subscr=email_subscr, ipn_data=ipn_data)
     
                 elif payment_type == "web_accept":
                     logging.info("This is a one-time donation.")
@@ -733,7 +735,9 @@ class IPN(BaseHandlerAdmin):
                         payment_id = parameters['txn_id']
     
                         #Create a new donation
-                        s.create.donation(name, email, amount_donated, confirmation_amount, address, team_key, individual_key, True, payment_id, special_notes, "one-time", email_subscr, ipn_data)
+                        s.create.donation(name, email, amount_donated, "one-time", confirmation_amount=confirmation_amount, address=address,
+                                        team_key=team_key, individual_key=individual_key, payment_id=payment_id, special_notes=special_notes,
+                                        email_subscr=email_subscr, ipn_data=ipn_data)
     
                     else:
                         logging.info("Payment status not complete.  Not logging the donation.")

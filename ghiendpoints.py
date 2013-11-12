@@ -371,7 +371,7 @@ class EndpointsAPI(remote.Service):
         address = [req.address.street, req.address.city, req.address.state, req.address.zipcode]
 
         if contact_exists[0] == False:
-            s.create.contact(req.name, req.email, req.phone, address, req.notes, True)
+            s.create.contact(req.name, email=req.email, phone=req.phone, address=address, notes=req.notes, add_mc=True)
 
         else:
             #If this email address already exists for a user
@@ -413,7 +413,7 @@ class EndpointsAPI(remote.Service):
             if team_key == "team":
                 team_key = None
 
-            s.create.individual(req.name, tools.getKey(team_key), email, req.password, req.admin)
+            s.create.individual(req.name, tools.getKey(team_key), email, req.password, admin=req.admin)
 
         else:
             #If this email address already exists for a user
@@ -457,8 +457,8 @@ class EndpointsAPI(remote.Service):
         if individual_key:
             individual_key = tools.getKey(individual_key)            
 
-        s.create.donation(name, email, amount_donated, amount_donated, address, team_key, 
-                            individual_key, add_deposit, "", notes, "offline", False, None)
+        s.create.donation(name, email, amount_donated, "offline", address=address, team_key=team_key, 
+                            individual_key=individual_key, add_deposit=add_deposit, special_notes=notes)
 
         return SuccessMessage_Out(success=success, message=message)
     

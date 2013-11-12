@@ -579,7 +579,7 @@ class UtilitiesBase():
 
 ## -- Settings Classes -- ##
 class SettingsCreate(UtilitiesBase):
-    def contact(self, name, email, phone, address, notes, add_mc):
+    def contact(self, name, email=None, phone=None, address=None, notes=None, add_mc=False):
         logging.info("Creating contact for: " + name)
         if name:
             new_contact = models.Contact()
@@ -626,7 +626,10 @@ class SettingsCreate(UtilitiesBase):
 
         new_deposit.put()
 
-    def donation(self, name, email, amount_donated, confirmation_amount, address, team_key, individual_key, add_deposit, payment_id, special_notes, payment_type, email_subscr, ipn_data):
+    def donation(self, name, email, amount_donated, payment_type, confirmation_amount=None, address=None, team_key=None, individual_key=None, add_deposit=True, payment_id=None, special_notes=None, email_subscr=False, ipn_data=None):
+        if confirmation_amount == None:
+            confirmation_amount = amount_donated
+
         #All variables being passed as either string or integer
         new_donation = models.Donation()
         new_donation.settings = self.e.key
@@ -707,7 +710,7 @@ Thanks!"""
 
         return new_donation.key
 
-    def individual(self, name, team_key, email, password, admin):
+    def individual(self, name, team_key, email, password, admin=False):
         new_individual = models.Individual()
 
         new_individual.name = name
@@ -733,7 +736,7 @@ Thanks!"""
         logging.info("Individual created.")
         return new_individual.key
 
-    def recurring_donation(self, payment_id, duration, ipn_data):
+    def recurring_donation(self, payment_id, duration, ipn_data=None):
         new_recurring = models.show_donation_page()
         new_recurring.payment_id = payment_id
         new_recurring.duration = duration
