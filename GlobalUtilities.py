@@ -626,7 +626,7 @@ class SettingsCreate(UtilitiesBase):
 
         new_deposit.put()
 
-    def donation(self, name, email, amount_donated, confirmation_amount, address, team_key, individual_key, add_deposit, payment_id, special_notes, payment_type, email_subscr, ipn_data):
+    def donation(self, name, email, amount_donated, confirmation_amount, address, team_key, individual_key, add_deposit, payment_id, special_notes, payment_type, email_subscr, ipn_data, contact_key=None):
         #All variables being passed as either string or integer
         new_donation = models.Donation()
         new_donation.settings = self.e.key
@@ -638,15 +638,16 @@ class SettingsCreate(UtilitiesBase):
         new_donation.given_name = name
         new_donation.given_email = email
 
-        exists = self.e.exists.contact(email=email, name=name)
-        if exists[0]:
-            c = exists[1]
-            new_donation.contact = c.key
+        if not contact_key:
+            exists = self.e.exists.contact(email=email, name=name)
+            if exists[0]:
+                c = exists[1]
+                contact_key = c.key
+            else:
+                #Add new contact
+                contact_key = self.contact(name, email, None, address, None, email_subscr)
 
-        else:
-            #Add new contact
-            c_key = self.contact(name, email, None, address, None, email_subscr)
-            new_donation.contact = c_key
+        new_donation.contact = contact_key
 
         if payment_type == "recurring":
             new_donation.isRecurring = True
