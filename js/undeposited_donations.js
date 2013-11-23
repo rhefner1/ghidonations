@@ -85,6 +85,7 @@ $(document).ready(function(){
 		
 			var donation_keys = getCheckedRows()
 			params = {'donation_keys':donation_keys}
+			var request = ghiapi.deposits.remove(params)
 			request.execute(function(response){
 				rpcSuccessMessage(response)
 				refreshPage()
