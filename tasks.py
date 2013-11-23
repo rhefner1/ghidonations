@@ -118,12 +118,20 @@ class ReindexEntities(webapp2.RequestHandler):
         mode = self.request.get("mode")
         e_key = self.request.get("key")
 
-        if mode == "contact":
-            c = tools.getKey(e_key).get()
-            all_donations = models.Donation.query(models.Donation.settings == c.settings, models.Donation.contact == c.key)
+        base = tools.getKey(e_key).get()
 
-            for e in tools.qCache(all_donations):
-                taskqueue.add(url="/tasks/delayindexing", params={'e' : e.key.urlsafe()}, countdown=2, queue_name="delayindexing")
+        if mode == "contact":
+            query = models.Donation.query(models.Donation.settings == base.settings, models.Donation.contact == base.key)
+            query = tools.qCache(query)
+
+        elif mode == "individual":
+            query = base.data.donations
+
+        elif mode == "team":
+            query = base.data.donations
+
+        for e in query:
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.key.urlsafe()}, countdown=2, queue_name="delayindexing")
 
 class UpdateAnalytics(webapp2.RequestHandler):
     def _run(self):
