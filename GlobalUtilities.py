@@ -484,12 +484,6 @@ def queryCursorDB(query, encoded_cursor, keys_only=False, num_results=_NUM_RESUL
 
     return [entities, new_cursor]
 
-def reindexEntities(entity_list):
-    logging.error("################## ENTERING REINDEX ENTITIES")
-    # Donations refer back to contact data and need to have their search documents updated when a contact is updated
-    for e in entity_list:
-        e.search.index()
-
 def searchReturnAll(query, search_results, settings, search_function, entity_return=True):
     all_results = []
     results = search_results

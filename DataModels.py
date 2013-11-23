@@ -16,6 +16,11 @@ _DONATION_SEARCH_INDEX = "donation"
 _INDIVIDUAL_SEARCH_INDEX = "individual"
 _TEAM_SEARCH_INDEX = "team"
 
+def reindexEntities(entity_list):
+    # Donations refer back to contact data and need to have their search documents updated when a contact is updated
+    for e in tools.qCache(entity_list):
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e}, queue_name="delayindexing")
+
 class DecimalProperty(ndb.StringProperty):
     def _validate(self, value):
         if not isinstance(value, (Decimal, str)):
@@ -84,6 +89,11 @@ class Contact(ndb.Expando):
         if name != self.name and name != None:
             self.name = name
 
+            # Reindexing donations on name change
+            all_donations = Donation.query(Donation.settings == self.settings, Donation.contact == self.key)
+            reindexEntities(all_donations)
+            #deferred.defer( reindexEntities, entity_list=all_donations, countdown=2, _queue="backend" )
+
         if email != self.email:
             self.email = email
             
@@ -115,10 +125,6 @@ class Contact(ndb.Expando):
         memcache.delete("contacts" + e.settings.urlsafe())
 
         e.settings.get().refresh.contactsJSON()
-
-        all_donations = Donation.query(Donation.settings == e.settings, Donation.contact == e.key)
-        deferred.defer( tools.reindexEntities, entity_list=all_donations, countdown=2, _queue="backend" )
-
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
@@ -402,7 +408,7 @@ class Individual(ndb.Expando):
     def email_user(self, msg_id):
         #Gives the user an email when something happens in their account
         if msg_id == 1:
-            email_subject
+            email_subject = "Recurring donation"
             email_message = "A new recurring donation was sent to you!"
 
         message = mail.EmailMessage()
@@ -416,7 +422,7 @@ class Individual(ndb.Expando):
         logging.info("Sending alert email to: " + self.email)
 
         #Adding to history
-        logging.info("Alert email sent at " + currentTime())
+        logging.info("Alert email sent at " + tools.currentTime())
 
         message.send()
 
