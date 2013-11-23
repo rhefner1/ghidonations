@@ -1174,7 +1174,7 @@ class ContactCreate(UtilitiesBase):
 class ContactData(UtilitiesBase):
     @property
     def all_donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
+        q = models.Donation.gql("WHERE contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
         return q
 
     @property 
@@ -1481,7 +1481,7 @@ class IndividualData(UtilitiesBase):
             settings = self.e.settings
             individual_key = self.e.key
 
-            q = models.Donation.gql("WHERE settings = :s AND individual = :i", s=settings, i=individual_key)
+            q = models.Donation.gql("WHERE individual = :i", s=settings, i=individual_key)
             donations = qCache(q)
 
             donation_total = toDecimal(0)
@@ -1614,7 +1614,7 @@ class IndividualSearch(UtilitiesBase):
 class TeamData(UtilitiesBase):
     @property
     def donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND team = :t ORDER BY donation_date", s=self.e.settings, t=self.e.key)
+        q = models.Donation.gql("WHERE team = :t ORDER BY donation_date", s=self.e.settings, t=self.e.key)
         return qCache(q)
 
     @property
@@ -1625,7 +1625,7 @@ class TeamData(UtilitiesBase):
         def get_item():
             settings = self.e.settings
 
-            q = models.Donation.gql("WHERE settings = :s AND team = :t", s=settings, t=team_key)
+            q = models.Donation.gql("WHERE team = :t", s=settings, t=team_key)
             donations = qCache(q)
 
             donation_total = toDecimal(0)
@@ -1718,7 +1718,7 @@ class TeamListData(UtilitiesBase):
     @property
     def donations(self):
         i = self.e.individual.get()
-        q = models.Donation.gql("WHERE settings = :s AND team = :t AND individual = :i", s=i.settings, t=self.e.team, i=i.key)
+        q = models.Donation.gql("WHERE team = :t AND individual = :i", s=i.settings, t=self.e.team, i=i.key)
         return qCache(q)
 
     @property
