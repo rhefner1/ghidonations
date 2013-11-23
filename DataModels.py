@@ -16,11 +16,6 @@ _DONATION_SEARCH_INDEX = "donation"
 _INDIVIDUAL_SEARCH_INDEX = "individual"
 _TEAM_SEARCH_INDEX = "team"
 
-def reindexEntities(entity_list):
-    # Donations refer back to contact data and need to have their search documents updated when a contact is updated
-    for e in tools.qCache(entity_list):
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.key.urlsafe()}, queue_name="delayindexing")
-
 class DecimalProperty(ndb.StringProperty):
     def _validate(self, value):
         if not isinstance(value, (Decimal, str)):
@@ -90,9 +85,7 @@ class Contact(ndb.Expando):
             self.name = name
 
             # Reindexing donations on name change
-            all_donations = Donation.query(Donation.settings == self.settings, Donation.contact == self.key)
-            reindexEntities(all_donations)
-            #deferred.defer( reindexEntities, entity_list=all_donations, countdown=2, _queue="backend" )
+            taskqueue.add(url="/tasks/reindex", params={'mode' : 'contact', 'key' : self.websafe}, queue_name="backend")
 
         if email != self.email:
             self.email = email
