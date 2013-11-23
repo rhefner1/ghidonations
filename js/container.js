@@ -337,8 +337,15 @@ function pageThrough(data_table, page_number, rpc_request, rpc_params, callback)
         }
         
         cursors_dict[page_number + 1] = new_cursor
+        
+        // Truncating cells
+        var TRUNCATION_LENGTH = 30
+        $(".dataTable td").each(function(){
+            if ( $(this).text().length > TRUNCATION_LENGTH ){
+                $(this).text( $(this).text().substring(0, TRUNCATION_LENGTH).concat("...") )
+            }
+        })
 
-        data_table.fnTruncateCells()
         data_table.fnAdjustColumnSizing()
 
         data_loading = false
