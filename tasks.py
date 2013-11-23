@@ -64,7 +64,8 @@ class DelayIndexing(webapp2.RequestHandler):
         try:
             e = tools.getKey(entity_key).get()
             e.search.index()
-        except:
+        except Exception, e:
+            logging.error( str(e) )
             self.error(500)
 
 class DeleteSpreadsheet(webapp2.RequestHandler):

@@ -19,7 +19,7 @@ _TEAM_SEARCH_INDEX = "team"
 def reindexEntities(entity_list):
     # Donations refer back to contact data and need to have their search documents updated when a contact is updated
     for e in tools.qCache(entity_list):
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e}, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.key.urlsafe()}, queue_name="delayindexing")
 
 class DecimalProperty(ndb.StringProperty):
     def _validate(self, value):
