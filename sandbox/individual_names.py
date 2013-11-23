@@ -17,7 +17,7 @@ names = [
     "StreetAddress":"2653 Lyon Avenue",
     "City":"Worcester",
     "State":"MA",
-    "ZipCode":01609
+    "ZipCode":41609
   },
   {
     "GivenName":"Gina",
@@ -47,7 +47,7 @@ names = [
     "StreetAddress":"2836 Kovar Road",
     "City":"Boston",
     "State":"MA",
-    "ZipCode":02110
+    "ZipCode":42110
   },
   {
     "GivenName":"Hector",
@@ -57,7 +57,7 @@ names = [
     "StreetAddress":"587 Lake Road",
     "City":"Hopewell  Mercer",
     "State":"NJ",
-    "ZipCode":08525
+    "ZipCode":48525
   },
   {
     "GivenName":"Brad",
@@ -417,7 +417,7 @@ names = [
     "StreetAddress":"1299 Raoul Wallenberg Place",
     "City":"Wallingford",
     "State":"CT",
-    "ZipCode":06492
+    "ZipCode":46492
   },
   {
     "GivenName":"Traci",
@@ -477,7 +477,7 @@ names = [
     "StreetAddress":"1064 Elliott Street",
     "City":"Wilton",
     "State":"NH",
-    "ZipCode":03086
+    "ZipCode":43086
   },
   {
     "GivenName":"Douglas",
@@ -577,7 +577,7 @@ names = [
     "StreetAddress":"2279 Hampton Meadows",
     "City":"Acton",
     "State":"MA",
-    "ZipCode":01720
+    "ZipCode":41720
   },
   {
     "GivenName":"Patricia",
@@ -627,7 +627,7 @@ names = [
     "StreetAddress":"4144 Gerald L. Bates Drive",
     "City":"Cambridge",
     "State":"MA",
-    "ZipCode":02141
+    "ZipCode":42141
   },
   {
     "GivenName":"Donna",
@@ -737,7 +737,7 @@ names = [
     "StreetAddress":"475 Winding Way",
     "City":"Tiverton",
     "State":"RI",
-    "ZipCode":02878
+    "ZipCode":42878
   },
   {
     "GivenName":"Shirley",
@@ -757,7 +757,7 @@ names = [
     "StreetAddress":"2788 Lee Avenue",
     "City":"Camden",
     "State":"NJ",
-    "ZipCode":08102
+    "ZipCode":48102
   },
   {
     "GivenName":"Gale",
@@ -837,7 +837,7 @@ names = [
     "StreetAddress":"4422 Stanton Hollow Road",
     "City":"Cambridge",
     "State":"MA",
-    "ZipCode":02141
+    "ZipCode":42141
   },
   {
     "GivenName":"Gwen",
@@ -897,7 +897,7 @@ names = [
     "StreetAddress":"4734 Burke Street",
     "City":"Walpole",
     "State":"MA",
-    "ZipCode":02081
+    "ZipCode":42081
   },
   {
     "GivenName":"Inez",
@@ -937,7 +937,7 @@ names = [
     "StreetAddress":"4159 Lincoln Street",
     "City":"Pleasantville",
     "State":"NJ",
-    "ZipCode":08232
+    "ZipCode":48232
   },
   {
     "GivenName":"Garnet",
@@ -1037,7 +1037,7 @@ names = [
     "StreetAddress":"4518 Romano Street",
     "City":"Winchester",
     "State":"MA",
-    "ZipCode":01890
+    "ZipCode":41890
   },
   {
     "GivenName":"Inez",
@@ -1047,7 +1047,7 @@ names = [
     "StreetAddress":"3094 Aspen Court",
     "City":"Boston",
     "State":"MA",
-    "ZipCode":02110
+    "ZipCode":42110
   },
   {
     "GivenName":"Inez",
@@ -1137,7 +1137,7 @@ names = [
     "StreetAddress":"3535 Beechwood Avenue",
     "City":"Rochelle Park",
     "State":"NJ",
-    "ZipCode":07662
+    "ZipCode":47662
   },
   {
     "GivenName":"Robert",
@@ -1147,7 +1147,7 @@ names = [
     "StreetAddress":"1809 West Side Avenue",
     "City":"Englewood",
     "State":"NJ",
-    "ZipCode":07631
+    "ZipCode":47631
   },
   {
     "GivenName":"Nora",
@@ -1227,7 +1227,7 @@ names = [
     "StreetAddress":"4750 Hummingbird Way",
     "City":"Brockton",
     "State":"MA",
-    "ZipCode":02401
+    "ZipCode":42401
   },
   {
     "GivenName":"Lisa",
@@ -1317,7 +1317,7 @@ names = [
     "StreetAddress":"1404 Deer Ridge Drive",
     "City":"Rochelle Park",
     "State":"NJ",
-    "ZipCode":07662
+    "ZipCode":47662
   },
   {
     "GivenName":"Rogelio",
@@ -1417,7 +1417,7 @@ names = [
     "StreetAddress":"2517 Single Street",
     "City":"South Boston",
     "State":"MA",
-    "ZipCode":02127
+    "ZipCode":42127
   },
   {
     "GivenName":"Keith",
@@ -1427,7 +1427,7 @@ names = [
     "StreetAddress":"3652 C Street",
     "City":"East Bridgewater",
     "State":"MA",
-    "ZipCode":02333
+    "ZipCode":42333
   },
   {
     "GivenName":"Francis",
@@ -1747,7 +1747,7 @@ names = [
     "StreetAddress":"1029 Goldleaf Lane",
     "City":"Red Bank",
     "State":"NJ",
-    "ZipCode":07701
+    "ZipCode":47701
   },
   {
     "GivenName":"Judith",
@@ -1937,7 +1937,7 @@ names = [
     "StreetAddress":"2730 Whiteman Street",
     "City":"Pleasantville",
     "State":"NJ",
-    "ZipCode":08232
+    "ZipCode":48232
   },
   {
     "GivenName":"Sarah",
@@ -2007,7 +2007,7 @@ names = [
     "StreetAddress":"1881 Vernon Street",
     "City":"California",
     "State":"CA",
-    "ZipCode":02110
+    "ZipCode":42110
   },
   {
     "GivenName":"David",
@@ -2037,7 +2037,7 @@ names = [
     "StreetAddress":"361 Finwood Road",
     "City":"Freehold",
     "State":"NJ",
-    "ZipCode":07728
+    "ZipCode":47728
   },
   {
     "GivenName":"Leslie",
@@ -2107,7 +2107,7 @@ names = [
     "StreetAddress":"465 Lynn Street",
     "City":"Boston",
     "State":"MA",
-    "ZipCode":02114
+    "ZipCode":42114
   },
   {
     "GivenName":"Diane",
@@ -2127,7 +2127,7 @@ names = [
     "StreetAddress":"859 Lee Avenue",
     "City":"Camden",
     "State":"NJ",
-    "ZipCode":08102
+    "ZipCode":48102
   },
   {
     "GivenName":"Lindsey",
@@ -2337,7 +2337,7 @@ names = [
     "StreetAddress":"261 Bloomfield Way",
     "City":"North New Portland",
     "State":"ME",
-    "ZipCode":04961
+    "ZipCode":44961
   },
   {
     "GivenName":"Frances",
@@ -2377,7 +2377,7 @@ names = [
     "StreetAddress":"4740 Victoria Court",
     "City":"Fort Kent",
     "State":"ME",
-    "ZipCode":04743
+    "ZipCode":44743
   },
   {
     "GivenName":"Neal",
@@ -2477,7 +2477,7 @@ names = [
     "StreetAddress":"4935 Fantages Way",
     "City":"Bangor",
     "State":"ME",
-    "ZipCode":04401
+    "ZipCode":44401
   },
   {
     "GivenName":"Coleman",
@@ -2527,7 +2527,7 @@ names = [
     "StreetAddress":"1951 Jadewood Farms",
     "City":"West Orange",
     "State":"NJ",
-    "ZipCode":07052
+    "ZipCode":47052
   },
   {
     "GivenName":"Anna",
@@ -2647,7 +2647,7 @@ names = [
     "StreetAddress":"3583 Finwood Road",
     "City":"Jackson",
     "State":"NJ",
-    "ZipCode":08537
+    "ZipCode":48537
   },
   {
     "GivenName":"Lisa",
@@ -2817,7 +2817,7 @@ names = [
     "StreetAddress":"1945 Goldleaf Lane",
     "City":"Ridgewood",
     "State":"NJ",
-    "ZipCode":07450
+    "ZipCode":47450
   },
   {
     "GivenName":"Thomas",
@@ -2977,7 +2977,7 @@ names = [
     "StreetAddress":"1012 Copperhead Road",
     "City":"Manchester",
     "State":"CT",
-    "ZipCode":06040
+    "ZipCode":46040
   },
   {
     "GivenName":"Larry",
@@ -2987,7 +2987,7 @@ names = [
     "StreetAddress":"285 Christie Way",
     "City":"Worcester",
     "State":"MA",
-    "ZipCode":01610
+    "ZipCode":41610
   },
   {
     "GivenName":"Helen",
@@ -3107,7 +3107,7 @@ names = [
     "StreetAddress":"617 Romano Street",
     "City":"Braintree",
     "State":"MA",
-    "ZipCode":02184
+    "ZipCode":42184
   },
   {
     "GivenName":"Pricilla",
@@ -3177,7 +3177,7 @@ names = [
     "StreetAddress":"2337 Beechwood Avenue",
     "City":"Piscataway",
     "State":"NJ",
-    "ZipCode":08854
+    "ZipCode":48854
   },
   {
     "GivenName":"Toni",
@@ -3277,7 +3277,7 @@ names = [
     "StreetAddress":"61 Lyon Avenue",
     "City":"Springfield",
     "State":"MA",
-    "ZipCode":01109
+    "ZipCode":41109
   },
   {
     "GivenName":"Lionel",
@@ -3337,7 +3337,7 @@ names = [
     "StreetAddress":"1428 Whitman Court",
     "City":"Wallingford",
     "State":"CT",
-    "ZipCode":06492
+    "ZipCode":46492
   },
   {
     "GivenName":"Susan",
@@ -3487,7 +3487,7 @@ names = [
     "StreetAddress":"1303 Victoria Court",
     "City":"Danforth",
     "State":"ME",
-    "ZipCode":04424
+    "ZipCode":44424
   },
   {
     "GivenName":"Porfirio",
@@ -3507,7 +3507,7 @@ names = [
     "StreetAddress":"2382 Finwood Road",
     "City":"Metuchen",
     "State":"NJ",
-    "ZipCode":08840
+    "ZipCode":48840
   },
   {
     "GivenName":"Shaun",
@@ -3827,7 +3827,7 @@ names = [
     "StreetAddress":"4222 Ferguson Street",
     "City":"Franklin",
     "State":"MA",
-    "ZipCode":02038
+    "ZipCode":42038
   },
   {
     "GivenName":"Ashley",
@@ -3997,7 +3997,7 @@ names = [
     "StreetAddress":"575 Lakewood Drive",
     "City":"Rochelle Park",
     "State":"NJ",
-    "ZipCode":07662
+    "ZipCode":47662
   },
   {
     "GivenName":"Marie",
@@ -4067,7 +4067,7 @@ names = [
     "StreetAddress":"3982 Burke Street",
     "City":"Framingham",
     "State":"MA",
-    "ZipCode":01701
+    "ZipCode":41701
   },
   {
     "GivenName":"Zora",
@@ -4077,7 +4077,7 @@ names = [
     "StreetAddress":"3547 Watson Street",
     "City":"Somerdale",
     "State":"NJ",
-    "ZipCode":08083
+    "ZipCode":48083
   },
   {
     "GivenName":"Monica",
@@ -4117,7 +4117,7 @@ names = [
     "StreetAddress":"845 Cook Hill Road",
     "City":"Hartford",
     "State":"CT",
-    "ZipCode":06103
+    "ZipCode":46103
   },
   {
     "GivenName":"Esther",
@@ -4297,7 +4297,7 @@ names = [
     "StreetAddress":"2300 Granville Lane",
     "City":"Teterboro",
     "State":"NJ",
-    "ZipCode":07608
+    "ZipCode":47608
   },
   {
     "GivenName":"Melissa",
@@ -4327,7 +4327,7 @@ names = [
     "StreetAddress":"1242 Dark Hollow Road",
     "City":"Mount Holly",
     "State":"NJ",
-    "ZipCode":08060
+    "ZipCode":48060
   },
   {
     "GivenName":"Margaret",
@@ -4347,7 +4347,7 @@ names = [
     "StreetAddress":"1205 Hedge Street",
     "City":"Piscataway",
     "State":"NJ",
-    "ZipCode":08854
+    "ZipCode":48854
   },
   {
     "GivenName":"Martin",
@@ -4567,7 +4567,7 @@ names = [
     "StreetAddress":"1312 Upton Avenue",
     "City":"South China",
     "State":"ME",
-    "ZipCode":04358
+    "ZipCode":44358
   },
   {
     "GivenName":"Sarah",
@@ -4647,7 +4647,7 @@ names = [
     "StreetAddress":"1594 Beechwood Avenue",
     "City":"Westfield",
     "State":"NJ",
-    "ZipCode":07090
+    "ZipCode":47090
   },
   {
     "GivenName":"Kenneth",
