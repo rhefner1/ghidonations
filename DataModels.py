@@ -83,9 +83,7 @@ class Contact(ndb.Expando):
 
         if name != self.name and name != None:
             self.name = name
-
-            # Reindexing donations on name change
-            taskqueue.add(url="/tasks/reindex", params={'mode' : 'contact', 'key' : self.websafe}, queue_name="backend")
+            name_changed = True
 
         if email != self.email:
             self.email = email
@@ -110,6 +108,10 @@ class Contact(ndb.Expando):
 
         #And now to put that contact back in the datastore
         self.put()
+
+        if name_changed == True:
+            # Reindexing donations on name change
+            taskqueue.add(url="/tasks/reindex", params={'mode' : 'contact', 'key' : self.websafe}, countdown=1, queue_name="backend")
 
     ## -- After Put -- ##
     @classmethod
@@ -490,6 +492,10 @@ class Individual(ndb.Expando):
 
         self.put()
 
+        if name_changed:
+            # Reindexing donations on name change
+            taskqueue.add(url="/tasks/reindex", params={'mode' : 'team', 'key' : self.websafe}, countdown=1, queue_name="backend")
+
     ## -- After put -- ##
     def _post_put_hook(self, future):
         e = future.get_result().get()
@@ -680,11 +686,16 @@ class Team(ndb.Expando):
     def update(self, name, show_team):
         if name != self.name:
             self.name = name
+            name_changed = True
 
         if show_team != self.show_team:
             self.show_team = show_team
 
         self.put()
+
+        if name_changed == True:
+            # Reindexing donations on name change
+            taskqueue.add(url="/tasks/reindex", params={'mode' : 'team', 'key' : self.websafe}, countdown=1, queue_name="backend")
 
     ## -- After put -- ##
     @classmethod
@@ -694,7 +705,6 @@ class Team(ndb.Expando):
         memcache.delete("teammembers" + e.websafe)
         memcache.delete("teamsdict" + e.settings.urlsafe())
 
-        #deferred.defer( tools.TeamSearch.updateDonations, base_entity=self, _queue="backend" )
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")      
 
     ## -- Before Deletion -- ##
