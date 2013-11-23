@@ -84,6 +84,9 @@ class Contact(ndb.Expando):
         if name != self.name and name != None:
             self.name = name
 
+            # Reindexing donations on name change
+            taskqueue.add(url="/tasks/reindex", params={'mode' : 'contact', 'key' : self.websafe}, queue_name="backend")
+
         if email != self.email:
             self.email = email
             
@@ -398,7 +401,7 @@ class Individual(ndb.Expando):
     def email_user(self, msg_id):
         #Gives the user an email when something happens in their account
         if msg_id == 1:
-            email_subject
+            email_subject = "Recurring donation"
             email_message = "A new recurring donation was sent to you!"
 
         message = mail.EmailMessage()
@@ -412,7 +415,7 @@ class Individual(ndb.Expando):
         logging.info("Sending alert email to: " + self.email)
 
         #Adding to history
-        logging.info("Alert email sent at " + currentTime())
+        logging.info("Alert email sent at " + tools.currentTime())
 
         message.send()
 
@@ -691,6 +694,7 @@ class Team(ndb.Expando):
         memcache.delete("teammembers" + e.websafe)
         memcache.delete("teamsdict" + e.settings.urlsafe())
 
+        #deferred.defer( tools.TeamSearch.updateDonations, base_entity=self, _queue="backend" )
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")      
 
     ## -- Before Deletion -- ##
