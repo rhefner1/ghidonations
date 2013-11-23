@@ -166,3 +166,4 @@ pip-log.txt
 .DS_Store
 
 appengine_config.py
+.idea
