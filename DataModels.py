@@ -83,6 +83,7 @@ class Contact(ndb.Expando):
 
         if name != self.name and name != None:
             self.name = name
+            name_changed = True
 
         if email != self.email:
             self.email = email
@@ -107,6 +108,10 @@ class Contact(ndb.Expando):
 
         #And now to put that contact back in the datastore
         self.put()
+
+        if name_changed == True:
+            # Reindexing donations on name change
+            taskqueue.add(url="/tasks/reindex", params={'mode' : 'contact', 'key' : self.websafe}, countdown=1, queue_name="backend")
 
     ## -- After Put -- ##
     @classmethod
@@ -398,7 +403,7 @@ class Individual(ndb.Expando):
     def email_user(self, msg_id):
         #Gives the user an email when something happens in their account
         if msg_id == 1:
-            email_subject
+            email_subject = "Recurring donation"
             email_message = "A new recurring donation was sent to you!"
 
         message = mail.EmailMessage()
@@ -412,7 +417,7 @@ class Individual(ndb.Expando):
         logging.info("Sending alert email to: " + self.email)
 
         #Adding to history
-        logging.info("Alert email sent at " + currentTime())
+        logging.info("Alert email sent at " + tools.currentTime())
 
         message.send()
 
@@ -486,6 +491,10 @@ class Individual(ndb.Expando):
             pass
 
         self.put()
+
+        if name_changed:
+            # Reindexing donations on name change
+            taskqueue.add(url="/tasks/reindex", params={'mode' : 'team', 'key' : self.websafe}, countdown=1, queue_name="backend")
 
     ## -- After put -- ##
     def _post_put_hook(self, future):
@@ -677,11 +686,16 @@ class Team(ndb.Expando):
     def update(self, name, show_team):
         if name != self.name:
             self.name = name
+            name_changed = True
 
         if show_team != self.show_team:
             self.show_team = show_team
 
         self.put()
+
+        if name_changed == True:
+            # Reindexing donations on name change
+            taskqueue.add(url="/tasks/reindex", params={'mode' : 'team', 'key' : self.websafe}, countdown=1, queue_name="backend")
 
     ## -- After put -- ##
     @classmethod
