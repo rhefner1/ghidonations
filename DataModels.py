@@ -500,7 +500,7 @@ class Individual(ndb.Expando):
     def _post_put_hook(self, future):
         e = future.get_result().get()
 
-        deferred.defer(clear_team_memcache, e, _queue="backend")
+        deferred.defer(clear_team_memcache, e, _countdown=2, _queue="backend")
             
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")
 
