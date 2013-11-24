@@ -71,7 +71,7 @@ def populateTestSandbox(settings_key=None, num_teams=13, num_individuals=500, nu
 	for i in itertools.islice(individual_names.names, 0, num_individuals):
 		team_key = team_keys[ random.randint(0, len(team_keys)-1 ) ]
 
-		key = s.create.individual( i["GivenName"] + " " + i["Surname"], team_key, i["EmailAddress"], "password", True)
+		key = s.create.individual( i["GivenName"] + " " + i["Surname"], team_key, i["EmailAddress"], "password", admin=True)
 		individual_keys.append(key)
 
 	for c in itertools.islice(contact_names.names, 0, num_contacts):
@@ -111,8 +111,8 @@ def populateTestSandbox(settings_key=None, num_teams=13, num_individuals=500, nu
 			else:
 				amount_donated = confirmation_amount - confirmation_amount * .022
 
-			s.create.donation( c["GivenName"] + " " + c["Surname"], c["EmailAddress"], str(amount_donated), str(confirmation_amount),
-				None, team_key, individual_key, True, None, None, payment_type, False, None, contact_key=contact_key)
+			s.create.donation( c["GivenName"] + " " + c["Surname"], c["EmailAddress"], str(amount_donated), payment_type, 
+								confirmation_amount=str(confirmation_amount), team_key=team_key, individual_key=individual_key, contact_key=contact_key)
 
 	taskqueue.add(url="/tasks/updateanalytics", params={}, queue_name="backend")
 	tools.flushMemcache()
