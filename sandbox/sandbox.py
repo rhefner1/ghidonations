@@ -1,5 +1,6 @@
 import json, random, itertools
 import GlobalUtilities as tools
+from google.appengine.api import taskqueue
 
 ### --- Execute this first --- ###
 def createTestSandbox():
@@ -75,8 +76,8 @@ def populateTestSandbox(settings_key=None, num_teams=13, num_individuals=500, nu
 
 	for c in itertools.islice(contact_names.names, 0, num_contacts):
 		phone = c["TelephoneNumber"].replace("-", "")
-		address = json.dumps( [ c["StreetAddress"], c["City"], c["State"], c["ZipCode"] ] )
-		s.create.contact( c["GivenName"] + " " + c["Surname"], email=c["EmailAddress"], phone=phone, address=address)
+		address = [ c["StreetAddress"], c["City"], c["State"], str(c["ZipCode"]) ]
+		contact_key = s.create.contact( c["GivenName"] + " " + c["Surname"], c["EmailAddress"], phone, address, None, False)
 
 		# Choose how many donations this contact should have
 		for i in range(0,12):
@@ -91,7 +92,7 @@ def populateTestSandbox(settings_key=None, num_teams=13, num_individuals=500, nu
 			if random.randint(0,1) == 1: 
 				try:
 					individual_key = individual_keys [ random.randint( 0, len(individual_keys)-1 ) ]
-					team_key = individual_key.get().data.teams.fetch(1)[0].key
+					team_key = individual_key.get().data.teams.fetch(1)[0].team
 
 				except:
 					team_key = None
@@ -114,4 +115,4 @@ def populateTestSandbox(settings_key=None, num_teams=13, num_individuals=500, nu
 								confirmation_amount=str(confirmation_amount), team_key=team_key, individual_key=individual_key)
 
 	taskqueue.add(url="/tasks/updateanalytics", params={}, queue_name="backend")
-	tools.flushMemcache(self)
+	tools.flushMemcache()

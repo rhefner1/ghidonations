@@ -257,12 +257,14 @@ $(document).ready(function() {
     })
 
     $("#back_button").live("click", function(){
+        selected_team = null
         loadTeams()
     })
 
     $("#backtolist_button").click(function(e){
         $("#designate_label").html("<strong>Select one:</strong>")
         hideInfo()
+        selected_individual = null
     })
 
     // Check if team & individual keys are embedded in URL

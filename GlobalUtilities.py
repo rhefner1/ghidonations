@@ -641,15 +641,16 @@ class SettingsCreate(UtilitiesBase):
         new_donation.given_name = name
         new_donation.given_email = email
 
-        exists = self.e.exists.contact(email=email, name=name)
-        if exists[0]:
-            c = exists[1]
-            new_donation.contact = c.key
+        if not contact_key:
+            exists = self.e.exists.contact(email=email, name=name)
+            if exists[0]:
+                c = exists[1]
+                contact_key = c.key
+            else:
+                #Add new contact
+                contact_key = self.contact(name, email, None, address, None, email_subscr)
 
-        else:
-            #Add new contact
-            c_key = self.contact(name, email, None, address, None, email_subscr)
-            new_donation.contact = c_key
+        new_donation.contact = contact_key
 
         if payment_type == "recurring":
             new_donation.isRecurring = True
@@ -908,12 +909,12 @@ class SettingsDeposits(UtilitiesBase):
         for key in unicode_keys:
             donation_keys.append(getKey(key))
 
+        self.e.create.deposit_receipt(donation_keys)
+
         for key in donation_keys:
             d = key.get()
             d.deposited = True
             d.put()
-
-        self.e.create.deposit_receipt(donation_keys)
 
     def remove(self, unicode_keys):
         #Changing all unicode keys into Key objects
@@ -1176,7 +1177,7 @@ class ContactCreate(UtilitiesBase):
 class ContactData(UtilitiesBase):
     @property
     def all_donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
+        q = models.Donation.gql("WHERE contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
         return q
 
     @property 
@@ -1483,7 +1484,7 @@ class IndividualData(UtilitiesBase):
             settings = self.e.settings
             individual_key = self.e.key
 
-            q = models.Donation.gql("WHERE settings = :s AND individual = :i", s=settings, i=individual_key)
+            q = models.Donation.gql("WHERE individual = :i", s=settings, i=individual_key)
             donations = qCache(q)
 
             donation_total = toDecimal(0)
@@ -1616,7 +1617,7 @@ class IndividualSearch(UtilitiesBase):
 class TeamData(UtilitiesBase):
     @property
     def donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND team = :t ORDER BY donation_date", s=self.e.settings, t=self.e.key)
+        q = models.Donation.gql("WHERE team = :t ORDER BY donation_date", s=self.e.settings, t=self.e.key)
         return qCache(q)
 
     @property
@@ -1627,7 +1628,7 @@ class TeamData(UtilitiesBase):
         def get_item():
             settings = self.e.settings
 
-            q = models.Donation.gql("WHERE settings = :s AND team = :t", s=settings, t=team_key)
+            q = models.Donation.gql("WHERE team = :t", s=settings, t=team_key)
             donations = qCache(q)
 
             donation_total = toDecimal(0)
@@ -1720,7 +1721,7 @@ class TeamListData(UtilitiesBase):
     @property
     def donations(self):
         i = self.e.individual.get()
-        q = models.Donation.gql("WHERE settings = :s AND team = :t AND individual = :i", s=i.settings, t=self.e.team, i=i.key)
+        q = models.Donation.gql("WHERE team = :t AND individual = :i", s=i.settings, t=self.e.team, i=i.key)
         return qCache(q)
 
     @property

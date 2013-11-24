@@ -1,5 +1,6 @@
 import logging, json, datetime, appengine_config, webapp2, uuid
 from google.appengine.api import taskqueue, memcache, search
+from google.appengine.ext import deferred
 
 import GlobalUtilities as tools
 import DataModels as models
@@ -586,7 +587,11 @@ class EndpointsAPI(remote.Service):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
         if req.donation_keys != []:
-            s.deposits.deposit(req.donation_keys)
+            donation_keys = []
+            for k in req.donation_keys:
+                donation_keys.append(str(k))
+
+            deferred.defer(s.deposits.deposit, donation_keys, _queue="backend")
 
         else:
             message = "No donations to deposit."
@@ -604,7 +609,11 @@ class EndpointsAPI(remote.Service):
         isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
 
         if req.donation_keys != []:
-            s.deposits.remove(req.donation_keys)
+            donation_keys = []
+            for k in req.donation_keys:
+                donation_keys.append(str(k))
+
+            deferred.defer(s.deposits.remove, donation_keys, _queue="backend")
 
         return SuccessMessage_Out(success=success, message=message)
 

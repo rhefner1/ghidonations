@@ -64,7 +64,8 @@ class DelayIndexing(webapp2.RequestHandler):
         try:
             e = tools.getKey(entity_key).get()
             e.search.index()
-        except:
+        except Exception, e:
+            logging.error( str(e) )
             self.error(500)
 
 class DeleteSpreadsheet(webapp2.RequestHandler):
@@ -111,6 +112,26 @@ class MailchimpAdd(webapp2.RequestHandler):
         s.mailchimp.add(email, name, True)
 
         logging.info("Retrying Mailchimp add through task queue for: " + email  + " under settings ID: " + settings_key)
+
+class ReindexEntities(webapp2.RequestHandler):
+    def post(self):
+        mode = self.request.get("mode")
+        e_key = self.request.get("key")
+
+        base = tools.getKey(e_key).get()
+
+        if mode == "contact":
+            query = models.Donation.query(models.Donation.settings == base.settings, models.Donation.contact == base.key)
+            query = tools.qCache(query)
+
+        elif mode == "individual":
+            query = base.data.donations
+
+        elif mode == "team":
+            query = base.data.donations
+
+        for e in query:
+            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.key.urlsafe()}, countdown=2, queue_name="delayindexing")
 
 class UpdateAnalytics(webapp2.RequestHandler):
     def _run(self):
@@ -195,6 +216,7 @@ app = webapp2.WSGIApplication([
         ('/tasks/deletespreadsheet', DeleteSpreadsheet),
         ('/tasks/indexall', IndexAll),
         ('/tasks/mailchimp', MailchimpAdd),
+        ('/tasks/reindex', ReindexEntities),
 
         ('/tasks/updateanalytics', UpdateAnalytics),
         ('/tasks/contactsjson', UpdateContactsJSON)],
