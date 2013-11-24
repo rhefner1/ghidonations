@@ -1017,8 +1017,9 @@ class SettingsExists(UtilitiesBase):
         try:
             user = models.Individual.gql("WHERE settings = :s AND email = :e", s=self.e.key, e=email)
 
-            if user.fetch(1)[0]:
-                return [True, user[0]]
+            user_entity = user.fetch(1)[0]
+            if user_entity:
+                return [True, user_entity]
             else:
                 return [False, None]
 
