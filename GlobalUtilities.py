@@ -626,7 +626,7 @@ class SettingsCreate(UtilitiesBase):
 
         new_deposit.put()
 
-    def donation(self, name, email, amount_donated, payment_type, confirmation_amount=None, address=None, team_key=None, individual_key=None, add_deposit=True, payment_id=None, special_notes=None, email_subscr=False, ipn_data=None):
+    def donation(self, name, email, amount_donated, payment_type, confirmation_amount=None, address=None, team_key=None, individual_key=None, add_deposit=True, payment_id=None, special_notes=None, email_subscr=False, ipn_data=None, contact_key=None):
         if confirmation_amount == None:
             confirmation_amount = amount_donated
 

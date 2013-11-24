@@ -112,7 +112,7 @@ def populateTestSandbox(settings_key=None, num_teams=13, num_individuals=500, nu
 				amount_donated = confirmation_amount - confirmation_amount * .022
 
 			s.create.donation( c["GivenName"] + " " + c["Surname"], c["EmailAddress"], str(amount_donated), payment_type, 
-								confirmation_amount=str(confirmation_amount), team_key=team_key, individual_key=individual_key)
+								confirmation_amount=str(confirmation_amount), team_key=team_key, individual_key=individual_key, contact_key=contact_key)
 
 	taskqueue.add(url="/tasks/updateanalytics", params={}, queue_name="backend")
 	tools.flushMemcache()
