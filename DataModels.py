@@ -339,6 +339,10 @@ class Donation(ndb.Expando):
         index = search.Index(name=_DONATION_SEARCH_INDEX)
         index.delete(e.websafe)
 
+class GlobalSettings(ndb.Expando):
+    cookie_key = ndb.StringProperty()
+    gcs_bucket = ndb.StringProperty()
+
 class Impression(ndb.Expando):
     contact = ndb.KeyProperty()
     impression = ndb.StringProperty()
