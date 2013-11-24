@@ -255,3 +255,8 @@ indexes:
   - name: is_root_pipeline
   - name: start_time
     direction: desc
+
+- kind: Donation
+  properties:
+  - name: team
+  - name: donation_date
