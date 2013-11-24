@@ -1,6 +1,6 @@
 # coding: utf-8
 
-import logging, json, time, re, math, appengine_config, pipeline
+import logging, json, time, re, os, math, appengine_config, pipeline
 from time import gmtime, strftime
 from datetime import *
 from decimal import *
@@ -334,12 +334,20 @@ def getFlash(self):
 
     return message
 
-def giveError(self, error_code):
-    # checkAuthentication(self, False)
+def getGlobalSettings():
+    q = models.GlobalSettings.query()
 
-    self.error(error_code)
-    self.response.write(
-                   template.render('pages/error.html', {}))
+    try:
+        global_settings = q.fetch(1)[0]
+
+    except:
+        new_global_settings = models.GlobalSettings()
+        new_global_settings.cookie_key = os.urandom(64).encode("base64")
+        global_settings = new_global_settings.put()
+        
+        global_settings = global_settings.get()
+
+    return global_settings
 
 def getSearchDoc(doc_id, index):
     if not doc_id:
@@ -356,6 +364,13 @@ def getSearchDoc(doc_id, index):
 
     except search.InvalidRequest: # catches ill-formed doc ids
       return None
+
+def giveError(self, error_code):
+    # checkAuthentication(self, False)
+
+    self.error(error_code)
+    self.response.write(
+                   template.render('pages/error.html', {}))
 
 def GQLtoDict(self, gql_query):
     #Converts GQLQuery of App Engine data models to dictionary objects

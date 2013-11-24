@@ -1,5 +1,7 @@
 from gaesessions import SessionMiddleware
 from google.appengine.ext.appstats import recording
+import GlobalUtilities as tools
+from google.appengine.api import memcache
 
 # suggestion: generate your own random key using os.urandom(64)
 # WARNING: Make sure you run os.urandom(64) OFFLINE and copy/paste the output to
@@ -7,9 +9,17 @@ from google.appengine.ext.appstats import recording
 # runtime then any existing sessions will become junk every time you start,
 # deploy, or update your app!
 
-COOKIE_KEY = '\xdaQ\x14\x9f\x86\xc4j\xe3\x02]\xf5\xdd\xd7\xfd\x0e\xfbiXij,\x87\xfc\xb3\xa6\xff\xa4\xf0\xcbdZ\xedE\xa4]\xd6\xd4\x8f\x1b\xb3\xf6Ty6\xa8\xd2\x11kQ\xc3\xd4\x0b\xdf+\x8e\xe4`3g1\x1b\xe6\xad\x17'
-GCS_BUCKET = "/ghidonationsreports"
+COOKIE_KEY = memcache.get("COOKIE_KEY")
+GCS_BUCKET = memcache.get("GCS_BUCKET")
 
+if not COOKIE_KEY or not GCS_BUCKET:
+	global_settings = tools.getGlobalSettings()
+
+	COOKIE_KEY = global_settings.cookie_key.decode('base64')
+	GCS_BUCKET = global_settings.gcs_bucket
+
+	memcache.set("COOKIE_KEY", COOKIE_KEY)
+	memcache.set("GCS_BUCKET", GCS_BUCKET)
 
 def webapp_add_wsgi_middleware(app):
 	app = SessionMiddleware(app, cookie_key=COOKIE_KEY)
