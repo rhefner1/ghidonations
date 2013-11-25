@@ -157,6 +157,11 @@ indexes:
   - name: time_created
     direction: desc
 
+- kind: Donation
+  properties:
+  - name: team
+  - name: donation_date
+
 - kind: Donor
   properties:
   - name: settings_key
@@ -255,8 +260,3 @@ indexes:
   - name: is_root_pipeline
   - name: start_time
     direction: desc
-
-- kind: Donation
-  properties:
-  - name: team
-  - name: donation_date

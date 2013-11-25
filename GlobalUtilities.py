@@ -1,8 +1,7 @@
 # coding: utf-8
 
-import logging, json, time, re, os, math, appengine_config, pipeline
+import logging, json, time, datetime, re, os, math, appengine_config, pipeline
 from time import gmtime, strftime
-from datetime import *
 from decimal import *
 
 # App Engine platform
@@ -306,7 +305,7 @@ def indexEntitiesFromQuery(query, query_cursor=None):
 ###### ------ Utilities ------ ######
 def currentTime():
     #Outputs current date and time
-    return convertTime(datetime.utcnow()).strftime("%b %d, %Y %I:%M:%S %p") 
+    return convertTime(datetime.datetime.utcnow()).strftime("%b %d, %Y %I:%M:%S %p") 
 
 def convertTime(time):
     utc_zone = UTC()
@@ -1154,7 +1153,7 @@ class SettingsSearch(UtilitiesBase):
     def donation(self, query, **kwargs):
 
         expr_list = [search.SortExpression(
-            expression="time", default_value=0,
+            expression="timesort", default_value=0,
             direction=search.SortExpression.DESCENDING)]
 
         search_function = self.e.search.donation
@@ -1203,8 +1202,8 @@ class ContactData(UtilitiesBase):
 
     def annual_donations(self, year):
         year = int(year)
-        year_start = datetime(year, 1, 1)
-        year_end = datetime(year, 12, 31)
+        year_start = datetime.datetime(year, 1, 1)
+        year_end = datetime.datetime(year, 12, 31)
 
         return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
 
@@ -1453,6 +1452,8 @@ class DonationSearch(UtilitiesBase):
         if d.individual:
             individual_key = d.individual.urlsafe()
 
+        time_seconds = int( time.mktime( d.donation_date.timetuple() ) )
+
         document = search.Document(doc_id=d.websafe,
             fields=[search.TextField(name='donation_key', value=d.websafe),
 
@@ -1473,6 +1474,7 @@ class DonationSearch(UtilitiesBase):
                     search.TextField(name='team_key', value=team_key),
                     search.TextField(name='individual_key', value=individual_key),
                     search.TextField(name='settings', value=d.settings.urlsafe()),
+                    search.NumberField(name='timesort', value=time_seconds),
                     ])
 
         return document
@@ -1796,18 +1798,18 @@ class DictDiffer(object):
     
 ###### ------ Time classes ------ ######
 
-class EST(tzinfo): 
+class EST(datetime.tzinfo): 
     def utcoffset(self,dt): 
-        return timedelta(hours=-4,minutes=0) 
+        return datetime.timedelta(hours=-4,minutes=0) 
     def tzname(self,dt): 
         return "GMT -4" 
     def dst(self,dt): 
-        return timedelta(0) 
+        return datetime.timedelta(0) 
 
-class UTC(tzinfo):
+class UTC(datetime.tzinfo):
     def utcoffset(self, dt):
-        return timedelta(0)
+        return datetime.timedelta(0)
     def tzname(self, dt):
         return "UTC"
     def dst(self, dt):
-        return timedelta(0)
+        return datetime.timedelta(0)
