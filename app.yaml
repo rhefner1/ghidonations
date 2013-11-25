@@ -86,9 +86,6 @@ handlers:
 
 
 # API endpoints
-- url: /_ah/pipeline(/.*)?
-  script: pipeline.handlers.app
-
 - url: /_ah/spi/.*
   script: ghiendpoints.app
 

@@ -1,0 +1,13 @@
+application: ghidonations
+module: csvpipeline
+version: 5k
+runtime: python27
+instance_class: F4
+
+automatic_scaling:
+  max_idle_instances: automatic  # default value
+  min_pending_latency: automatic  # default value
+
+handlers:
+- url: /_ah/pipeline(/.*)?
+  script: pipeline.handlers.app
