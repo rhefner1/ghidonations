@@ -663,7 +663,7 @@ class SettingsCreate(UtilitiesBase):
                 contact_key = c.key
             else:
                 #Add new contact
-                contact_key = self.contact(name, email, None, address, None, email_subscr)
+                contact_key = self.contact(name, email=email, address=address, add_mc=email_subscr)
 
         new_donation.contact = contact_key
 
