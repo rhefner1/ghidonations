@@ -85,6 +85,9 @@ class Contact(ndb.Expando):
             self.name = name
             name_changed = True
 
+        else:
+            name_changed = False
+
         if email != self.email:
             self.email = email
             
