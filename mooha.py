@@ -16,6 +16,7 @@ import cloudstorage as gcs
 # Application files
 import DataModels as models
 import GlobalUtilities as tools
+import spreadsheet_pipelines
 
 class BaseHandler(webapp2.RequestHandler):
     def get(self):
@@ -473,6 +474,10 @@ class SpreadsheetDownload(blobstore_handlers.BlobstoreDownloadHandler):
         else:
             logging.info("Serving blob: " + str_blob_key)
             self.send_blob(blob_key, save_as=True)
+
+class StartSpreadsheetJob(webapp2.RequestHandler):
+    def post(self):
+        
 
 class TeamMembers(BaseHandlerAdmin):
     def task(self, isAdmin, s):

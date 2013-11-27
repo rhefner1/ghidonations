@@ -758,9 +758,8 @@ class EndpointsAPI(remote.Service):
         # Create unique identifier for this job
         job_id = str(uuid.uuid4())
         memcache.set(job_id, 0)
-        
-        stage = spreadsheet_pipelines.GenerateReport(s.websafe, req.mode, job_id)
-        stage.start(queue_name='spreadsheet')
+
+        spreadsheet_pipelines.kickoffJob(s.websafe, req.mode, job_id)
 
         pipeline_id = stage.pipeline_id
         memcache.set("id" + job_id, pipeline_id)

@@ -1,7 +1,7 @@
 # App Engine platform
 import logging, csv, gc, appengine_config, urllib, cStringIO
 from google.appengine.ext import blobstore
-from google.appengine.api import files, memcache, taskqueue
+from google.appengine.api import files, memcache, taskqueue, modules, urlfetch
 
 # Application files
 import DataModels as models
@@ -18,6 +18,21 @@ my_default_retry_params = gcs.RetryParams(initial_delay=0.2,
                             max_delay=5.0, backoff_factor=2,
                             max_retry_period=15)
 gcs.set_default_retry_params(my_default_retry_params)
+
+def kickoffJob(settings_key, mode, job_id):
+    # Make a URL fetch to spreadsheet module to process the task
+
+    form_fields = {
+      "first_name": "Albert",
+      "last_name": "Johnson",
+      "email_address": "Albert.Johnson@example.com"
+    }
+    form_data = urllib.urlencode(form_fields)
+    result = urlfetch.fetch(url=url,
+        payload=form_data,
+        method=urlfetch.POST,
+        headers={'Content-Type': 'application/x-www-form-urlencoded'})
+
 
 class GenerateReport(pipeline.Pipeline):
     def run(self, settings_key, mode, job_id):
