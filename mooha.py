@@ -477,7 +477,17 @@ class SpreadsheetDownload(blobstore_handlers.BlobstoreDownloadHandler):
 
 class StartSpreadsheetJob(webapp2.RequestHandler):
     def post(self):
-        
+        settings_key = self.request.get("settings_key")
+        mode = self.request.get("mode")
+        job_id = self.request.get("job_id")
+
+        stage = spreadsheet_pipelines.GenerateReport(settings_key, mode, job_id)
+        stage.start(queue_name='spreadsheet')
+
+        pipeline_id = stage.pipeline_id
+        memcache.set("id" + job_id, pipeline_id)
+
+        self.response.write("Pipeline: " + pipeline_id + " started.")
 
 class TeamMembers(BaseHandlerAdmin):
     def task(self, isAdmin, s):
@@ -802,6 +812,7 @@ app = webapp2.WSGIApplication([
        ('/ajax/reviewdetails', ReviewQueueDetails),
        ('/ajax/settings', Settings),
        ('/ajax/spreadsheet/download', SpreadsheetDownload),
+       ('/startspreadsheet', StartSpreadsheetJob),
        ('/ajax/teammembers', TeamMembers),
        ('/thanks', ThankYou),
        ('/ajax/undeposited', UndepositedDonations),

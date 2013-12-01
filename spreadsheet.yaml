@@ -1,5 +1,5 @@
 application: ghidonations
-module: csvpipeline
+module: spreadsheet
 version: 5k
 runtime: python27
 instance_class: F4
@@ -9,5 +9,10 @@ automatic_scaling:
   min_pending_latency: automatic  # default value
 
 handlers:
+- url: /startspreadsheet
+  script: mooha.app
+  secure: always
+  login: admin
+
 - url: /_ah/pipeline(/.*)?
   script: pipeline.handlers.app

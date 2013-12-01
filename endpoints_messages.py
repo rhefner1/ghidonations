@@ -275,7 +275,6 @@ class ConfirmationAnnualReport_In(messages.Message):
 # spreadsheet.start
 class SpreadsheetStart_In(messages.Message):
     mode = messages.StringField(1, required=True)
-    filename = messages.StringField(2, required=True)
 
 class SpreadsheetStart_Out(messages.Message):
     job_id = messages.StringField(1, required=True)

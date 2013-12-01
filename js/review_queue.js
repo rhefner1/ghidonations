@@ -83,5 +83,5 @@ $(document).ready(function(){
         }
     })
     
-    setupDownloadQuery("donations", "Donations")
+    setupDownloadQuery("donations")
 });

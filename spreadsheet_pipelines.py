@@ -20,19 +20,26 @@ my_default_retry_params = gcs.RetryParams(initial_delay=0.2,
 gcs.set_default_retry_params(my_default_retry_params)
 
 def kickoffJob(settings_key, mode, job_id):
+    memcache.set(job_id, 0)
+
     # Make a URL fetch to spreadsheet module to process the task
+    url = "https://%s/" % modules.get_hostname(module="spreadsheet")
 
     form_fields = {
-      "first_name": "Albert",
-      "last_name": "Johnson",
-      "email_address": "Albert.Johnson@example.com"
+      "settings_key": settings_key,
+      "mode": mode,
+      "job_id": job_id
     }
+
+    # try:
     form_data = urllib.urlencode(form_fields)
     result = urlfetch.fetch(url=url,
         payload=form_data,
         method=urlfetch.POST,
         headers={'Content-Type': 'application/x-www-form-urlencoded'})
-
+    
+    # except urllib2.URLError, e:
+    #     handleError(e)    
 
 class GenerateReport(pipeline.Pipeline):
     def run(self, settings_key, mode, job_id):

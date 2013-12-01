@@ -39,6 +39,6 @@ $(document).ready(function(){
     });
 
     setupSearchEvents()
-    setupDownloadQuery("individuals", "Individuals")
+    setupDownloadQuery("individuals")
 
 });

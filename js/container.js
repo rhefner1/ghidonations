@@ -498,13 +498,13 @@ function checkTaskStatus(response){
     })
 }
 
-function setupDownloadQuery(mode, file_name){
+function setupDownloadQuery(mode){
     $("#download_query").delegate("button", "click", function(){
         $(this).hide()
         $("#download_query").html("Generating report - <span id='download_progress'>0</span>% finished. <img style='margin-left:5px' src='/images/ajax-loader.gif'>")
 
         var query = $("#search_query").val()
-        var params = {"mode":mode, "filename":file_name}
+        var params = {"mode":mode}
         var request = ghiapi.spreadsheet.start(params)
 
         request.execute(function(response){
