@@ -630,9 +630,14 @@ class EndpointsAPI(remote.Service):
 
         d = tools.getKey(req.donation_key).get()
 
-        #Email receipt to donor
-        d.review.archive()
-        d.confirmation.task(60)
+        if not d.email or d.email == ['']:
+            success = False
+            message = "Email not sent. Contact doesn't have an email address." 
+
+        else:
+            #Email receipt to donor
+            d.review.archive()
+            d.confirmation.task(60)
 
         return SuccessMessage_Out(success=success, message=message)
 

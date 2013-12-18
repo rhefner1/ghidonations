@@ -464,10 +464,10 @@ function rpcSuccessMessage(response){
         }
         catch(err){
             message = "An error occurred."
+            throw "Server error"
         }
 
-        show_flash("undone", message, false)
-        throw "Server error"
+        show_flash("undone", message, true)
     }
 }
 

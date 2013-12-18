@@ -1362,7 +1362,7 @@ class DonationConfirmation(UtilitiesBase):
     def email(self):
         d = self.e
 
-        if d.email:
+        if d.email or d.email != ['']:
 
             message = mail.EmailMessage()
             message.to = d.email[0]
