@@ -13,6 +13,8 @@ function trigger_search(query){
         data_table.fnClearTable()
     }
 
+    query = query.replace(",", "")
+    
     var rpc_request = ghiapi.get.contacts
     var rpc_params = {'query':query}
 

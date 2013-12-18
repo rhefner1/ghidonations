@@ -12,6 +12,8 @@ function trigger_search(query){
         data_table.fnClearTable()
     }
 
+    query = query.replace(",", "")
+
     //Reinitialize the table with new settings
     var rpc_request = ghiapi.get.deposits
     var rpc_params = {'query':query}
