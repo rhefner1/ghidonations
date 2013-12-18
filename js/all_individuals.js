@@ -12,6 +12,8 @@ function trigger_search(query){
     if (data_table){
         data_table.fnClearTable()
     }
+
+    query = query.replace(",", "")
     
     //Reinitialize the table with new settings
     var rpc_request = ghiapi.get.individuals
