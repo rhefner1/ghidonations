@@ -691,6 +691,8 @@ class Team(ndb.Expando):
 
     ## -- Update -- ##
     def update(self, name, show_team):
+        name_changed = False
+        
         if name != self.name:
             self.name = name
             name_changed = True
