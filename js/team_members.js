@@ -54,8 +54,9 @@ $(document).ready(function(){
             var request = ghiapi.update.team(params)
 
 	    	request.execute(function(response){
-                rpcSuccessMessage(response)
-	    		refreshPage()
+                rpcSuccessMessage(response, function(){
+                    refreshPage() 
+                })
 	    	})
     	}
     	
@@ -70,8 +71,10 @@ $(document).ready(function(){
             var request = ghiapi.team.delete(params)
 
 	    	request.execute(function(response){
-                rpcSuccessMessage(response)
-	    		window.location.hash = "allteams"
+                rpcSuccessMessage(response, function(){
+                    window.location.hash = "allteams"
+                })
+	    		
 	    	})
     	}
     	

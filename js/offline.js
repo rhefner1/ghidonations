@@ -95,8 +95,9 @@ $(document).ready(function(){
             var request = ghiapi.new.offline_donation(params)
 
             request.execute(function(response){
-                rpcSuccessMessage(response)
-                refreshPage()
+                rpcSuccessMessage(response, function(){
+                    refreshPage()  
+                })
             })
         }
         

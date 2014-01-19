@@ -442,9 +442,13 @@ function rpcPost(data, callback){
         });
 }
 
-function rpcSuccessMessage(response){
+function rpcSuccessMessage(response, callback){
     if (response.success == true){
         show_flash("done", response.message, true)
+
+        if (refresh == true){
+            callback
+        }
     }
     else{
         if (response.error_message){

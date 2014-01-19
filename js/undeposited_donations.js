@@ -68,8 +68,10 @@ $(document).ready(function(){
 			var request = ghiapi.deposits.add(params)
 
 			request.execute(function(response){
-				rpcSuccessMessage(response)
-				window.location.hash = "alldeposits"
+				rpcSuccessMessage(response, function(){
+                    window.location.hash = "alldeposits" 
+                })
+				
 			})
 		}
 		else{
@@ -87,8 +89,10 @@ $(document).ready(function(){
 			params = {'donation_keys':donation_keys}
 			var request = ghiapi.deposits.remove(params)
 			request.execute(function(response){
-				rpcSuccessMessage(response)
-				refreshPage()
+				rpcSuccessMessage(response, function(){
+                    refreshPage()
+                })
+				
 			})
 		}
 		else{

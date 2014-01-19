@@ -95,8 +95,10 @@ $(document).ready(function(){
             var request = ghiapi.contact.delete(params)
 
             request.execute(function(response){
-                rpcSuccessMessage(response)
-                window.location.hash = "allcontacts"
+                rpcSuccessMessage(response, function(){
+                    window.location.hash = "allcontacts"
+                })
+                
             })
         }
         else{
@@ -128,8 +130,9 @@ $(document).ready(function(){
         var request = ghiapi.update.contact(params)
 
         request.execute(function(response){
-            rpcSuccessMessage(response)
-            refreshPage()
+            rpcSuccessMessage(response, function(){
+                refreshPage()  
+            })
         })
     })
 
@@ -142,8 +145,9 @@ $(document).ready(function(){
         var request = ghiapi.new.impression(params)
 
         request.execute(function(response){
-            rpcSuccessMessage(response)
-            refreshPage()
+            rpcSuccessMessage(response, function(){
+                refreshPage()  
+            })
         })
     })
 })

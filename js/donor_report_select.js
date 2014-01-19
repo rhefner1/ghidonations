@@ -40,8 +40,9 @@ $(document).ready(function(){
 
             var request = ghiapi.confirmation.annual_report(params)
             request.execute(function(response){
-                rpcSuccessMessage(response)
-                refreshPage()
+                rpcSuccessMessage(response, function(){
+                    refreshPage()  
+                })
             })
         }
         else{

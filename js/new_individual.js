@@ -17,8 +17,9 @@ $(document).ready(function(){
             var request = ghiapi.new.individual(params)
 
             request.execute(function(response){
-                rpcSuccessMessage(response)
-                refreshPage()
+                rpcSuccessMessage(response, function(){
+                    refreshPage()  
+                })
             })     
         }  
     })
