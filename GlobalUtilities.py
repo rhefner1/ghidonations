@@ -729,11 +729,13 @@ Thanks!"""
         new_individual = models.Individual()
 
         new_individual.name = name
-        new_individual.email = email
         new_individual.settings = self.e.key
-        new_individual.password = password
         new_individual.admin = bool(admin)
         new_individual.description = "Thank you for supporting my short-term mission trip to India. Your prayer and financial support is greatly needed and appreciated. Thanks for helping make it possible for me to go join God in His work in India."
+
+        if email:
+            new_individual.email = email
+            new_individual.password = password
 
         new_individual.put()
 
@@ -1602,11 +1604,13 @@ class IndividualSearch(UtilitiesBase):
     def createDocument(self):
         i = self.e
 
+        email = "" if not i.email else i.email
+
         document = search.Document(doc_id=i.websafe,
             fields=[search.TextField(name='individual_key', value=i.websafe),
 
                     search.TextField(name='name', value=i.name),
-                    search.TextField(name='email', value=i.email),
+                    search.TextField(name='email', value=email),
 
                     search.TextField(name='team', value=i.data.readable_team_names),
                     search.NumberField(name='raised', value=float(i.data.donation_total)),

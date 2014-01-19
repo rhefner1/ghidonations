@@ -434,10 +434,19 @@ class Individual(ndb.Expando):
 
         if name != self.name:
             self.name = name
-            name_changed = True
+            name_changed = True 
         
-        if email != self.email:
-            self.email = email
+        if email:
+            if email != self.email:
+                self.email = email
+
+            if password != None and password != "" and self.password != password:
+                self.password = password
+
+        else:
+            self.email = None
+            self.password = None
+
 
         #Initializes DictDiffer object to tell differences from current dictionary to server-side one
         team = json.loads(team_list)
@@ -481,9 +490,6 @@ class Individual(ndb.Expando):
                 old_blob.delete()
 
             self.photo = change_image
-
-        if password != None and password != "" and self.password != password:
-            self.password = password
 
         try:
             for tl in self.teamlist_entities:

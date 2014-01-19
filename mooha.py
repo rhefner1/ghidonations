@@ -340,7 +340,11 @@ class Login(webapp2.RequestHandler):
         email = self.request.get("email")
         password = self.request.get("password")
 
-        authenticated, user = tools.checkCredentials(self, email, password)
+        if email != "" and password != "":
+            authenticated, user = tools.checkCredentials(self, email, password)
+
+        else:
+            authenticated = False
 
         if authenticated == True:
             logging.info("Authenticated: " + str(authenticated) + " and User: " + str(user.name))

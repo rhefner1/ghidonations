@@ -105,24 +105,15 @@ class RPCMethods:
     # that do have a value to return. The response in that case is None
 
 #### ---- Globalhopeindia.org Utility Functions ---- ####
-    def individualExists(self, email):
-        settings = tools.getSettingsKey(self)
-        return settings.get().exists.individual(email)
-
     def pub_allTeams(self, settings):
     # This returns a json list of teams
         s = tools.getKey(settings).get()
-
-        all_teams = []
-        for t in s.data.display_teams:
-            team = [t.name, t.key.urlsafe()]           
-            all_teams.append(team)
-        
-        return all_teams
+        return [t.name, t.key.urlsafe() for t in s.data.display_teams]
 
     def pub_individualInfo(self, team_key, individual_key):
         i = tools.getKey(individual_key).get()
         t_key = tools.getKey(team_key)
+        
         return i.data.info(t_key)
 
     def pub_teamInfo(self, team_key):
