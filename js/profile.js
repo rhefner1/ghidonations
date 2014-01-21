@@ -128,15 +128,17 @@ $(document).ready(function(){
 	    	var request = ghiapi.individual.delete(params)
 
 		    request.execute(function(response){
-		    	rpcSuccessMessage(response)
+		    	rpcSuccessMessage(response, function(){
+                    var home_page = $("#home_page").val()
+		            if (home_page == "dashboard"){
+		            	window.location.hash = "allteams"
+		            }
+		            else{
+		            	window.location = "/login"
+		            }  
+                })
 		    	
-		    	var home_page = $("#home_page").val()
-	            if (home_page == "dashboard"){
-	            	window.location.hash = "allteams"
-	            }
-	            else{
-	            	window.location = "/login"
-	            }
+		    	
 		    })
 		}
 		else{

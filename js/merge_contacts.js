@@ -35,8 +35,9 @@ $(document).ready(function(){
                 var params = {'contact1':contact1, 'contact2':contact2}
                 var request = ghiapi.merge.contacts(params)
                 request.execute(function(response){
-                    rpcSuccessMessage(response)
-                    refreshPage()
+                    rpcSuccessMessage(response, function(){
+                        refreshPage()  
+                    })
                 })
             }
                 

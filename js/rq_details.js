@@ -121,8 +121,10 @@ $(document).ready(function(){
                 var request = ghiapi.donation.delete(params)
 
                 request.execute(function(response){
-                    rpcSuccessMessage(response)
-                    closeColorbox()
+                    rpcSuccessMessage(response, function(){
+                        closeColorbox() 
+                    })
+                    
                 })
             }
             else{
@@ -137,8 +139,9 @@ $(document).ready(function(){
         var request = ghiapi.confirmation.email(params)
 
         request.execute(function(response){
-            rpcSuccessMessage(response)
-            closeColorbox()
+            rpcSuccessMessage(response, function(){
+                closeColorbox() 
+            })
         })
     
     })
@@ -155,9 +158,11 @@ $(document).ready(function(){
         var request = ghiapi.confirmation.print(params)
 
         request.execute(function(response){
-            rpcSuccessMessage(response)
-            window.open(response.print_url, "_blank")
-            closeColorbox()
+            rpcSuccessMessage(response, function(){
+                window.open(response.print_url, "_blank")
+                closeColorbox() 
+            })
+            
         })
     
     })
@@ -169,8 +174,9 @@ $(document).ready(function(){
         var request = ghiapi.donation.archive(params)
 
         request.execute(function(response){
-            rpcSuccessMessage(response)
-            closeColorbox()
+            rpcSuccessMessage(response, function(){
+                closeColorbox() 
+            })
         })
     
     })
@@ -215,8 +221,9 @@ $(document).ready(function(){
         var request = ghiapi.update.donation(params)
 
         request.execute(function(response){
-            rpcSuccessMessage(response)
-            refreshPage()
+            rpcSuccessMessage(response, function(){
+                refreshPage() 
+            })
         })
     
     })

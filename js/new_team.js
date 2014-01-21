@@ -13,8 +13,10 @@ $(document).ready(function(){
             var request = ghiapi.new.team(params)
 
             request.execute(function(response){
-                rpcSuccessMessage(response)
-                window.location.hash = "newindividual"
+                rpcSuccessMessage(response, function(){
+                    window.location.hash = "newindividual"  
+                })
+                
             })
         }            
     })
