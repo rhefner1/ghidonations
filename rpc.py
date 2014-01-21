@@ -108,7 +108,7 @@ class RPCMethods:
     def pub_allTeams(self, settings):
     # This returns a json list of teams
         s = tools.getKey(settings).get()
-        return [t.name, t.key.urlsafe() for t in s.data.display_teams]
+        return [[t.name, t.key.urlsafe()] for t in s.data.display_teams]
 
     def pub_individualInfo(self, team_key, individual_key):
         i = tools.getKey(individual_key).get()

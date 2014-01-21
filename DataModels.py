@@ -434,7 +434,7 @@ class Individual(ndb.Expando):
 
         if name != self.name:
             self.name = name
-            name_changed = True 
+            name_changed = True
         
         if email:
             if email != self.email:
