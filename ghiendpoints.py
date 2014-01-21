@@ -407,13 +407,10 @@ class EndpointsAPI(remote.Service):
 
         email, team_key = req.email, req.team_key
 
-        if exists[0] == False:
-            if email == "":
-                email = None
+        if email == "": email = None
+        if team_key == "team": team_key = None
 
-            if team_key == "team":
-                team_key = None
-
+        if email == None or exists[0] == False:
             s.create.individual(req.name, tools.getKey(team_key), email, req.password, admin=req.admin)
 
         else:
