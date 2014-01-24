@@ -753,14 +753,6 @@ Thanks!"""
         logging.info("Individual created.")
         return new_individual.key
 
-    def recurring_donation(self, payment_id, duration, ipn_data=None):
-        new_recurring = models.show_donation_page()
-        new_recurring.payment_id = payment_id
-        new_recurring.duration = duration
-        new_recurring.ipn_data = ipn_data
-
-        new_recurring.put()
-
     def team(self, name):
         new_team = models.Team()
         new_team.name = name
@@ -854,10 +846,6 @@ class SettingsData(UtilitiesBase):
             donors.append(donors_dict[k])
 
         return donors
-
-    def recurring_info(self, payment_id):
-        info = models.show_donation_page.gql("WHERE payment_id = :id", id=payment_id).fetch(1)[0]
-        return info
 
     def team_donors(self, team_key):
         donors = []
