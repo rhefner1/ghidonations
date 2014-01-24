@@ -612,7 +612,13 @@ class IPN(BaseHandlerAdmin):
             # Check the IPN POST request came from real PayPal, not from a fraudster.
             if parameters:
                 parameters['cmd']='_notify-validate'
-                params = urllib.urlencode(parameters)
+
+                # Encode the parameters in UTF-8 out of Unicode
+                str_parameters = {}
+                for k, v in parameters.iteritems():
+                    str_parameters[k] = unicode(v).encode('utf-8')
+
+                params = urllib.urlencode(str_parameters)
                 status = urlfetch.fetch(
                             url = PP_URL,
                             method = urlfetch.POST,
