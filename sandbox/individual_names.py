@@ -1,8 +1,8 @@
 names = [
   {
-    "GivenName":"Kimberly",
-    "Surname":"Shields",
-    "EmailAddress":"KimberlyDShields@jourrapide.com",
+    "GivenName":"Joe",
+    "Surname":"Schmoe",
+    "EmailAddress":"test@example.com",
     "TelephoneNumber":"402-427-6916",
     "StreetAddress":"785 Oak Way",
     "City":"Kennard",
