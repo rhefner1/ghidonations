@@ -744,7 +744,6 @@ Thanks!"""
         new_tl.team = team_key
         new_tl.fundraise_amt = toDecimal("2800")
         new_tl.sort_name = name
-        new_tl.show_donation_page = True
 
         new_tl.put()
 
@@ -1672,7 +1671,7 @@ class TeamData(UtilitiesBase):
     def members_public_donation_page(self):
         #Returns members that indicated that they want to be included
         #in the public donation page
-        q = models.TeamList.gql("WHERE team = :t AND show_donation_page = :s ORDER BY sort_name", t=self.e.key, s=True)
+        q = models.TeamList.gql("WHERE team = :t AND show_donation_page != :s ORDER BY sort_name", t=self.e.key, s=False)
         return qCache(q)
 
     @property
@@ -1696,19 +1695,19 @@ class TeamData(UtilitiesBase):
         
         def get_item():
             members = self.members
-            all_members = []
 
-            for tl in members:
-                tl_key = tl.individual.urlsafe()
-                member = []
-                member.append(tl.individual_name)
-                member.append(tl.individual.get().data.photo_url)        
-                member.append(tl_key)
+            return [[tl.individual_name, tl.individual.get().data.photo_url, tl.individual.urlsafe()] for tl in members]
 
-                #Attaching this to the main array
-                all_members.append(member)
+        return cache(memcache_key, get_item)
 
-            return all_members
+    @property
+    def public_members_list(self):
+        memcache_key = "publicteammembers" +  self.e.websafe
+        
+        def get_item():
+            members = self.members_public_donation_page
+
+            return [[tl.individual_name, tl.individual.get().data.photo_url, tl.individual.urlsafe()] for tl in members]
 
         return cache(memcache_key, get_item)
 

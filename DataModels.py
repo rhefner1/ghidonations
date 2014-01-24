@@ -377,6 +377,8 @@ class Individual(ndb.Expando):
     description = ndb.TextProperty()
     photo = ndb.StringProperty()
 
+    show_donation_page = ndb.BooleanProperty(default=True)
+
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
@@ -392,15 +394,6 @@ class Individual(ndb.Expando):
     @property
     def search(self):
         return tools.IndividualSearch(self)
-
-    @property
-    def show_donation_page(self):
-        try:
-            q = TeamList.gql("WHERE individual = :i", i=self.key)
-            return q.fetch(1)[0].show_donation_page
-
-        except:
-            return False
 
     @property
     def websafe(self):
@@ -431,6 +424,7 @@ class Individual(ndb.Expando):
     ## -- Update Individual -- #
     def update(self, name, email, team_list, description, change_image, password, show_donation_page):
         name_changed = False
+        show_donation_changed = False
 
         if name != self.name:
             self.name = name
@@ -447,6 +441,9 @@ class Individual(ndb.Expando):
             self.email = None
             self.password = None
 
+        if show_donation_page != self.show_donation_page:
+            self.show_donation_page = show_donation_page
+            show_donation_changed = True
 
         #Initializes DictDiffer object to tell differences from current dictionary to server-side one
         team = json.loads(team_list)
@@ -492,14 +489,16 @@ class Individual(ndb.Expando):
             self.photo = change_image
 
         try:
-            for tl in self.teamlist_entities:
-                if show_donation_page != tl.show_donation_page:
-                    tl.show_donation_page = show_donation_page
-                
-                if name_changed == True:
-                    tl.sort_name = name
+            if name_changed or show_donation_changed:
+                for tl in self.teamlist_entities:
 
-                tl.put()
+                    if name_changed == True:
+                        tl.sort_name = name
+
+                    if show_donation_changed:
+                        tl.show_donation_page = show_donation_page
+
+                    tl.put()
         except:
             pass
 
@@ -530,6 +529,7 @@ class Individual(ndb.Expando):
 
         for tl in i.data.teams:
             memcache.delete("teammembers" + tl.team.urlsafe())
+            memcache.delete("publicteammembers" + tl.team.urlsafe())
             memcache.delete("teammembersdict" + tl.team.urlsafe())
 
             tl.key.delete()
@@ -718,6 +718,7 @@ class Team(ndb.Expando):
         e = future.get_result().get()
         memcache.delete('allteams' + e.settings.urlsafe())
         memcache.delete("teammembers" + e.websafe)
+        memcache.delete("publicteammembers" + e.websafe)
         memcache.delete("teamsdict" + e.settings.urlsafe())
 
         taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")      
@@ -747,8 +748,7 @@ class TeamList(ndb.Model):
     team = ndb.KeyProperty()
     fundraise_amt = DecimalProperty()
 
-    #Show in public donation page
-    show_donation_page = ndb.BooleanProperty()
+    show_donation_page = ndb.BooleanProperty(default=True)
 
     sort_name = ndb.StringProperty()
 
@@ -772,5 +772,6 @@ class TeamList(ndb.Model):
 def clear_team_memcache(e):
     for t in e.data.teams:
         memcache.delete("teammembers" + t.team.urlsafe())
+        memcache.delete("publicteammembers" + t.team.urlsafe())
         memcache.delete("teammembersdict" + t.team.urlsafe())
         memcache.delete("info" + t.team.urlsafe() + e.websafe)
