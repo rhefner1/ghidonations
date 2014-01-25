@@ -120,7 +120,7 @@ class RPCMethods:
     # This returns a simplejson list of team members' names, hosted link to picture, and description
     # Response parsed by Javascript on main GHI site
         t = tools.getKey(team_key).get()
-        return t.data.members_list
+        return t.data.public_members_list
 
 app = webapp2.WSGIApplication([
     ('/rpc', RPCHandler),

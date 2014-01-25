@@ -1671,7 +1671,7 @@ class TeamData(UtilitiesBase):
     def members_public_donation_page(self):
         #Returns members that indicated that they want to be included
         #in the public donation page
-        q = models.TeamList.gql("WHERE team = :t AND show_donation_page != :s ORDER BY sort_name", t=self.e.key, s=False)
+        q = models.TeamList.gql("WHERE team = :t AND show_donation_page != :s ORDER BY show_donation_page, sort_name", t=self.e.key, s=False)
         return qCache(q)
 
     @property
