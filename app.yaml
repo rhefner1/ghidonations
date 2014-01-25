@@ -1,5 +1,5 @@
 application: ghidonations
-version: 5l
+version: 5m
 runtime: python27
 api_version: 1
 threadsafe: true
