@@ -37,13 +37,14 @@ _NUM_RESULTS = 15
 ###### ------ Authentication ------ ######
 def checkCredentials(self, email, password):
     try:
-        users = models.Individual.gql("WHERE email = :e", e=email)
+        users = models.Individual.query(models.Individual.email == email)
         target_user = users.fetch(1)[0]
 
         if target_user.password == password:
             return True, target_user
         else:
             return False, None
+
     except:
         return False, None
 
@@ -63,8 +64,7 @@ def checkAuthentication(self, admin_required, from_endpoints=False):
         return u.admin, u.settings.get()
 
     except Exception as e:
-        message = "Error in checkAuthentication - kicking out to login page. " + str(e)
-        logging.info(message)
+        logging.info("Error in checkAuthentication - kicking out to login page. " + str(e))
 
         if from_endpoints:
             raise endpoints.ForbiddenException(message)
@@ -73,12 +73,13 @@ def checkAuthentication(self, admin_required, from_endpoints=False):
             
         return None, None
 
-def getUsername(self):
+def getUsername(self, user_key=None):
     try:
-        user_key = getUserKey(self)
-        user = user_key.get()
+        if not user_key:
+            user_key = getUserKey(self)
 
-        return user.name
+        return user_key.get().name
+
     except:
         self.redirect("/login")
 
@@ -87,16 +88,14 @@ def getUserKey(self):
     user_key = self.session["key"]
 
     if user_key == None or user_key == "":
-        raise Exception("User key is none")
+        raise Exception("No User Key available")
 
     return getKey(user_key)
 
-def getSettingsKey(self, endpoints=False):
+def getSettingsKey(self, user_key=None, endpoints=False):
     try:
-        user_key = getUserKey(self)
-        user = user_key.get()
-        
-        return user.settings
+        if not user_key: user_key = getUserKey(self)        
+        return user_key.get().settings
 
     except Exception as e:
         if endpoints:
@@ -109,25 +108,21 @@ def RPCcheckAuthentication(self, admin_required):
         self.session = get_current_session()
 
         #If the cookie doesn't exist, send them back to login
-        if not self.session["key"]:
-            return False
+        if not self.session["key"]: return False
         else:
-            #The cookie does exist, so store the key
-            user_key = getUserKey(self)
-            user = user_key.get()
-
             #Get admin privledges associated with this user
-            user_privledges = user.admin
+            user_privledges = getUserKey(self).get().admin
 
             #If the user tries to enter an admin page with standard credentials,
             #kick them out.
             if admin_required == True and user_privledges == False:
                 return "semi"
-            
+
             #Otherwise, good to go
-            return True
-    except:
-        return False
+            else:
+                return True
+            
+    except: return False
 
 ###### ------ Managing entity access w/memcache ------ ######
 
@@ -137,10 +132,10 @@ def cache(memcache_key, get_item):
     item_json = memcache.get(memcache_key)
 
     if not item_json:
-        item = get_item()
-        memcache.set(memcache_key, json.dumps(item))
+        picked_item = json.dumps( get_item() )
+        memcache.set(memcache_key, picked_item)
 
-    else: 
+    else:
         item = json.loads(item_json)
 
     return item
@@ -148,9 +143,10 @@ def cache(memcache_key, get_item):
 def deserializeEntity(data):
     if data is None:
         return None
+
+    # Getting entity from protobuf
     else:
-        # Getting entity fro protobuf
-        return ndb.model_from_protobuf(data)
+        return ndb.model_from_protobuf(data)        
 
 def flushMemcache():
     return memcache.flush_all()
@@ -162,16 +158,11 @@ def gqlCache(memcache_key, get_item):
     cached_query = memcache.get(memcache_key)
 
     if not cached_query:
-        entities = get_item
+        entities = serializeEntities(get_item)
+        memcache.set(memcache_key, entities)
 
-        serialized = serializeEntities(entities)
-        memcache.set(memcache_key, serialized)
-
-    else: 
-        entities = []
-        for e in cached_query:
-            entity = deserializeEntity(e)
-            entities.append(entity)
+    else:
+        entities = [deserializeEntity(e) for e in cached_query]
 
     return entities
 
@@ -184,22 +175,20 @@ def gqlCount(gql_object):
     return length
 
 def qCache(q):
-    return ndb.get_multi(q.fetch(keys_only=True))
+    return ndb.get_multi( q.fetch(keys_only=True) )
 
 def serializeEntities(models):
     if models is None:
         return None
     else:
-        entities_list = []
-        for m in models:
-            e_proto = serializeEntity(m)
-            entities_list.append(e_proto)
+        entities_list = [serializeEntity(m) for m in models]
 
         return entities_list
 
 def serializeEntity(model):
     if model is None:
         return None
+
     else:
         # Encoding entity to protobuf
         return ndb.model_to_protobuf(model)
@@ -207,26 +196,17 @@ def serializeEntity(model):
 ###### ------ Data Access ------ ######
 def getAccountEmails(self):
     all_settings = models.Settings.query()
-    all_emails = {}
-
-    for s in all_settings:
-        all_emails[s.email] = str(s.websafe)
-    
-    return all_emails
+    return {s.email:str(s.websafe) for s in all_settings}
 
 def getMailchimpLists(self, mc_apikey):
     ms = MailSnake(mc_apikey)
     response = ms.lists()
 
     try:
-        mc_lists = {}
-
-        for l in response["data"]:
-
-            list_name = l["name"]
-            mc_lists[list_name] = l["id"]
+        mc_lists = { mc_list["name"]:mc_list["id"] for mc_list in response["data"] }
 
         return [True, mc_lists]
+
     except:
         if response["code"] == 104:
             return [False, "Sorry, you entered an incorrect Mailchimp API Key"]
@@ -235,24 +215,10 @@ def getMailchimpLists(self, mc_apikey):
 
 ###### ------ Data Creation ------ ######
 def newSettings(name, email):
-    new_settings = models.Settings()
-    new_settings.name = name
-    new_settings.email = email
-
-    new_settings.mc_use = False
-
-    new_settings.impressions = []
-
-    new_settings.amount1 = 10
-    new_settings.amount2 = 25
-    new_settings.amount3 = 75
-    new_settings.amount4 = 100
-    new_settings.use_custom = True
-
-    logging.info("Settings created.")
-
+    new_settings = models.Settings(name=name, email=email)
     new_settings.put()
 
+    logging.info("Settings created.")
     return new_settings.key
 
 ###### ------ Spreadsheet Export Controller Utilities ------ ######
@@ -305,15 +271,14 @@ def indexEntitiesFromQuery(query, query_cursor=None):
 ###### ------ Utilities ------ ######
 def currentTime():
     #Outputs current date and time
-    return convertTime(datetime.datetime.utcnow()).strftime("%b %d, %Y %I:%M:%S %p") 
+    current_time = datetime.datetime.utcnow()
+    return convertTime(current_time).strftime("%b %d, %Y %I:%M:%S %p") 
 
 def convertTime(time):
-    utc_zone = UTC()
-    to_zone = EST()
+    utc_zone, to_zone = UTC(), EST()
     time = time.replace(tzinfo=utc_zone)
 
-    new_time = time.astimezone(to_zone)
-    return new_time
+    return time.astimezone(to_zone)
 
 def getWebsafeCursor(cursor_object):
     if cursor_object:
@@ -337,16 +302,18 @@ def getGlobalSettings():
     q = models.GlobalSettings.query()
 
     try:
-        global_settings = q.fetch(1)[0]
+        # Get the existing Global Settings object
+        gs_obj = q.fetch(1)[0]
 
     except:
-        new_global_settings = models.GlobalSettings()
-        new_global_settings.cookie_key = os.urandom(64).encode("base64")
-        global_settings = new_global_settings.put()
+        # Create a new Global Settings object
+        new_gs = models.GlobalSettings()
+        new_gs.cookie_key = os.urandom(64).encode("base64")
+        new_gs_key = new_gs.put()
         
-        global_settings = global_settings.get()
+        gs_obj = new_gs_key.get()
 
-    return global_settings
+    return gs_obj
 
 def getSearchDoc(doc_id, index):
     if not doc_id:
@@ -385,10 +352,9 @@ def GQLtoDict(self, gql_query):
 
 def isEmail(email):
     if email:
-        if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", email) != None:
-            return True
-        else:
-            return False
+        re_statement = "^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$"
+        return True if re.match(re_statement, email) != None else False
+
     else:
         return False
 
@@ -441,16 +407,10 @@ def mergeContacts(c1_key, c2_key):
 
 def moneyAmount(money_string):
     money = toDecimal(money_string)
-    money = "${:,.2f}".format(money)
-    return money
+    return "${:,.2f}".format(money)
 
 def ndbKeyToUrlsafe(keys):
-    urlsafe_keys = []
-
-    for k in keys:
-        urlsafe_keys.append(k.urlsafe())
-
-    return urlsafe_keys
+    return [k.urlsafe() for k in keys]
 
 def pipelineStatus(job_id):
     pipeline_id = memcache.get("id" + job_id)
@@ -523,33 +483,18 @@ def searchReturnAll(query, search_results, settings, search_function, entity_ret
     return all_results
 
 def searchToDocuments(search_results):
-    documents = []
-
-    for r in search_results:
-        documents.append(r)
-
-    return documents
+    return [r for r in search_results]
 
 def searchToEntities(search_results):
-    entities = []
-
-    for r in search_results:
-        key = r.fields[0].value
-        d = getKey(key).get()
-        entities.append(d)
-
-    return entities
+    # r.fields[0].value is the key value from the search results
+    return [getKey( r.fields[0].value ).get() for r in search_results]
 
 def setFlash(self, message):
     self.session = get_current_session()
     self.session["flash"] = message
 
 def strArrayToKey(self, str_array):
-    key_array = []
-    for k in str_array:
-        key_array.append(getKey(k))
-
-    return key_array
+    return [getKey(k) for k in str_array]
 
 def toDecimal(number):
     if number != None:
@@ -578,13 +523,6 @@ def truncateEmail(email, is_list=False):
 
     return email
 
-def writeEntities(e_key):
-  e = e_key.get()
-  if isinstance(e.email, basestring):
-      email = e.email
-      e.email = [email]
-      e.put()
-
 ###### ------ Utilities Classes ------ ######
 class UtilitiesBase():
     def __init__(self, base_entity):
@@ -596,9 +534,6 @@ class SettingsCreate(UtilitiesBase):
     def contact(self, name, email=None, phone=None, address=None, notes=None, add_mc=False):
         logging.info("Creating contact for: " + name)
         if name:
-            new_contact = models.Contact()
-            new_contact.name = name
-            new_contact.settings = self.e.key
 
             if address == None or address == "":
                 address = ['', '', '', '']
@@ -611,10 +546,9 @@ class SettingsCreate(UtilitiesBase):
             if phone == None or phone == "None":
                 phone = ""
 
-            new_contact.email = email
-            new_contact.phone = phone
-            new_contact.address = address
-            new_contact.notes = notes
+             new_contact = models.Contact(name=name, settings=self.e.key
+                                        email=email, phone=phone, address=address,
+                                        notes=notes)
 
             #Log the contact
             logging.info("Contact created.")
@@ -632,11 +566,8 @@ class SettingsCreate(UtilitiesBase):
             logging.error("Cannot create contact because there is not a name.")
 
     def deposit_receipt(self, entity_keys):
-        new_deposit = models.DepositReceipt()
-
-        new_deposit.entity_keys = entity_keys
-        new_deposit.settings = self.e.key
-        new_deposit.time_deposited = currentTime()
+        new_deposit = models.DepositReceipt(entity_keys=entity_keys, settings=self.e.key,
+                                            time_deposited=currentTime())
 
         new_deposit.put()
 
@@ -644,17 +575,7 @@ class SettingsCreate(UtilitiesBase):
         if confirmation_amount == None:
             confirmation_amount = amount_donated
 
-        #All variables being passed as either string or integer
-        new_donation = models.Donation()
-        new_donation.settings = self.e.key
-        new_donation.payment_id = payment_id
-        new_donation.payment_type = payment_type
-        new_donation.special_notes = special_notes
-        new_donation.ipn_data = ipn_data
-
-        new_donation.given_name = name
-        new_donation.given_email = email
-
+        # Create new contact for this donation if it doesn't exist already
         if not contact_key:
             exists = self.e.exists.contact(email=email, name=name)
             if exists[0]:
@@ -664,7 +585,17 @@ class SettingsCreate(UtilitiesBase):
                 #Add new contact
                 contact_key = self.contact(name, email=email, address=address, add_mc=email_subscr)
 
-        new_donation.contact = contact_key
+        # Formatting team/individual values
+        if team_key == "" or team_key == "none":
+            team_key = None 
+            
+        if individual_key == "" or individual_key == "none":
+            individual_key = None
+
+        # Create the new donation object
+        new_donation = models.Donation(settings=self.e.key, payment_id=payment_id, payment_type=payment_type,
+                                        special_notes=special_notes, ipn_data=ipn_data, given_name=name, 
+                                        given_email=email, contact=contact_key, team=team_key, individual=individual_key)
 
         if payment_type == "recurring":
             new_donation.isRecurring = True
@@ -678,15 +609,6 @@ class SettingsCreate(UtilitiesBase):
         else:
             logging.info("Not adding to undeposited donations")
             new_donation.deposited = True
-
-        if team_key == "" or team_key == "none":
-            team_key = None 
-            
-        if individual_key == "" or individual_key == "none":
-            individual_key = None
-
-        new_donation.team = team_key
-        new_donation.individual = individual_key
             
         new_donation.put()
 
@@ -726,11 +648,8 @@ Thanks!"""
         return new_donation.key
 
     def individual(self, name, team_key, email, password, admin=False):
-        new_individual = models.Individual()
+        new_individual = models.Individual(name=name, settings=self.e.key, admin=bool(admin))
 
-        new_individual.name = name
-        new_individual.settings = self.e.key
-        new_individual.admin = bool(admin)
         new_individual.description = "Thank you for supporting my short-term mission trip to India. Your prayer and financial support is greatly needed and appreciated. Thanks for helping make it possible for me to go join God in His work in India."
 
         if email:
@@ -739,13 +658,8 @@ Thanks!"""
 
         new_individual.put()
 
-        new_tl = models.TeamList()
-        new_tl.individual = new_individual.key
-        new_tl.team = team_key
-        new_tl.fundraise_amt = toDecimal("2800")
-        new_tl.sort_name = name
-        new_tl.show_donation_page = True
-
+        # Create new TeamList object
+        new_tl = models.TeamList(individual=new_individual.key, team=team_key, fundraise_amt=toDecimal("2800"), sort_name=name)
         new_tl.put()
 
         memcache.delete("teammembersdict" + team_key.urlsafe())
@@ -754,44 +668,33 @@ Thanks!"""
         return new_individual.key
 
     def team(self, name):
-        new_team = models.Team()
-        new_team.name = name
-        new_team.settings = self.e.key
-        new_team.show_team = True
+        new_team = models.Team(name=name, settings=self.e.key)
+        new_team.put()
 
         logging.info("Team created.")
 
-        new_team.put()
-
         return new_team.key
-
-        return new_donation.key.urlsafe()
         
 class SettingsData(UtilitiesBase):
     @property
     def all_contacts(self):
-        q = models.Contact.gql("WHERE settings = :s ORDER BY name", s=self.e.key)
-        return q
+        return models.Contact.gql("WHERE settings = :s ORDER BY name", s=self.e.key)
 
     @property
     def all_deposits(self):
-        q = models.DepositReceipt.gql("WHERE settings = :s ORDER BY creation_date DESC", s=self.e.key)
-        return q
+        return models.DepositReceipt.gql("WHERE settings = :s ORDER BY creation_date DESC", s=self.e.key)
 
     @property
     def all_donations(self):
-        q = models.Donation.gql("WHERE settings = :s ORDER BY donation_date DESC", s=self.e.key)
-        return q
+        return models.Donation.gql("WHERE settings = :s ORDER BY donation_date DESC", s=self.e.key)
 
     @property
     def all_individuals(self):
-        q = models.Individual.gql("WHERE settings = :k ORDER BY name ASC", k=self.e.key)
-        return q
+        return models.Individual.gql("WHERE settings = :k ORDER BY name ASC", k=self.e.key)
 
     @property
     def all_teams(self):
-        q = models.Team.gql("WHERE settings = :k ORDER BY name", k=self.e.key)
-        return q
+        return models.Team.gql("WHERE settings = :k ORDER BY name", k=self.e.key)
 
     def contacts(self, query_cursor):
         query = self.all_contacts
@@ -803,8 +706,7 @@ class SettingsData(UtilitiesBase):
 
     @property
     def display_teams(self):
-        q = models.Team.gql("WHERE settings = :k AND show_team = True ORDER BY name", k=self.e.key)
-        return q
+        return models.Team.gql("WHERE settings = :k AND show_team = True ORDER BY name", k=self.e.key)
 
     def donations(self, query_cursor):
         query = self.all_donations
@@ -830,31 +732,17 @@ class SettingsData(UtilitiesBase):
 
     @property
     def recurring_donors(self):
-        donors_dict = {}
         query = models.Donation.gql("WHERE settings = :s AND isRecurring = :r", s=self.e.key, r=True)
 
-        for d in query:
-            #Adding to dictionary first to manage duplicates
-            websafe = d.contact
+        # Putting in set to eliminate duplicates
+        all_contact_keys = set([d.contact for d in query])
 
-            if not websafe in donors_dict:
-                donors_dict[websafe] = d.contact.get()
-
-        donors = []
-        for k in donors_dict:
-            #Now creating a normal iterable array of just entities
-            donors.append(donors_dict[k])
-
-        return donors
+        # Getting the contact object for each contact 
+        return [c_key.get() for c_key in all_contact_keys]
 
     def team_donors(self, team_key):
-        donors = []
-        donations = models.Donation.gql("WHERE team = :t", t=team_key)
-        for d in donations:
-            #if d.name not in donors:
-            donors.append(d.contact.get())
-            
-        return donors
+        donations = models.Donation.gql("WHERE team = :t", t=team_key)    
+        return [d.contact.get() for d in donations]
 
     @property
     def teams_dict(self):
@@ -862,21 +750,13 @@ class SettingsData(UtilitiesBase):
 
         def get_item():
             teams = models.Team.gql("WHERE settings = :k AND show_team = :s", k=self.e.key, s=True)
-
-            teams_dict = {}
-            for t in teams:
-                teams_dict[t.name] = t.websafe
-
-            return teams_dict
+            return {t.name:t.websafe for t in teams}
 
         return cache(memcache_key, get_item)
 
     @property
     def teams_list(self):
-        teams = []
-        for t in self.teams:
-            teams.append(t)
-        return teams
+        return [t for t in self.teams]
         
     def teams(self, query_cursor):
         query = self.all_teams
@@ -909,10 +789,7 @@ class SettingsData(UtilitiesBase):
 class SettingsDeposits(UtilitiesBase):
     def deposit(self, unicode_keys):
         #Changing all unicode keys into Key objects
-        donation_keys = []
-        for key in unicode_keys:
-            donation_keys.append(getKey(key))
-
+        donation_keys = [getKey(key) for key in unicode_keys]
         self.e.create.deposit_receipt(donation_keys)
 
         for key in donation_keys:
@@ -922,9 +799,7 @@ class SettingsDeposits(UtilitiesBase):
 
     def remove(self, unicode_keys):
         #Changing all unicode keys into Key objects
-        donation_keys = []
-        for key in unicode_keys:
-            donation_keys.append(getKey(key))
+        donation_keys = [getKey(key) for key in unicode_keys]
 
         for key in donation_keys:
             d = key.get()
@@ -1171,24 +1046,17 @@ class SettingsSearch(UtilitiesBase):
 ## -- Contact Classes -- ##
 class ContactCreate(UtilitiesBase):
     def impression(self, impression, notes):
-        new_impression = models.Impression()
-
-        new_impression.contact = self.e.key
-        new_impression.impression = impression
-        new_impression.notes = notes
-
+        new_impression = models.Impression(contact=self.e.key, impression=impression, notes=notes)
         new_impression.put()
 
 class ContactData(UtilitiesBase):
     @property
     def all_donations(self):
-        q = models.Donation.gql("WHERE contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
-        return q
+        return models.Donation.gql("WHERE contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
 
     @property 
     def all_impressions(self):
-        q = models.Impression.gql("WHERE contact = :c ORDER BY creation_date DESC", c=self.e.key)
-        return q
+        return models.Impression.gql("WHERE contact = :c ORDER BY creation_date DESC", c=self.e.key)
 
     def annual_donations(self, year):
         year = int(year)
@@ -1683,20 +1551,11 @@ class TeamData(UtilitiesBase):
         memcache_key = "teammembers" +  self.e.websafe
         
         def get_item():
-            members = self.members
-            all_members = []
+            return [    [tl.individual_name, 
+                        tl.individual.get().data.photo_url,
+                        tl.individual.urlsafe()]
 
-            for tl in members:
-                tl_key = tl.individual.urlsafe()
-                member = []
-                member.append(tl.individual_name)
-                member.append(tl.individual.get().data.photo_url)        
-                member.append(tl_key)
-
-                #Attaching this to the main array
-                all_members.append(member)
-
-            return all_members
+                        for tl in self.members]
 
         return cache(memcache_key, get_item)
 

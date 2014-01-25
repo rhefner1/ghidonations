@@ -543,22 +543,22 @@ class Settings(ndb.Expando):
     email = ndb.StringProperty()
 
     #Mailchimp values
-    mc_use = ndb.BooleanProperty()
+    mc_use = ndb.BooleanProperty(default=False)
     mc_apikey = ndb.StringProperty()
     mc_donorlist = ndb.StringProperty()
 
     #Impressions
-    impressions = ndb.StringProperty(repeated=True)
+    impressions = ndb.StringProperty(repeated=True, default=[])
 
     #PayPal
     paypal_id = ndb.StringProperty()
 
     #Donate page
-    amount1 = ndb.IntegerProperty()
-    amount2 = ndb.IntegerProperty()
-    amount3 = ndb.IntegerProperty()
-    amount4 = ndb.IntegerProperty()
-    use_custom = ndb.BooleanProperty()
+    amount1 = ndb.IntegerProperty(default=10)
+    amount2 = ndb.IntegerProperty(default=25)
+    amount3 = ndb.IntegerProperty(default=75)
+    amount4 = ndb.IntegerProperty(default=100)
+    use_custom = ndb.BooleanProperty(default=True)
 
     donate_parent = ndb.StringProperty()
 
@@ -678,7 +678,7 @@ class Settings(ndb.Expando):
 class Team(ndb.Expando):
     name = ndb.StringProperty()
     settings = ndb.KeyProperty()
-    show_team = ndb.BooleanProperty()
+    show_team = ndb.BooleanProperty(default=True)
     
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
@@ -748,7 +748,7 @@ class TeamList(ndb.Model):
     fundraise_amt = DecimalProperty()
 
     #Show in public donation page
-    show_donation_page = ndb.BooleanProperty()
+    show_donation_page = ndb.BooleanProperty(default=True)
 
     sort_name = ndb.StringProperty()
 
