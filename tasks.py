@@ -15,6 +15,51 @@ from xlwt import *
 # Google Cloud Storage
 import cloudstorage as gcs
 
+class AggregateAnnualReport(webapp2.RequestHandler):
+    def post(self):
+        target_year = int(self.request.get("year"))
+        s = tools.getKey( self.request.get("skey") )
+        mode = self.request.get("mode")
+        to_email = self.request.get("email")
+
+        td1 = datetime(target_year,1,1,0,0)
+        td2 = datetime(target_year,12,31,0,0)
+
+        annual_donations = models.Donation.query(models.Donation.settings == s, 
+                                                models.Donation.donation_date >= td1,
+                                                models.Donation.donation_date <= td2)
+
+        all_contacts = set([d.contact for d in annual_donations])
+
+        with_email = []
+        without_email = []
+
+        for c_key in all_contacts:
+            c = c_key.get()
+            if c.email != []:
+                with_email.append(c)
+            else:
+                without_email.append(c)
+
+        # Initializing email message
+        message = mail.EmailMessage()
+        message.to = to_email
+        message.sender = "Global Hope India <donate@globalhopeindia.org>"
+        message.subject = str(target_year) + " Aggregate Donation Report"
+        body = ""
+
+        body += "\n" + "#### " + str(len(with_email)) + " Donors with Email Addresses ####"
+        for c in with_email:
+            body += "\n" + str(c.key)
+
+        body += "\n" + "\n\n\n#### " + str(len(without_email)) + " Donors WITHOUT Email Addresses ####"
+        for c in without_email:
+            body += "\n" + "https://ghidonations.appspot.com/reports/donor?c=" + c.websafe + "&y=2013"
+
+        message.body = body
+        message.send()
+
+
 class AnnualReport(webapp2.RequestHandler):
     def post(self):
         contact_key = self.request.get("contact_key")
@@ -211,6 +256,7 @@ class UpdateContactsJSON(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
         ('/tasks/annualreport', AnnualReport),
+        ('/tasks/aggregateannualreport', AggregateAnnualReport),
         ('/tasks/confirmation', Confirmation),
         ('/tasks/delayindexing', DelayIndexing),
         ('/tasks/deletespreadsheet', DeleteSpreadsheet),
