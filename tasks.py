@@ -20,7 +20,6 @@ class AggregateAnnualReport(webapp2.RequestHandler):
         target_year = int(self.request.get("year"))
         s = tools.getKey( self.request.get("skey") )
         mode = self.request.get("mode")
-        to_email = self.request.get("email")
 
         td1 = datetime(target_year,1,1,0,0)
         td2 = datetime(target_year,12,31,0,0)
@@ -33,19 +32,26 @@ class AggregateAnnualReport(webapp2.RequestHandler):
 
         with_email = []
         without_email = []
+        missing_contacts = []
 
         for c_key in all_contacts:
             c = c_key.get()
-            if c.email != []:
-                with_email.append(c)
-            else:
-                without_email.append(c)
+            if not c:
+                missing_contacts.append(c_key)
 
-        # Initializing email message
-        message = mail.EmailMessage()
-        message.to = to_email
-        message.sender = "Global Hope India <donate@globalhopeindia.org>"
-        message.subject = str(target_year) + " Aggregate Donation Report"
+            else:
+
+                if c.email != ['']:
+                    with_email.append(c)
+
+                else:
+                    donation_total = c.data.donation_total
+                    if donation_total >= tools.toDecimal("250"):
+                        without_email.append(c)
+
+                    elif c.data.number_donations == 1 and donation_total >= tools.toDecimal("100"):
+                        without_email.append(c)
+
         body = ""
 
         body += "\n" + "#### " + str(len(with_email)) + " Donors with Email Addresses ####"
@@ -56,8 +62,14 @@ class AggregateAnnualReport(webapp2.RequestHandler):
         for c in without_email:
             body += "\n" + "https://ghidonations.appspot.com/reports/donor?c=" + c.websafe + "&y=2013"
 
-        message.body = body
-        message.send()
+        body += "\n" + "\n\n\n#### " + str(len(missing_contacts)) + " Missing Contacts ####"
+        for c in missing_contacts:
+            body += "\n" + str(c)
+
+        # Writing text file
+        gcs_file_key, gcs_file = tools.newFile("text/plain", "GHI_Donations_" + str(target_year) + ".txt")
+        gcs_file.write( body )
+        gcs_file.close()
 
 
 class AnnualReport(webapp2.RequestHandler):
