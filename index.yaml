@@ -247,6 +247,12 @@ indexes:
 - kind: TeamList
   properties:
   - name: team
+  - name: show_donation_page
+  - name: sort_name
+
+- kind: TeamList
+  properties:
+  - name: team
   - name: sort_name
 
 - kind: _AE_Pipeline_Record
