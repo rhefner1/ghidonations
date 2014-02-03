@@ -18,7 +18,7 @@
 
 	<div id="upfold" style="margin-left:50px">
 	
-	   <div class="address">
+	   <div class="address" style="font-size:18px">
 	   <p>
 	   Global Hope India<br>
        400 Fayetteville St, Ste E<br>
@@ -54,17 +54,11 @@
 	  <tr>
 	  <th style="border: 1px solid gray; border-collapse:collapse;padding:5px">Date Donated</th>
 	  <th style="border: 1px solid gray; border-collapse:collapse;padding:5px">Donation Amount</th>
-	  <th style="border: 1px solid gray; border-collapse:collapse;padding:5px">Payment Type</th>
-	  <th style="border: 1px solid gray; border-collapse:collapse;padding:5px">Designated Team</th>
-	  <th style="border: 1px solid gray; border-collapse:collapse;padding:5px">Designated Individual</th>
 	  </tr>
 	  {% for d in donations %}
 		  <tr>
 		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.formatted_donation_date }}</td>
 		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">${{ d.confirmation_amount }}</td>
-		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.payment_type }}</td>
-		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.designated_team }}</td>
-		  <td style="border: 1px solid gray; border-collapse:collapse;padding:5px">{{ d.designated_individual }}</td>
 		  </tr>
 	  {% endfor %}
 	  </table>

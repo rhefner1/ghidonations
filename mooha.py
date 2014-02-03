@@ -119,17 +119,16 @@ class Container(BaseHandler):
 
         try:
             template_variables = {"settings" : s.key.urlsafe(), "username" : username, "mobile_redirect" : mobile_redirect}
-
-            if isAdmin == True:
-                self.response.write(
-                    template.render('pages/container.html', template_variables))
-
-            elif isAdmin == False:
-                self.response.write(
-                    template.render('pages/container_ind.html', template_variables))
-            
         except:
             self.redirect("/login")
+
+        if isAdmin == True:
+            self.response.write(
+                template.render('pages/container.html', template_variables))
+
+        elif isAdmin == False:
+            self.response.write(
+                template.render('pages/container_ind.html', template_variables))
         
 class Dashboard(BaseHandlerAdmin):
     def task(self, isAdmin, s):

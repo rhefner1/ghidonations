@@ -95,6 +95,7 @@
          #footer a { color: #eeeeee; text-decoration: none; font-weight: bold; }
          #permission-reminder { white-space: normal; }
          #street-address { color: #ffffff; white-space: normal; }
+         .confirmation_header img {width: 640px;}
 
       </style>
       <!--[if gte mso 9]>
@@ -125,7 +126,7 @@
                                  <tbody>
                                     <tr>
                                        <td class="w610" width="610">
-                                            {{ s.confirmation_header|safe }}
+                                            <div class="confirmation_header">{{ s.confirmation_header|safe }}</div>
                                        </td>
                                     </tr>
                                  </tbody>
@@ -155,8 +156,6 @@
                                                                <multiline>Thank you for supporting {{ s.name }} in the year of {{ year }}.</multiline>
                                                             </div>
 
-                                                            <br>
-
                                                             <div align="left" class="article-content">
                                                                <multiline>{{ s.donor_report_text|safe }}</multiline>
                                                             </div>
@@ -183,7 +182,7 @@
                                                             </div>
                                                             <br>
                                                             <div align="left" class="article-content">
-                                                               <multiline>Donation total: {{ donation_total }}</multiline>
+                                                               <multiline><strong>Donation total: {{ donation_total }}</strong></multiline>
                                                             </div>
 
                                                             <br><hr><br>

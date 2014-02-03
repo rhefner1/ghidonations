@@ -83,7 +83,11 @@ class AnnualReport(webapp2.RequestHandler):
         if c.email:
 
             message = mail.EmailMessage()
-            message.to = c.email
+
+            try: email = c.email[0]
+            except: email = c.email
+            
+            message.to = email
             message.sender = "Global Hope India <donate@globalhopeindia.org>"
             message.subject = str(year) + " Global Hope India Donations"
 
