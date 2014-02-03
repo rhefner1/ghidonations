@@ -56,7 +56,7 @@ class AggregateAnnualReport(webapp2.RequestHandler):
 
         body += "\n" + "#### " + str(len(with_email)) + " Donors with Email Addresses ####"
         for c in with_email:
-            body += "\n" + str(c.key)
+            body += "\n" + c.websafe
 
         body += "\n" + "\n\n\n#### " + str(len(without_email)) + " Donors WITHOUT Email Addresses ####"
         for c in without_email:
