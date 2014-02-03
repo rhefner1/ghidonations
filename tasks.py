@@ -85,7 +85,7 @@ class AnnualReport(webapp2.RequestHandler):
             message = mail.EmailMessage()
             message.to = c.email
             message.sender = "Global Hope India <donate@globalhopeindia.org>"
-            message.subject = "2012 Global Hope India Donations"
+            message.subject = str(year) + " Global Hope India Donations"
 
             donations = c.data.annual_donations(year)
             donation_total = tools.toDecimal(0)
