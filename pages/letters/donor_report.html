@@ -169,9 +169,6 @@
                                                                         <tr>
                                                                             <th width="116" align="left">Date</th>
                                                                             <th width="116" align="left">Amount</th>
-                                                                            <th width="116" align="left">Type</th>
-                                                                            <th width="116" align="left">Team</th>
-                                                                            <th width="116" align="left">Individual</th>
                                                                         </tr>
                                                                     </thead>
                                                                     <tbody>
@@ -179,9 +176,6 @@
                                                                         <tr>
                                                                             <td width="116">{{ d.formatted_donation_date }}</td>
                                                                             <td width="116">${{ d.confirmation_amount }}</td>
-                                                                            <td width="116">{{ d.payment_type }}</td>
-                                                                            <td width="116">{{ d.designated_team }}</td>
-                                                                            <td width="116">{{ d.designated_individual }}</td>
                                                                         </tr>
                                                                         {% endfor %}
                                                                     </tbody>
