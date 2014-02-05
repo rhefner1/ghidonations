@@ -15,6 +15,63 @@ from xlwt import *
 # Google Cloud Storage
 import cloudstorage as gcs
 
+class AggregateAnnualReport(webapp2.RequestHandler):
+    def post(self):
+        target_year = int(self.request.get("year"))
+        s = tools.getKey( self.request.get("skey") )
+        mode = self.request.get("mode")
+
+        td1 = datetime(target_year,1,1,0,0)
+        td2 = datetime(target_year,12,31,0,0)
+
+        annual_donations = models.Donation.query(models.Donation.settings == s, 
+                                                models.Donation.donation_date >= td1,
+                                                models.Donation.donation_date <= td2)
+
+        all_contacts = set([d.contact for d in annual_donations])
+
+        with_email = []
+        without_email = []
+        missing_contacts = []
+
+        for c_key in all_contacts:
+            c = c_key.get()
+            if not c:
+                missing_contacts.append(c_key)
+
+            else:
+
+                if c.email != ['']:
+                    with_email.append(c)
+
+                else:
+                    donation_total = c.data.donation_total
+                    if donation_total >= tools.toDecimal("250"):
+                        without_email.append(c)
+
+                    elif c.data.number_donations == 1 and donation_total >= tools.toDecimal("100"):
+                        without_email.append(c)
+
+        body = ""
+
+        body += "\n" + "#### " + str(len(with_email)) + " Donors with Email Addresses ####"
+        for c in with_email:
+            body += "\n" + c.websafe
+
+        body += "\n" + "\n\n\n#### " + str(len(without_email)) + " Donors WITHOUT Email Addresses ####"
+        for c in without_email:
+            body += "\n" + "https://ghidonations.appspot.com/reports/donor?c=" + c.websafe + "&y=2013"
+
+        body += "\n" + "\n\n\n#### " + str(len(missing_contacts)) + " Missing Contacts ####"
+        for c in missing_contacts:
+            body += "\n" + str(c)
+
+        # Writing text file
+        gcs_file_key, gcs_file = tools.newFile("text/plain", "GHI_Donations_" + str(target_year) + ".txt")
+        gcs_file.write( body )
+        gcs_file.close()
+
+
 class AnnualReport(webapp2.RequestHandler):
     def post(self):
         contact_key = self.request.get("contact_key")
@@ -26,9 +83,13 @@ class AnnualReport(webapp2.RequestHandler):
         if c.email:
 
             message = mail.EmailMessage()
-            message.to = c.email
+
+            try: email = c.email[0]
+            except: email = c.email
+            
+            message.to = email
             message.sender = "Global Hope India <donate@globalhopeindia.org>"
-            message.subject = "2012 Global Hope India Donations"
+            message.subject = str(year) + " Global Hope India Donations"
 
             donations = c.data.annual_donations(year)
             donation_total = tools.toDecimal(0)
@@ -211,6 +272,7 @@ class UpdateContactsJSON(webapp2.RequestHandler):
 
 app = webapp2.WSGIApplication([
         ('/tasks/annualreport', AnnualReport),
+        ('/tasks/aggregateannualreport', AggregateAnnualReport),
         ('/tasks/confirmation', Confirmation),
         ('/tasks/delayindexing', DelayIndexing),
         ('/tasks/deletespreadsheet', DeleteSpreadsheet),
