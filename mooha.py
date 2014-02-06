@@ -678,8 +678,8 @@ class IPN(BaseHandlerAdmin):
                 try:
                     decoded_custom = json.loads(parameters["custom"])
     
-                    team_key = tools.getKey(decoded_custom[0])
-                    individual_key = tools.getKey(decoded_custom[1])
+                    team_key = tools.getKeyIfExists(decoded_custom[0])
+                    individual_key = tools.getKeyIfExists(decoded_custom[1])
                     special_notes = decoded_custom[2]
     
                     if s.exists.entity(team_key) == False:
@@ -688,7 +688,7 @@ class IPN(BaseHandlerAdmin):
                         individual_key = None
     
                 except:
-                    logging.info("Excepted on designation.")
+                    logging.error("Excepted on designation.")
                     team_key = None
                     individual_key = None
                     special_notes = None

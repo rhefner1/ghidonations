@@ -158,6 +158,16 @@ def flushMemcache():
 def getKey(entity_key):
     return ndb.Key(urlsafe=entity_key)
 
+def getKeyIfExists(websafe_key):
+    try:
+        key = getKey(websafe_key)
+        obj = key.get()
+
+        # If exception hasn't been thrown, the key exists
+        return key
+    except:
+        return None
+
 def gqlCache(memcache_key, get_item):
     cached_query = memcache.get(memcache_key)
 
