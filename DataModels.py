@@ -621,6 +621,9 @@ class Settings(ndb.Expando):
         if email != s.email:
             s.email = email
 
+            if email in tools.getAccountEmails():
+                raise Exception("Cannot have the same email as another organization.")
+
         if mc_use != s.mc_use:
             s.mc_use = mc_use
 

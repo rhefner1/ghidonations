@@ -591,7 +591,7 @@ class IPN(BaseHandlerAdmin):
 
         #Gets all account emails from Settings data models
         #to authenticate PayPal (don't accept payment from unknown)
-        all_account_emails = tools.getAccountEmails(self)
+        all_account_emails = tools.getAccountEmails()
 
         parameters = None
         if self.request.POST:
