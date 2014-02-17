@@ -215,7 +215,7 @@ def serializeEntity(model):
         return ndb.model_to_protobuf(model)
 
 ###### ------ Data Access ------ ######
-def getAccountEmails(self):
+def getAccountEmails():
     all_settings = models.Settings.query()
     all_emails = {}
 
