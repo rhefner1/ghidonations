@@ -752,7 +752,7 @@ Thanks!"""
         new_tl = models.TeamList()
         new_tl.individual = new_individual.key
         new_tl.team = team_key
-        new_tl.fundraise_amt = toDecimal("2800")
+        new_tl.fundraise_amt = toDecimal("2900")
         new_tl.sort_name = name
 
         new_tl.put()
