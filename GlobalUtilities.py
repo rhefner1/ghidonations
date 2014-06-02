@@ -650,7 +650,7 @@ class SettingsCreate(UtilitiesBase):
 
         new_deposit.put()
 
-    def donation(self, name, email, amount_donated, payment_type, confirmation_amount=None, address=None, team_key=None, individual_key=None, add_deposit=True, payment_id=None, special_notes=None, email_subscr=False, ipn_data=None, contact_key=None):
+    def donation(self, name, email, amount_donated, payment_type, confirmation_amount=None, phone=None, address=None, team_key=None, individual_key=None, add_deposit=True, payment_id=None, special_notes=None, email_subscr=False, ipn_data=None, contact_key=None):
         if confirmation_amount == None:
             confirmation_amount = amount_donated
 
@@ -672,7 +672,7 @@ class SettingsCreate(UtilitiesBase):
                 contact_key = c.key
             else:
                 #Add new contact
-                contact_key = self.contact(name, email=email, address=address, add_mc=email_subscr)
+                contact_key = self.contact(name, email=email, phone=phone, address=address, add_mc=email_subscr)
 
         new_donation.contact = contact_key
 
