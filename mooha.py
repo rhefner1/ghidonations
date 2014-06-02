@@ -699,8 +699,16 @@ class IPN(BaseHandlerAdmin):
                 except:
                     cover_trans = False
                     email_subscr = False
-    
-    
+
+                try:
+                    phone = parameters['contact_phone']
+
+                    if len(phone) > 10:
+                        special_notes += "\nContact phone: " + phone
+                        phone = None
+                except:
+                    phone = None
+
                 confirmation_amount = tools.toDecimal(0)
                 amount_donated = tools.toDecimal(0)
                 try:
@@ -735,8 +743,9 @@ class IPN(BaseHandlerAdmin):
                     
                     #Create a new donation
                     s.create.donation(name, email, amount_donated, payment_type, confirmation_amount=confirmation_amount,
-                                    address=address, team_key=team_key, individual_key=individual_key, payment_id=payment_id,
-                                    special_notes=special_notes, email_subscr=email_subscr, ipn_data=ipn_data)
+                                    phone=phone, address=address, team_key=team_key, individual_key=individual_key,
+                                    payment_id=payment_id, special_notes=special_notes, email_subscr=email_subscr,
+                                    ipn_data=ipn_data)
     
                 elif payment_type == "web_accept":
                     logging.info("This is a one-time donation.")
