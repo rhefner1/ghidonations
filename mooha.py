@@ -707,7 +707,7 @@ class IPN(BaseHandlerAdmin):
                         special_notes += "\nContact phone: " + phone
                         phone = None
                 except:
-                    logging.error("Excepted on phone number.")
+                    logging.info("Excepted on phone number.")
                     phone = None
 
                 confirmation_amount = tools.toDecimal(0)
