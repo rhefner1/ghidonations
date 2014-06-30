@@ -60,6 +60,10 @@ class Contact(ndb.Expando):
         return tools.ContactCreate(self)
 
     @property
+    def confirmation(self):
+        return tools.ContactConfirmation(self)
+
+    @property
     def data(self):
         return tools.ContactData(self)
 
@@ -567,6 +571,7 @@ class Settings(ndb.Expando):
     confirmation_info = ndb.TextProperty()
     confirmation_header = ndb.TextProperty()
     confirmation_footer = ndb.TextProperty()
+    first_time_donor = ndb.TextProperty()
     donor_report_text = ndb.TextProperty()
 
     #Contact JSON

@@ -673,6 +673,7 @@ class SettingsCreate(UtilitiesBase):
             else:
                 #Add new contact
                 contact_key = self.contact(name, email=email, phone=phone, address=address, add_mc=email_subscr)
+                contact_key.get().confirmation.first_time_donor()
 
         new_donation.contact = contact_key
 
@@ -1199,6 +1200,38 @@ class ContactCreate(UtilitiesBase):
         new_impression.notes = notes
 
         new_impression.put()
+
+class ContactConfirmation(UtilitiesBase):
+    def first_time_donor_email(self):
+        c = self.e
+
+        if c.email or c.email != ['']:
+
+            message = mail.EmailMessage()
+            message.to = c.email[0]
+
+            ## TODO - is there any other way to get an organization's email address to appear if it's not verified?
+            settings_name = c.settings.get().name
+            if settings_name == "GHI":
+                message.sender = "donate@globalhopeindia.org"
+                message.subject = "Thanks for supporting GHI!"
+            else:
+                message.sender = settings_name + " <mailer@ghidonations.appspotmail.com>"
+                message.subject = settings_name + " - Thanks for supporting us!"
+
+            s = c.settings.get()
+
+            template_variables = {"s": s, "c": c, }
+
+            #Message body/HTML here
+            message.html = template.render("pages/letters/first_time_donor.html", template_variables)
+
+            logging.info("Sending confirmation email to: " + c.email[0])
+
+            #Adding to history
+            logging.info("Confirmation email sent at " + currentTime())
+
+            message.send()
 
 class ContactData(UtilitiesBase):
     @property
