@@ -93,6 +93,11 @@ class HeaderCSV(pipeline.Pipeline):
             header_data.append("Team")
             header_data.append("Individual")
             header_data.append("Reviewed")
+            header_data.append("Phone")
+            header_data.append("Street")
+            header_data.append("City")
+            header_data.append("State")
+            header_data.append("Zipcode")
 
         elif mode == "individuals":
             header_data.append("Name")
@@ -141,6 +146,7 @@ class CreateCSV(pipeline.Pipeline):
 
                 elif mode == "donations":
                     d = e
+                    c = d.contact.get()
                     row_data.append(str(d.donation_date))
                     row_data.append(d.name)
                     row_data.append(d.given_email)
@@ -149,6 +155,11 @@ class CreateCSV(pipeline.Pipeline):
                     row_data.append(d.designated_team)
                     row_data.append(d.designated_individual)
                     row_data.append(str(d.reviewed))
+                    row_data.append(c.phone)
+                    row_data.append(c.address[0])
+                    row_data.append(c.address[1])
+                    row_data.append(c.address[2])
+                    row_data.append(c.address[3])
 
                 elif mode == "individuals":
                     i = e
