@@ -1547,14 +1547,18 @@ class IndividualData(UtilitiesBase):
                 image_url = "https://ghidonations.appspot.com/images/face150.jpg"
 
             tl = self.getTeamList(team)
-            percentage = int(float(tl.data.donation_total / tl.fundraise_amt) * 100)
 
-            if percentage > 100:
-                percentage = 100
-            elif percentage <0:
-                percentage = 0
+            percentage = None
+            message = None
+            if self.e.show_progress_bar:
+                percentage = int(float(tl.data.donation_total / tl.fundraise_amt) * 100)
 
-            message = str(percentage) + "% to goal of $" + str(tl.fundraise_amt)
+                if percentage > 100:
+                    percentage = 100
+                elif percentage <0:
+                    percentage = 0
+
+                message = str(percentage) + "% to goal of $" + str(tl.fundraise_amt)
                 
             return [image_url, self.e.name, self.e.description, percentage, message]
 

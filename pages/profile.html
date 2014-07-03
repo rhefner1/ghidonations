@@ -97,6 +97,10 @@
                                 <input type="checkbox" name="show_donation_page" />
                                 Show in public donation page
                             </div>
+                            <div class="input">
+                                <input type="checkbox" name="show_progress_bar" />
+                                Show progress bar on public donation page
+                            </div>
                         </div>
 
                         <div class="clearfix hidden grey-highlight" id="save_profile_changes">
@@ -146,6 +150,7 @@
             <input type="hidden" name="team_list" value='{{ i.data.team_json|escape }}'>
             <input type="hidden" id="individual_key" name="individual_key" value="{{ i.websafe }}" />
             <input type="hidden" id="var_show_donation_page" name="var_show_donation_page" value="{{ i.show_donation_page }}" />
+            <input type="hidden" id="var_show_progress_bar" name="var_show_progress_bar" value="{{ i.show_progress_bar }}" />
 
             </form>
         </div>

@@ -378,6 +378,7 @@ class Individual(ndb.Expando):
     photo = ndb.StringProperty()
 
     show_donation_page = ndb.BooleanProperty(default=True)
+    show_progress_bar = ndb.BooleanProperty(default=True)
 
     #Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
@@ -422,7 +423,7 @@ class Individual(ndb.Expando):
         message.send()
 
     ## -- Update Individual -- #
-    def update(self, name, email, team_list, description, change_image, password, show_donation_page):
+    def update(self, name, email, team_list, description, change_image, password, show_donation_page, show_progress_bar):
         name_changed = False
         show_donation_changed = False
 
@@ -443,6 +444,10 @@ class Individual(ndb.Expando):
 
         if show_donation_page != self.show_donation_page:
             self.show_donation_page = show_donation_page
+            show_donation_changed = True
+
+        if show_progress_bar != self.show_progress_bar:
+            self.show_progress_bar = show_progress_bar
             show_donation_changed = True
 
         #Initializes DictDiffer object to tell differences from current dictionary to server-side one
@@ -497,6 +502,7 @@ class Individual(ndb.Expando):
 
                     if show_donation_changed:
                         tl.show_donation_page = show_donation_page
+                        tl.show_progress_bar = show_progress_bar
 
                     tl.put()
         except:
@@ -752,6 +758,7 @@ class TeamList(ndb.Model):
     fundraise_amt = DecimalProperty()
 
     show_donation_page = ndb.BooleanProperty(default=True)
+    show_progress_bar = ndb.BooleanProperty(default=True)
 
     sort_name = ndb.StringProperty()
 
