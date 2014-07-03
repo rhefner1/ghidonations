@@ -63,9 +63,12 @@ $(document).ready(function(){
 	team_list = JSON.parse(htmlDecode($("input[name=team_list]").val()))
 	var team_names = ""
 
-	var show_donation_page = $("#var_show_donation_page").val()
-	if (show_donation_page == "True"){
+	if ($("#var_show_donation_page").val() == "True"){
 		$("input[name=show_donation_page]").attr("checked", "checked")
+	}
+
+	if ($("#var_show_progress_bar").val() == "True"){
+		$("input[name=show_progress_bar]").attr("checked", "checked")
 	}
 
 	//Formatting team fields

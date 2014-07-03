@@ -118,8 +118,16 @@ function showInfo(team_key, individual_key){
             $("#info_name").text(name)
             $("#info_description").text(description)
 
-            $("#info_progressbar div").css("width", percentage + "%")
-            $("#info_message").text(message)
+            if (percentage == null){
+                $("#info_progressbar").hide()
+                $("#info_message").hide()
+            }
+            else{
+                $("#info_progressbar").show()
+                $("#info_message").show()
+                $("#info_progressbar div").css("width", percentage + "%")
+                $("#info_message").text(message)
+            }
 
             $("#designate").hide()
             $("#info_container").fadeIn()
