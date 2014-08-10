@@ -583,8 +583,8 @@ class UpdateProfile(blobstore_handlers.BlobstoreUploadHandler):
 
         self.redirect("/#profile?i=" + individual_key)
 
-class IPN(BaseHandlerAdmin):
-    def task(self, isAdmin, s):
+class IPN(webapp2.RequestHandler):
+    def get(self):
         self.response.write("GHI Donations - PayPal IPN Handler")
 
     def post(self):
