@@ -724,7 +724,7 @@ A new note was received from {name} for ${confirmation_amount} ({payment_type} d
 You can view this donation at <a href="https://ghidonations.appspot.com/#contact?c={contact_key}">https://ghidonations.appspot.com/contact?c={contact_key}</a>.<br><br>
 Thanks!"""
 
-                message = message.format(payment_type=payment_type, name=name, confirmation_amount=confirmation_amount, special_notes=special_notes, contact_key=new_donation.contact.urlsafe())
+                message = message.format(payment_type=payment_type, name=name, confirmation_amount=confirmation_amount, special_notes=special_notes.encode('utf-8', 'ignore'), contact_key=new_donation.contact.urlsafe())
 
                 email.html = message
                 email.send()
