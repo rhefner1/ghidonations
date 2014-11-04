@@ -707,6 +707,16 @@ class EndpointsAPI(remote.Service):
 
         return SuccessMessage_Out(success=success, message=message)
 
+    # contact.info
+    @endpoints.method(ContactKey_In, Contact_Info, path='contact/info',
+                    http_method='POST', name='contact.info')
+    def contact_info(self, req):
+        isAdmin, s = tools.checkAuthentication(self, True, from_endpoints=True)
+        c = tools.getKey(req.contact_key).get()
+
+        return Contact_Info(key=c.websafe, name=c.name, email=c.email,
+                            address=c.address)
+
     # team.delete
     @endpoints.method(TeamKey_In, SuccessMessage_Out, path='team/delete',
                     http_method='POST', name='team.delete')

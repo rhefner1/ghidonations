@@ -12,7 +12,13 @@ $(document).ready(function(){
             select: function(e, ui){
                 $("input[name=contact]").val(ui.item.name)
                 contact = ui.item.key
-                contact_email = ui.item.email
+
+                var params2 = {'contact_key':contact}
+                var request2 = ghiapi.contact.info(params2)
+
+                request2.execute(function(response2) {
+                    contact_email = response2.email[0]
+                })
             }
         });
     })

@@ -14,18 +14,23 @@ $(document).ready(function(){
             $("input[name=name]").autocomplete({
                 source: JSON.parse(response.json_data),
                 select: function(event, ui){
-                    $("input[name=email]").val(ui.item.email[0])
+                    var params2 = {'contact_key':ui.item.key}
+                    var request2 = ghiapi.contact.info(params2)
 
-                    try{
-                        var address = JSON.parse(ui.item.address)
-                        $("input[name=street]").val(address[0])
-                        $("input[name=city]").val(address[1])
-                        $("input[name=state]").val(address[2])
-                        $("input[name=zip]").val(address[3])
-                    }
-                    catch(err) {
-                        void(0)
-                    }
+                    request2.execute(function(response2){
+                        $("input[name=email]").val(response2.email[0])
+
+                        try{
+                            $("input[name=street]").val(response2.address[0])
+                            $("input[name=city]").val(response2.address[1])
+                            $("input[name=state]").val(response2.address[2])
+                            $("input[name=zip]").val(response2.address[3])
+                        }
+                        catch(err) {
+                            void(0)
+                        }
+                    })
+
                 }
             });
         })

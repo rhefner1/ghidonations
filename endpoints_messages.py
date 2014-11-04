@@ -272,6 +272,13 @@ class ConfirmationAnnualReport_In(messages.Message):
     contact_key = messages.StringField(1, required=True)
     year = messages.IntegerField(2, required=True)
 
+# contact.info
+class Contact_Info(messages.Message):
+    key = messages.StringField(1, required=True)
+    name = messages.StringField(2, required=True)
+    email = messages.StringField(3, repeated=True)
+    address = messages.StringField(4, repeated=True)
+
 # spreadsheet.start
 class SpreadsheetStart_In(messages.Message):
     mode = messages.StringField(1, required=True)
