@@ -261,8 +261,6 @@ class UpdateContactsJSON(webapp2.RequestHandler):
         for c in s.data.all_contacts:
             contact = {}
             contact["label"] = c.name
-            contact["email"] = c.email
-            contact["address"] = json.dumps(c.address)
             contact["key"] = str(c.websafe)
             
             contacts.append(contact)
