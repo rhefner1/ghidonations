@@ -1214,9 +1214,9 @@ class ContactData(UtilitiesBase):
     def annual_donations(self, year):
         year = int(year)
         year_start = datetime.datetime(year, 1, 1)
-        year_end = datetime.datetime(year, 12, 31)
+        year_end = datetime.datetime(year + 1, 1, 1)
 
-        return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date <= :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
+        return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date < :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
 
     def donations(self, query_cursor):
         query = self.all_donations
