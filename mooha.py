@@ -554,7 +554,7 @@ class UpdateProfile(blobstore_handlers.BlobstoreUploadHandler):
         individual_key = self.request.get("individual_key")
         name = self.request.get("name")
         email = self.request.get("email")
-        team = self.request.get("team_list")
+        team = self.request.get("team_list").replace("=\r\n","")
         description = quopri.decodestring(self.request.get("description"))
         password = self.request.get("password")
         show_donation_page = self.request.get("show_donation_page")
