@@ -110,7 +110,7 @@ $(document).ready(function(){
     	var team_name = $("#all_teams option[value=" + team_key + "]").text()
 
     	//Add team to dictionary
-		team_list[team_key] = [team_name, 2800]
+		team_list[team_key] = [team_name, 2900]
 
 		refreshCurrentTeams()
 	})
