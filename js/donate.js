@@ -222,7 +222,7 @@ $(document).ready(function() {
     })
 
 
-    $("#members_list .read_more").live("click", function(event){
+    $("#members_list .read_more").on("click", function(event){
         event.preventDefault()
 
         selected_individual = $(this).parent().attr("data-id")
@@ -264,7 +264,7 @@ $(document).ready(function() {
         submitForm()
     })
 
-    $("#back_button").live("click", function(){
+    $("#back_button").on("click", function(){
         selected_team = null
         loadTeams()
     })
