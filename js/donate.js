@@ -43,7 +43,7 @@ function loadTeams(){
             var name_json = data[0]
             var key_json = data[1]
 
-            var div = '<input type="button" class="button black team" style="margin-right:10px" data-id="key" value="name">'
+            var div = '<input type="button" class="button black team" style="margin-right:10px;margin-top:10px" data-id="key" value="name">'
             $("#designate").append(div.replace("name", name_json).replace("key", key_json))
         });  
     })  
