@@ -121,7 +121,7 @@ class Confirmation(webapp2.RequestHandler):
 class DelayIndexing(webapp2.RequestHandler):
     def post(self):
         entity_key = self.request.get("e")
-
+        logging.info("WOMBAT trying to index %s" % entity_key)
         try:
             e = tools.getKey(entity_key).get()
             e.search.index()
