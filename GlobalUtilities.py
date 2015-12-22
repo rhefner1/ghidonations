@@ -1376,7 +1376,12 @@ class DonationConfirmation(UtilitiesBase):
         if d.email or d.email != ['']:
 
             message = mail.EmailMessage()
-            message.to = d.email[0]
+            if d.given_email:
+                # Email address that came from PayPal
+                message.to = d.given_email
+            else:
+                # Email address associated with contact
+                message.to = d.email[0]
 
             ## TODO - is there any other way to get an organization's email address to appear if it's not verified?
             settings_name = d.settings.get().name
