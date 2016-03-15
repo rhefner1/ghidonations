@@ -446,6 +446,10 @@ class EndpointsAPI(remote.Service):
             add_deposit = req.name, req.email, tools.toDecimal(req.amount_donated), req.notes, \
             req.address, req.team_key, req.individual_key, req.add_deposit
 
+        # Check for null value in individual field
+        if individual_key == "none":
+            individual_key = None
+
         if address:
             address = [address.street, address.city, address.state, address.zipcode]
 
@@ -453,7 +457,7 @@ class EndpointsAPI(remote.Service):
             team_key = tools.getKey(team_key)
 
         if individual_key:
-            individual_key = tools.getKey(individual_key)            
+            individual_key = tools.getKey(individual_key)
 
         s.create.donation(name, email, amount_donated, "offline", address=address, team_key=team_key, 
                             individual_key=individual_key, add_deposit=add_deposit, special_notes=notes)
