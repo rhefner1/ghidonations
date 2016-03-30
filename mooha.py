@@ -199,7 +199,7 @@ class Deposit(BaseHandlerAdmin):
                 string = a[0] + " ($" + str(a[1]) + ")"
                 new_array.append(string)
 
-            new_team_breakout[str(name) + " ($" + str(amount_donated) + ")"] = new_array
+            new_team_breakout[unicode(name) + " ($" + str(amount_donated) + ")"] = new_array
 
         template_variables = {"d" : deposit, "donations" : donations, "team_breakout" : new_team_breakout,
                 "gross_amount" : gross_amount, "net_amount" : net_amount}
