@@ -1,11 +1,17 @@
 # coding: utf-8
 
-import logging, json, time, datetime, re, os, math, appengine_config, pipeline
-from time import gmtime, strftime
+import appengine_config
+import datetime
+import json
+import logging
+import os
+import pipeline
+import re
+import time
 from decimal import *
 
 # App Engine platform
-from google.appengine.api import taskqueue, mail, memcache, images, files
+from google.appengine.api import taskqueue, mail, memcache, images
 from google.appengine.ext.webapp import template
 from google.appengine.ext import ndb, deferred
 
@@ -19,7 +25,7 @@ import cloudstorage as gcs
 from mailsnake import MailSnake
 
 # Sessions
-from gaesessions import get_current_session, Session
+from gaesessions import get_current_session
 
 # Application files
 import DataModels as models
@@ -34,6 +40,7 @@ _INDIVIDUAL_SEARCH_INDEX = "individual"
 _TEAM_SEARCH_INDEX = "team"
 _NUM_RESULTS = 15
 
+
 ###### ------ Authentication ------ ######
 def checkCredentials(self, email, password):
     try:
@@ -47,9 +54,10 @@ def checkCredentials(self, email, password):
     except:
         return False, None
 
+
 def checkAuthentication(self, admin_required, from_endpoints=False):
     try:
-        #If the cookie doesn't exist, send them back to login
+        # If the cookie doesn't exist, send them back to login
         u_key = getUserKey(self)
         u = u_key.get()
 
@@ -70,8 +78,9 @@ def checkAuthentication(self, admin_required, from_endpoints=False):
             raise endpoints.ForbiddenException(message)
         else:
             self.redirect("/login")
-            
+
         return None, None
+
 
 def getUsername(self):
     try:
@@ -82,6 +91,7 @@ def getUsername(self):
     except:
         self.redirect("/login")
 
+
 def getUserKey(self):
     self.session = get_current_session()
     user_key = self.session["key"]
@@ -91,11 +101,12 @@ def getUserKey(self):
 
     return getKey(user_key)
 
+
 def getSettingsKey(self, endpoints=False):
     try:
         user_key = getUserKey(self)
         user = user_key.get()
-        
+
         return user.settings
 
     except Exception as e:
@@ -104,30 +115,32 @@ def getSettingsKey(self, endpoints=False):
         else:
             self.redirect("/login")
 
+
 def RPCcheckAuthentication(self, admin_required):
     try:
         self.session = get_current_session()
 
-        #If the cookie doesn't exist, send them back to login
+        # If the cookie doesn't exist, send them back to login
         if not self.session["key"]:
             return False
         else:
-            #The cookie does exist, so store the key
+            # The cookie does exist, so store the key
             user_key = getUserKey(self)
             user = user_key.get()
 
-            #Get admin privledges associated with this user
+            # Get admin privledges associated with this user
             user_privledges = user.admin
 
-            #If the user tries to enter an admin page with standard credentials,
-            #kick them out.
+            # If the user tries to enter an admin page with standard credentials,
+            # kick them out.
             if admin_required == True and user_privledges == False:
                 return "semi"
-            
-            #Otherwise, good to go
+
+            # Otherwise, good to go
             return True
     except:
         return False
+
 
 ###### ------ Managing entity access w/memcache ------ ######
 
@@ -140,10 +153,11 @@ def cache(memcache_key, get_item):
         item = get_item()
         memcache.set(memcache_key, json.dumps(item))
 
-    else: 
+    else:
         item = json.loads(item_json)
 
     return item
+
 
 def deserializeEntity(data):
     if data is None:
@@ -152,11 +166,14 @@ def deserializeEntity(data):
         # Getting entity fro protobuf
         return ndb.model_from_protobuf(data)
 
+
 def flushMemcache():
     return memcache.flush_all()
 
+
 def getKey(entity_key):
     return ndb.Key(urlsafe=entity_key)
+
 
 def getKeyIfExists(websafe_key):
     try:
@@ -168,6 +185,7 @@ def getKeyIfExists(websafe_key):
     except:
         return None
 
+
 def gqlCache(memcache_key, get_item):
     cached_query = memcache.get(memcache_key)
 
@@ -177,13 +195,14 @@ def gqlCache(memcache_key, get_item):
         serialized = serializeEntities(entities)
         memcache.set(memcache_key, serialized)
 
-    else: 
+    else:
         entities = []
         for e in cached_query:
             entity = deserializeEntity(e)
             entities.append(entity)
 
     return entities
+
 
 def gqlCount(gql_object):
     try:
@@ -193,8 +212,10 @@ def gqlCount(gql_object):
 
     return length
 
+
 def qCache(q):
     return ndb.get_multi(q.fetch(keys_only=True))
+
 
 def serializeEntities(models):
     if models is None:
@@ -207,12 +228,14 @@ def serializeEntities(models):
 
         return entities_list
 
+
 def serializeEntity(model):
     if model is None:
         return None
     else:
         # Encoding entity to protobuf
         return ndb.model_to_protobuf(model)
+
 
 ###### ------ Data Access ------ ######
 def getAccountEmails():
@@ -221,8 +244,9 @@ def getAccountEmails():
 
     for s in all_settings:
         all_emails[s.email] = str(s.websafe)
-    
+
     return all_emails
+
 
 def getMailchimpLists(self, mc_apikey):
     ms = MailSnake(mc_apikey)
@@ -232,7 +256,6 @@ def getMailchimpLists(self, mc_apikey):
         mc_lists = {}
 
         for l in response["data"]:
-
             list_name = l["name"]
             mc_lists[list_name] = l["id"]
 
@@ -242,6 +265,7 @@ def getMailchimpLists(self, mc_apikey):
             return [False, "Sorry, you entered an incorrect Mailchimp API Key"]
         else:
             return [False, "Unknown error"]
+
 
 ###### ------ Data Creation ------ ######
 def newSettings(name, email):
@@ -265,6 +289,7 @@ def newSettings(name, email):
 
     return new_settings.key
 
+
 ###### ------ Spreadsheet Export Controller Utilities ------ ######
 def checkTaskCompletion(s, job_id):
     m = memcache.get(job_id)
@@ -272,6 +297,7 @@ def checkTaskCompletion(s, job_id):
         return False, None
     else:
         return True, m
+
 
 def getAllSearchDocs(index_name):
     index = search.Index(name=index_name)
@@ -292,14 +318,16 @@ def getAllSearchDocs(index_name):
 
     return documents
 
+
 def newFile(mime_type, file_name):
     gcs_file_key = appengine_config.GCS_BUCKET + "/" + file_name
 
     write_retry_params = gcs.RetryParams(backoff_factor=1.1)
     gcs_file = gcs.open(gcs_file_key, 'w', content_type=mime_type,
-                            retry_params=write_retry_params)
+                        retry_params=write_retry_params)
 
     return gcs_file_key, gcs_file
+
 
 ###### ------ Deferred Utilities ------ ######
 def indexEntitiesFromQuery(query, query_cursor=None):
@@ -310,12 +338,14 @@ def indexEntitiesFromQuery(query, query_cursor=None):
         deferred.defer(indexEntitiesFromQuery, query, query_cursor=new_cursor, _queue="backend")
 
     for e in entities:
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.urlsafe()}, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e': e.urlsafe()}, queue_name="delayindexing")
+
 
 ###### ------ Utilities ------ ######
 def currentTime():
-    #Outputs current date and time
-    return convertTime(datetime.datetime.utcnow()).strftime("%b %d, %Y %I:%M:%S %p") 
+    # Outputs current date and time
+    return convertTime(datetime.datetime.utcnow()).strftime("%b %d, %Y %I:%M:%S %p")
+
 
 def convertTime(time):
     utc_zone = UTC()
@@ -325,11 +355,13 @@ def convertTime(time):
     new_time = time.astimezone(to_zone)
     return new_time
 
+
 def getWebsafeCursor(cursor_object):
     if cursor_object:
         return cursor_object.web_safe_string
     else:
         return None
+
 
 def getFlash(self):
     try:
@@ -343,6 +375,7 @@ def getFlash(self):
 
     return message
 
+
 def getGlobalSettings():
     q = models.GlobalSettings.query()
 
@@ -353,10 +386,11 @@ def getGlobalSettings():
         new_global_settings = models.GlobalSettings()
         new_global_settings.cookie_key = os.urandom(64).encode("base64")
         global_settings = new_global_settings.put()
-        
+
         global_settings = global_settings.get()
 
     return global_settings
+
 
 def getSearchDoc(doc_id, index):
     if not doc_id:
@@ -364,26 +398,28 @@ def getSearchDoc(doc_id, index):
 
     try:
         response = index.get_range(
-        start_id=doc_id, limit=1, include_start_object=True)
+            start_id=doc_id, limit=1, include_start_object=True)
 
         if response.results and response.results[0].doc_id == doc_id:
             return response.results[0]
 
         return None
 
-    except search.InvalidRequest: # catches ill-formed doc ids
-      return None
+    except search.InvalidRequest:  # catches ill-formed doc ids
+        return None
+
 
 def giveError(self, error_code):
     # checkAuthentication(self, False)
 
     self.error(error_code)
     self.response.write(
-                   template.render('pages/error.html', {}))
+        template.render('pages/error.html', {}))
+
 
 def GQLtoDict(self, gql_query):
-    #Converts GQLQuery of App Engine data models to dictionary objects
-    #An empty list to start out with - will be what we return
+    # Converts GQLQuery of App Engine data models to dictionary objects
+    # An empty list to start out with - will be what we return
     all_objects = []
 
     for o in gql_query:
@@ -393,6 +429,7 @@ def GQLtoDict(self, gql_query):
 
     return all_objects
 
+
 def isEmail(email):
     if email:
         if re.match("^.+\\@(\\[?)[a-zA-Z0-9\\-\\.]+\\.([a-zA-Z]{2,3}|[0-9]{1,3})(\\]?)$", email) != None:
@@ -401,6 +438,7 @@ def isEmail(email):
             return False
     else:
         return False
+
 
 def listDiff(list1, list2):
     # Typically old value is list1, new value is list2
@@ -412,6 +450,7 @@ def listDiff(list1, list2):
         pass
 
     return list_diff
+
 
 def mergeContacts(c1_key, c2_key):
     c1 = c1_key.get()
@@ -449,10 +488,12 @@ def mergeContacts(c1_key, c2_key):
     # Finally, delete c1
     c1.key.delete()
 
+
 def moneyAmount(money_string):
     money = toDecimal(money_string)
     money = "${:,.2f}".format(money)
     return money
+
 
 def ndbKeyToUrlsafe(keys):
     urlsafe_keys = []
@@ -461,6 +502,7 @@ def ndbKeyToUrlsafe(keys):
         urlsafe_keys.append(k.urlsafe())
 
     return urlsafe_keys
+
 
 def pipelineStatus(job_id):
     pipeline_id = memcache.get("id" + job_id)
@@ -478,7 +520,7 @@ def pipelineStatus(job_id):
 
             if status == "aborted":
                 logging.error("Error in pipelineStatus with job_id: " + job_id)
-                
+
             if status == "filled" or status == "done":
                 pipelines_finished += 1
 
@@ -490,6 +532,7 @@ def pipelineStatus(job_id):
     else:
         logging.debug("Could not find pipeline_id, defaulting to status=0")
         return 0
+
 
 def queryCursorDB(query, encoded_cursor, keys_only=False, num_results=_NUM_RESULTS):
     new_cursor = None
@@ -508,12 +551,13 @@ def queryCursorDB(query, encoded_cursor, keys_only=False, num_results=_NUM_RESUL
 
     return [entities, new_cursor]
 
+
 def searchReturnAll(query, search_results, settings, search_function, entity_return=True):
     all_results = []
     results = search_results
 
     end_of_results = False
-    
+
     while (end_of_results == False):
         if entity_return == True:
             all_results += searchToEntities(results)
@@ -532,6 +576,7 @@ def searchReturnAll(query, search_results, settings, search_function, entity_ret
 
     return all_results
 
+
 def searchToDocuments(search_results):
     documents = []
 
@@ -539,6 +584,7 @@ def searchToDocuments(search_results):
         documents.append(r)
 
     return documents
+
 
 def searchToEntities(search_results):
     entities = []
@@ -550,9 +596,11 @@ def searchToEntities(search_results):
 
     return entities
 
+
 def setFlash(self, message):
     self.session = get_current_session()
     self.session["flash"] = message
+
 
 def strArrayToKey(self, str_array):
     key_array = []
@@ -561,9 +609,10 @@ def strArrayToKey(self, str_array):
 
     return key_array
 
+
 def toDecimal(number):
     if number != None:
-        #Stripping amount donated from commas, etc
+        # Stripping amount donated from commas, etc
         non_decimal = re.compile(r'[^\d.-]+')
         number = non_decimal.sub('', str(number))
 
@@ -571,8 +620,8 @@ def toDecimal(number):
     else:
         return Decimal(0).quantize(Decimal("1.00"))
 
-def truncateEmail(email, is_list=False):
 
+def truncateEmail(email, is_list=False):
     if is_list == True:
         new_email = ""
         for e in email:
@@ -588,18 +637,21 @@ def truncateEmail(email, is_list=False):
 
     return email
 
+
 def writeEntities(e_key):
-  e = e_key.get()
-  if isinstance(e.email, basestring):
-      email = e.email
-      e.email = [email]
-      e.put()
+    e = e_key.get()
+    if isinstance(e.email, basestring):
+        email = e.email
+        e.email = [email]
+        e.put()
+
 
 ###### ------ Utilities Classes ------ ######
 class UtilitiesBase():
     def __init__(self, base_entity):
-        #Property self.e is an alias back to the original entity
+        # Property self.e is an alias back to the original entity
         self.e = base_entity
+
 
 ## -- Settings Classes -- ##
 class SettingsCreate(UtilitiesBase):
@@ -626,15 +678,15 @@ class SettingsCreate(UtilitiesBase):
             new_contact.address = address
             new_contact.notes = notes
 
-            #Log the contact
+            # Log the contact
             logging.info("Contact created.")
 
             new_contact.put()
 
             if add_mc == True:
                 for e in email:
-                    if e and e != "": 
-                        #Add new contact to Mailchimp
+                    if e and e != "":
+                        # Add new contact to Mailchimp
                         self.e.mailchimp.add(e, name, False)
 
             return new_contact.key
@@ -650,11 +702,13 @@ class SettingsCreate(UtilitiesBase):
 
         new_deposit.put()
 
-    def donation(self, name, email, amount_donated, payment_type, confirmation_amount=None, phone=None, address=None, team_key=None, individual_key=None, add_deposit=True, payment_id=None, special_notes=None, email_subscr=False, ipn_data=None, contact_key=None):
+    def donation(self, name, email, amount_donated, payment_type, confirmation_amount=None, phone=None, address=None,
+                 team_key=None, individual_key=None, add_deposit=True, payment_id=None, special_notes=None,
+                 email_subscr=False, ipn_data=None, contact_key=None):
         if confirmation_amount == None:
             confirmation_amount = amount_donated
 
-        #All variables being passed as either string or integer
+        # All variables being passed as either string or integer
         new_donation = models.Donation()
         new_donation.settings = self.e.key
         new_donation.payment_id = payment_id
@@ -671,7 +725,7 @@ class SettingsCreate(UtilitiesBase):
                 c = exists[1]
                 contact_key = c.key
             else:
-                #Add new contact
+                # Add new contact
                 contact_key = self.contact(name, email=email, phone=phone, address=address, add_mc=email_subscr)
 
         new_donation.contact = contact_key
@@ -690,23 +744,24 @@ class SettingsCreate(UtilitiesBase):
             new_donation.deposited = True
 
         if team_key == "" or team_key == "none":
-            team_key = None 
-            
+            team_key = None
+
         if individual_key == "" or individual_key == "none":
             individual_key = None
 
         new_donation.team = team_key
         new_donation.individual = individual_key
-            
+
         new_donation.put()
 
         # If designated, re-index team and individual
         if team_key:
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : team_key.urlsafe()}, countdown=5, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e': team_key.urlsafe()}, countdown=5,
+                          queue_name="delayindexing")
 
         if individual_key:
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : individual_key.urlsafe()}, countdown=5, queue_name="delayindexing")
-
+            taskqueue.add(url="/tasks/delayindexing", params={'e': individual_key.urlsafe()}, countdown=5,
+                          queue_name="delayindexing")
 
         if payment_type != "offline":
 
@@ -724,12 +779,14 @@ A new note was received from {name} for ${confirmation_amount} ({payment_type} d
 You can view this donation at <a href="https://ghidonations.appspot.com/#contact?c={contact_key}">https://ghidonations.appspot.com/contact?c={contact_key}</a>.<br><br>
 Thanks!"""
 
-                message = message.format(payment_type=payment_type, name=name, confirmation_amount=confirmation_amount, special_notes=special_notes.encode('utf-8', 'ignore'), contact_key=new_donation.contact.urlsafe())
+                message = message.format(payment_type=payment_type, name=name, confirmation_amount=confirmation_amount,
+                                         special_notes=special_notes.encode('utf-8', 'ignore'),
+                                         contact_key=new_donation.contact.urlsafe())
 
                 email.html = message
                 email.send()
 
-            #Go ahead and send the confirmation email automatically
+            # Go ahead and send the confirmation email automatically
             new_donation.confirmation.task(86400)
             new_donation.review.archive()
 
@@ -783,7 +840,8 @@ Thanks!"""
         return new_team.key
 
         return new_donation.key.urlsafe()
-        
+
+
 class SettingsData(UtilitiesBase):
     @property
     def all_contacts(self):
@@ -836,13 +894,15 @@ class SettingsData(UtilitiesBase):
         memcache_key = "numopen" + self.e.websafe
 
         def get_item():
-            query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY donation_date DESC", c=False, s=self.e.key)
+            query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY donation_date DESC", c=False,
+                                        s=self.e.key)
             return gqlCount(query)
 
         return cache(memcache_key, get_item)
 
     def open_donations(self, query_cursor):
-        query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY donation_date DESC", c=False, s=self.e.key)
+        query = models.Donation.gql("WHERE reviewed = :c AND settings = :s ORDER BY donation_date DESC", c=False,
+                                    s=self.e.key)
         return queryCursorDB(query, query_cursor)
 
     @property
@@ -851,7 +911,7 @@ class SettingsData(UtilitiesBase):
         query = models.Donation.gql("WHERE settings = :s AND isRecurring = :r", s=self.e.key, r=True)
 
         for d in query:
-            #Adding to dictionary first to manage duplicates
+            # Adding to dictionary first to manage duplicates
             websafe = d.contact
 
             if not websafe in donors_dict:
@@ -859,7 +919,7 @@ class SettingsData(UtilitiesBase):
 
         donors = []
         for k in donors_dict:
-            #Now creating a normal iterable array of just entities
+            # Now creating a normal iterable array of just entities
             donors.append(donors_dict[k])
 
         return donors
@@ -872,9 +932,9 @@ class SettingsData(UtilitiesBase):
         donors = []
         donations = models.Donation.gql("WHERE team = :t", t=team_key)
         for d in donations:
-            #if d.name not in donors:
+            # if d.name not in donors:
             donors.append(d.contact.get())
-            
+
         return donors
 
     @property
@@ -898,14 +958,15 @@ class SettingsData(UtilitiesBase):
         for t in self.teams:
             teams.append(t)
         return teams
-        
+
     def teams(self, query_cursor):
         query = self.all_teams
         return queryCursorDB(query, query_cursor)
 
     @property
     def undeposited_donations(self):
-        q = models.Donation.gql("WHERE settings = :s AND deposited = :d ORDER BY donation_date DESC", s=self.e.key, d=False)
+        q = models.Donation.gql("WHERE settings = :s AND deposited = :d ORDER BY donation_date DESC", s=self.e.key,
+                                d=False)
         return qCache(q)
 
     ## -- Analytics -- ##
@@ -927,9 +988,10 @@ class SettingsData(UtilitiesBase):
 
         return cache(memcache_key, get_item)
 
+
 class SettingsDeposits(UtilitiesBase):
     def deposit(self, unicode_keys):
-        #Changing all unicode keys into Key objects
+        # Changing all unicode keys into Key objects
         donation_keys = []
         for key in unicode_keys:
             donation_keys.append(getKey(key))
@@ -942,7 +1004,7 @@ class SettingsDeposits(UtilitiesBase):
             d.put()
 
     def remove(self, unicode_keys):
-        #Changing all unicode keys into Key objects
+        # Changing all unicode keys into Key objects
         donation_keys = []
         for key in unicode_keys:
             donation_keys.append(getKey(key))
@@ -952,15 +1014,16 @@ class SettingsDeposits(UtilitiesBase):
             d.deposited = None
             d.put()
 
+
 class SettingsExists(UtilitiesBase):
     ## -- Check existences -- ##
     def _check_contact_email(self, email):
-        try: 
+        try:
             if email == None or email == "":
                 return [False, None]
             else:
                 query = models.Contact.query(models.Contact.settings == self.e.key,
-                                                models.Contact.email == email)
+                                             models.Contact.email == email)
 
                 if gqlCount(query) != 0:
                     return [True, query.fetch(1)[0]]
@@ -971,9 +1034,9 @@ class SettingsExists(UtilitiesBase):
             return [False, None]
 
     def _check_contact_name(self, name):
-        try: 
+        try:
             query = models.Contact.query(models.Contact.settings == self.e.key,
-                                            models.Contact.name == name)
+                                         models.Contact.name == name)
 
             if gqlCount(query) != 0:
                 return [True, query.fetch(1)[0]]
@@ -1038,7 +1101,7 @@ class SettingsExists(UtilitiesBase):
         return exists
 
     def individual(self, email):
-        #Check if a user exists in the database - when creating new users
+        # Check if a user exists in the database - when creating new users
         try:
             user = models.Individual.gql("WHERE settings = :s AND email = :e", s=self.e.key, e=email)
 
@@ -1051,22 +1114,23 @@ class SettingsExists(UtilitiesBase):
         except:
             return [False, None]
 
+
 class SettingsMailchimp(UtilitiesBase):
     def add(self, email, name, task_queue):
         if self.e.mc_use == True:
-        #Check if the settings indicate to use Mailchimp
+            # Check if the settings indicate to use Mailchimp
 
             if isEmail(email):
                 ms = MailSnake(self.e.mc_apikey)
-                try:               
-                    #[ MailChimp API v1.3 documentation ]
-                    #http://www.mailchimp.com/api/1.3/
-                    
-                    #http://apidocs.mailchimp.com/api/1.3/listsubscribe.func.php
-                    #listSubscribe(string apikey, string id, string email_address, array merge_vars, string email_type, 
-                    #bool double_optin, bool update_existing, bool replace_interests, bool send_welcome)
+                try:
+                    # [ MailChimp API v1.3 documentation ]
+                    # http://www.mailchimp.com/api/1.3/
+
+                    # http://apidocs.mailchimp.com/api/1.3/listsubscribe.func.php
+                    # listSubscribe(string apikey, string id, string email_address, array merge_vars, string email_type,
+                    # bool double_optin, bool update_existing, bool replace_interests, bool send_welcome)
                     name_split = name.split()
-                    merge_vars = {"FNAME":name_split[0], "LNAME":" ".join(name_split[1:])}
+                    merge_vars = {"FNAME": name_split[0], "LNAME": " ".join(name_split[1:])}
 
                     response = ms.listSubscribe(id=self.e.mc_donorlist, email_address=email, merge_vars=merge_vars)
 
@@ -1077,31 +1141,36 @@ class SettingsMailchimp(UtilitiesBase):
 
                     elif response["code"] == 214:
                         logging.info("Already in database. No action required.")
-                    
+
                     else:
-                    #Must be an error if not True and not error 214 - raise error
+                        # Must be an error if not True and not error 214 - raise error
                         raise
 
                 except:
                     if task_queue == False:
-                    #This is the original request, so add to task queue.
+                        # This is the original request, so add to task queue.
                         logging.error("An error occured contacting Mailchimp. Added to task queue to try again.")
-                        taskqueue.add(url="/tasks/mailchimp", params={'email' : email, 'name' : name, 'settings' : self.e.websafe}, queue_name="mailchimp")
-                        
+                        taskqueue.add(url="/tasks/mailchimp",
+                                      params={'email': email, 'name': name, 'settings': self.e.websafe},
+                                      queue_name="mailchimp")
+
                     else:
-                    #If this is coming from the task queue, fail it (so the task queue retry mechanism works)
+                        # If this is coming from the task queue, fail it (so the task queue retry mechanism works)
                         raise
                         logging.info("Request from task queue failed. Sending back 500 error.")
 
             else:
                 logging.info("Not a valid email address. Not continuing.")
 
+
 class SettingsRefresh(UtilitiesBase):
     def contactsJSON(self):
-        taskqueue.add(url="/tasks/contactsjson", params={'s_key' : self.e.websafe}, queue_name="backend") 
+        taskqueue.add(url="/tasks/contactsjson", params={'s_key': self.e.websafe}, queue_name="backend")
+
 
 class SettingsSearch(UtilitiesBase):
-    def search(self, index_name, expr_list, query, search_function, query_cursor=None, entity_return=False, return_all=False):
+    def search(self, index_name, expr_list, query, search_function, query_cursor=None, entity_return=False,
+               return_all=False):
         # query string looks like 'job tag:"very important" sent < 2011-02-28'
 
         if query_cursor == None:
@@ -1123,7 +1192,7 @@ class SettingsSearch(UtilitiesBase):
             query += add_settings_query
 
         elif add_settings_query not in query:
-            query += " AND " + add_settings_query  
+            query += " AND " + add_settings_query
 
         query_obj = search.Query(query_string=query, options=query_options)
 
@@ -1137,7 +1206,8 @@ class SettingsSearch(UtilitiesBase):
             return [searchToEntities(search_results), new_cursor]
 
         elif return_all == True:
-            return searchReturnAll(query, search_results, settings=self.e, search_function=search_function, entity_return=entity_return)
+            return searchReturnAll(query, search_results, settings=self.e, search_function=search_function,
+                                   entity_return=entity_return)
 
         else:
             return [search_results, search_results.cursor]
@@ -1149,7 +1219,8 @@ class SettingsSearch(UtilitiesBase):
 
         search_function = self.e.search.contact
 
-        return self.search(index_name=_CONTACT_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
+        return self.search(index_name=_CONTACT_SEARCH_INDEX, expr_list=expr_list, query=query,
+                           search_function=search_function, **kwargs)
 
     def deposit(self, query, **kwargs):
 
@@ -1159,7 +1230,8 @@ class SettingsSearch(UtilitiesBase):
 
         search_function = self.e.search.deposit
 
-        return self.search(index_name=_DEPOSIT_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
+        return self.search(index_name=_DEPOSIT_SEARCH_INDEX, expr_list=expr_list, query=query,
+                           search_function=search_function, **kwargs)
 
     def donation(self, query, **kwargs):
 
@@ -1169,7 +1241,8 @@ class SettingsSearch(UtilitiesBase):
 
         search_function = self.e.search.donation
 
-        return self.search(index_name=_DONATION_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
+        return self.search(index_name=_DONATION_SEARCH_INDEX, expr_list=expr_list, query=query,
+                           search_function=search_function, **kwargs)
 
     def individual(self, query, **kwargs):
         expr_list = [search.SortExpression(
@@ -1178,7 +1251,8 @@ class SettingsSearch(UtilitiesBase):
 
         search_function = self.e.search.individual
 
-        return self.search(index_name=_INDIVIDUAL_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
+        return self.search(index_name=_INDIVIDUAL_SEARCH_INDEX, expr_list=expr_list, query=query,
+                           search_function=search_function, **kwargs)
 
     def team(self, query, **kwargs):
         expr_list = [search.SortExpression(
@@ -1187,7 +1261,9 @@ class SettingsSearch(UtilitiesBase):
 
         search_function = self.e.search.team
 
-        return self.search(index_name=_TEAM_SEARCH_INDEX, expr_list=expr_list, query=query, search_function=search_function, **kwargs)
+        return self.search(index_name=_TEAM_SEARCH_INDEX, expr_list=expr_list, query=query,
+                           search_function=search_function, **kwargs)
+
 
 ## -- Contact Classes -- ##
 class ContactCreate(UtilitiesBase):
@@ -1200,13 +1276,14 @@ class ContactCreate(UtilitiesBase):
 
         new_impression.put()
 
+
 class ContactData(UtilitiesBase):
     @property
     def all_donations(self):
         q = models.Donation.gql("WHERE contact = :c ORDER BY donation_date DESC", s=self.e.settings, c=self.e.key)
         return q
 
-    @property 
+    @property
     def all_impressions(self):
         q = models.Impression.gql("WHERE contact = :c ORDER BY creation_date DESC", c=self.e.key)
         return q
@@ -1216,7 +1293,9 @@ class ContactData(UtilitiesBase):
         year_start = datetime.datetime(year, 1, 1)
         year_end = datetime.datetime(year + 1, 1, 1)
 
-        return models.Donation.gql("WHERE contact = :c AND donation_date >= :year_start AND donation_date < :year_end ORDER BY donation_date ASC", c=self.e.key, year_start=year_start, year_end=year_end)
+        return models.Donation.gql(
+            "WHERE contact = :c AND donation_date >= :year_start AND donation_date < :year_end ORDER BY donation_date ASC",
+            c=self.e.key, year_start=year_start, year_end=year_end)
 
     def donations(self, query_cursor):
         query = self.all_donations
@@ -1248,6 +1327,7 @@ class ContactData(UtilitiesBase):
     def number_donations(self):
         return int(gqlCount(self.all_donations))
 
+
 class ContactSearch(UtilitiesBase):
     def createDocument(self):
         c = self.e
@@ -1255,23 +1335,24 @@ class ContactSearch(UtilitiesBase):
         email = ' '.join(c.email)
 
         document = search.Document(doc_id=c.websafe,
-            fields=[search.TextField(name='contact_key', value=c.websafe),
-                    search.TextField(name='name', value=c.name),
-                    search.TextField(name='email', value=email),
+                                   fields=[search.TextField(name='contact_key', value=c.websafe),
+                                           search.TextField(name='name', value=c.name),
+                                           search.TextField(name='email', value=email),
 
-                    search.NumberField(name='total_donated', value=float(c.data.donation_total)),
-                    search.NumberField(name='number_donations', value=int(c.data.number_donations)),
+                                           search.NumberField(name='total_donated', value=float(c.data.donation_total)),
+                                           search.NumberField(name='number_donations',
+                                                              value=int(c.data.number_donations)),
 
-                    search.TextField(name='phone', value=c.phone),
+                                           search.TextField(name='phone', value=c.phone),
 
-                    search.TextField(name='street', value=c.address[0]),
-                    search.TextField(name='city', value=c.address[1]),
-                    search.TextField(name='state', value=c.address[2]),
-                    search.TextField(name='zip', value=c.address[3]),
+                                           search.TextField(name='street', value=c.address[0]),
+                                           search.TextField(name='city', value=c.address[1]),
+                                           search.TextField(name='state', value=c.address[2]),
+                                           search.TextField(name='zip', value=c.address[3]),
 
-                    search.DateField(name='created', value=c.creation_date),
-                    search.TextField(name='settings', value=c.settings.urlsafe())
-                    ])
+                                           search.DateField(name='created', value=c.creation_date),
+                                           search.TextField(name='settings', value=c.settings.urlsafe())
+                                           ])
 
         return document
 
@@ -1288,17 +1369,18 @@ class ContactSearch(UtilitiesBase):
             logging.error("Failed creating index on contact key:" + self.e.websafe + " because: " + str(e))
             self.error(500)
 
+
 ## -- Deposit Classes -- ##
 class DepositSearch(UtilitiesBase):
     def createDocument(self):
         de = self.e
 
         document = search.Document(doc_id=de.websafe,
-            fields=[search.TextField(name='deposit_key', value=de.websafe),
-                    search.TextField(name='time_deposited_string', value=de.time_deposited),
-                    search.DateField(name='created', value=de.creation_date),
-                    search.TextField(name='settings', value=de.settings.urlsafe()),
-                    ])
+                                   fields=[search.TextField(name='deposit_key', value=de.websafe),
+                                           search.TextField(name='time_deposited_string', value=de.time_deposited),
+                                           search.DateField(name='created', value=de.creation_date),
+                                           search.TextField(name='settings', value=de.settings.urlsafe()),
+                                           ])
 
         return document
 
@@ -1315,14 +1397,16 @@ class DepositSearch(UtilitiesBase):
             logging.error("Failed creating index on deposit key:" + self.e.websafe + " because: " + str(e))
             self.error(500)
 
+
 ## -- Donation Classes -- ##
 class DonationAssign(UtilitiesBase):
     ## -- Associating Donations With Team/Individual -- ##
     def associateIndividual(self, individual_key, writeback):
         if self.e.individual != individual_key:
-        #Just to make sure the association is actually changed - instead of marking the same value as it was before
+            # Just to make sure the association is actually changed - instead of marking the same value as it was before
             try:
-                message = "Donation " + self.e.websafe +  " associated with individual " + str(individual_key.urlsafe()) + "."
+                message = "Donation " + self.e.websafe + " associated with individual " + str(
+                    individual_key.urlsafe()) + "."
                 logging.info(message)
             except:
                 pass
@@ -1334,9 +1418,9 @@ class DonationAssign(UtilitiesBase):
 
     def associateTeam(self, team_key, writeback):
         if self.e.team != team_key:
-        #Just to make sure the association is actually changed - instead of marking the same value as it was before
+            # Just to make sure the association is actually changed - instead of marking the same value as it was before
             try:
-                message = "Donation " + self.e.websafe +  " associated with team " + str(team_key.urlsafe()) + "."
+                message = "Donation " + self.e.websafe + " associated with team " + str(team_key.urlsafe()) + "."
                 logging.info(message)
             except:
                 pass
@@ -1348,8 +1432,9 @@ class DonationAssign(UtilitiesBase):
 
     def disassociateIndividual(self, writeback):
         if self.e.individual != None:
-        #Just to make sure the association is actually changed - instead of marking the same value as it was before
-            message = "Donation " + self.e.websafe +  " removed from individual " + str(self.e.individual.urlsafe()) + "."
+            # Just to make sure the association is actually changed - instead of marking the same value as it was before
+            message = "Donation " + self.e.websafe + " removed from individual " + str(
+                self.e.individual.urlsafe()) + "."
             logging.info(message)
 
             self.e.individual = None
@@ -1359,14 +1444,15 @@ class DonationAssign(UtilitiesBase):
 
     def disassociateTeam(self, writeback):
         if self.e.team != None:
-        #Just to make sure the association is actually changed - instead of marking the same value as it was before
-            message = "Donation " + self.e.websafe +  " removed from team `" + str(self.e.team.urlsafe()) + "."
+            # Just to make sure the association is actually changed - instead of marking the same value as it was before
+            message = "Donation " + self.e.websafe + " removed from team `" + str(self.e.team.urlsafe()) + "."
             logging.info(message)
 
             self.e.team = None
 
         if writeback == True:
             self.e.put()
+
 
 class DonationConfirmation(UtilitiesBase):
     ## -- Confirmation Letter -- ##
@@ -1402,19 +1488,19 @@ class DonationConfirmation(UtilitiesBase):
             else:
                 individual_name = None
 
-            template_variables = {"s": s, "d" : d, "date" : date, "individual_name" : individual_name}
+            template_variables = {"s": s, "d": d, "date": date, "individual_name": individual_name}
 
             who = "http://ghidonations.appspot.com"
 
             template_variables["see_url"] = d.confirmation.see_url(who)
             template_variables["print_url"] = d.confirmation.print_url(who)
-     
-            #Message body/HTML here
+
+            # Message body/HTML here
             message.html = template.render("pages/letters/thanks_email.html", template_variables)
 
             logging.info("Sending confirmation email to: " + d.email[0])
 
-            #Adding to history
+            # Adding to history
             logging.info("Confirmation email sent at " + currentTime())
 
             message.send()
@@ -1436,7 +1522,8 @@ class DonationConfirmation(UtilitiesBase):
 
     def task(self, countdown_secs):
         logging.info("Tasking confirmation email.  Delaying for " + str(countdown_secs) + " seconds.")
-        taskqueue.add(url="/tasks/confirmation", params={'donation_key' : self.e.websafe}, countdown=int(countdown_secs))
+        taskqueue.add(url="/tasks/confirmation", params={'donation_key': self.e.websafe}, countdown=int(countdown_secs))
+
 
 class DonationReview(UtilitiesBase):
     ## -- Review Queue -- ##
@@ -1447,6 +1534,7 @@ class DonationReview(UtilitiesBase):
     def markUnreviewed(self):
         self.e.reviewed = False
         self.e.put()
+
 
 class DonationSearch(UtilitiesBase):
     def createDocument(self):
@@ -1468,30 +1556,31 @@ class DonationSearch(UtilitiesBase):
         if d.individual:
             individual_key = d.individual.urlsafe()
 
-        time_seconds = int( time.mktime( d.donation_date.timetuple() ) )
+        time_seconds = int(time.mktime(d.donation_date.timetuple()))
 
         document = search.Document(doc_id=d.websafe,
-            fields=[search.TextField(name='donation_key', value=d.websafe),
+                                   fields=[search.TextField(name='donation_key', value=d.websafe),
 
-                    search.DateField(name='time', value=d.donation_date),
-                    search.TextField(name='name', value=c.name),
-                    search.TextField(name='email', value=email),
-                    search.NumberField(name='amount', value=float(d.amount_donated)),
-                    search.TextField(name='type', value=d.payment_type),
+                                           search.DateField(name='time', value=d.donation_date),
+                                           search.TextField(name='name', value=c.name),
+                                           search.TextField(name='email', value=email),
+                                           search.NumberField(name='amount', value=float(d.amount_donated)),
+                                           search.TextField(name='type', value=d.payment_type),
 
-                    search.TextField(name='team', value=d.designated_team),
-                    search.TextField(name='individual', value=d.designated_individual),
+                                           search.TextField(name='team', value=d.designated_team),
+                                           search.TextField(name='individual', value=d.designated_individual),
 
-                    search.TextField(name='reviewed', value=reviewed),
+                                           search.TextField(name='reviewed', value=reviewed),
 
-                    search.TextField(name='formatted_donation_date', value=d.formatted_donation_date),
-                    
-                    search.TextField(name='contact_key', value=d.contact.urlsafe()),
-                    search.TextField(name='team_key', value=team_key),
-                    search.TextField(name='individual_key', value=individual_key),
-                    search.TextField(name='settings', value=d.settings.urlsafe()),
-                    search.NumberField(name='timesort', value=time_seconds),
-                    ])
+                                           search.TextField(name='formatted_donation_date',
+                                                            value=d.formatted_donation_date),
+
+                                           search.TextField(name='contact_key', value=d.contact.urlsafe()),
+                                           search.TextField(name='team_key', value=team_key),
+                                           search.TextField(name='individual_key', value=individual_key),
+                                           search.TextField(name='settings', value=d.settings.urlsafe()),
+                                           search.NumberField(name='timesort', value=time_seconds),
+                                           ])
 
         return document
 
@@ -1503,10 +1592,11 @@ class DonationSearch(UtilitiesBase):
         try:
             doc = self.createDocument()
             index.put(doc)
-            
+
         except Exception as e:
             logging.error("Failed creating index on donation key:" + self.e.websafe + " because: " + str(e))
             self.error(500)
+
 
 ## -- Individual Classes -- ##
 class IndividualData(UtilitiesBase):
@@ -1545,6 +1635,7 @@ class IndividualData(UtilitiesBase):
 
     def info(self, team):
         memcache_key = "info" + team.urlsafe() + self.e.websafe
+
         def get_item():
             if self.e.photo:
                 image_url = images.get_serving_url(self.e.photo, 150, secure_url=True)
@@ -1560,11 +1651,11 @@ class IndividualData(UtilitiesBase):
 
                 if percentage > 100:
                     percentage = 100
-                elif percentage <0:
+                elif percentage < 0:
                     percentage = 0
 
                 message = str(percentage) + "% to goal of $" + str(tl.fundraise_amt)
-                
+
             return [image_url, self.e.name, self.e.description, percentage, message]
 
         return cache(memcache_key, get_item)
@@ -1618,6 +1709,7 @@ class IndividualData(UtilitiesBase):
     def team_json(self):
         return json.dumps(self.team_list)
 
+
 class IndividualSearch(UtilitiesBase):
     def createDocument(self):
         i = self.e
@@ -1625,25 +1717,25 @@ class IndividualSearch(UtilitiesBase):
         email = "" if not i.email else i.email
 
         document = search.Document(doc_id=i.websafe,
-            fields=[search.TextField(name='individual_key', value=i.websafe),
+                                   fields=[search.TextField(name='individual_key', value=i.websafe),
 
-                    search.TextField(name='name', value=i.name),
-                    search.TextField(name='email', value=email),
+                                           search.TextField(name='name', value=i.name),
+                                           search.TextField(name='email', value=email),
 
-                    search.TextField(name='team', value=i.data.readable_team_names),
-                    search.NumberField(name='raised', value=float(i.data.donation_total)),
-                    
-                    search.DateField(name='created', value=i.creation_date),
-                    search.TextField(name='team_key', value=i.data.search_team_list),
-                    search.TextField(name='settings', value=i.settings.urlsafe()),
-                    ])
+                                           search.TextField(name='team', value=i.data.readable_team_names),
+                                           search.NumberField(name='raised', value=float(i.data.donation_total)),
+
+                                           search.DateField(name='created', value=i.creation_date),
+                                           search.TextField(name='team_key', value=i.data.search_team_list),
+                                           search.TextField(name='settings', value=i.settings.urlsafe()),
+                                           ])
 
         return document
 
     def index(self):
         # Updates search index of this entity or creates new one if it doesn't exist
         index = search.Index(name=_INDIVIDUAL_SEARCH_INDEX)
-    
+
         # Creating the new index
         try:
             doc = self.createDocument()
@@ -1652,6 +1744,7 @@ class IndividualSearch(UtilitiesBase):
         except Exception as e:
             logging.error("Failed creating index on individual key:" + self.e.websafe + " because: " + str(e))
             self.error(500)
+
 
 ## -- Team Classes -- ##
 class TeamData(UtilitiesBase):
@@ -1663,8 +1756,8 @@ class TeamData(UtilitiesBase):
     @property
     def donation_total(self):
         team_key = self.e.key
-        memcache_key = "tdtotal" +  team_key.urlsafe()
-        
+        memcache_key = "tdtotal" + team_key.urlsafe()
+
         def get_item():
             settings = self.e.settings
 
@@ -1678,7 +1771,7 @@ class TeamData(UtilitiesBase):
 
             return str(donation_total)
 
-        item = cache(memcache_key, get_item) 
+        item = cache(memcache_key, get_item)
         return toDecimal(item)
 
     @property
@@ -1688,16 +1781,17 @@ class TeamData(UtilitiesBase):
 
     @property
     def members_public_donation_page(self):
-        #Returns members that indicated that they want to be included
-        #in the public donation page
-        q = models.TeamList.gql("WHERE team = :t AND show_donation_page != :s ORDER BY show_donation_page, sort_name", t=self.e.key, s=False)
+        # Returns members that indicated that they want to be included
+        # in the public donation page
+        q = models.TeamList.gql("WHERE team = :t AND show_donation_page != :s ORDER BY show_donation_page, sort_name",
+                                t=self.e.key, s=False)
         return qCache(q)
 
     @property
     def members_dict(self):
-        memcache_key = "teammembersdict" +  self.e.websafe
+        memcache_key = "teammembersdict" + self.e.websafe
         members = self.members
-    
+
         def get_item():
             members_dict = {}
             for tl in members:
@@ -1710,8 +1804,8 @@ class TeamData(UtilitiesBase):
 
     @property
     def members_list(self):
-        memcache_key = "teammembers" +  self.e.websafe
-        
+        memcache_key = "teammembers" + self.e.websafe
+
         def get_item():
             members = self.members
 
@@ -1721,8 +1815,8 @@ class TeamData(UtilitiesBase):
 
     @property
     def public_members_list(self):
-        memcache_key = "publicteammembers" +  self.e.websafe
-        
+        memcache_key = "publicteammembers" + self.e.websafe
+
         def get_item():
             members = self.members_public_donation_page
 
@@ -1730,17 +1824,18 @@ class TeamData(UtilitiesBase):
 
         return cache(memcache_key, get_item)
 
+
 class TeamSearch(UtilitiesBase):
     def createDocument(self):
         t = self.e
 
         document = search.Document(doc_id=t.websafe,
-            fields=[search.TextField(name='team_key', value=t.websafe),
-                    search.TextField(name='name', value=t.name),
-                    search.TextField(name='donation_total', value=str(t.data.donation_total)),
-                    search.DateField(name='created', value=t.creation_date),
-                    search.TextField(name='settings', value=t.settings.urlsafe()),
-                    ])
+                                   fields=[search.TextField(name='team_key', value=t.websafe),
+                                           search.TextField(name='name', value=t.name),
+                                           search.TextField(name='donation_total', value=str(t.data.donation_total)),
+                                           search.DateField(name='created', value=t.creation_date),
+                                           search.TextField(name='settings', value=t.settings.urlsafe()),
+                                           ])
 
         return document
 
@@ -1756,6 +1851,7 @@ class TeamSearch(UtilitiesBase):
         except Exception as e:
             logging.error("Failed creating index on team key:" + self.e.websafe + " because: " + str(e))
             self.error(500)
+
 
 class TeamListData(UtilitiesBase):
     @property
@@ -1778,7 +1874,7 @@ class TeamListData(UtilitiesBase):
 
             for d in donations:
                 donation_total += d.amount_donated
-            
+
             return str(donation_total)
 
         item = cache(memcache_key, get_item)
@@ -1796,6 +1892,7 @@ class TeamListData(UtilitiesBase):
     def team_websafe(self):
         return self.team.urlsafe()
 
+
 ## -- Dictionary Difference Class -- ##
 class DictDiffer(object):
     """
@@ -1805,33 +1902,44 @@ class DictDiffer(object):
     (3) keys same in both but changed values
     (4) keys same in both and unchanged values
     """
+
     def __init__(self, current_dict, past_dict):
         self.current_dict, self.past_dict = current_dict, past_dict
         self.set_current, self.set_past = set(current_dict.keys()), set(past_dict.keys())
         self.intersect = self.set_current.intersection(self.set_past)
+
     def added(self):
         return self.set_current - self.intersect
+
     def removed(self):
         return self.set_past - self.intersect
+
     def changed(self):
         return set(o for o in self.intersect if self.past_dict[o] != self.current_dict[o])
+
     def unchanged(self):
         return set(o for o in self.intersect if self.past_dict[o] == self.current_dict[o])
-    
+
+
 ###### ------ Time classes ------ ######
 
-class EST(datetime.tzinfo): 
-    def utcoffset(self,dt): 
-        return datetime.timedelta(hours=-4,minutes=0) 
-    def tzname(self,dt): 
-        return "GMT -4" 
-    def dst(self,dt): 
-        return datetime.timedelta(0) 
+class EST(datetime.tzinfo):
+    def utcoffset(self, dt):
+        return datetime.timedelta(hours=-4, minutes=0)
+
+    def tzname(self, dt):
+        return "GMT -4"
+
+    def dst(self, dt):
+        return datetime.timedelta(0)
+
 
 class UTC(datetime.tzinfo):
     def utcoffset(self, dt):
         return datetime.timedelta(0)
+
     def tzname(self, dt):
         return "UTC"
+
     def dst(self, dt):
         return datetime.timedelta(0)

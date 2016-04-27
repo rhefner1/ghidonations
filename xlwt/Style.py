@@ -5,56 +5,58 @@ from BIFFRecords import *
 
 FIRST_USER_DEFINED_NUM_FORMAT_IDX = 164
 
-class XFStyle(object):
 
+class XFStyle(object):
     def __init__(self):
-        self.num_format_str  = 'General'
-        self.font            = Formatting.Font()
-        self.alignment       = Formatting.Alignment()
-        self.borders         = Formatting.Borders()
-        self.pattern         = Formatting.Pattern()
-        self.protection      = Formatting.Protection()
+        self.num_format_str = 'General'
+        self.font = Formatting.Font()
+        self.alignment = Formatting.Alignment()
+        self.borders = Formatting.Borders()
+        self.pattern = Formatting.Pattern()
+        self.protection = Formatting.Protection()
+
 
 default_style = XFStyle()
 
+
 class StyleCollection(object):
     _std_num_fmt_list = [
-            'general',
-            '0',
-            '0.00',
-            '#,##0',
-            '#,##0.00',
-            '"$"#,##0_);("$"#,##',
-            '"$"#,##0_);[Red]("$"#,##',
-            '"$"#,##0.00_);("$"#,##',
-            '"$"#,##0.00_);[Red]("$"#,##',
-            '0%',
-            '0.00%',
-            '0.00E+00',
-            '# ?/?',
-            '# ??/??',
-            'M/D/YY',
-            'D-MMM-YY',
-            'D-MMM',
-            'MMM-YY',
-            'h:mm AM/PM',
-            'h:mm:ss AM/PM',
-            'h:mm',
-            'h:mm:ss',
-            'M/D/YY h:mm',
-            '_(#,##0_);(#,##0)',
-            '_(#,##0_);[Red](#,##0)',
-            '_(#,##0.00_);(#,##0.00)',
-            '_(#,##0.00_);[Red](#,##0.00)',
-            '_("$"* #,##0_);_("$"* (#,##0);_("$"* "-"_);_(@_)',
-            '_(* #,##0_);_(* (#,##0);_(* "-"_);_(@_)',
-            '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)',
-            '_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)',
-            'mm:ss',
-            '[h]:mm:ss',
-            'mm:ss.0',
-            '##0.0E+0',
-            '@'
+        'general',
+        '0',
+        '0.00',
+        '#,##0',
+        '#,##0.00',
+        '"$"#,##0_);("$"#,##',
+        '"$"#,##0_);[Red]("$"#,##',
+        '"$"#,##0.00_);("$"#,##',
+        '"$"#,##0.00_);[Red]("$"#,##',
+        '0%',
+        '0.00%',
+        '0.00E+00',
+        '# ?/?',
+        '# ??/??',
+        'M/D/YY',
+        'D-MMM-YY',
+        'D-MMM',
+        'MMM-YY',
+        'h:mm AM/PM',
+        'h:mm:ss AM/PM',
+        'h:mm',
+        'h:mm:ss',
+        'M/D/YY h:mm',
+        '_(#,##0_);(#,##0)',
+        '_(#,##0_);[Red](#,##0)',
+        '_(#,##0.00_);(#,##0.00)',
+        '_(#,##0.00_);[Red](#,##0.00)',
+        '_("$"* #,##0_);_("$"* (#,##0);_("$"* "-"_);_(@_)',
+        '_(* #,##0_);_(* (#,##0);_(* "-"_);_(@_)',
+        '_("$"* #,##0.00_);_("$"* (#,##0.00);_("$"* "-"??_);_(@_)',
+        '_(* #,##0.00_);_(* (#,##0.00);_(* "-"??_);_(@_)',
+        'mm:ss',
+        '[h]:mm:ss',
+        'mm:ss.0',
+        '##0.0E+0',
+        '@'
     ]
 
     def __init__(self, style_compression=0):
@@ -64,7 +66,7 @@ class StyleCollection(object):
         self._font_x2id = {}
         self._font_val2x = {}
 
-        for x in (0, 1, 2, 3, 5): # The font with index 4 is omitted in all BIFF versions
+        for x in (0, 1, 2, 3, 5):  # The font with index 4 is omitted in all BIFF versions
             font = Formatting.Font()
             search_key = font._search_key()
             self._font_id2x[font] = x
@@ -98,7 +100,7 @@ class StyleCollection(object):
                 FIRST_USER_DEFINED_NUM_FORMAT_IDX
                 + len(self._num_formats)
                 - len(StyleCollection._std_num_fmt_list)
-                )
+            )
             self._num_formats[num_format_str] = num_format_idx
 
         font = style.font
@@ -112,7 +114,7 @@ class StyleCollection(object):
                 self._font_id2x[font] = font_idx
                 self.stats[1] += 1
             else:
-                font_idx = len(self._font_x2id) + 1 # Why plus 1? Font 4 is missing
+                font_idx = len(self._font_x2id) + 1  # Why plus 1? Font 4 is missing
                 self._font_id2x[font] = font_idx
                 self._font_val2x[search_key] = font_idx
                 self._font_x2id[font_idx] = font
@@ -197,16 +199,20 @@ class StyleCollection(object):
     def _all_styles(self):
         return StyleRecord().get()
 
+
 # easyxf and its supporting objects ###################################
 
 class EasyXFException(Exception):
     pass
 
+
 class EasyXFCallerError(EasyXFException):
     pass
 
+
 class EasyXFAuthorError(EasyXFException):
     pass
+
 
 class IntULim(object):
     # If astring represents a valid unsigned integer ('123', '0xabcd', etc)
@@ -224,54 +230,54 @@ class IntULim(object):
             return None
         return value
 
+
 bool_map = {
     # Text values for all Boolean attributes
-    '1': 1, 'yes': 1, 'true':  1, 'on':  1,
-    '0': 0, 'no':  0, 'false': 0, 'off': 0,
-    }
+    '1': 1, 'yes': 1, 'true': 1, 'on': 1,
+    '0': 0, 'no': 0, 'false': 0, 'off': 0,
+}
 
 border_line_map = {
     # Text values for these borders attributes:
     # left, right, top, bottom and diag
-    'no_line':  0x00,
-    'thin':     0x01,
-    'medium':   0x02,
-    'dashed':   0x03,
-    'dotted':   0x04,
-    'thick':    0x05,
-    'double':   0x06,
-    'hair':     0x07,
-    'medium_dashed':                0x08,
-    'thin_dash_dotted':             0x09,
-    'medium_dash_dotted':           0x0a,
-    'thin_dash_dot_dotted':         0x0b,
-    'medium_dash_dot_dotted':       0x0c,
-    'slanted_medium_dash_dotted':   0x0d,
-    }
+    'no_line': 0x00,
+    'thin': 0x01,
+    'medium': 0x02,
+    'dashed': 0x03,
+    'dotted': 0x04,
+    'thick': 0x05,
+    'double': 0x06,
+    'hair': 0x07,
+    'medium_dashed': 0x08,
+    'thin_dash_dotted': 0x09,
+    'medium_dash_dotted': 0x0a,
+    'thin_dash_dot_dotted': 0x0b,
+    'medium_dash_dot_dotted': 0x0c,
+    'slanted_medium_dash_dotted': 0x0d,
+}
 
 charset_map = {
     # Text values for font.charset
-    'ansi_latin':           0x00,
-    'sys_default':          0x01,
-    'symbol':               0x02,
-    'apple_roman':          0x4d,
-    'ansi_jap_shift_jis':   0x80,
-    'ansi_kor_hangul':      0x81,
-    'ansi_kor_johab':       0x82,
-    'ansi_chinese_gbk':     0x86,
-    'ansi_chinese_big5':    0x88,
-    'ansi_greek':           0xa1,
-    'ansi_turkish':         0xa2,
-    'ansi_vietnamese':      0xa3,
-    'ansi_hebrew':          0xb1,
-    'ansi_arabic':          0xb2,
-    'ansi_baltic':          0xba,
-    'ansi_cyrillic':        0xcc,
-    'ansi_thai':            0xde,
-    'ansi_latin_ii':        0xee,
-    'oem_latin_i':          0xff,
-    }
-
+    'ansi_latin': 0x00,
+    'sys_default': 0x01,
+    'symbol': 0x02,
+    'apple_roman': 0x4d,
+    'ansi_jap_shift_jis': 0x80,
+    'ansi_kor_hangul': 0x81,
+    'ansi_kor_johab': 0x82,
+    'ansi_chinese_gbk': 0x86,
+    'ansi_chinese_big5': 0x88,
+    'ansi_greek': 0xa1,
+    'ansi_turkish': 0xa2,
+    'ansi_vietnamese': 0xa3,
+    'ansi_hebrew': 0xb1,
+    'ansi_arabic': 0xb2,
+    'ansi_baltic': 0xba,
+    'ansi_cyrillic': 0xcc,
+    'ansi_thai': 0xde,
+    'ansi_latin_ii': 0xee,
+    'oem_latin_i': 0xff,
+}
 
 # Text values for colour indices. "grey" is a synonym of "gray".
 # The names are those given by Microsoft Excel 2003 to the colours
@@ -344,34 +350,35 @@ for _line in _colour_map_text.splitlines():
         colour_map[_name.replace('gray', 'grey')] = _num
 del _colour_map_text, _line, _name, _num
 
-
 pattern_map = {
     # Text values for pattern.pattern
     # xlwt/doc/pattern_examples.xls showcases all of these patterns.
-    'no_fill':              0,
-    'none':                 0,
-    'solid':                1,
-    'solid_fill':           1,
-    'solid_pattern':        1,
-    'fine_dots':            2,
-    'alt_bars':             3,
-    'sparse_dots':          4,
-    'thick_horz_bands':     5,
-    'thick_vert_bands':     6,
-    'thick_backward_diag':  7,
-    'thick_forward_diag':   8,
-    'big_spots':            9,
-    'bricks':               10,
-    'thin_horz_bands':      11,
-    'thin_vert_bands':      12,
-    'thin_backward_diag':   13,
-    'thin_forward_diag':    14,
-    'squares':              15,
-    'diamonds':             16,
-    }
+    'no_fill': 0,
+    'none': 0,
+    'solid': 1,
+    'solid_fill': 1,
+    'solid_pattern': 1,
+    'fine_dots': 2,
+    'alt_bars': 3,
+    'sparse_dots': 4,
+    'thick_horz_bands': 5,
+    'thick_vert_bands': 6,
+    'thick_backward_diag': 7,
+    'thick_forward_diag': 8,
+    'big_spots': 9,
+    'bricks': 10,
+    'thin_horz_bands': 11,
+    'thin_vert_bands': 12,
+    'thin_backward_diag': 13,
+    'thin_forward_diag': 14,
+    'squares': 15,
+    'diamonds': 16,
+}
+
 
 def any_str_func(s):
     return s.strip()
+
 
 def colour_index_func(s, maxval=0x7F):
     try:
@@ -382,10 +389,13 @@ def colour_index_func(s, maxval=0x7F):
         return None
     return value
 
+
 colour_index_func_7 = colour_index_func
+
 
 def colour_index_func_15(s):
     return colour_index_func(s, maxval=0x7FFF)
+
 
 def rotation_func(s):
     try:
@@ -395,17 +405,18 @@ def rotation_func(s):
     if not (-90 <= value <= 90):
         raise EasyXFCallerError("rotation %d: should be -90 to +90 degrees" % value)
     if value < 0:
-        value = 90 - value # encode as 91 to 180 (clockwise)
+        value = 90 - value  # encode as 91 to 180 (clockwise)
     return value
 
+
 xf_dict = {
-    'align': 'alignment', # synonym
+    'align': 'alignment',  # synonym
     'alignment': {
         'dire': {
             'general': 0,
             'lr': 1,
             'rl': 2,
-            },
+        },
         'direction': 'dire',
         'horiz': 'horz',
         'horizontal': 'horz',
@@ -413,17 +424,17 @@ xf_dict = {
             'general': 0,
             'left': 1,
             'center': 2,
-            'centre': 2, # "align: horiz centre" means xf.alignment.horz is set to 2
+            'centre': 2,  # "align: horiz centre" means xf.alignment.horz is set to 2
             'right': 3,
             'filled': 4,
             'justified': 5,
             'center_across_selection': 6,
             'centre_across_selection': 6,
             'distributed': 7,
-            },
-        'inde': IntULim(15), # restriction: 0 <= value <= 15
+        },
+        'inde': IntULim(15),  # restriction: 0 <= value <= 15
         'indent': 'inde',
-        'rota': [{'stacked': 255, 'none': 0, }, rotation_func],
+        'rota': [{'stacked': 255, 'none': 0,}, rotation_func],
         'rotation': 'rota',
         'shri': bool_map,
         'shrink': 'shri',
@@ -435,63 +446,64 @@ xf_dict = {
             'bottom': 2,
             'justified': 3,
             'distributed': 4,
-            },
-         'vertical': 'vert',
-         'wrap': bool_map,
-         },
+        },
+        'vertical': 'vert',
+        'wrap': bool_map,
+    },
     'border': 'borders',
     'borders': {
-        'left':     [border_line_map, IntULim(0x0d)],
-        'right':    [border_line_map, IntULim(0x0d)],
-        'top':      [border_line_map, IntULim(0x0d)],
-        'bottom':   [border_line_map, IntULim(0x0d)],
-        'diag':     [border_line_map, IntULim(0x0d)],
-        'top_colour':       [colour_map, colour_index_func_7],
-        'bottom_colour':    [colour_map, colour_index_func_7],
-        'left_colour':      [colour_map, colour_index_func_7],
-        'right_colour':     [colour_map, colour_index_func_7],
-        'diag_colour':      [colour_map, colour_index_func_7],
-        'top_color':        'top_colour',
-        'bottom_color':     'bottom_colour',
-        'left_color':       'left_colour',
-        'right_color':      'right_colour',
-        'diag_color':       'diag-colour',
-        'need_diag_1':  bool_map,
-        'need_diag_2':  bool_map,
-        },
+        'left': [border_line_map, IntULim(0x0d)],
+        'right': [border_line_map, IntULim(0x0d)],
+        'top': [border_line_map, IntULim(0x0d)],
+        'bottom': [border_line_map, IntULim(0x0d)],
+        'diag': [border_line_map, IntULim(0x0d)],
+        'top_colour': [colour_map, colour_index_func_7],
+        'bottom_colour': [colour_map, colour_index_func_7],
+        'left_colour': [colour_map, colour_index_func_7],
+        'right_colour': [colour_map, colour_index_func_7],
+        'diag_colour': [colour_map, colour_index_func_7],
+        'top_color': 'top_colour',
+        'bottom_color': 'bottom_colour',
+        'left_color': 'left_colour',
+        'right_color': 'right_colour',
+        'diag_color': 'diag-colour',
+        'need_diag_1': bool_map,
+        'need_diag_2': bool_map,
+    },
     'font': {
         'bold': bool_map,
         'charset': charset_map,
-        'color':  'colour_index',
-        'color_index':  'colour_index',
-        'colour':  'colour_index',
+        'color': 'colour_index',
+        'color_index': 'colour_index',
+        'colour': 'colour_index',
         'colour_index': [colour_map, colour_index_func_15],
         'escapement': {'none': 0, 'superscript': 1, 'subscript': 2},
-        'family': {'none': 0, 'roman': 1, 'swiss': 2, 'modern': 3, 'script': 4, 'decorative': 5, },
-        'height': IntULim(0xFFFF), # practical limits are much narrower e.g. 160 to 1440 (8pt to 72pt)
+        'family': {'none': 0, 'roman': 1, 'swiss': 2, 'modern': 3, 'script': 4, 'decorative': 5,},
+        'height': IntULim(0xFFFF),  # practical limits are much narrower e.g. 160 to 1440 (8pt to 72pt)
         'italic': bool_map,
         'name': any_str_func,
         'outline': bool_map,
         'shadow': bool_map,
         'struck_out': bool_map,
-        'underline': [bool_map, {'none': 0, 'single': 1, 'single_acc': 0x21, 'double': 2, 'double_acc': 0x22, }],
-        },
+        'underline': [bool_map, {'none': 0, 'single': 1, 'single_acc': 0x21, 'double': 2, 'double_acc': 0x22,}],
+    },
     'pattern': {
-        'back_color':   'pattern_back_colour',
-        'back_colour':  'pattern_back_colour',
-        'fore_color':   'pattern_fore_colour',
-        'fore_colour':  'pattern_fore_colour',
+        'back_color': 'pattern_back_colour',
+        'back_colour': 'pattern_back_colour',
+        'fore_color': 'pattern_fore_colour',
+        'fore_colour': 'pattern_fore_colour',
         'pattern': [pattern_map, IntULim(16)],
-        'pattern_back_color':   'pattern_back_colour',
-        'pattern_back_colour':  [colour_map, colour_index_func_7],
-        'pattern_fore_color':   'pattern_fore_colour',
-        'pattern_fore_colour':  [colour_map, colour_index_func_7],
-        },
+        'pattern_back_color': 'pattern_back_colour',
+        'pattern_back_colour': [colour_map, colour_index_func_7],
+        'pattern_fore_color': 'pattern_fore_colour',
+        'pattern_fore_colour': [colour_map, colour_index_func_7],
+    },
     'protection': {
-        'cell_locked' :   bool_map,
+        'cell_locked': bool_map,
         'formula_hidden': bool_map,
-        },
-    }
+    },
+}
+
 
 def _esplit(s, split_char, esc_char="\\"):
     escaped = False
@@ -508,8 +520,9 @@ def _esplit(s, split_char, esc_char="\\"):
             olist[-1] += c
     return olist
 
+
 def _parse_strg_to_obj(strg, obj, parse_dict,
-    field_sep=",", line_sep=";", intro_sep=":", esc_char="\\", debug=False):
+                       field_sep=",", line_sep=";", intro_sep=":", esc_char="\\", debug=False):
     for line in _esplit(strg, line_sep, esc_char):
         line = line.strip()
         if not line:
@@ -536,7 +549,8 @@ def _parse_strg_to_obj(strg, obj, parse_dict,
         section_dict = result
         section_obj = getattr(obj, section, None)
         if section_obj is None:
-            raise EasyXFAuthorError('instance of %s class has no attribute named %s' % (obj.__class__.__name__, section))
+            raise EasyXFAuthorError(
+                'instance of %s class has no attribute named %s' % (obj.__class__.__name__, section))
         for kv_str in _esplit(item_str, field_sep, esc_char):
             guff = kv_str.split()
             if not guff:
@@ -581,12 +595,13 @@ def _parse_strg_to_obj(strg, obj, parse_dict,
             if debug: print "+++ %s.%s = %r # %s; was %r" % (section, k, value, v, orig)
             setattr(section_obj, k, value)
 
+
 def easyxf(strg_to_parse="", num_format_str=None,
-    field_sep=",", line_sep=";", intro_sep=":", esc_char="\\", debug=False):
+           field_sep=",", line_sep=";", intro_sep=":", esc_char="\\", debug=False):
     xfobj = XFStyle()
     if num_format_str is not None:
         xfobj.num_format_str = num_format_str
     if strg_to_parse:
         _parse_strg_to_obj(strg_to_parse, xfobj, xf_dict,
-            field_sep=field_sep, line_sep=line_sep, intro_sep=intro_sep, esc_char=esc_char, debug=debug)
+                           field_sep=field_sep, line_sep=line_sep, intro_sep=intro_sep, esc_char=esc_char, debug=debug)
     return xfobj

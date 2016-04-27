@@ -1,7 +1,7 @@
-from gaesessions import SessionMiddleware
-from google.appengine.ext.appstats import recording
 import GlobalUtilities as tools
+from gaesessions import SessionMiddleware
 from google.appengine.api import memcache
+from google.appengine.ext.appstats import recording
 
 # suggestion: generate your own random key using os.urandom(64)
 # WARNING: Make sure you run os.urandom(64) OFFLINE and copy/paste the output to
@@ -13,21 +13,24 @@ COOKIE_KEY = memcache.get("COOKIE_KEY")
 GCS_BUCKET = memcache.get("GCS_BUCKET")
 
 if not COOKIE_KEY or not GCS_BUCKET:
-	global_settings = tools.getGlobalSettings()
+    global_settings = tools.getGlobalSettings()
 
-	COOKIE_KEY = global_settings.cookie_key.decode('base64')
-	GCS_BUCKET = global_settings.gcs_bucket
+    COOKIE_KEY = global_settings.cookie_key.decode('base64')
+    GCS_BUCKET = global_settings.gcs_bucket
 
-	memcache.set("COOKIE_KEY", COOKIE_KEY)
-	memcache.set("GCS_BUCKET", GCS_BUCKET)
+    memcache.set("COOKIE_KEY", COOKIE_KEY)
+    memcache.set("GCS_BUCKET", GCS_BUCKET)
+
 
 def webapp_add_wsgi_middleware(app):
-	app = SessionMiddleware(app, cookie_key=COOKIE_KEY)
-	return app
+    app = SessionMiddleware(app, cookie_key=COOKIE_KEY)
+    return app
+
 
 def recording_add_wsgi_middleware(app):
- 	app = recording.appstats_wsgi_middleware(app)
-	return app
+    app = recording.appstats_wsgi_middleware(app)
+    return app
+
 
 #########################################
 # Remote_API Authentication configuration.

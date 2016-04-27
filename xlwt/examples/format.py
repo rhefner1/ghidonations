@@ -12,7 +12,6 @@ font0.bold = True
 style0 = XFStyle()
 style0.font = font0
 
-
 wb = Workbook()
 ws0 = wb.add_sheet('0')
 
@@ -33,6 +32,5 @@ for i in range(0, 0x53):
 
     ws0.write(i, 2, 'colour', style)
     ws0.write(i, 3, hex(i), style0)
-
 
 wb.save('format.xls')

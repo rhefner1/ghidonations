@@ -3,6 +3,7 @@
 __VERSION__ = '0.7.2'
 
 import sys
+
 if sys.version_info[:2] < (2, 3):
     print >> sys.stderr, "Sorry, xlwt requires Python 2.3 or later"
     sys.exit(1)

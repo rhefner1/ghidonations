@@ -12,7 +12,6 @@ font0.bold = True
 style0 = XFStyle()
 style0.font = font0
 
-
 wb = Workbook()
 ws0 = wb.add_sheet('0')
 

@@ -34,16 +34,14 @@
             EOF
 '''
 
+import tempfile
+
 import BIFFRecords
 import Bitmap
-import Formatting
 import Style
-import tempfile
 
 
 class Worksheet(object):
-    from Workbook import Workbook
-
     #################################################################
     ## Constructor
     #################################################################
@@ -86,10 +84,10 @@ class Worksheet(object):
         self.__first_visible_row = 0
         self.__first_visible_col = 0
         self.__grid_colour = 0x40
-        self.__preview_magn = 60 # percent
-        self.__normal_magn = 100 # percent
+        self.__preview_magn = 60  # percent
+        self.__normal_magn = 100  # percent
 
-        self.visibility = 0 # from/to BOUNDSHEET record.
+        self.visibility = 0  # from/to BOUNDSHEET record.
 
         self.__vert_split_pos = None
         self.__horz_split_pos = None
@@ -135,11 +133,11 @@ class Worksheet(object):
         self.__footer_str = '&F'
         self.__print_centered_vert = 0
         self.__print_centered_horz = 1
-        self.__left_margin = 0.3 #0.5
-        self.__right_margin = 0.3 #0.5
-        self.__top_margin = 0.61 #1.0
-        self.__bottom_margin = 0.37 #1.0
-        self.__paper_size_code = 9 # A4
+        self.__left_margin = 0.3  # 0.5
+        self.__right_margin = 0.3  # 0.5
+        self.__top_margin = 0.61  # 1.0
+        self.__bottom_margin = 0.37  # 1.0
+        self.__paper_size_code = 9  # A4
         self.__print_scaling = 100
         self.__start_page_number = 1
         self.__fit_width_to_pages = 1
@@ -151,8 +149,8 @@ class Worksheet(object):
         self.__print_notes = 0
         self.__print_notes_at_end = 0
         self.__print_omit_errors = 0
-        self.__print_hres = 0x012C # 300 dpi
-        self.__print_vres = 0x012C # 300 dpi
+        self.__print_hres = 0x012C  # 300 dpi
+        self.__print_vres = 0x012C  # 300 dpi
         self.__header_margin = 0.1
         self.__footer_margin = 0.1
         self.__copies_num = 1
@@ -430,33 +428,33 @@ class Worksheet(object):
 
     #################################################################
 
-    #def set_split_active_pane(self, value):
+    # def set_split_active_pane(self, value):
     #    self.__split_active_pane = abs(value) & 0x03
     #
-    #def get_split_active_pane(self):
+    # def get_split_active_pane(self):
     #    return self.__split_active_pane
     #
-    #split_active_pane = property(get_split_active_pane, set_split_active_pane)
+    # split_active_pane = property(get_split_active_pane, set_split_active_pane)
 
     #################################################################
 
-    #def set_row_gut_width(self, value):
+    # def set_row_gut_width(self, value):
     #    self.__row_gut_width = value
     #
-    #def get_row_gut_width(self):
+    # def get_row_gut_width(self):
     #    return self.__row_gut_width
     #
-    #row_gut_width = property(get_row_gut_width, set_row_gut_width)
+    # row_gut_width = property(get_row_gut_width, set_row_gut_width)
     #
     #################################################################
     #
-    #def set_col_gut_height(self, value):
+    # def set_col_gut_height(self, value):
     #    self.__col_gut_height = value
     #
-    #def get_col_gut_height(self):
+    # def get_col_gut_height(self):
     #    return self.__col_gut_height
     #
-    #col_gut_height = property(get_col_gut_height, set_col_gut_height)
+    # col_gut_height = property(get_col_gut_height, set_col_gut_height)
     #
     #################################################################
 
@@ -660,13 +658,13 @@ class Worksheet(object):
 
     #################################################################
     #
-    #def set_grid_set(self, value):
+    # def set_grid_set(self, value):
     #    self.__grid_set = int(value)
     #
-    #def get_grid_set(self):
+    # def get_grid_set(self):
     #    return bool(self.__grid_set)
     #
-    #grid_set = property(get_grid_set, set_grid_set)
+    # grid_set = property(get_grid_set, set_grid_set)
     #
     #################################################################
 
@@ -1015,9 +1013,9 @@ class Worksheet(object):
         # multiple records. In the meantime, avoid this method and use
         # write_merge() instead.
         if c2 > c1:
-            self.row(r1).write_blanks(c1 + 1, c2,  style)
-        for r in range(r1+1, r2+1):
-            self.row(r).write_blanks(c1, c2,  style)
+            self.row(r1).write_blanks(c1 + 1, c2, style)
+        for r in range(r1 + 1, r2 + 1):
+            self.row(r).write_blanks(c1, c2, style)
         self.__merged_ranges.append((r1, r2, c1, c2))
 
     def write_merge(self, r1, r2, c1, c2, label="", style=Style.default_style):
@@ -1025,12 +1023,12 @@ class Worksheet(object):
         assert 0 <= r1 <= r2 <= 65535
         self.write(r1, c1, label, style)
         if c2 > c1:
-            self.row(r1).write_blanks(c1 + 1, c2,  style) # skip (r1, c1)
-        for r in range(r1+1, r2+1):
-            self.row(r).write_blanks(c1, c2,  style)
+            self.row(r1).write_blanks(c1 + 1, c2, style)  # skip (r1, c1)
+        for r in range(r1 + 1, r2 + 1):
+            self.row(r).write_blanks(c1, c2, style)
         self.__merged_ranges.append((r1, r2, c1, c2))
 
-    def insert_bitmap(self, filename, row, col, x = 0, y = 0, scale_x = 1, scale_y = 1):
+    def insert_bitmap(self, filename, row, col, x=0, y=0, scale_x=1, scale_y=1):
         bmp = Bitmap.ImDataBmpRecord(filename)
         obj = Bitmap.ObjBmpRecord(row, col, self, bmp, x, y, scale_x, scale_y)
 
@@ -1052,18 +1050,17 @@ class Worksheet(object):
                 self.first_used_row = indx
         return self.__rows[indx]
 
-    def row_height(self, row): # in pixels
+    def row_height(self, row):  # in pixels
         if row in self.__rows:
             return self.__rows[row].get_height_in_pixels()
         else:
             return 17
 
-    def col_width(self, col): # in pixels
+    def col_width(self, col):  # in pixels
         if col in self.__cols:
             return self.__cols[col].width_in_pixels()
         else:
             return 64
-
 
     ##################################################################
     ## BIFF records generation
@@ -1122,23 +1119,23 @@ class Worksheet(object):
         return BIFFRecords.DimensionsRecord(
             self.first_used_row, self.last_used_row,
             self.first_used_col, self.last_used_col
-            ).get()
+        ).get()
 
     def __window2_rec(self):
         # Appends SCL record.
         options = 0
-        options |= (self.__show_formulas        & 0x01) << 0
-        options |= (self.__show_grid            & 0x01) << 1
-        options |= (self.__show_headers         & 0x01) << 2
-        options |= (self.__panes_frozen         & 0x01) << 3
-        options |= (self.show_zero_values       & 0x01) << 4
-        options |= (self.__auto_colour_grid     & 0x01) << 5
-        options |= (self.__cols_right_to_left   & 0x01) << 6
-        options |= (self.__show_outline         & 0x01) << 7
-        options |= (self.__remove_splits        & 0x01) << 8
-        options |= (self.__selected             & 0x01) << 9
-        options |= (self.__sheet_visible        & 0x01) << 10
-        options |= (self.__page_preview         & 0x01) << 11
+        options |= (self.__show_formulas & 0x01) << 0
+        options |= (self.__show_grid & 0x01) << 1
+        options |= (self.__show_headers & 0x01) << 2
+        options |= (self.__panes_frozen & 0x01) << 3
+        options |= (self.show_zero_values & 0x01) << 4
+        options |= (self.__auto_colour_grid & 0x01) << 5
+        options |= (self.__cols_right_to_left & 0x01) << 6
+        options |= (self.__show_outline & 0x01) << 7
+        options |= (self.__remove_splits & 0x01) << 8
+        options |= (self.__selected & 0x01) << 9
+        options |= (self.__sheet_visible & 0x01) << 10
+        options |= (self.__page_preview & 0x01) << 11
         if self.__page_preview:
             scl_magn = self.__preview_magn
         else:
@@ -1168,8 +1165,8 @@ class Worksheet(object):
             if self.__horz_split_first_visible is None:
                 self.__horz_split_first_visible = 0
             # inspired by pyXLWriter
-            self.__horz_split_pos = 20*self.__horz_split_pos + 255
-            self.__vert_split_pos = 113.879*self.__vert_split_pos + 390
+            self.__horz_split_pos = 20 * self.__horz_split_pos + 255
+            self.__vert_split_pos = 113.879 * self.__vert_split_pos + 390
 
         if self.__vert_split_pos > 0 and self.__horz_split_pos > 0:
             self.__split_active_pane = 0
@@ -1226,28 +1223,28 @@ class Worksheet(object):
         result += BIFFRecords.TopMarginRecord(self.__top_margin).get()
         result += BIFFRecords.BottomMarginRecord(self.__bottom_margin).get()
 
-        setup_page_options =  (self.__print_in_rows & 0x01) << 0
-        setup_page_options |=  (self.__portrait & 0x01) << 1
-        setup_page_options |=  (0x00 & 0x01) << 2
-        setup_page_options |=  (self.__print_not_colour & 0x01) << 3
-        setup_page_options |=  (self.__print_draft & 0x01) << 4
-        setup_page_options |=  (self.__print_notes & 0x01) << 5
-        setup_page_options |=  (0x00 & 0x01) << 6
-        setup_page_options |=  (0x01 & 0x01) << 7
-        setup_page_options |=  (self.__print_notes_at_end & 0x01) << 9
-        setup_page_options |=  (self.__print_omit_errors & 0x03) << 10
+        setup_page_options = (self.__print_in_rows & 0x01) << 0
+        setup_page_options |= (self.__portrait & 0x01) << 1
+        setup_page_options |= (0x00 & 0x01) << 2
+        setup_page_options |= (self.__print_not_colour & 0x01) << 3
+        setup_page_options |= (self.__print_draft & 0x01) << 4
+        setup_page_options |= (self.__print_notes & 0x01) << 5
+        setup_page_options |= (0x00 & 0x01) << 6
+        setup_page_options |= (0x01 & 0x01) << 7
+        setup_page_options |= (self.__print_notes_at_end & 0x01) << 9
+        setup_page_options |= (self.__print_omit_errors & 0x03) << 10
 
         result += BIFFRecords.SetupPageRecord(self.__paper_size_code,
-                                self.__print_scaling,
-                                self.__start_page_number,
-                                self.__fit_width_to_pages,
-                                self.__fit_height_to_pages,
-                                setup_page_options,
-                                self.__print_hres,
-                                self.__print_vres,
-                                self.__header_margin,
-                                self.__footer_margin,
-                                self.__copies_num).get()
+                                              self.__print_scaling,
+                                              self.__start_page_number,
+                                              self.__fit_width_to_pages,
+                                              self.__fit_height_to_pages,
+                                              setup_page_options,
+                                              self.__print_hres,
+                                              self.__print_vres,
+                                              self.__header_margin,
+                                              self.__footer_margin,
+                                              self.__copies_num).get()
         return result
 
     def __protection_rec(self):
@@ -1270,7 +1267,7 @@ class Worksheet(object):
             self.__dimensions_rec(),
             self.__print_settings_rec(),
             self.__protection_rec(),
-            ]
+        ]
         if self.row_tempfile:
             self.row_tempfile.flush()
             self.row_tempfile.seek(0)
@@ -1282,7 +1279,7 @@ class Worksheet(object):
             self.__window2_rec(),
             self.__panes_rec(),
             self.__eof_rec(),
-            ])
+        ])
         return ''.join(result)
 
     def flush_row_data(self):
@@ -1293,5 +1290,3 @@ class Worksheet(object):
             self.__flushed_rows[rowx] = 1
         self.__update_row_visible_levels()
         self.__rows = {}
-
-
