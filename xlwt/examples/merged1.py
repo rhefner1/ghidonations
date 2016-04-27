@@ -10,7 +10,7 @@ ws0 = wb.add_sheet('sheet0')
 fnt1 = Font()
 fnt1.name = 'Verdana'
 fnt1.bold = True
-fnt1.height = 18*0x14
+fnt1.height = 18 * 0x14
 
 pat1 = Pattern()
 pat1.pattern = Pattern.SOLID_PATTERN
@@ -25,7 +25,7 @@ brd1.bottom = 0x06
 fnt2 = Font()
 fnt2.name = 'Verdana'
 fnt2.bold = True
-fnt2.height = 14*0x14
+fnt2.height = 14 * 0x14
 
 brd2 = Borders()
 brd2.left = 0x01
@@ -41,7 +41,7 @@ fnt3 = Font()
 fnt3.name = 'Verdana'
 fnt3.bold = True
 fnt3.italic = True
-fnt3.height = 12*0x14
+fnt3.height = 12 * 0x14
 
 brd3 = Borders()
 brd3.left = 0x07
@@ -92,11 +92,9 @@ ware_style.font = fnt4
 ware_style.alignment = al3
 ware_style.borders = brd3
 
-
 ws0.merge(3, 3, 1, 5, style1)
 ws0.merge(4, 10, 1, 6, style2)
 ws0.merge(14, 16, 1, 7, style3)
 ws0.col(1).width = 0x0d00
-
 
 wb.save('merged1.xls')

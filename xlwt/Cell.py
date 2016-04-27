@@ -1,7 +1,9 @@
 # -*- coding: windows-1252 -*-
 
 from struct import unpack, pack
+
 import BIFFRecords
+
 
 class StrCell(object):
     __slots__ = ["rowx", "colx", "xf_idx", "sst_idx"]
@@ -16,6 +18,7 @@ class StrCell(object):
         # return BIFFRecords.LabelSSTRecord(self.rowx, self.colx, self.xf_idx, self.sst_idx).get()
         return pack('<5HL', 0x00FD, 10, self.rowx, self.colx, self.xf_idx, self.sst_idx)
 
+
 class BlankCell(object):
     __slots__ = ["rowx", "colx", "xf_idx"]
 
@@ -28,6 +31,7 @@ class BlankCell(object):
         # return BIFFRecords.BlankRecord(self.rowx, self.colx, self.xf_idx).get()
         return pack('<5H', 0x0201, 6, self.rowx, self.colx, self.xf_idx)
 
+
 class MulBlankCell(object):
     __slots__ = ["rowx", "colx1", "colx2", "xf_idx"]
 
@@ -39,7 +43,8 @@ class MulBlankCell(object):
 
     def get_biff_data(self):
         return BIFFRecords.MulBlankRecord(self.rowx,
-            self.colx1, self.colx2, self.xf_idx).get()
+                                          self.colx1, self.colx2, self.xf_idx).get()
+
 
 class NumberCell(object):
     __slots__ = ["rowx", "colx", "xf_idx", "number"]
@@ -60,9 +65,9 @@ class NumberCell(object):
         # of bangs per buck, or not at all.
         # SJM 2007-10-01
 
-        if -0x20000000 <= num < 0x20000000: # fits in 30-bit *signed* int
+        if -0x20000000 <= num < 0x20000000:  # fits in 30-bit *signed* int
             inum = int(num)
-            if inum == num: # survives round-trip
+            if inum == num:  # survives round-trip
                 # print "30-bit integer RK", inum, hex(inum)
                 rk_encoded = 2 | (inum << 2)
                 return 1, rk_encoded
@@ -81,30 +86,31 @@ class NumberCell(object):
                 rk_encoded = 3 | (itemp << 2)
                 return 1, rk_encoded
 
-        if 0: # Cost of extra pack+unpack not justified by tiny yield.
+        if 0:  # Cost of extra pack+unpack not justified by tiny yield.
             packed = pack('<d', num)
             w01, w23 = unpack('<2i', packed)
-            if not w01 and not(w23 & 3):
+            if not w01 and not (w23 & 3):
                 # 34 lsb are 0
                 # print "float RK", w23, hex(w23)
                 return 1, w23
 
             packed100 = pack('<d', temp)
             w01, w23 = unpack('<2i', packed100)
-            if not w01 and not(w23 & 3):
+            if not w01 and not (w23 & 3):
                 # 34 lsb are 0
                 # print "float RK*100", w23, hex(w23)
                 return 1, w23 | 1
 
-        #print "Number"
-        #print
+        # print "Number"
+        # print
         return 0, pack('<5Hd', 0x0203, 14, self.rowx, self.colx, self.xf_idx, num)
 
     def get_biff_data(self):
         isRK, value = self.get_encoded_data()
         if isRK:
             return pack('<5Hi', 0x27E, 10, self.rowx, self.colx, self.xf_idx, value)
-        return value # NUMBER record already packed
+        return value  # NUMBER record already packed
+
 
 class BooleanCell(object):
     __slots__ = ["rowx", "colx", "xf_idx", "number"]
@@ -117,24 +123,26 @@ class BooleanCell(object):
 
     def get_biff_data(self):
         return BIFFRecords.BoolErrRecord(self.rowx,
-            self.colx, self.xf_idx, self.number, 0).get()
+                                         self.colx, self.xf_idx, self.number, 0).get()
+
 
 error_code_map = {
-    0x00:  0, # Intersection of two cell ranges is empty
-    0x07:  7, # Division by zero
-    0x0F: 15, # Wrong type of operand
-    0x17: 23, # Illegal or deleted cell reference
-    0x1D: 29, # Wrong function or range name
-    0x24: 36, # Value range overflow
-    0x2A: 42, # Argument or function not available
-    '#NULL!' :  0, # Intersection of two cell ranges is empty
-    '#DIV/0!':  7, # Division by zero
-    '#VALUE!': 36, # Wrong type of operand
-    '#REF!'  : 23, # Illegal or deleted cell reference
-    '#NAME?' : 29, # Wrong function or range name
-    '#NUM!'  : 36, # Value range overflow
-    '#N/A!'  : 42, # Argument or function not available
+    0x00: 0,  # Intersection of two cell ranges is empty
+    0x07: 7,  # Division by zero
+    0x0F: 15,  # Wrong type of operand
+    0x17: 23,  # Illegal or deleted cell reference
+    0x1D: 29,  # Wrong function or range name
+    0x24: 36,  # Value range overflow
+    0x2A: 42,  # Argument or function not available
+    '#NULL!': 0,  # Intersection of two cell ranges is empty
+    '#DIV/0!': 7,  # Division by zero
+    '#VALUE!': 36,  # Wrong type of operand
+    '#REF!': 23,  # Illegal or deleted cell reference
+    '#NAME?': 29,  # Wrong function or range name
+    '#NUM!': 36,  # Value range overflow
+    '#N/A!': 42,  # Argument or function not available
 }
+
 
 class ErrorCell(object):
     __slots__ = ["rowx", "colx", "xf_idx", "number"]
@@ -150,7 +158,8 @@ class ErrorCell(object):
 
     def get_biff_data(self):
         return BIFFRecords.BoolErrRecord(self.rowx,
-            self.colx, self.xf_idx, self.number, 1).get()
+                                         self.colx, self.xf_idx, self.number, 1).get()
+
 
 class FormulaCell(object):
     __slots__ = ["rowx", "colx", "xf_idx", "frmla", "calc_flags"]
@@ -164,7 +173,8 @@ class FormulaCell(object):
 
     def get_biff_data(self):
         return BIFFRecords.FormulaRecord(self.rowx,
-            self.colx, self.xf_idx, self.frmla.rpn(), self.calc_flags).get()
+                                         self.colx, self.xf_idx, self.frmla.rpn(), self.calc_flags).get()
+
 
 # module-level function for *internal* use by the Row module
 
@@ -179,7 +189,7 @@ def _get_cells_biff_data_mul(rowx, cell_items):
         if isinstance(icell, NumberCell):
             isRK, value = icell.get_encoded_data()
             if not isRK:
-                pieces.append(value) # pre-packed NUMBER record
+                pieces.append(value)  # pre-packed NUMBER record
                 i += 1
                 continue
             muldata = [(value, icell.xf_idx)]
@@ -194,7 +204,7 @@ def _get_cells_biff_data_mul(rowx, cell_items):
         lastcolx = icolx
         j = i
         packed_record = ''
-        for j in xrange(i+1, nitems):
+        for j in xrange(i + 1, nitems):
             jcolx, jcell = cell_items[j]
             if jcolx != lastcolx + 1:
                 nexti = j
@@ -240,4 +250,3 @@ def _get_cells_biff_data_mul(rowx, cell_items):
             pieces.append(packed_record)
         i = nexti
     return ''.join(pieces)
-

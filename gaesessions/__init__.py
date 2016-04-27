@@ -1,14 +1,14 @@
 """A fast, lightweight, and secure session WSGI middleware for use with GAE."""
-from Cookie import CookieError, SimpleCookie
-from base64 import b64decode, b64encode
 import datetime
 import hashlib
 import hmac
 import logging
-import pickle
 import os
+import pickle
 import threading
 import time
+from Cookie import CookieError, SimpleCookie
+from base64 import b64decode, b64encode
 
 from google.appengine.api import memcache
 from google.appengine.ext import db
@@ -29,7 +29,8 @@ COOKIE_FMT = ' ' + COOKIE_NAME_PREFIX + '%02d="%s"; %sPath=' + COOKIE_PATH + '; 
 
 COOKIE_FMT_SECURE = COOKIE_FMT + '; Secure'
 COOKIE_DATE_FMT = '%a, %d-%b-%Y %H:%M:%S GMT'
-COOKIE_OVERHEAD = len(COOKIE_FMT % (0, '', '')) + len('expires=Xxx, xx XXX XXXX XX:XX:XX GMT; ') + 150  # 150=safety margin (e.g., in case browser uses 4000 instead of 4096)
+COOKIE_OVERHEAD = len(COOKIE_FMT % (0, '', '')) + len(
+    'expires=Xxx, xx XXX XXXX XX:XX:XX GMT; ') + 150  # 150=safety margin (e.g., in case browser uses 4000 instead of 4096)
 MAX_DATA_PER_COOKIE = MAX_COOKIE_LEN - COOKIE_OVERHEAD
 
 _tls = threading.local()
@@ -449,7 +450,9 @@ class SessionMiddleware(object):
     memcache/datastore latency which is critical for small sessions.  Larger
     sessions are kept in memcache+datastore instead.  Defaults to 10KB.
     """
-    def __init__(self, app, cookie_key, lifetime=DEFAULT_LIFETIME, no_datastore=False, cookie_only_threshold=DEFAULT_COOKIE_ONLY_THRESH):
+
+    def __init__(self, app, cookie_key, lifetime=DEFAULT_LIFETIME, no_datastore=False,
+                 cookie_only_threshold=DEFAULT_COOKIE_ONLY_THRESH):
         self.app = app
         self.lifetime = lifetime
         self.no_datastore = no_datastore
@@ -458,11 +461,13 @@ class SessionMiddleware(object):
         if not self.cookie_key:
             raise ValueError("cookie_key MUST be specified")
         if len(self.cookie_key) < 32:
-            raise ValueError("RFC2104 recommends you use at least a 32 character key.  Try os.urandom(64) to make a key.")
+            raise ValueError(
+                "RFC2104 recommends you use at least a 32 character key.  Try os.urandom(64) to make a key.")
 
     def __call__(self, environ, start_response):
         # initialize a session for the current user
-        _tls.current_session = Session(lifetime=self.lifetime, no_datastore=self.no_datastore, cookie_only_threshold=self.cookie_only_thresh, cookie_key=self.cookie_key)
+        _tls.current_session = Session(lifetime=self.lifetime, no_datastore=self.no_datastore,
+                                       cookie_only_threshold=self.cookie_only_thresh, cookie_key=self.cookie_key)
 
         # create a hook for us to insert a cookie into the response headers
         def my_start_response(status, headers, exc_info=None):
@@ -481,6 +486,7 @@ class DjangoSessionMiddleware(object):
     in ``DjangoSessionMiddleware.__init__()`` since Django cannot call an
     initialization method with parameters.
     """
+
     def __init__(self):
         fake_app = lambda environ, start_response: start_response
         self.wrapped_wsgi_middleware = SessionMiddleware(fake_app, cookie_key='you MUST change this')

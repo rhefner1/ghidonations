@@ -15,11 +15,11 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this library; if not, write to the Free Software Foundation,
 # Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # This module was written/ported from PERL Spreadsheet::WriteExcel module
 # The author of the PERL Spreadsheet::WriteExcel module is John McNamara
 # <jmcnamara@cpan.org>
-#----------------------------------------------------------------------------
+# ----------------------------------------------------------------------------
 # See the README.txt distributed with pyXLWriter for more details.
 
 # Portions are (C) Roman V. Kiseliov, 2005
@@ -31,9 +31,8 @@
 __rev_id__ = """$Id: Utils.py 3844 2009-05-20 01:02:54Z sjmachin $"""
 
 import re
-from struct import pack
-from ExcelMagic import MAX_ROW, MAX_COL
 
+from ExcelMagic import MAX_ROW, MAX_COL
 
 _re_cell_ex = re.compile(r"(\$?)([A-I]?[A-Z])(\$?)(\d+)", re.IGNORECASE)
 _re_row_range = re.compile(r"\$?(\d+):\$?(\d+)")
@@ -47,7 +46,7 @@ def col_by_name(colname):
     """
     col = 0
     pow = 1
-    for i in xrange(len(colname)-1, -1, -1):
+    for i in xrange(len(colname) - 1, -1, -1):
         ch = colname[i]
         col += (ord(ch) - ord('A') + 1) * pow
         pow *= 26
@@ -95,11 +94,11 @@ def rowcol_to_cell(row, col, row_abs=False, col_abs=False):
     A1 notation.
 
     """
-    assert 0 <= row < MAX_ROW # MAX_ROW counts from 1
-    assert 0 <= col < MAX_COL # MAX_COL counts from 1
+    assert 0 <= row < MAX_ROW  # MAX_ROW counts from 1
+    assert 0 <= col < MAX_COL  # MAX_COL counts from 1
     d = col // 26
     m = col % 26
-    chr1 = ""    # Most significant character in AA1
+    chr1 = ""  # Most significant character in AA1
     if row_abs:
         row_abs = '$'
     else:
@@ -109,13 +108,14 @@ def rowcol_to_cell(row, col, row_abs=False, col_abs=False):
     else:
         col_abs = ''
     if d > 0:
-        chr1 = chr(ord('A') + d  - 1)
+        chr1 = chr(ord('A') + d - 1)
     chr2 = chr(ord('A') + m)
     # Zero index to 1-index
     return col_abs + chr1 + chr2 + row_abs + str(row + 1)
 
+
 def rowcol_pair_to_cellrange(row1, col1, row2, col2,
-    row1_abs=False, col1_abs=False, row2_abs=False, col2_abs=False):
+                             row1_abs=False, col1_abs=False, row2_abs=False, col2_abs=False):
     """Convert two (row,column) pairs
     into a cell range string in A1:B2 notation.
 
@@ -127,7 +127,8 @@ def rowcol_pair_to_cellrange(row1, col1, row2, col2,
         rowcol_to_cell(row1, col1, row1_abs, col1_abs)
         + ":"
         + rowcol_to_cell(row2, col2, row2_abs, col2_abs)
-        )
+    )
+
 
 def cellrange_to_rowcol_pair(cellrange):
     """Convert cell range string in A1 notation to numeric row/col
@@ -173,11 +174,12 @@ def cell_to_packed_rowcol(cell):
     row, col, row_abs, col_abs = cell_to_rowcol(cell)
     if col >= MAX_COL:
         raise Exception("Column %s greater than IV in formula" % cell)
-    if row >= MAX_ROW: # this for BIFF8. for BIFF7 available 2^14
+    if row >= MAX_ROW:  # this for BIFF8. for BIFF7 available 2^14
         raise Exception("Row %s greater than %d in formula" % (cell, MAX_ROW))
     col |= int(not row_abs) << 15
     col |= int(not col_abs) << 14
     return row, col
+
 
 # === sheetname functions ===
 
@@ -188,6 +190,7 @@ def valid_sheet_name(sheet_name):
         if c in u"[]:\\?/*\x00":
             return False
     return True
+
 
 def quote_sheet_name(unquoted_sheet_name):
     if not valid_sheet_name(unquoted_sheet_name):

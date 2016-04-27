@@ -1,13 +1,14 @@
 # -*- coding: windows-1252 -*-
 
-import ExcelFormulaParser, ExcelFormulaLexer
 import struct
+
+import ExcelFormulaLexer
+import ExcelFormulaParser
 from antlr import ANTLRException
 
 
 class Formula(object):
-    __slots__ = ["__init__",  "__s", "__parser", "__sheet_refs", "__xcall_refs"]
-
+    __slots__ = ["__init__", "__s", "__parser", "__sheet_refs", "__xcall_refs"]
 
     def __init__(self, s):
         try:
@@ -26,7 +27,7 @@ class Formula(object):
 
     def patch_references(self, patches):
         for offset, idx in patches:
-            self.__parser.rpn = self.__parser.rpn[:offset] + struct.pack('<H', idx) + self.__parser.rpn[offset+2:]
+            self.__parser.rpn = self.__parser.rpn[:offset] + struct.pack('<H', idx) + self.__parser.rpn[offset + 2:]
 
     def text(self):
         return self.__s
@@ -40,4 +41,3 @@ class Formula(object):
 
         '''
         return struct.pack("<H", len(self.__parser.rpn)) + self.__parser.rpn
-

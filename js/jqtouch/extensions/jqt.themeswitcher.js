@@ -1,24 +1,24 @@
 /*
 
-            _/    _/_/    _/_/_/_/_/                              _/
-               _/    _/      _/      _/_/    _/    _/    _/_/_/  _/_/_/
-          _/  _/  _/_/      _/    _/    _/  _/    _/  _/        _/    _/
-         _/  _/    _/      _/    _/    _/  _/    _/  _/        _/    _/
-        _/    _/_/  _/    _/      _/_/      _/_/_/    _/_/_/  _/    _/
-       _/
-    _/
+ _/    _/_/    _/_/_/_/_/                              _/
+ _/    _/      _/      _/_/    _/    _/    _/_/_/  _/_/_/
+ _/  _/  _/_/      _/    _/    _/  _/    _/  _/        _/    _/
+ _/  _/    _/      _/    _/    _/  _/    _/  _/        _/    _/
+ _/    _/_/  _/    _/      _/_/      _/_/_/    _/_/_/  _/    _/
+ _/
+ _/
 
-    Documentation and issue tracking on Google Code <http://code.google.com/p/jqtouch/>
+ Documentation and issue tracking on Google Code <http://code.google.com/p/jqtouch/>
 
-    (c) 2011 by jQTouch project members.
-    See LICENSE.txt for license.
+ (c) 2011 by jQTouch project members.
+ See LICENSE.txt for license.
 
-*/
+ */
 
-(function($) {
+(function ($) {
     if ($.jQTouch) {
 
-        var scriptpath = $("script").last().attr("src").split('?')[0].split('/').slice(0, -1).join('/')+'/';
+        var scriptpath = $("script").last().attr("src").split('?')[0].split('/').slice(0, -1).join('/') + '/';
 
         $.jQTouch.addExtension(function ThemeSwitcher(jQT) {
 
@@ -41,29 +41,29 @@
                     item.disabled = false; // workaround for Firefox on Zepto
                     $item.removeAttr('disabled');
                 } else {
-                  item.disabled = true; // workaround for Firefox on Zepto
-                  $item.attr('disabled', true);
+                    item.disabled = true; // workaround for Firefox on Zepto
+                    $item.attr('disabled', true);
                 }
             };
 
             function initializeStyleState(item, title) {
-              // and, workaround for WebKit by initializing the 'disabled' attribute
-              if (!current) {
-                  current = title;
-              }
-              setStyleState(item, current);
+                // and, workaround for WebKit by initializing the 'disabled' attribute
+                if (!current) {
+                    current = title;
+                }
+                setStyleState(item, current);
             }
 
             // public
             function switchStyle(title) {
                 current = title;
-                $(options.themeStyleSelector).each(function(i, item) {
+                $(options.themeStyleSelector).each(function (i, item) {
                     setStyleState(item, title);
                 });
             };
 
             // collect title names, from <head>
-            $(options.themeStyleSelector).each(function(i, item) {
+            $(options.themeStyleSelector).each(function (i, item) {
                 var $item = $(item);
                 var title = $item.attr('title');
 
@@ -73,7 +73,7 @@
             });
 
             // add included theme
-            for (var i=0; i < options.themeIncluded.length; i++) {
+            for (var i = 0; i < options.themeIncluded.length; i++) {
                 var hash = options.themeIncluded[i];
                 if (!(hash.title in titles)) {
                     link = $('<link title="' + hash.title + '" href="' + hash.href + '" rel="stylesheet">');
@@ -93,18 +93,18 @@
                 }
 
                 // bind to UI items
-                $(options.themeSelectionSelector).delegate('* > a', 'tap', function() {
+                $(options.themeSelectionSelector).delegate('* > a', 'tap', function () {
                     var $a = $(this).closest('a');
                     switchStyle($a.attr('data-title'));
 
                     // poor-man simulation of radio button behaviour
-                    setTimeout(function() {
+                    setTimeout(function () {
                         $a.addClass('active');
                     }, 0);
                 });
 
                 // poor-man simulation of radio button behaviour
-                $(options.themeSelectionSelector).closest('#jqt > *').bind('pageAnimationEnd', function(e, data){
+                $(options.themeSelectionSelector).closest('#jqt > *').bind('pageAnimationEnd', function (e, data) {
                     if (data.direction === 'in') {
                         $(options.themeSelectionSelector).find('a[data-title="' + current + '"]').addClass('active');
                     }

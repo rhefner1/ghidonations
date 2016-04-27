@@ -1,9 +1,9 @@
 var pages_retrieved = 0
-var cursors_dict = {0:null}
+var cursors_dict = {0: null}
 
-function clickHandler(){
+function clickHandler() {
     $("#donations #load_more").off()
-    $("#donations #load_more").one("click", function(){
+    $("#donations #load_more").one("click", function () {
         $("#load_more_text").hide()
         $("#search_loading").show()
 
@@ -14,19 +14,19 @@ function clickHandler(){
     })
 }
 
-function getDonations(){
+function getDonations() {
     var i_key = $("#i_key").val()
 
     var query_cursor = cursors_dict[pages_retrieved]
     pages_retrieved += 1
 
-    if (query_cursor != "end"){
-        var params = {'individual_key':i_key, 'query_cursor':null}
+    if (query_cursor != "end") {
+        var params = {'individual_key': i_key, 'query_cursor': null}
         var request = ghiapi.semi.get.individual_donations(params)
-    
-        request.execute(function(response){
 
-            $.each(response.objects, function(index, d){
+        request.execute(function (response) {
+
+            $.each(response.objects, function (index, d) {
                 var template = $.tmpl('<li style="font-size:16px"><span>${name}</span> <small class="counter">${amount_donated}</small></a></li>', d)
                 template.appendTo("#donations_list");
             })
@@ -34,7 +34,7 @@ function getDonations(){
             // Saving query cursor for next request
             var next_cursor = response.new_cursor
 
-            if (next_cursor == null){
+            if (next_cursor == null) {
                 next_cursor = "end"
 
                 $("#donations #load_more").hide()
@@ -48,10 +48,10 @@ function getDonations(){
     clickHandler()
 }
 
-function initializeAPI(){
+function initializeAPI() {
     // Load GHI Donations API
     var ROOT = '/_ah/api';
-    gapi.client.load('ghidonations', 'v1', function() {
+    gapi.client.load('ghidonations', 'v1', function () {
         ghiapi = gapi.client.ghidonations
 
         //Team list dictionary parsed from JSON
@@ -59,13 +59,13 @@ function initializeAPI(){
         var team_names = ""
 
         //Formatting team field
-        $.each(team_list, function(team_key, values){
+        $.each(team_list, function (team_key, values) {
             team_names += values[0] + ", "
         })
 
-        $("#team_names").text(team_names.substr(0, team_names.length-2))
+        $("#team_names").text(team_names.substr(0, team_names.length - 2))
 
         clickHandler()
         getDonations()
-    }, ROOT); 
+    }, ROOT);
 }

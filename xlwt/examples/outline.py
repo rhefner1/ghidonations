@@ -7,7 +7,8 @@ import xlwt
 style = xlwt.easyxf(
     "font: name Arial, colour_index blue, bold on;"
     "borders: top double, bottom double, left double, right double;"
-    )
+)
+
 
 def write_data_cells(ws):
     ws.write_merge(1, 1, 1, 5, 'test 1', style)
@@ -20,6 +21,7 @@ def write_data_cells(ws):
     ws.write_merge(8, 8, 1, 4, 'test 1', style)
     ws.write_merge(9, 9, 1, 3, 'test 5', style)
 
+
 def write_row_outline_levels(ws):
     ws.row(1).level = 1
     ws.row(2).level = 1
@@ -31,6 +33,7 @@ def write_row_outline_levels(ws):
     ws.row(8).level = 1
     ws.row(9).level = 1
 
+
 def write_column_outline_levels(ws):
     ws.col(1).level = 1
     ws.col(2).level = 1
@@ -41,6 +44,7 @@ def write_column_outline_levels(ws):
     ws.col(7).level = 2
     ws.col(8).level = 1
     ws.col(9).level = 1
+
 
 wb = xlwt.Workbook()
 

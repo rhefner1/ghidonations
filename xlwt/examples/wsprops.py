@@ -1,5 +1,5 @@
 props = \
-[
+    [
         'name',
         'parent',
         'rows',
@@ -73,7 +73,7 @@ props = \
         'header_margin',
         'footer_margin',
         'copies_num',
-]
+    ]
 
 from xlwt import *
 
@@ -103,8 +103,8 @@ print ws.first_visible_col
 print ws.grid_colour
 print ws.preview_magn
 print ws.normal_magn
-#print ws.row_gut_width
-#print ws.col_gut_height
+# print ws.row_gut_width
+# print ws.col_gut_height
 print ws.show_auto_page_breaks
 print ws.dialogue_sheet
 print ws.auto_style_outline
@@ -125,7 +125,7 @@ print ws.delta
 print ws.save_recalc
 print ws.print_headers
 print ws.print_grid
-#print ws.grid_set
+# print ws.grid_set
 print ws.vert_page_breaks
 print ws.horz_page_breaks
 print ws.header_str
