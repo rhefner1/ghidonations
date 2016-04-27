@@ -1547,7 +1547,7 @@ class IndividualData(UtilitiesBase):
         memcache_key = "info" + team.urlsafe() + self.e.websafe
         def get_item():
             if self.e.photo:
-                image_url = images.get_serving_url(self.e.photo, 150)
+                image_url = images.get_serving_url(self.e.photo, 150, secure_url=True)
             else:
                 image_url = "https://ghidonations.appspot.com/images/face150.jpg"
 
