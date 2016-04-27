@@ -1,5 +1,5 @@
 application: ghidonations
-version: 5r
+version: 5s
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -57,7 +57,7 @@ handlers:
   script: mooha.app
   secure: optional
 
-- url: /donate
+- url: /donate*.*
   script: mooha.app
   secure: always
 
