@@ -1,32 +1,34 @@
-#App engine platform
-import logging, webapp2, appengine_config, json, gc
-
-import GlobalUtilities as tools
-import DataModels as models
-
-from google.appengine.api import mail, taskqueue, files, memcache
-from google.appengine.ext import deferred, blobstore
-from google.appengine.ext.webapp import template
+# App engine platform
+import appengine_config
+import json
+import logging
+import webapp2
 from datetime import datetime, timedelta
 
-#Excel export
-from xlwt import *
+import DataModels as models
+import GlobalUtilities as tools
+from google.appengine.api import mail, taskqueue
+from google.appengine.ext import deferred
+from google.appengine.ext.webapp import template
+
+# Excel export
 
 # Google Cloud Storage
 import cloudstorage as gcs
 
+
 class AggregateAnnualReport(webapp2.RequestHandler):
     def post(self):
         target_year = int(self.request.get("year"))
-        s = tools.getKey( self.request.get("skey") )
+        s = tools.getKey(self.request.get("skey"))
         mode = self.request.get("mode")
 
-        td1 = datetime(target_year,1,1,0,0)
-        td2 = datetime(target_year,12,31,0,0)
+        td1 = datetime(target_year, 1, 1, 0, 0)
+        td2 = datetime(target_year, 12, 31, 0, 0)
 
-        annual_donations = models.Donation.query(models.Donation.settings == s, 
-                                                models.Donation.donation_date >= td1,
-                                                models.Donation.donation_date <= td2)
+        annual_donations = models.Donation.query(models.Donation.settings == s,
+                                                 models.Donation.donation_date >= td1,
+                                                 models.Donation.donation_date <= td2)
 
         all_contacts = set([d.contact for d in annual_donations])
 
@@ -68,7 +70,7 @@ class AggregateAnnualReport(webapp2.RequestHandler):
 
         # Writing text file
         gcs_file_key, gcs_file = tools.newFile("text/plain", "GHI_Donations_" + str(target_year) + ".txt")
-        gcs_file.write( body )
+        gcs_file.write(body)
         gcs_file.close()
 
 
@@ -84,9 +86,11 @@ class AnnualReport(webapp2.RequestHandler):
 
             message = mail.EmailMessage()
 
-            try: email = c.email[0]
-            except: email = c.email
-            
+            try:
+                email = c.email[0]
+            except:
+                email = c.email
+
             message.to = email
             message.sender = "Global Hope India <donate@globalhopeindia.org>"
             message.subject = str(year) + " Global Hope India Donations"
@@ -99,7 +103,8 @@ class AnnualReport(webapp2.RequestHandler):
 
             donation_total = "${:,.2f}".format(donation_total)
 
-            template_variables = {"s":c.settings.get(), "c":c, "donations":donations, "year":year, "donation_total":str(donation_total)}
+            template_variables = {"s": c.settings.get(), "c": c, "donations": donations, "year": year,
+                                  "donation_total": str(donation_total)}
 
             message.html = template.render("pages/letters/donor_report.html", template_variables)
             message.send()
@@ -108,15 +113,17 @@ class AnnualReport(webapp2.RequestHandler):
 
         else:
             logging.info("Annual report not sent sent because " + c.name + "doesn't have an email.")
-        
+
+
 class Confirmation(webapp2.RequestHandler):
     def post(self):
         donation_key = self.request.get("donation_key")
         d = tools.getKey(donation_key).get()
 
         logging.info("Retrying confirmation email through task queue for donation: " + donation_key)
-        
+
         d.confirmation.email()
+
 
 class DelayIndexing(webapp2.RequestHandler):
     def post(self):
@@ -126,8 +133,9 @@ class DelayIndexing(webapp2.RequestHandler):
             e = tools.getKey(entity_key).get()
             e.search.index()
         except Exception, e:
-            logging.error( str(e) )
+            logging.error(str(e))
             self.error(500)
+
 
 class DeleteSpreadsheet(webapp2.RequestHandler):
     def post(self):
@@ -137,6 +145,7 @@ class DeleteSpreadsheet(webapp2.RequestHandler):
             gcs.delete(file_key)
         except:
             pass
+
 
 class IndexAll(webapp2.RequestHandler):
     def post(self):
@@ -162,6 +171,7 @@ class IndexAll(webapp2.RequestHandler):
             teams = models.Team.query()
             deferred.defer(tools.indexEntitiesFromQuery, teams, _queue="backend")
 
+
 class MailchimpAdd(webapp2.RequestHandler):
     def post(self):
         email = self.request.get("email")
@@ -172,7 +182,8 @@ class MailchimpAdd(webapp2.RequestHandler):
 
         s.mailchimp.add(email, name, True)
 
-        logging.info("Retrying Mailchimp add through task queue for: " + email  + " under settings ID: " + settings_key)
+        logging.info("Retrying Mailchimp add through task queue for: " + email + " under settings ID: " + settings_key)
+
 
 class ReindexEntities(webapp2.RequestHandler):
     def post(self):
@@ -182,7 +193,8 @@ class ReindexEntities(webapp2.RequestHandler):
         base = tools.getKey(e_key).get()
 
         if mode == "contact":
-            query = models.Donation.query(models.Donation.settings == base.settings, models.Donation.contact == base.key)
+            query = models.Donation.query(models.Donation.settings == base.settings,
+                                          models.Donation.contact == base.key)
             query = tools.qCache(query)
 
         elif mode == "individual":
@@ -192,30 +204,33 @@ class ReindexEntities(webapp2.RequestHandler):
             query = base.data.donations
 
         for e in query:
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.key.urlsafe()}, countdown=2, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e': e.key.urlsafe()}, countdown=2,
+                          queue_name="delayindexing")
+
 
 class UpdateAnalytics(webapp2.RequestHandler):
     def _run(self):
 
-        #Scheduled cron job to update analytics for all settings accounts every hour
+        # Scheduled cron job to update analytics for all settings accounts every hour
         all_settings = models.Settings.query()
         for s in all_settings:
 
             ## Update one_week_history
             last_week = datetime.today() - timedelta(days=7)
 
-            #Get donations made in the last week
-            donations = models.Donation.gql("WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC", 
-                        s=s.key, last_week=last_week)
+            # Get donations made in the last week
+            donations = models.Donation.gql(
+                "WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC",
+                s=s.key, last_week=last_week)
 
             donation_count = 0
             total_money = tools.toDecimal(0)
 
             for d in donations:
-                #Counting total money
+                # Counting total money
                 total_money += d.amount_donated
-                
-                #Counting number of donations
+
+                # Counting number of donations
                 donation_count += 1
 
             one_week_history = [donation_count, str(total_money)]
@@ -226,9 +241,10 @@ class UpdateAnalytics(webapp2.RequestHandler):
             ## Update one_month_history
             last_week = datetime.today() - timedelta(days=30)
 
-            #Get donations made in the last week
-            donations = models.Donation.gql("WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC", 
-                        s=s.key, last_week=last_week)
+            # Get donations made in the last week
+            donations = models.Donation.gql(
+                "WHERE settings = :s AND donation_date > :last_week ORDER BY donation_date DESC",
+                s=s.key, last_week=last_week)
 
             one_month_history = [["Date", "Amount Donated ($)"]]
             donations_dict = {}
@@ -251,6 +267,7 @@ class UpdateAnalytics(webapp2.RequestHandler):
 
     get = post = _run
 
+
 class UpdateContactsJSON(webapp2.RequestHandler):
     def post(self):
         s_key = self.request.get("s_key")
@@ -262,23 +279,24 @@ class UpdateContactsJSON(webapp2.RequestHandler):
             contact = {}
             contact["label"] = c.name
             contact["key"] = str(c.websafe)
-            
+
             contacts.append(contact)
-  
+
         s.contacts_json = json.dumps(contacts)
         s.put()
 
-app = webapp2.WSGIApplication([
-        ('/tasks/annualreport', AnnualReport),
-        ('/tasks/aggregateannualreport', AggregateAnnualReport),
-        ('/tasks/confirmation', Confirmation),
-        ('/tasks/delayindexing', DelayIndexing),
-        ('/tasks/deletespreadsheet', DeleteSpreadsheet),
-        ('/tasks/indexall', IndexAll),
-        ('/tasks/mailchimp', MailchimpAdd),
-        ('/tasks/reindex', ReindexEntities),
 
-        ('/tasks/updateanalytics', UpdateAnalytics),
-        ('/tasks/contactsjson', UpdateContactsJSON)],
-        debug=True)
+app = webapp2.WSGIApplication([
+    ('/tasks/annualreport', AnnualReport),
+    ('/tasks/aggregateannualreport', AggregateAnnualReport),
+    ('/tasks/confirmation', Confirmation),
+    ('/tasks/delayindexing', DelayIndexing),
+    ('/tasks/deletespreadsheet', DeleteSpreadsheet),
+    ('/tasks/indexall', IndexAll),
+    ('/tasks/mailchimp', MailchimpAdd),
+    ('/tasks/reindex', ReindexEntities),
+
+    ('/tasks/updateanalytics', UpdateAnalytics),
+    ('/tasks/contactsjson', UpdateContactsJSON)],
+    debug=True)
 app = appengine_config.recording_add_wsgi_middleware(app)

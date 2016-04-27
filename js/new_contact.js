@@ -1,13 +1,15 @@
-$(document).ready(function(){
+$(document).ready(function () {
 
     $("form").validationEngine()
     add_email_handler()
-    
-    $("#save").click(function(){
+
+    $("#save").click(function () {
         var validation_result = $("form").validationEngine('validate')
-        if (validation_result == true){
+        if (validation_result == true) {
             var name = $("#newcontact input[name=name]").val()
-            var email = $(".email_address").map(function(){return $(this).val();}).get()
+            var email = $(".email_address").map(function () {
+                return $(this).val();
+            }).get()
             var notes = $("#newcontact textarea[name=notes]").val()
 
             var phone_1 = $("input[name=phone_1]").val()
@@ -20,20 +22,20 @@ $(document).ready(function(){
             var state = $("input[name=state]").val()
             var zipcode = $("input[name=zip]").val()
 
-            address = {'street':street, 'city':city, 'state':state, 'zipcode':zipcode}
+            address = {'street': street, 'city': city, 'state': state, 'zipcode': zipcode}
 
             //Flash message
             show_flash("setting", "Creating contact...", false)
-            
-            var params = {'name':name, 'email':email, 'phone':phone, 'address':address, 'notes':notes}
+
+            var params = {'name': name, 'email': email, 'phone': phone, 'address': address, 'notes': notes}
             var request = ghiapi.new.contact(params)
 
-            request.execute(function(response){
-                rpcSuccessMessage(response, function(){
-                    refreshPage()  
+            request.execute(function (response) {
+                rpcSuccessMessage(response, function () {
+                    refreshPage()
                 })
-                
-            })            
-        }                
+
+            })
+        }
     })
 });

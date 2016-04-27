@@ -1,7 +1,8 @@
 # -*- coding: cp1252 -*-
 from struct import pack
+
 from UnicodeUtils import upack1, upack2
-import sys
+
 
 class SharedStringTable(object):
     _SST_ID = 0x00FC
@@ -46,7 +47,7 @@ class SharedStringTable(object):
         self._continues = [None, None]
         self._current_piece = pack('<II', 0, 0)
         data = [(idx, s) for s, idx in self._str_indexes.iteritems()]
-        data.sort() # in index order
+        data.sort()  # in index order
         for idx, s in data:
             if self._tally[idx] == 0:
                 s = u''
@@ -61,19 +62,18 @@ class SharedStringTable(object):
         self._continues = None
         return result
 
-
     def _add_to_sst(self, s):
         u_str = upack2(s, self.encoding)
 
         is_unicode_str = u_str[2] == '\x01'
         if is_unicode_str:
-            atom_len = 5 # 2 byte -- len,
-                         # 1 byte -- options,
-                         # 2 byte -- 1st sym
+            atom_len = 5  # 2 byte -- len,
+            # 1 byte -- options,
+            # 2 byte -- 1st sym
         else:
-            atom_len = 4 # 2 byte -- len,
-                         # 1 byte -- options,
-                         # 1 byte -- 1st sym
+            atom_len = 4  # 2 byte -- len,
+            # 1 byte -- options,
+            # 1 byte -- 1st sym
 
         self._save_atom(u_str[0:atom_len])
         self._save_splitted(u_str[atom_len:], is_unicode_str)
@@ -83,7 +83,8 @@ class SharedStringTable(object):
             self._sst_record = self._current_piece
         else:
             curr_piece_len = len(self._current_piece)
-            self._continues.append(pack('<2H%ds'%curr_piece_len, self._CONTINUE_ID, curr_piece_len, self._current_piece))
+            self._continues.append(
+                pack('<2H%ds' % curr_piece_len, self._CONTINUE_ID, curr_piece_len, self._current_piece))
         self._current_piece = ''
 
     def _save_atom(self, s):
@@ -110,7 +111,7 @@ class SharedStringTable(object):
                 else:
                     atom_len = free_space
 
-            self._current_piece += s[i:i+atom_len]
+            self._current_piece += s[i:i + atom_len]
 
             if need_more_space:
                 self._new_piece()
@@ -123,8 +124,7 @@ class SharedStringTable(object):
 
 
 class BiffRecord(object):
-
-    _rec_data = '' # class attribute; child classes need to set this.
+    _rec_data = ''  # class attribute; child classes need to set this.
 
     # Sheer waste.
     # def __init__(self):
@@ -144,7 +144,7 @@ class BiffRecord(object):
         # data = self.get_rec_data()
         data = self._rec_data
 
-        if len(data) > 0x2020: # limit for BIFF7/8
+        if len(data) > 0x2020:  # limit for BIFF7/8
             chunks = []
             pos = 0
             while pos < len(data):
@@ -154,7 +154,7 @@ class BiffRecord(object):
                 pos = chunk_pos
             continues = pack('<2H', self._REC_ID, len(chunks[0])) + chunks[0]
             for chunk in chunks[1:]:
-                continues += pack('<2H%ds'%len(chunk), 0x003C, len(chunk), chunk)
+                continues += pack('<2H%ds' % len(chunk), 0x003C, len(chunk), chunk)
                 # 0x003C -- CONTINUE record id
             return continues
         else:
@@ -177,21 +177,21 @@ class Biff8BOFRecord(BiffRecord):
     8      4    File history flags
     12     4    Lowest Excel version that can read all records in this file
     """
-    _REC_ID      = 0x0809
+    _REC_ID = 0x0809
     # stream types
     BOOK_GLOBAL = 0x0005
-    VB_MODULE   = 0x0006
-    WORKSHEET   = 0x0010
-    CHART       = 0x0020
-    MACROSHEET  = 0x0040
-    WORKSPACE   = 0x0100
+    VB_MODULE = 0x0006
+    WORKSHEET = 0x0010
+    CHART = 0x0020
+    MACROSHEET = 0x0040
+    WORKSPACE = 0x0100
 
     def __init__(self, rec_type):
-        version  = 0x0600
-        build    = 0x0DBB
-        year     = 0x07CC
+        version = 0x0600
+        build = 0x0DBB
+        year = 0x07CC
         file_hist_flags = 0x00L
-        ver_can_read    = 0x06L
+        ver_can_read = 0x06L
 
         self._rec_data = pack('<4H2I', version, rec_type, build, year, file_hist_flags, ver_can_read)
 
@@ -230,7 +230,7 @@ class WriteAccessRecord(BiffRecord):
     def __init__(self, owner):
         uowner = owner[0:0x30]
         uowner_len = len(uowner)
-        self._rec_data = pack('%ds%ds' % (uowner_len, 0x70 - uowner_len), uowner, ' '*(0x70 - uowner_len))
+        self._rec_data = pack('%ds%ds' % (uowner_len, 0x70 - uowner_len), uowner, ' ' * (0x70 - uowner_len))
 
 
 class DSFRecord(BiffRecord):
@@ -256,7 +256,7 @@ class TabIDRecord(BiffRecord):
 
     def __init__(self, sheetcount):
         for i in range(sheetcount):
-            self._rec_data += pack('<H', i+1)
+            self._rec_data += pack('<H', i + 1)
 
 
 class FnGroupCountRecord(BiffRecord):
@@ -286,7 +286,6 @@ class ObjectProtectRecord(BiffRecord):
     """
     _REC_ID = 0x0063
 
-
     def __init__(self, objprotect):
         self._rec_data = pack('<H', objprotect)
 
@@ -298,7 +297,6 @@ class ScenProtectRecord(BiffRecord):
     Scenario protection is not active, if this record is omitted.
     """
     _REC_ID = 0x00DD
-
 
     def __init__(self, scenprotect):
         self._rec_data = pack('<H', scenprotect)
@@ -324,6 +322,7 @@ class PasswordRecord(BiffRecord):
     protection password.
     """
     _REC_ID = 0x0013
+
     def passwd_hash(self, plaintext):
         """
         Based on the algorithm provided by Daniel Rentz of OpenOffice.
@@ -343,7 +342,7 @@ class PasswordRecord(BiffRecord):
         passwd_hash ^= 0xCE4B
         return passwd_hash
 
-    def __init__(self, passwd = ""):
+    def __init__(self, passwd=""):
         self._rec_data = pack('<H', self.passwd_hash(passwd))
 
 
@@ -371,6 +370,7 @@ class BackupRecord(BiffRecord):
     def __init__(self, backup):
         self._rec_data = pack('<H', backup)
 
+
 class HideObjRecord(BiffRecord):
     """
     This record specifies whether and how to show objects in the workbook.
@@ -386,7 +386,6 @@ class HideObjRecord(BiffRecord):
 
     def __init__(self):
         self._rec_data = pack('<H', 0x00)
-
 
 
 class RefreshAllRecord(BiffRecord):
@@ -573,6 +572,7 @@ class CodepageBiff8Record(BiffRecord):
     def __init__(self):
         self._rec_data = pack('<H', self.UTF_16)
 
+
 class Window1Record(BiffRecord):
     """
     Offset Size Contents
@@ -594,6 +594,7 @@ class Window1Record(BiffRecord):
                 horizontal scrollbar.
     """
     _REC_ID = 0x003D
+
     # flags
 
     def __init__(self,
@@ -603,10 +604,11 @@ class Window1Record(BiffRecord):
                  active_sheet,
                  first_tab_index, selected_tabs, tab_width):
         self._rec_data = pack('<9H', hpos_twips, vpos_twips,
-                                      width_twips, height_twips,
-                                      flags,
-                                      active_sheet,
-                                      first_tab_index, selected_tabs, tab_width)
+                              width_twips, height_twips,
+                              flags,
+                              active_sheet,
+                              first_tab_index, selected_tabs, tab_width)
+
 
 class FontRecord(BiffRecord):
     """
@@ -678,15 +680,16 @@ class FontRecord(BiffRecord):
     _REC_ID = 0x0031
 
     def __init__(self,
-                    height, options, colour_index, weight, escapement,
-                    underline, family, charset,
-                    name):
+                 height, options, colour_index, weight, escapement,
+                 underline, family, charset,
+                 name):
         uname = upack1(name)
         uname_len = len(uname)
 
         self._rec_data = pack('<5H4B%ds' % uname_len, height, options, colour_index, weight, escapement,
-                                                underline, family, charset, 0x00,
-                                                uname)
+                              underline, family, charset, 0x00,
+                              uname)
+
 
 class NumberFormatRecord(BiffRecord):
     """
@@ -889,23 +892,23 @@ class XFRecord(BiffRecord):
         fmt = pack('<H', fmt_str_xf_idx)
         if xftype == 'cell':
             prt = pack('<H',
-                ((protection.cell_locked    & 0x01) << 0) |
-                ((protection.formula_hidden & 0x01) << 1)
-            )
+                       ((protection.cell_locked & 0x01) << 0) |
+                       ((protection.formula_hidden & 0x01) << 1)
+                       )
         else:
             prt = pack('<H', 0xFFF5)
         aln = pack('B',
-            ((alignment.horz & 0x07) << 0) |
-            ((alignment.wrap & 0x01) << 3) |
-            ((alignment.vert & 0x07) << 4)
-        )
+                   ((alignment.horz & 0x07) << 0) |
+                   ((alignment.wrap & 0x01) << 3) |
+                   ((alignment.vert & 0x07) << 4)
+                   )
         rot = pack('B', alignment.rota)
         txt = pack('B',
-            ((alignment.inde & 0x0F) << 0) |
-            ((alignment.shri & 0x01) << 4) |
-            ((alignment.merg & 0x01) << 5) |
-            ((alignment.dire & 0x03) << 6)
-        )
+                   ((alignment.inde & 0x0F) << 0) |
+                   ((alignment.shri & 0x01) << 4) |
+                   ((alignment.merg & 0x01) << 5) |
+                   ((alignment.dire & 0x03) << 6)
+                   )
         if xftype == 'cell':
             used_attr = pack('B', 0xF8)
         else:
@@ -922,30 +925,31 @@ class XFRecord(BiffRecord):
         if borders.diag == borders.NO_LINE:
             borders.diag_colour = 0x00
         brd1 = pack('<L',
-            ((borders.left          & 0x0F) << 0 ) |
-            ((borders.right         & 0x0F) << 4 ) |
-            ((borders.top           & 0x0F) << 8 ) |
-            ((borders.bottom        & 0x0F) << 12) |
-            ((borders.left_colour   & 0x7F) << 16) |
-            ((borders.right_colour  & 0x7F) << 23) |
-            ((borders.need_diag1    & 0x01) << 30) |
-            ((borders.need_diag2    & 0x01) << 31)
-        )
+                    ((borders.left & 0x0F) << 0) |
+                    ((borders.right & 0x0F) << 4) |
+                    ((borders.top & 0x0F) << 8) |
+                    ((borders.bottom & 0x0F) << 12) |
+                    ((borders.left_colour & 0x7F) << 16) |
+                    ((borders.right_colour & 0x7F) << 23) |
+                    ((borders.need_diag1 & 0x01) << 30) |
+                    ((borders.need_diag2 & 0x01) << 31)
+                    )
         brd2 = pack('<L',
-            ((borders.top_colour    & 0x7F) << 0 ) |
-            ((borders.bottom_colour & 0x7F) << 7 ) |
-            ((borders.diag_colour   & 0x7F) << 14) |
-            ((borders.diag          & 0x0F) << 21) |
-            ((pattern.pattern       & 0x3F) << 26)
-        )
+                    ((borders.top_colour & 0x7F) << 0) |
+                    ((borders.bottom_colour & 0x7F) << 7) |
+                    ((borders.diag_colour & 0x7F) << 14) |
+                    ((borders.diag & 0x0F) << 21) |
+                    ((pattern.pattern & 0x3F) << 26)
+                    )
         pat = pack('<H',
-            ((pattern.pattern_fore_colour & 0x7F) << 0 ) |
-            ((pattern.pattern_back_colour & 0x7F) << 7 )
-        )
+                   ((pattern.pattern_fore_colour & 0x7F) << 0) |
+                   ((pattern.pattern_back_colour & 0x7F) << 7)
+                   )
         self._rec_data = fnt + fmt + prt + \
-                        aln + rot + txt + used_attr + \
-                        brd1 + brd2 + \
-                        pat
+                         aln + rot + txt + used_attr + \
+                         brd1 + brd2 + \
+                         pat
+
 
 class StyleRecord(BiffRecord):
     """
@@ -1150,18 +1154,19 @@ class ExtSSTRecord(BiffRecord):
             str_chunk_num, pos_in_chunk = str_placement[str_counter]
             if str_chunk_num <> portion_counter:
                 portion_counter = str_chunk_num
-                abs_stream_pos += portions_len[portion_counter-1]
-                #print hex(abs_stream_pos)
-            str_stream_pos = abs_stream_pos + pos_in_chunk + 4 # header
+                abs_stream_pos += portions_len[portion_counter - 1]
+                # print hex(abs_stream_pos)
+            str_stream_pos = abs_stream_pos + pos_in_chunk + 4  # header
             extsst[str_counter] = (pos_in_chunk, str_stream_pos)
             str_counter += 1
 
-        exsst_str_count_delta = max(8, len(str_placement)*8/0x2000) # maybe smth else?
+        exsst_str_count_delta = max(8, len(str_placement) * 8 / 0x2000)  # maybe smth else?
         self._rec_data = pack('<H', exsst_str_count_delta)
         str_counter = 0
         while str_counter < len(str_placement):
             self._rec_data += pack('<IHH', extsst[str_counter][1], extsst[str_counter][0], 0)
             str_counter += exsst_str_count_delta
+
 
 class DimensionsRecord(BiffRecord):
     """
@@ -1175,15 +1180,16 @@ class DimensionsRecord(BiffRecord):
     12      2       Not used
     """
     _REC_ID = 0x0200
+
     def __init__(self, first_used_row, last_used_row, first_used_col, last_used_col):
         if first_used_row > last_used_row or first_used_col > last_used_col:
             # Special case: empty worksheet
             first_used_row = first_used_col = 0
             last_used_row = last_used_col = -1
         self._rec_data = pack('<2L3H',
-            first_used_row, last_used_row + 1,
-            first_used_col, last_used_col + 1,
-            0x00)
+                              first_used_row, last_used_row + 1,
+                              first_used_col, last_used_col + 1,
+                              0x00)
 
 
 class Window2Record(BiffRecord):
@@ -1243,13 +1249,13 @@ class Window2Record(BiffRecord):
     _REC_ID = 0x023E
 
     def __init__(self, options, first_visible_row, first_visible_col,
-        grid_colour, preview_magn, normal_magn, scl_magn):
+                 grid_colour, preview_magn, normal_magn, scl_magn):
         self._rec_data = pack('<7HL', options,
-                                    first_visible_row, first_visible_col,
-                                    grid_colour,
-                                    0x00,
-                                    preview_magn, normal_magn,
-                                    0x00L)
+                              first_visible_row, first_visible_col,
+                              grid_colour,
+                              0x00,
+                              preview_magn, normal_magn,
+                              0x00L)
         if scl_magn:
             self._scl_rec = pack('<4H', 0x00A0, 4, scl_magn, 100)
         else:
@@ -1318,11 +1324,12 @@ class PanesRecord(BiffRecord):
     ------------|-------------      ------------|-------------
     """
     _REC_ID = 0x0041
+
     def __init__(self, px, py, first_row_bottom, first_col_right, active_pane):
         self._rec_data = pack('<5H',
-                                            px, py,
-                                            first_row_bottom, first_col_right,
-                                            active_pane)
+                              px, py,
+                              first_row_bottom, first_col_right,
+                              active_pane)
 
 
 class RowRecord(BiffRecord):
@@ -1372,9 +1379,10 @@ class RowRecord(BiffRecord):
 
     def __init__(self, index, first_col, last_col, height_options, options):
         self._rec_data = pack('<6HL', index, first_col, last_col + 1,
-                                        height_options,
-                                        0x00, 0x00,
-                                        options)
+                              height_options,
+                              0x00, 0x00,
+                              options)
+
 
 class LabelSSTRecord(BiffRecord):
     """
@@ -1430,11 +1438,12 @@ class MergedCellsRecord(BiffRecord):
                 i -= 1
                 j += 1
             self._rec_data += pack('<3H', self._REC_ID, len(merged) + 2, j) + \
-                                    merged
+                              merged
 
     # for some reason Excel doesn't use CONTINUE
     def get(self):
         return self._rec_data
+
 
 class MulBlankRecord(BiffRecord):
     """
@@ -1452,9 +1461,9 @@ class MulBlankRecord(BiffRecord):
     _REC_ID = 0x00BE
 
     def __init__(self, row, first_col, last_col, xf_index):
-        blanks_count = last_col-first_col+1
-        self._rec_data = pack('%dH' % blanks_count, *([xf_index]*blanks_count))
-        self._rec_data = pack('<2H', row, first_col) +  self._rec_data + pack('<H',  last_col)
+        blanks_count = last_col - first_col + 1
+        self._rec_data = pack('%dH' % blanks_count, *([xf_index] * blanks_count))
+        self._rec_data = pack('<2H', row, first_col) + self._rec_data + pack('<H', last_col)
 
 
 class BlankRecord(BiffRecord):
@@ -1494,6 +1503,7 @@ class NumberRecord(BiffRecord):
 
     def __init__(self, row, col, xf_index, number):
         self._rec_data = pack('<3Hd', row, col, xf_index, number)
+
 
 class BoolErrRecord(BiffRecord):
     """
@@ -1546,6 +1556,7 @@ class GutsRecord(BiffRecord):
     def __init__(self, row_gut_width, col_gut_height, row_visible_levels, col_visible_levels):
         self._rec_data = pack('<4H', row_gut_width, col_gut_height, row_visible_levels, col_visible_levels)
 
+
 class WSBoolRecord(BiffRecord):
     """
     This  record stores a 16 bit value with Boolean options for the current
@@ -1590,6 +1601,7 @@ class WSBoolRecord(BiffRecord):
     def __init__(self, options):
         self._rec_data = pack('<H', options)
 
+
 class ColInfoRecord(BiffRecord):
     """
     This record specifies the width for a given range of columns.
@@ -1623,6 +1635,7 @@ class ColInfoRecord(BiffRecord):
 
     def __init__(self, first_col, last_col, width, xf_index, options):
         self._rec_data = pack('<6H', first_col, last_col, width, xf_index, options, 0)
+
 
 class CalcModeRecord(BiffRecord):
     """
@@ -1660,6 +1673,7 @@ class CalcCountRecord(BiffRecord):
     def __init__(self, calc_count):
         self._rec_data = pack('<H', calc_count)
 
+
 class RefModeRecord(BiffRecord):
     """
     This record is part of the Calculation Settings Block.
@@ -1680,6 +1694,7 @@ class RefModeRecord(BiffRecord):
     def __init__(self, ref_mode):
         self._rec_data = pack('<H', ref_mode)
 
+
 class IterationRecord(BiffRecord):
     """
     This record is part of the Calculation Settings Block.
@@ -1694,6 +1709,7 @@ class IterationRecord(BiffRecord):
 
     def __init__(self, iterations_on):
         self._rec_data = pack('<H', iterations_on)
+
 
 class DeltaRecord(BiffRecord):
     """
@@ -1712,6 +1728,7 @@ class DeltaRecord(BiffRecord):
     def __init__(self, delta):
         self._rec_data = pack('<d', delta)
 
+
 class SaveRecalcRecord(BiffRecord):
     """
     This record is part of the Calculation Settings Block.
@@ -1729,6 +1746,7 @@ class SaveRecalcRecord(BiffRecord):
 
     def __init__(self, recalc):
         self._rec_data = pack('<H', recalc)
+
 
 class PrintHeadersRecord(BiffRecord):
     """
@@ -1821,6 +1839,7 @@ class DefColWidthRecord(BiffRecord):
     def __init__(self, def_width):
         self._rec_data = pack('<H', options, def_width)
 
+
 class HorizontalPageBreaksRecord(BiffRecord):
     """
     This  record  is  part  of  the  Page  Settings  Block. It contains all
@@ -1846,6 +1865,7 @@ class HorizontalPageBreaksRecord(BiffRecord):
         self._rec_data = pack('<H', len(breaks_list))
         for r, c1, c2 in breaks_list:
             self._rec_data += pack('<3H', r, c1, c2)
+
 
 class VerticalPageBreaksRecord(BiffRecord):
     """
@@ -1873,6 +1893,7 @@ class VerticalPageBreaksRecord(BiffRecord):
         self._rec_data = pack('<H', len(breaks_list))
         for r, c1, c2 in breaks_list:
             self._rec_data += pack('<3H', r, c1, c2)
+
 
 class HeaderRecord(BiffRecord):
     """
@@ -1939,6 +1960,7 @@ class HeaderRecord(BiffRecord):
 
     def __init__(self, header_str):
         self._rec_data = upack2(header_str)
+
 
 class FooterRecord(BiffRecord):
     """
@@ -2019,6 +2041,7 @@ class RightMarginRecord(BiffRecord):
     def __init__(self, margin):
         self._rec_data = pack('<d', margin)
 
+
 class TopMarginRecord(BiffRecord):
     """
     This  record  is  part of the Page Settings Block. It contains the top
@@ -2049,6 +2072,7 @@ class BottomMarginRecord(BiffRecord):
 
     def __init__(self, margin):
         self._rec_data = pack('<d', margin)
+
 
 class SetupPageRecord(BiffRecord):
     """
@@ -2204,17 +2228,19 @@ class SetupPageRecord(BiffRecord):
 
     """
     _REC_ID = 0x00A1
+
     def __init__(self, paper, scaling, start_num, fit_width_to, fit_height_to,
-                    options,
-                    hres, vres,
-                    header_margin, footer_margin,
-                    num_copies):
+                 options,
+                 hres, vres,
+                 header_margin, footer_margin,
+                 num_copies):
         self._rec_data = pack('<8H2dH', paper, scaling, start_num,
-                                        fit_width_to, fit_height_to, \
-                                        options,
-                                        hres, vres,
-                                        header_margin, footer_margin,
-                                        num_copies)
+                              fit_width_to, fit_height_to, \
+                              options,
+                              hres, vres,
+                              header_margin, footer_margin,
+                              num_copies)
+
 
 class NameRecord(BiffRecord):
     """
@@ -2262,15 +2288,19 @@ class NameRecord(BiffRecord):
     """
     _REC_ID = 0x0018
 
-    def __init__(self, options, keyboard_shortcut, name, sheet_index, rpn, menu_text='', desc_text='', help_text='', status_text=''):
+    def __init__(self, options, keyboard_shortcut, name, sheet_index, rpn, menu_text='', desc_text='', help_text='',
+                 status_text=''):
         if type(name) == int:
             uname = chr(name)
         else:
             uname = upack1(name)[1:]
         uname_len = len(uname)
 
-        #~ self._rec_data = pack('<HBBHHHBBBB%ds%ds' % (uname_len, len(rpn)), options, keyboard_shortcut, uname_len, len(rpn), 0x0000, sheet_index, len(menu_text), len(desc_text), len(help_text), len(status_text), uname, rpn) + menu_text + desc_text + help_text + status_text
-        self._rec_data = pack('<HBBHHHBBBBB%ds%ds' % (uname_len, len(rpn)), options, keyboard_shortcut, uname_len, len(rpn), 0x0000, sheet_index, 0x00, len(menu_text), len(desc_text), len(help_text), len(status_text), uname, rpn) + menu_text + desc_text + help_text + status_text
+        # ~ self._rec_data = pack('<HBBHHHBBBB%ds%ds' % (uname_len, len(rpn)), options, keyboard_shortcut, uname_len, len(rpn), 0x0000, sheet_index, len(menu_text), len(desc_text), len(help_text), len(status_text), uname, rpn) + menu_text + desc_text + help_text + status_text
+        self._rec_data = pack('<HBBHHHBBBBB%ds%ds' % (uname_len, len(rpn)), options, keyboard_shortcut, uname_len,
+                              len(rpn), 0x0000, sheet_index, 0x00, len(menu_text), len(desc_text), len(help_text),
+                              len(status_text), uname, rpn) + menu_text + desc_text + help_text + status_text
+
 
 # Excel (both 2003 and 2007) don't like refs
 # split over a record boundary, which is what the
@@ -2281,6 +2311,7 @@ class NameRecord(BiffRecord):
 # 1370 = floor((8224 - 2) / 6.0) max refs in a record
 
 _maxRefPerRecord = 1370
+
 
 class ExternSheetRecord(BiffRecord):
     """
@@ -2303,7 +2334,7 @@ class ExternSheetRecord(BiffRecord):
 
         # do we always need this ref? or only if there are no refs?
         # (I believe that if there are no refs then we should not generate the link table - Ruben)
-        #refs.insert(0, (0,0,0))
+        # refs.insert(0, (0,0,0))
 
         self.refs = refs
 
@@ -2311,15 +2342,16 @@ class ExternSheetRecord(BiffRecord):
         res = []
         nrefs = len(self.refs)
         for idx in xrange(0, nrefs, _maxRefPerRecord):
-            chunk = self.refs[idx:idx+_maxRefPerRecord]
+            chunk = self.refs[idx:idx + _maxRefPerRecord]
             krefs = len(chunk)
-            if idx: # CONTINUE record
+            if idx:  # CONTINUE record
                 header = pack("<HH", 0x003C, 6 * krefs)
-            else: # ExternSheetRecord
+            else:  # ExternSheetRecord
                 header = pack("<HHH", self._REC_ID, 6 * krefs + 2, nrefs)
             res.append(header)
             res.extend([pack("<HHH", *r) for r in chunk])
         return ''.join(res)
+
 
 class SupBookRecord(BiffRecord):
     """
@@ -2331,6 +2363,7 @@ class SupBookRecord(BiffRecord):
 
     """
     _REC_ID = 0x01AE
+
 
 class InternalReferenceSupBookRecord(SupBookRecord):
     """
@@ -2346,6 +2379,7 @@ class InternalReferenceSupBookRecord(SupBookRecord):
 
     def __init__(self, num_sheets):
         self._rec_data = pack('<HBB', num_sheets, 0x01, 0x04)
+
 
 class XcallSupBookRecord(SupBookRecord):
     """
@@ -2390,4 +2424,3 @@ class ExternnameRecord(BiffRecord):
 
     def __init__(self, options=0, index=0, name=None, fmla=None):
         self._rec_data = pack('<HHH', options, index, 0) + upack1(name) + fmla
-

@@ -41,7 +41,6 @@ ws0.row(7).level = 2
 ws0.row(8).level = 1
 ws0.row(9).level = 1
 
-
 ws1 = wb.add_sheet('Columns Outline')
 
 ws1.write_merge(1, 1, 1, 5, 'test 1', style)
@@ -63,7 +62,6 @@ ws1.col(6).level = 2
 ws1.col(7).level = 2
 ws1.col(8).level = 1
 ws1.col(9).level = 1
-
 
 ws2 = wb.add_sheet('Rows and Columns Outline')
 

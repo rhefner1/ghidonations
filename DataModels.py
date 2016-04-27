@@ -1,11 +1,13 @@
-import logging, json, datetime
+import datetime
+import json
+import logging
 from decimal import *
 
-#App Engine platform
+# App Engine platform
 from google.appengine.api import mail, memcache, datastore_errors, taskqueue
 from google.appengine.ext import ndb, blobstore, deferred
 
-#Search
+# Search
 from google.appengine.api import search
 
 import GlobalUtilities as tools
@@ -15,6 +17,7 @@ _DEPOSIT_SEARCH_INDEX = "deposit"
 _DONATION_SEARCH_INDEX = "donation"
 _INDIVIDUAL_SEARCH_INDEX = "individual"
 _TEAM_SEARCH_INDEX = "team"
+
 
 class DecimalProperty(ndb.StringProperty):
     def _validate(self, value):
@@ -29,18 +32,19 @@ class DecimalProperty(ndb.StringProperty):
     def _from_base_type(self, value):
         return tools.toDecimal(value)
 
+
 ###### ////// ------ Define datastore models ------ ////// ######
 class Contact(ndb.Expando):
-    #Standard information we need to know
+    # Standard information we need to know
     name = ndb.StringProperty()
     email = ndb.StringProperty(repeated=True)
     phone = ndb.StringProperty()
     address = ndb.StringProperty(repeated=True)
     notes = ndb.TextProperty(indexed=True)
-    
+
     settings = ndb.KeyProperty()
 
-    #Sets creation date
+    # Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
@@ -75,7 +79,7 @@ class Contact(ndb.Expando):
     def update(self, name, email, phone, notes, address):
         settings = self.settings.get()
 
-        #Changing blank values to None
+        # Changing blank values to None
         if name == "":
             name = None
         if email == None:
@@ -90,7 +94,7 @@ class Contact(ndb.Expando):
 
         if email != self.email:
             self.email = email
-            
+
             if settings.mc_use:
                 for e in email:
                     if e and e != "":
@@ -106,15 +110,16 @@ class Contact(ndb.Expando):
 
         if address != self.address:
             if address != None and address != "" and address != "None":
-                #If the address is something and is different than that on file
+                # If the address is something and is different than that on file
                 self.address = address
 
-        #And now to put that contact back in the datastore
+        # And now to put that contact back in the datastore
         self.put()
 
         if name_changed == True:
             # Reindexing donations on name change
-            taskqueue.add(url="/tasks/reindex", params={'mode' : 'contact', 'key' : self.websafe}, countdown=1, queue_name="backend")
+            taskqueue.add(url="/tasks/reindex", params={'mode': 'contact', 'key': self.websafe}, countdown=1,
+                          queue_name="backend")
 
     ## -- After Put -- ##
     @classmethod
@@ -123,7 +128,7 @@ class Contact(ndb.Expando):
         memcache.delete("contacts" + e.settings.urlsafe())
 
         e.settings.get().refresh.contactsJSON()
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e': e.websafe}, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
     @classmethod
@@ -134,13 +139,14 @@ class Contact(ndb.Expando):
         index = search.Index(name=_CONTACT_SEARCH_INDEX)
         index.delete(e.websafe)
 
+
 class DepositReceipt(ndb.Expando):
     entity_keys = ndb.KeyProperty(repeated=True)
 
     settings = ndb.KeyProperty()
     time_deposited = ndb.StringProperty()
 
-    #Sets creation date
+    # Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
@@ -155,9 +161,10 @@ class DepositReceipt(ndb.Expando):
     @classmethod
     def _post_put_hook(self, future):
         e = future.get_result().get()
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e': e.websafe}, queue_name="delayindexing")
 
-     ## -- Before Delete -- ##
+        ## -- Before Delete -- ##
+
     @classmethod
     def _pre_delete_hook(cls, key):
         e = key.get()
@@ -166,44 +173,45 @@ class DepositReceipt(ndb.Expando):
         index = search.Index(name=_DEPOSIT_SEARCH_INDEX)
         index.delete(e.websafe)
 
+
 class Donation(ndb.Expando):
     contact = ndb.KeyProperty()
     reviewed = ndb.BooleanProperty(default=False)
 
-    #Only for deposited donations
+    # Only for deposited donations
     deposited = ndb.BooleanProperty()
 
-    #Determines which account this donation is for - settings key
+    # Determines which account this donation is for - settings key
     settings = ndb.KeyProperty()
 
-    #How much is this donation worth?
+    # How much is this donation worth?
     amount_donated = DecimalProperty()
     confirmation_amount = DecimalProperty()
 
-    #Is this a recurring donation
+    # Is this a recurring donation
     isRecurring = ndb.BooleanProperty(default=False)
 
-    #Whether it's recurring, one-time, or offline
+    # Whether it's recurring, one-time, or offline
     payment_type = ndb.StringProperty()
 
-    #Special notes from PayPal custom field
+    # Special notes from PayPal custom field
     special_notes = ndb.TextProperty(indexed=True)
 
-    #All recurring donations have the same ID; one-time of course
-    #is unique to that payment
+    # All recurring donations have the same ID; one-time of course
+    # is unique to that payment
     payment_id = ndb.StringProperty()
 
-    #Who to associate this donation to (keys)
+    # Who to associate this donation to (keys)
     team = ndb.KeyProperty()
     individual = ndb.KeyProperty()
-    
-    #Sets the time that the donation was placed
+
+    # Sets the time that the donation was placed
     donation_date = ndb.DateTimeProperty(auto_now_add=True)
 
-    #IPN original data
+    # IPN original data
     ipn_data = ndb.TextProperty()
 
-    #Used for debugging purposes to see who actually gave the donation
+    # Used for debugging purposes to see who actually gave the donation
     given_name = ndb.StringProperty()
     given_email = ndb.StringProperty()
 
@@ -267,25 +275,25 @@ class Donation(ndb.Expando):
 
     ## -- Update donation -- ##
     def update(self, notes, team_key, individual_key, add_deposit, donation_date):
-        #Get self data entity from datastore
+        # Get self data entity from datastore
 
         if team_key == "general":
-        #If they completely disassociated the self (back to General Fund), clear out team and individual keys
+            # If they completely disassociated the self (back to General Fund), clear out team and individual keys
             self.assign.disassociateTeam(False)
             self.assign.disassociateIndividual(False)
 
         else:
-        #The team has isn't general, so associate it
+            # The team has isn't general, so associate it
             self.assign.associateTeam(team_key, False)
 
             if individual_key == "none" or individual_key == None:
-            #Eiither part of General fund or in a team without a specific individual
+                # Eiither part of General fund or in a team without a specific individual
                 self.assign.disassociateIndividual(False)
 
             else:
-            #Associate individual
+                # Associate individual
                 self.assign.associateIndividual(individual_key, False)
-                
+
         if notes != str(self.special_notes):
             if notes == None or notes == "":
                 notes = "None"
@@ -301,7 +309,7 @@ class Donation(ndb.Expando):
         if donation_date:
             self.donation_date = datetime.datetime(donation_date.year, donation_date.month, donation_date.day)
 
-        #And now to put that donation back in the datastore
+        # And now to put that donation back in the datastore
         self.put()
 
     ## -- After Put -- ##
@@ -319,12 +327,14 @@ class Donation(ndb.Expando):
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
 
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.team.urlsafe()}, countdown=2, queue_name="delayindexing")
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.individual.urlsafe()}, countdown=2, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e': e.team.urlsafe()}, countdown=2,
+                          queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e': e.individual.urlsafe()}, countdown=2,
+                          queue_name="delayindexing")
 
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, queue_name="delayindexing")
+        taskqueue.add(url="/tasks/delayindexing", params={'e': e.websafe}, queue_name="delayindexing")
 
-     ## -- Before Delete -- ##
+        ## -- Before Delete -- ##
 
     @classmethod
     def _pre_delete_hook(cls, key):
@@ -335,23 +345,27 @@ class Donation(ndb.Expando):
             memcache.delete("idtotal" + e.individual.urlsafe())
             memcache.delete("info" + e.team.urlsafe() + e.individual.urlsafe())
 
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.team.urlsafe()}, countdown=2, queue_name="delayindexing")
-            taskqueue.add(url="/tasks/delayindexing", params={'e' : e.individual.urlsafe()}, countdown=2, queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e': e.team.urlsafe()}, countdown=2,
+                          queue_name="delayindexing")
+            taskqueue.add(url="/tasks/delayindexing", params={'e': e.individual.urlsafe()}, countdown=2,
+                          queue_name="delayindexing")
 
         # Delete search index
         index = search.Index(name=_DONATION_SEARCH_INDEX)
         index.delete(e.websafe)
 
+
 class GlobalSettings(ndb.Expando):
     cookie_key = ndb.StringProperty()
     gcs_bucket = ndb.StringProperty()
+
 
 class Impression(ndb.Expando):
     contact = ndb.KeyProperty()
     impression = ndb.StringProperty()
     notes = ndb.TextProperty(indexed=True)
 
-    #Sets creation date
+    # Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
@@ -362,25 +376,26 @@ class Impression(ndb.Expando):
     def websafe(self):
         return self.key.urlsafe()
 
+
 class Individual(ndb.Expando):
     name = ndb.StringProperty()
     email = ndb.StringProperty()
 
-    #Determines which account this person belongs to
+    # Determines which account this person belongs to
     settings = ndb.KeyProperty()
 
-    #Credentials
+    # Credentials
     admin = ndb.BooleanProperty()
     password = ndb.StringProperty()
 
-    #Profile
+    # Profile
     description = ndb.TextProperty()
     photo = ndb.StringProperty()
 
     show_donation_page = ndb.BooleanProperty(default=True)
     show_progress_bar = ndb.BooleanProperty(default=True)
 
-    #Sets creation date
+    # Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
@@ -402,7 +417,7 @@ class Individual(ndb.Expando):
 
     ## Currently not in use
     def email_user(self, msg_id):
-        #Gives the user an email when something happens in their account
+        # Gives the user an email when something happens in their account
         if msg_id == 1:
             email_subject = "Recurring donation"
             email_message = "A new recurring donation was sent to you!"
@@ -412,25 +427,26 @@ class Individual(ndb.Expando):
         message.subject = email_subject
         message.to = self.email
 
-        #Message body here - determined from msg_id
+        # Message body here - determined from msg_id
         message.body = email_message
 
         logging.info("Sending alert email to: " + self.email)
 
-        #Adding to history
+        # Adding to history
         logging.info("Alert email sent at " + tools.currentTime())
 
         message.send()
 
     ## -- Update Individual -- #
-    def update(self, name, email, team_list, description, change_image, password, show_donation_page, show_progress_bar):
+    def update(self, name, email, team_list, description, change_image, password, show_donation_page,
+               show_progress_bar):
         name_changed = False
         show_donation_changed = False
 
         if name != self.name:
             self.name = name
             name_changed = True
-        
+
         if email:
             if email != self.email:
                 self.email = email
@@ -450,7 +466,7 @@ class Individual(ndb.Expando):
             self.show_progress_bar = show_progress_bar
             show_donation_changed = True
 
-        #Initializes DictDiffer object to tell differences from current dictionary to server-side one
+        # Initializes DictDiffer object to tell differences from current dictionary to server-side one
         team = json.loads(team_list)
         dd = tools.DictDiffer(team, self.data.team_list)
 
@@ -483,10 +499,10 @@ class Individual(ndb.Expando):
             self.description = description
 
         if change_image != None:
-        #If change_image = None, there isn't any change. If it isn't, it 
-        #contains a 
+            # If change_image = None, there isn't any change. If it isn't, it
+            # contains a
             if self.photo != None:
-                #Delete old blob to keep it from orphaning
+                # Delete old blob to keep it from orphaning
                 old_blobkey = self.photo
                 old_blob = blobstore.BlobInfo.get(old_blobkey)
                 old_blob.delete()
@@ -512,22 +528,23 @@ class Individual(ndb.Expando):
 
         if name_changed:
             # Reindexing donations on name change
-            taskqueue.add(url="/tasks/reindex", params={'mode' : 'team', 'key' : self.websafe}, countdown=1, queue_name="backend")
+            taskqueue.add(url="/tasks/reindex", params={'mode': 'team', 'key': self.websafe}, countdown=1,
+                          queue_name="backend")
 
     ## -- After put -- ##
     def _post_put_hook(self, future):
         e = future.get_result().get()
 
         deferred.defer(clear_team_memcache, e, _countdown=2, _queue="backend")
-            
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")
+
+        taskqueue.add(url="/tasks/delayindexing", params={'e': e.websafe}, countdown=2, queue_name="delayindexing")
 
     ## -- Before Delete -- ##
     @classmethod
     def _pre_delete_hook(cls, key):
         i = key.get()
 
-        #Removing this individual's association with donations
+        # Removing this individual's association with donations
         for d in i.data.donations:
             d.team = None
             d.individual = None
@@ -544,22 +561,23 @@ class Individual(ndb.Expando):
         index = search.Index(name=_INDIVIDUAL_SEARCH_INDEX)
         index.delete(i.websafe)
 
+
 class Settings(ndb.Expando):
     name = ndb.StringProperty()
     email = ndb.StringProperty()
 
-    #Mailchimp values
+    # Mailchimp values
     mc_use = ndb.BooleanProperty()
     mc_apikey = ndb.StringProperty()
     mc_donorlist = ndb.StringProperty()
 
-    #Impressions
+    # Impressions
     impressions = ndb.StringProperty(repeated=True)
 
-    #PayPal
+    # PayPal
     paypal_id = ndb.StringProperty()
 
-    #Donate page
+    # Donate page
     amount1 = ndb.IntegerProperty()
     amount2 = ndb.IntegerProperty()
     amount3 = ndb.IntegerProperty()
@@ -568,22 +586,22 @@ class Settings(ndb.Expando):
 
     donate_parent = ndb.StringProperty()
 
-    #Confirmation letters
+    # Confirmation letters
     confirmation_text = ndb.TextProperty()
     confirmation_info = ndb.TextProperty()
     confirmation_header = ndb.TextProperty()
     confirmation_footer = ndb.TextProperty()
     donor_report_text = ndb.TextProperty()
 
-    #Contact JSON
+    # Contact JSON
     contacts_json = ndb.TextProperty()
 
-    #Analytics
+    # Analytics
     one_week_history = ndb.TextProperty()
     one_month_history = ndb.TextProperty()
 
-    #Sets creation date
-    creation_date = ndb.DateTimeProperty(auto_now_add=True)  
+    # Sets creation date
+    creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
     def create(self):
@@ -618,7 +636,9 @@ class Settings(ndb.Expando):
         return tools.SettingsSearch(self)
 
     ## -- Update -- ##
-    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, donate_parent, amount1, amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer, confirmation_text, donor_report_text):
+    def update(self, name, email, mc_use, mc_apikey, mc_donorlist, paypal_id, impressions, donate_parent, amount1,
+               amount2, amount3, amount4, use_custom, confirmation_header, confirmation_info, confirmation_footer,
+               confirmation_text, donor_report_text):
         s = self
 
         if name != s.name:
@@ -679,17 +699,18 @@ class Settings(ndb.Expando):
             s.donor_report_text = donor_report_text
 
         s.put()
-              
+
     @property
     def websafe(self):
         return self.key.urlsafe()
+
 
 class Team(ndb.Expando):
     name = ndb.StringProperty()
     settings = ndb.KeyProperty()
     show_team = ndb.BooleanProperty()
-    
-    #Sets creation date
+
+    # Sets creation date
     creation_date = ndb.DateTimeProperty(auto_now_add=True)
 
     @property
@@ -707,7 +728,7 @@ class Team(ndb.Expando):
     ## -- Update -- ##
     def update(self, name, show_team):
         name_changed = False
-        
+
         if name != self.name:
             self.name = name
             name_changed = True
@@ -719,7 +740,8 @@ class Team(ndb.Expando):
 
         if name_changed == True:
             # Reindexing donations on name change
-            taskqueue.add(url="/tasks/reindex", params={'mode' : 'team', 'key' : self.websafe}, countdown=1, queue_name="backend")
+            taskqueue.add(url="/tasks/reindex", params={'mode': 'team', 'key': self.websafe}, countdown=1,
+                          queue_name="backend")
 
     ## -- After put -- ##
     @classmethod
@@ -730,9 +752,10 @@ class Team(ndb.Expando):
         memcache.delete("publicteammembers" + e.websafe)
         memcache.delete("teamsdict" + e.settings.urlsafe())
 
-        taskqueue.add(url="/tasks/delayindexing", params={'e' : e.websafe}, countdown=2, queue_name="delayindexing")      
+        taskqueue.add(url="/tasks/delayindexing", params={'e': e.websafe}, countdown=2, queue_name="delayindexing")
 
-    ## -- Before Deletion -- ##
+        ## -- Before Deletion -- ##
+
     @classmethod
     def _pre_delete_hook(cls, key):
         t = key.get()
@@ -740,7 +763,7 @@ class Team(ndb.Expando):
 
         for tl in t.data.members:
             if tl:
-            #Delete this team from all
+                # Delete this team from all
                 tl.key.delete()
 
         for d in t.data.donations:
@@ -751,6 +774,7 @@ class Team(ndb.Expando):
         # Delete search index
         index = search.Index(name=_TEAM_SEARCH_INDEX)
         index.delete(t.websafe)
+
 
 class TeamList(ndb.Model):
     individual = ndb.KeyProperty()
@@ -770,13 +794,14 @@ class TeamList(ndb.Model):
     def individual_name(self):
         return self.individual.get().name
 
-    @property 
+    @property
     def team_name(self):
         return self.team.get().name
 
     @property
     def websafe(self):
         return self.key.urlsafe()
+
 
 ## -- Utilities -- ##
 def clear_team_memcache(e):

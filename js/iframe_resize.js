@@ -6,12 +6,12 @@ function iResize() {
     }
 }
 
-$(document).ready(function() {
+$(document).ready(function () {
     //Setting domain suffix to make same-origin policy happy
     document.domain = "globalhopeindia.org";
 
-    if ($.browser.safari || $.browser.opera) { 
-        iFrames.load(function(){
+    if ($.browser.safari || $.browser.opera) {
+        iFrames.load(function () {
             setTimeout(iResize, 0);
         });
 
@@ -22,7 +22,7 @@ $(document).ready(function() {
         }
 
     } else {
-        iFrames.load(function() {
+        iFrames.load(function () {
             this.style.height = this.contentWindow.document.body.offsetHeight + 'px';
         });
     }

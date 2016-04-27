@@ -39,8 +39,8 @@ var.     ln or
 [var.]   sz     (optional, only if phonetic=1) Asian Phonetic Settings Block 
 '''
 
-
 from struct import pack
+
 
 def upack2(s, encoding='ascii'):
     # If not unicode, make it so.
@@ -62,6 +62,7 @@ def upack2(s, encoding='ascii'):
         encs = us.encode('utf_16_le')
         flag = 1
     return pack('<HB', len_us, flag) + encs
+
 
 def upack1(s, encoding='ascii'):
     # Same as upack2(), but with a one-byte length field.

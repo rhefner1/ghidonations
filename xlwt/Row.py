@@ -1,11 +1,13 @@
 # -*- coding: windows-1252 -*-
 
+import datetime as dt
+
 import BIFFRecords
+import ExcelFormula
 import Style
 from Cell import StrCell, BlankCell, NumberCell, FormulaCell, MulBlankCell, BooleanCell, ErrorCell, \
     _get_cells_biff_data_mul
-import ExcelFormula
-import datetime as dt
+
 try:
     from decimal import Decimal
 except ImportError:
@@ -15,25 +17,25 @@ except ImportError:
 
 
 class Row(object):
-    __slots__ = [# private variables
-                 "__idx",
-                 "__parent",
-                 "__parent_wb",
-                 "__cells",
-                 "__min_col_idx",
-                 "__max_col_idx",
-                 "__xf_index",
-                 "__has_default_xf_index",
-                 "__height_in_pixels",
-                 # public variables
-                 "height",
-                 "has_default_height",
-                 "height_mismatch",
-                 "level",
-                 "collapse",
-                 "hidden",
-                 "space_above",
-                 "space_below"]
+    __slots__ = [  # private variables
+        "__idx",
+        "__parent",
+        "__parent_wb",
+        "__cells",
+        "__min_col_idx",
+        "__max_col_idx",
+        "__xf_index",
+        "__has_default_xf_index",
+        "__height_in_pixels",
+        # public variables
+        "height",
+        "has_default_height",
+        "height_mismatch",
+        "level",
+        "collapse",
+        "hidden",
+        "space_above",
+        "space_below"]
 
     def __init__(self, rowx, parent_sheet):
         if not (isinstance(rowx, int) and 0 <= rowx <= 65535):
@@ -57,17 +59,15 @@ class Row(object):
         self.space_above = 0
         self.space_below = 0
 
-
     def __adjust_height(self, style):
         twips = style.font.height
-        points = float(twips)/20.0
+        points = float(twips) / 20.0
         # Cell height in pixels can be calcuted by following approx. formula:
         # cell height in pixels = font height in points * 83/50 + 2/5
         # It works when screen resolution is 96 dpi
-        pix = int(round(points*83.0/50.0 + 2.0/5.0))
+        pix = int(round(points * 83.0 / 50.0 + 2.0 / 5.0))
         if pix > self.__height_in_pixels:
             self.__height_in_pixels = pix
-
 
     def __adjust_bound_col_idx(self, *args):
         for arg in args:
@@ -93,7 +93,7 @@ class Row(object):
         else:
             epoch = dt.datetime(1899, 12, 31, 0, 0, 0)
         delta = date - epoch
-        xldate = delta.days + float(delta.seconds) / (24*60*60)
+        xldate = delta.days + float(delta.seconds) / (24 * 60 * 60)
         # Add a day for Excel's missing leap day in 1900
         if xldate > 59:
             xldate += 1
@@ -102,34 +102,28 @@ class Row(object):
     def get_height_in_pixels(self):
         return self.__height_in_pixels
 
-
     def set_style(self, style):
         self.__adjust_height(style)
         self.__xf_index = self.__parent_wb.add_style(style)
         self.__has_default_xf_index = 1
 
-
     def get_xf_index(self):
         return self.__xf_index
-
 
     def get_cells_count(self):
         return len(self.__cells)
 
-
     def get_min_col(self):
         return self.__min_col_idx
 
-
     def get_max_col(self):
         return self.__max_col_idx
-
 
     def get_row_biff_data(self):
         height_options = (self.height & 0x07FFF)
         height_options |= (self.has_default_height & 0x01) << 15
 
-        options =  (self.level & 0x07) << 0
+        options = (self.level & 0x07) << 0
         options |= (self.collapse & 0x01) << 4
         options |= (self.hidden & 0x01) << 5
         options |= (self.height_mismatch & 0x01) << 6
@@ -140,13 +134,13 @@ class Row(object):
         options |= (self.space_below & 1) << 29
 
         return BIFFRecords.RowRecord(self.__idx, self.__min_col_idx,
-            self.__max_col_idx, height_options, options).get()
+                                     self.__max_col_idx, height_options, options).get()
 
     def insert_cell(self, col_index, cell_obj):
         if col_index in self.__cells:
             if not self.__parent._cell_overwrite_ok:
                 msg = "Attempt to overwrite cell: sheetname=%r rowx=%d colx=%d" \
-                    % (self.__parent.name, self.__idx, col_index)
+                      % (self.__parent.name, self.__idx, col_index)
                 raise Exception(msg)
             prev_cell_obj = self.__cells[col_index]
             sst_idx = getattr(prev_cell_obj, 'sst_idx', None)
@@ -156,12 +150,12 @@ class Row(object):
 
     def insert_mulcells(self, colx1, colx2, cell_obj):
         self.insert_cell(colx1, cell_obj)
-        for col_index in xrange(colx1+1, colx2+1):
+        for col_index in xrange(colx1 + 1, colx2 + 1):
             self.insert_cell(col_index, None)
 
     def get_cells_biff_data(self):
         cell_items = [item for item in self.__cells.iteritems() if item[1] is not None]
-        cell_items.sort() # in column order
+        cell_items.sort()  # in column order
         return _get_cells_biff_data_mul(self.__idx, cell_items)
         # previously:
         # return ''.join([cell.get_biff_data() for colx, cell in cell_items])
@@ -200,7 +194,7 @@ class Row(object):
         self.__adjust_bound_col_idx(colx)
         xf_index = self.__parent_wb.add_style(style)
         self.insert_cell(colx,
-            NumberCell(self.__idx, colx, xf_index, self.__excel_date_dt(datetime_obj)))
+                         NumberCell(self.__idx, colx, xf_index, self.__excel_date_dt(datetime_obj)))
 
     def set_cell_formula(self, colx, formula, style=Style.default_style, calc_flags=0):
         self.__adjust_height(style)
@@ -228,11 +222,11 @@ class Row(object):
         if isinstance(label, basestring):
             if len(label) > 0:
                 self.insert_cell(col,
-                    StrCell(self.__idx, col, style_index, self.__parent_wb.add_str(label))
-                    )
+                                 StrCell(self.__idx, col, style_index, self.__parent_wb.add_str(label))
+                                 )
             else:
                 self.insert_cell(col, BlankCell(self.__idx, col, style_index))
-        elif isinstance(label, bool): # bool is subclass of int; test bool first
+        elif isinstance(label, bool):  # bool is subclass of int; test bool first
             self.insert_cell(col, BooleanCell(self.__idx, col, style_index, label))
         elif isinstance(label, (float, int, long, Decimal)):
             self.insert_cell(col, NumberCell(self.__idx, col, style_index, label))
@@ -248,6 +242,3 @@ class Row(object):
             raise Exception("Unexpected data type %r" % type(label))
 
     write_blanks = set_cell_mulblanks
-
-
-

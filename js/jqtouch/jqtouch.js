@@ -1,42 +1,42 @@
 /*
 
-            _/    _/_/    _/_/_/_/_/                              _/
-               _/    _/      _/      _/_/    _/    _/    _/_/_/  _/_/_/
-          _/  _/  _/_/      _/    _/    _/  _/    _/  _/        _/    _/
-         _/  _/    _/      _/    _/    _/  _/    _/  _/        _/    _/
-        _/    _/_/  _/    _/      _/_/      _/_/_/    _/_/_/  _/    _/
-       _/
-    _/
+ _/    _/_/    _/_/_/_/_/                              _/
+ _/    _/      _/      _/_/    _/    _/    _/_/_/  _/_/_/
+ _/  _/  _/_/      _/    _/    _/  _/    _/  _/        _/    _/
+ _/  _/    _/      _/    _/    _/  _/    _/  _/        _/    _/
+ _/    _/_/  _/    _/      _/_/      _/_/_/    _/_/_/  _/    _/
+ _/
+ _/
 
-    Created by David Kaneda <http://www.davidkaneda.com>
-    Maintained by Thomas Yip <http://beedesk.com/>
-    Sponsored by Sencha Labs <http://www.sencha.com/>
-    Special thanks to Jonathan Stark <http://www.jonathanstark.com/>
+ Created by David Kaneda <http://www.davidkaneda.com>
+ Maintained by Thomas Yip <http://beedesk.com/>
+ Sponsored by Sencha Labs <http://www.sencha.com/>
+ Special thanks to Jonathan Stark <http://www.jonathanstark.com/>
 
-    Documentation and issue tracking on GitHub <http://github.com/senchalabs/jQTouch/>
+ Documentation and issue tracking on GitHub <http://github.com/senchalabs/jQTouch/>
 
-    (c) 2009-2011 Sencha Labs
-    jQTouch may be freely distributed under the MIT license.
+ (c) 2009-2011 Sencha Labs
+ jQTouch may be freely distributed under the MIT license.
 
-*/
-(function() {
+ */
+(function () {
 
-    jQTouchCore = function(options) {
+    jQTouchCore = function (options) {
         // Initialize internal jQT variables
         var $ = options.framework,
             $body,
-            $head=$('head'),
-            history=[],
-            newPageCount=0,
-            jQTSettings={},
-            $currentPage='',
-            orientation='portrait',
-            touchSelectors=[],
-            publicObj={},
-            tapBuffer=100, // High click delay = ~350, quickest animation (slide) = 250
-            extensions=jQTouchCore.prototype.extensions,
-            animations=[],
-            hairExtensions='',
+            $head = $('head'),
+            history = [],
+            newPageCount = 0,
+            jQTSettings = {},
+            $currentPage = '',
+            orientation = 'portrait',
+            touchSelectors = [],
+            publicObj = {},
+            tapBuffer = 100, // High click delay = ~350, quickest animation (slide) = 250
+            extensions = jQTouchCore.prototype.extensions,
+            animations = [],
+            hairExtensions = '',
             defaults = {
                 addGlossToIcon: true,
                 backSelector: '.back, .cancel, .goback',
@@ -59,18 +59,18 @@
                 useFastTouch: true,
                 useTouchScroll: true,
                 animations: [ // highest to lowest priority
-                    {name:'cubeleft', selector:'.cubeleft, .cube', is3d: true},
-                    {name:'cuberight', selector:'.cuberight', is3d: true},
-                    {name:'dissolve', selector:'.dissolve'},
-                    {name:'fade', selector:'.fade'},
-                    {name:'flipleft', selector:'.flipleft, .flip', is3d: true},
-                    {name:'flipright', selector:'.flipright', is3d: true},
-                    {name:'pop', selector:'.pop', is3d: true},
-                    {name:'swapleft', selector:'.swap', is3d: true},
-                    {name:'slidedown', selector:'.slidedown'},
-                    {name:'slideright', selector:'.slideright'},
-                    {name:'slideup', selector:'.slideup'},
-                    {name:'slideleft', selector:'.slideleft, .slide, #jqt > * > ul li a'}
+                    {name: 'cubeleft', selector: '.cubeleft, .cube', is3d: true},
+                    {name: 'cuberight', selector: '.cuberight', is3d: true},
+                    {name: 'dissolve', selector: '.dissolve'},
+                    {name: 'fade', selector: '.fade'},
+                    {name: 'flipleft', selector: '.flipleft, .flip', is3d: true},
+                    {name: 'flipright', selector: '.flipright', is3d: true},
+                    {name: 'pop', selector: '.pop', is3d: true},
+                    {name: 'swapleft', selector: '.swap', is3d: true},
+                    {name: 'slidedown', selector: '.slidedown'},
+                    {name: 'slideright', selector: '.slideright'},
+                    {name: 'slideup', selector: '.slideup'},
+                    {name: 'slideleft', selector: '.slideleft, .slide, #jqt > * > ul li a'}
                 ]
             }; // end defaults
 
@@ -79,11 +79,13 @@
                 console.warn(message);
             }
         }
+
         function addAnimation(animation) {
             if (typeof(animation.selector) === 'string' && typeof(animation.name) === 'string') {
                 animations.push(animation);
             }
         }
+
         function addPageToHistory(page, animation) {
             history.unshift({
                 page: page,
@@ -118,6 +120,7 @@
             }
 
         }
+
         function doNavigation(fromPage, toPage, animation, goingBack) {
 
             goingBack = goingBack ? goingBack : false;
@@ -137,8 +140,8 @@
             // Collapse the keyboard
             $(':focus').trigger('blur');
 
-            fromPage.trigger('pageAnimationStart', { direction: 'out', back: goingBack });
-            toPage.trigger('pageAnimationStart', { direction: 'in', back: goingBack });
+            fromPage.trigger('pageAnimationStart', {direction: 'out', back: goingBack});
+            toPage.trigger('pageAnimationStart', {direction: 'in', back: goingBack});
 
             if ($.support.animationEvents && animation && jQTSettings.useAnimations) {
                 // Fail over to 2d animation if need be
@@ -151,7 +154,7 @@
                     is3d = animation.is3d ? 'animating3d' : '';
 
                 if (goingBack) {
-                    finalAnimationName = finalAnimationName.replace(/left|right|up|down|in|out/, reverseAnimation );
+                    finalAnimationName = finalAnimationName.replace(/left|right|up|down|in|out/, reverseAnimation);
                 }
 
                 // Bind internal "cleanup" callback
@@ -166,13 +169,13 @@
                 if (jQTSettings.trackScrollPositions === true) {
                     toPage.css('top', window.pageYOffset - (toPage.data('lastScroll') || 0));
                 }
-                
+
                 toPage.addClass(finalAnimationName + ' in current');
                 fromPage.addClass(finalAnimationName + ' out');
 
                 if (jQTSettings.trackScrollPositions === true) {
                     fromPage.data('lastScroll', lastScroll);
-                    $('.scroll', fromPage).each(function(){
+                    $('.scroll', fromPage).each(function () {
                         $(this).data('lastScroll', this.scrollTop);
                     });
                 }
@@ -196,11 +199,11 @@
 
                         // Have to make sure the scroll/style resets
                         // are outside the flow of this function.
-                        setTimeout(function(){
+                        setTimeout(function () {
                             toPage.css('top', 0);
                             window.scroll(0, toPage.data('lastScroll'));
-                            $('.scroll', toPage).each(function(){
-                                this.scrollTop = - $(this).data('lastScroll');
+                            $('.scroll', toPage).each(function () {
+                                this.scrollTop = -$(this).data('lastScroll');
                             });
                         }, 0);
                     }
@@ -210,7 +213,7 @@
                 }
 
                 // In class is intentionally delayed, as it is our ghost click hack
-                setTimeout(function(){
+                setTimeout(function () {
                     toPage.removeClass('in');
                 }, bufferTime);
 
@@ -227,34 +230,37 @@
                 setHash($currentPage.attr('id'));
 
                 // Trigger custom events
-                toPage.trigger('pageAnimationEnd', { direction:'in', animation: animation});
-                fromPage.trigger('pageAnimationEnd', { direction:'out', animation: animation});
+                toPage.trigger('pageAnimationEnd', {direction: 'in', animation: animation});
+                fromPage.trigger('pageAnimationEnd', {direction: 'out', animation: animation});
             }
 
             return true;
         }
+
         function reverseAnimation(animation) {
-            var opposites={
-                'up' : 'down',
-                'down' : 'up',
-                'left' : 'right',
-                'right' : 'left',
-                'in' : 'out',
-                'out' : 'in'
+            var opposites = {
+                'up': 'down',
+                'down': 'up',
+                'left': 'right',
+                'right': 'left',
+                'in': 'out',
+                'out': 'in'
             };
 
             return opposites[animation] || animation;
         }
+
         function getOrientation() {
             return orientation;
         }
+
         function goBack() {
 
             // Error checking
-            if (history.length < 1 ) {
+            if (history.length < 1) {
             }
 
-            if (history.length === 1 ) {
+            if (history.length === 1) {
                 window.history.go(-1);
             }
 
@@ -268,12 +274,13 @@
             }
 
         }
+
         function goTo(toPage, animation) {
 
             var fromPage = history[0].page;
 
             if (typeof animation === 'string') {
-                for (var i=0, max=animations.length; i < max; i++) {
+                for (var i = 0, max = animations.length; i < max; i++) {
                     if (animations[i].name === animation) {
                         animation = animations[i];
                         break;
@@ -299,6 +306,7 @@
                 return false;
             }
         }
+
         function hashChangeHandler(e) {
             if (location.hash === history[0].hash) {
                 return true;
@@ -306,7 +314,7 @@
                 goBack();
                 return true;
             } else {
-                if( (history[1] && location.hash === history[1].hash) ) {
+                if ((history[1] && location.hash === history[1].hash)) {
                     goBack();
                     return true;
                 } else {
@@ -315,6 +323,7 @@
                 }
             }
         }
+
         function init(options) {
             jQTSettings = $.extend({}, defaults, options);
 
@@ -360,7 +369,7 @@
         function getAnimation(el) {
             var animation;
 
-            for (var i=0, max=animations.length; i < max; i++) {
+            for (var i = 0, max = animations.length; i < max; i++) {
                 if (el.is(animations[i].selector)) {
                     animation = animations[i];
                     break;
@@ -382,7 +391,7 @@
             var div = document.createElement('div');
             div.innerHTML = nodes;
 
-            $(div).children().each(function(index, node) {
+            $(div).children().each(function (index, node) {
                 var $node = $(this);
                 if (!$node.attr('id')) {
                     $node.attr('id', 'page-' + (++newPageCount));
@@ -408,17 +417,19 @@
 
         function orientationChangeHandler() {
             $body.css('minHeight', 1000);
-            scrollTo(0,0);
+            scrollTo(0, 0);
             var bodyHeight = window.innerHeight;
             $body.css('minHeight', bodyHeight);
 
             orientation = Math.abs(window.orientation) == 90 ? 'landscape' : 'portrait';
             $body.removeClass('portrait landscape').addClass(orientation).trigger('turn', {orientation: orientation});
         }
+
         function setHash(hash) {
             // Sanitize
             location.hash = '#' + hash.replace(/^#/, '');
         }
+
         function showPageByHref(href, options) {
 
             var defaults = {
@@ -460,13 +471,14 @@
                 settings.$referrer.unselect();
             }
         }
+
         function submitHandler(e, callback) {
 
             $(':focus').trigger('blur');
 
             e.preventDefault();
 
-            var $form = (typeof(e)==='string') ? $(e).eq(0) : (e.target ? $(e.target) : $(e));
+            var $form = (typeof(e) === 'string') ? $(e).eq(0) : (e.target ? $(e.target) : $(e));
 
             if ($form.length && $form.is(jQTSettings.formSelector) && $form.attr('action')) {
                 showPageByHref($form.attr('action'), {
@@ -479,6 +491,7 @@
             }
             return true;
         }
+
         function submitParentForm($el) {
 
             var $form = $el.closest('form');
@@ -489,6 +502,7 @@
             }
             return true;
         }
+
         function supportForTransform3d() {
 
             var head, body, style, div, result;
@@ -516,7 +530,8 @@
             // Pass back result
             return result;
         }
-        function touchStartHandler(e){
+
+        function touchStartHandler(e) {
 
             var $el = $(e.target),
                 selectors = touchSelectors.join(', ');
@@ -532,16 +547,17 @@
             }
 
             // Remove our active class if we move
-            $el.on($.support.touch ? 'touchmove' : 'mousemove', function(){
+            $el.on($.support.touch ? 'touchmove' : 'mousemove', function () {
                 $el.removeClass('active');
             });
 
-            $el.on('touchend', function(){
+            $el.on('touchend', function () {
                 $el.unbind('touchmove mousemove');
             });
 
         }
-        function tapHandler(e){
+
+        function tapHandler(e) {
 
             // Grab the target element
             var $el = $(e.target);
@@ -596,7 +612,7 @@
                     $el.addClass('loading active');
                     showPageByHref($el.attr('href'), {
                         animation: animation,
-                        callback: function() {
+                        callback: function () {
                             $el.removeClass('loading');
                             setTimeout($.fn.unselect, 250, $el);
                         },
@@ -627,14 +643,14 @@
             }
 
             // Define public jQuery functions
-            $.fn.isExternalLink = function() {
+            $.fn.isExternalLink = function () {
                 var $el = $(this);
                 return ($el.attr('target') == '_blank' || $el.attr('rel') == 'external' || $el.is('a[href^="http://maps.google.com"], a[href^="mailto:"], a[href^="tel:"], a[href^="javascript:"], a[href*="youtube.com/v"], a[href*="youtube.com/watch"]'));
             };
-            $.fn.makeActive = function() {
+            $.fn.makeActive = function () {
                 return $(this).addClass('active');
             };
-            $.fn.unselect = function(obj) {
+            $.fn.unselect = function (obj) {
                 if (obj) {
                     obj.removeClass('active');
                 } else {
@@ -643,7 +659,7 @@
             };
 
             // Add extensions
-            for (var i=0, max=extensions.length; i < max; i++) {
+            for (var i = 0, max = extensions.length; i < max; i++) {
                 var fn = extensions[i];
                 if ($.isFunction(fn)) {
                     $.extend(publicObj, fn(publicObj));
@@ -651,9 +667,9 @@
             }
 
             // Add animations
-            for (var j=0, max_anims=defaults.animations.length; j < max_anims; j++) {
+            for (var j = 0, max_anims = defaults.animations.length; j < max_anims; j++) {
                 var animation = defaults.animations[j];
-                if(jQTSettings[animation.name + 'Selector'] !== undefined){
+                if (jQTSettings[animation.name + 'Selector'] !== undefined) {
                     animation.selector = jQTSettings[animation.name + 'Selector'];
                 }
                 addAnimation(animation);
@@ -686,16 +702,16 @@
             }
 
             // Bind events
-            
+
             $body
                 .addClass(anatomy_lessons.join(' '))
                 .bind('click', clickHandler)
                 .bind('orientationchange', orientationChangeHandler)
                 .bind('submit', submitHandler)
                 .bind('tap', tapHandler)
-                .bind( $.support.touch ? 'touchstart' : 'mousedown', touchStartHandler)
+                .bind($.support.touch ? 'touchstart' : 'mousedown', touchStartHandler)
                 .trigger('orientationchange');
-            
+
             $(window).bind('hashchange', hashChangeHandler);
 
             var startHash = location.hash;
@@ -706,7 +722,7 @@
             } else {
                 $currentPage = $('#jqt > .current');
             }
-            
+
             setHash($currentPage.attr('id'));
             addPageToHistory($currentPage);
 
@@ -729,22 +745,22 @@
         };
         return publicObj;
     };
-    
+
     jQTouchCore.prototype.extensions = [];
 
     // If Zepto exists, jQTouch will use Zepto. Otherwise, a bridge should initialize
     // jQTouch. See jqtouch-jquery.js.
     if (!!window.Zepto) {
-        (function($) {
-            $.jQTouch = function(options) {
+        (function ($) {
+            $.jQTouch = function (options) {
                 options.framework = $;
                 return jQTouchCore(options);
             };
 
             $.fn.prop = $.fn.attr;
-            
+
             // Extensions directly manipulate the jQTouch object, before it's initialized.
-            $.jQTouch.addExtension = function(extension) {
+            $.jQTouch.addExtension = function (extension) {
                 jQTouchCore.prototype.extensions.push(extension);
             };
         })(Zepto);

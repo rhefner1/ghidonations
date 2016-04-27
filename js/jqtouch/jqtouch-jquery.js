@@ -1,20 +1,20 @@
 /*
 
-    jQuery Bridge for jQTouch
-    (adds events which Zepto includes by default)
+ jQuery Bridge for jQTouch
+ (adds events which Zepto includes by default)
 
-    Created by David Kaneda <http://www.davidkaneda.com>
-    Maintained by Jonathan Stark <http://jonathanstark.com/>
-    Sponsored by Sencha Labs <http://www.sencha.com/>
+ Created by David Kaneda <http://www.davidkaneda.com>
+ Maintained by Jonathan Stark <http://jonathanstark.com/>
+ Sponsored by Sencha Labs <http://www.sencha.com/>
 
-    Documentation and issue tracking on GitHub <http://wiki.github.com/senchalabs/jQTouch/>
+ Documentation and issue tracking on GitHub <http://wiki.github.com/senchalabs/jQTouch/>
 
-    (c) 2009-2011 by jQTouch project members.
-    See LICENSE.txt for license.
+ (c) 2009-2011 by jQTouch project members.
+ See LICENSE.txt for license.
 
-*/
+ */
 
-(function($) {
+(function ($) {
     var SUPPORT_TOUCH = (!!window.Touch),
         START_EVENT = SUPPORT_TOUCH ? 'touchstart' : 'mousedown',
         MOVE_EVENT = SUPPORT_TOUCH ? 'touchmove' : 'mousemove',
@@ -23,11 +23,11 @@
         lastTime = 0,
         tapReady = true,
         jQTSettings = {
-          useFastTouch: true, // experimental
-          debug: true,
-          moveThreshold: 10,
-          hoverDelay: 50,
-          pressDelay: 750
+            useFastTouch: true, // experimental
+            debug: true,
+            moveThreshold: 10,
+            hoverDelay: 50,
+            pressDelay: 750
         };
 
     function warn(message) {
@@ -62,18 +62,18 @@
             deltaY = 0,
             deltaT = 0;
 
-        touch = SUPPORT_TOUCH? event.changedTouches[0]: event;
+        touch = SUPPORT_TOUCH ? event.changedTouches[0] : event;
         startX = touch.pageX;
         startY = touch.pageY;
 
         // Prep the element
         bindEvents($el);
 
-        hoverTimeout = setTimeout(function() {
+        hoverTimeout = setTimeout(function () {
             $el.makeActive();
         }, jQTSettings.hoverDelay);
 
-        pressTimeout = setTimeout(function() {
+        pressTimeout = setTimeout(function () {
             unbindEvents($el);
             $el.unselect();
             clearTimeout(hoverTimeout);
@@ -115,7 +115,7 @@
                     direction = 'right';
                 }
                 unbindEvents($el);
-                $el.trigger('swipe', {direction:direction, deltaX:deltaX, deltaY: deltaY});
+                $el.trigger('swipe', {direction: direction, deltaX: deltaX, deltaY: deltaY});
             }
             $el.unselect();
             clearTimeout(hoverTimeout);
@@ -125,7 +125,7 @@
         }
 
         function updateChanges() {
-            var firstFinger = SUPPORT_TOUCH? event.changedTouches[0]: event; 
+            var firstFinger = SUPPORT_TOUCH ? event.changedTouches[0] : event;
             deltaX = firstFinger.pageX - startX;
             deltaY = firstFinger.pageY - startY;
             deltaT = new Date().getTime() - startTime;
@@ -152,32 +152,32 @@
         }
     } // End touch handler
 
-    $.jQTouch = function(options) {
+    $.jQTouch = function (options) {
 
         // take in options
         for (var i in options) {
             jQTSettings[i] = options[i];
         }
-        
-        $(document).bind('ready', function() {
-            $('#jqt').bind(START_EVENT, touchStartHandler);  
+
+        $(document).bind('ready', function () {
+            $('#jqt').bind(START_EVENT, touchStartHandler);
         });
 
-        $.fn.press = function(fn) {
+        $.fn.press = function (fn) {
             if ($.isFunction(fn)) {
                 return $(this).live('press', fn);
             } else {
                 return $(this).trigger('press');
             }
         };
-        $.fn.swipe = function(fn) {
+        $.fn.swipe = function (fn) {
             if ($.isFunction(fn)) {
                 return $(this).live('swipe', fn);
             } else {
                 return $(this).trigger('swipe');
             }
         };
-        $.fn.tap = function(fn) {
+        $.fn.tap = function (fn) {
             if ($.isFunction(fn)) {
                 return $(this).live('tap', fn);
             } else {
@@ -188,12 +188,12 @@
         options.framework = $;
 
         var core = jQTouchCore(options);
-        
+
         return core;
     };
-    
+
     // Extensions directly manipulate the jQTouch object, before it's initialized.
-    $.jQTouch.addExtension = function(extension) {
+    $.jQTouch.addExtension = function (extension) {
         jQTouchCore.prototype.extensions.push(extension);
     };
 

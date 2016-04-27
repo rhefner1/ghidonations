@@ -54,15 +54,16 @@ if version < '2.3':
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 ### ANTLR Standard Tokens
-SKIP                = -1
-INVALID_TYPE        = 0
-EOF_TYPE            = 1
-EOF                 = 1
+SKIP = -1
+INVALID_TYPE = 0
+EOF_TYPE = 1
+EOF = 1
 NULL_TREE_LOOKAHEAD = 3
-MIN_USER_TYPE       = 4
+MIN_USER_TYPE = 4
 
 ### ANTLR's EOF Symbol
-EOF_CHAR            = ''
+EOF_CHAR = ''
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                    general functions                           ###
@@ -73,47 +74,51 @@ EOF_CHAR            = ''
 ## <version>
 def version():
     r = {
-        'major'  : '2',
-        'minor'  : '7',
-        'micro'  : '5',
-        'patch'  : '' ,
+        'major': '2',
+        'minor': '7',
+        'micro': '5',
+        'patch': '',
         'version': '2.7.5'
-        }
+    }
     return r
+
+
 ## </version>
 
-def error(fmt,*args):
+def error(fmt, *args):
     if fmt:
         print "error: ", fmt % tuple(args)
 
-def ifelse(cond,_then,_else):
-    if cond :
+
+def ifelse(cond, _then, _else):
+    if cond:
         r = _then
     else:
         r = _else
     return r
+
 
 def is_string_type(x):
     # return  (isinstance(x,str) or isinstance(x,unicode))
     # Simplify; xlwt doesn't support Python < 2.3
     return isinstance(basestring)
 
+
 def assert_string_type(x):
     assert is_string_type(x)
     pass
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                     ANTLR Exceptions                           ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class ANTLRException(Exception):
-
     def __init__(self, *args):
         Exception.__init__(self, *args)
 
 
 class RecognitionException(ANTLRException):
-
     def __init__(self, *args):
         ANTLRException.__init__(self, *args)
         self.fileName = None
@@ -144,14 +149,13 @@ class RecognitionException(ANTLRException):
 
 
 class NoViableAltException(RecognitionException):
-
     def __init__(self, *args):
         RecognitionException.__init__(self, *args)
         self.token = None
-        self.node  = None
-        if isinstance(args[0],AST):
+        self.node = None
+        if isinstance(args[0], AST):
             self.node = args[0]
-        elif isinstance(args[0],Token):
+        elif isinstance(args[0], Token):
             self.token = args[0]
         else:
             raise TypeError("NoViableAltException requires Token or AST argument")
@@ -159,9 +163,9 @@ class NoViableAltException(RecognitionException):
     def __str__(self):
         if self.token:
             line = self.token.getLine()
-            col  = self.token.getColumn()
+            col = self.token.getColumn()
             text = self.token.getText()
-            return "unexpected symbol at line %s (column %s): \"%s\"" % (line,col,text)
+            return "unexpected symbol at line %s (column %s): \"%s\"" % (line, col, text)
         if self.node == ASTNULL:
             return "unexpected end of subtree"
         assert self.node
@@ -172,7 +176,6 @@ class NoViableAltException(RecognitionException):
 
 
 class NoViableAltForCharException(RecognitionException):
-
     def __init__(self, *args):
         self.foundChar = None
         if len(args) == 2:
@@ -207,13 +210,11 @@ class NoViableAltForCharException(RecognitionException):
 
 
 class SemanticException(RecognitionException):
-
     def __init__(self, *args):
         RecognitionException.__init__(self, *args)
 
 
 class MismatchedCharException(RecognitionException):
-
     NONE = 0
     CHAR = 1
     NOT_CHAR = 2
@@ -326,7 +327,6 @@ class MismatchedCharException(RecognitionException):
 
 
 class MismatchedTokenException(RecognitionException):
-
     NONE = 0
     TOKEN = 1
     NOT_TOKEN = 2
@@ -336,11 +336,11 @@ class MismatchedTokenException(RecognitionException):
     NOT_SET = 6
 
     def __init__(self, *args):
-        self.args =  args
+        self.args = args
         self.tokenNames = []
         self.token = None
         self.tokenText = ''
-        self.node =  None
+        self.node = None
         if len(args) == 6:
             # Expected range / not range
             if args[3]:
@@ -375,14 +375,14 @@ class MismatchedTokenException(RecognitionException):
             RecognitionException.__init__(self, "Mismatched Token: expecting any AST node", "<AST>", -1, -1)
 
         if len(args) >= 2:
-            if isinstance(args[1],Token):
+            if isinstance(args[1], Token):
                 self.token = args[1]
                 self.tokenText = self.token.getText()
                 RecognitionException.__init__(self, "Mismatched Token",
                                               self.fileName,
                                               self.token.getLine(),
                                               self.token.getColumn())
-            elif isinstance(args[1],AST):
+            elif isinstance(args[1], AST):
                 self.node = args[1]
                 self.tokenText = str(self.node)
                 RecognitionException.__init__(self, "Mismatched Token",
@@ -441,14 +441,12 @@ class MismatchedTokenException(RecognitionException):
 
 
 class TokenStreamException(ANTLRException):
-
     def __init__(self, *args):
         ANTLRException.__init__(self, *args)
 
 
 # Wraps an Exception in a TokenStreamException
 class TokenStreamIOException(TokenStreamException):
-
     def __init__(self, *args):
         if args and isinstance(args[0], Exception):
             io = args[0]
@@ -461,7 +459,6 @@ class TokenStreamIOException(TokenStreamException):
 
 # Wraps a RecognitionException in a TokenStreamException
 class TokenStreamRecognitionException(TokenStreamException):
-
     def __init__(self, *args):
         if args and isinstance(args[0], RecognitionException):
             recog = args[0]
@@ -477,20 +474,17 @@ class TokenStreamRecognitionException(TokenStreamException):
 
 
 class TokenStreamRetryException(TokenStreamException):
-
     def __init__(self, *args):
         TokenStreamException.__init__(self, *args)
 
 
 class CharStreamException(ANTLRException):
-
     def __init__(self, *args):
         ANTLRException.__init__(self, *args)
 
 
 # Wraps an Exception in a CharStreamException
 class CharStreamIOException(CharStreamException):
-
     def __init__(self, *args):
         if args and isinstance(args[0], Exception):
             io = args[0]
@@ -510,14 +504,14 @@ class TryAgain(Exception):
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class Token(object):
-    SKIP                = -1
-    INVALID_TYPE        = 0
-    EOF_TYPE            = 1
-    EOF                 = 1
+    SKIP = -1
+    INVALID_TYPE = 0
+    EOF_TYPE = 1
+    EOF = 1
     NULL_TREE_LOOKAHEAD = 3
-    MIN_USER_TYPE       = 4
+    MIN_USER_TYPE = 4
 
-    def __init__(self,**argv):
+    def __init__(self, **argv):
         try:
             self.type = argv['type']
         except:
@@ -539,30 +533,30 @@ class Token(object):
     def getFilename(self):
         return None
 
-    def setFilename(self,name):
+    def setFilename(self, name):
         return self
 
     def getText(self):
         return "<no text>"
 
-    def setText(self,text):
+    def setText(self, text):
         if is_string_type(text):
             pass
         else:
             raise TypeError("Token.setText requires string argument")
         return self
 
-    def setColumn(self,column):
+    def setColumn(self, column):
         return self
 
-    def setLine(self,line):
+    def setLine(self, line):
         return self
 
     def getType(self):
         return self.type
 
-    def setType(self,type):
-        if isinstance(type,int):
+    def setType(self, type):
+        if isinstance(type, int):
             self.type = type
         else:
             raise TypeError("Token.setType requires integer argument")
@@ -581,29 +575,30 @@ class Token(object):
             tval = 'SKIP'
         else:
             tval = type_
-        return '["%s",<%s>]' % (self.getText(),tval)
+        return '["%s",<%s>]' % (self.getText(), tval)
 
     __str__ = toString
     __repr__ = toString
 
+
 ### static attribute ..
-Token.badToken = Token( type=INVALID_TYPE, text="<no text>")
+Token.badToken = Token(type=INVALID_TYPE, text="<no text>")
 
 if __name__ == "__main__":
     print "testing .."
     T = Token.badToken
     print T
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       CommonToken                              ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class CommonToken(Token):
-
-    def __init__(self,**argv):
-        Token.__init__(self,**argv)
+    def __init__(self, **argv):
+        Token.__init__(self, **argv)
         self.line = 0
-        self.col  = 0
+        self.col = 0
         try:
             self.line = argv['line']
         except:
@@ -622,15 +617,15 @@ class CommonToken(Token):
     def getColumn(self):
         return self.col
 
-    def setLine(self,line):
+    def setLine(self, line):
         self.line = line
         return self
 
-    def setText(self,text):
+    def setText(self, text):
         self.text = text
         return self
 
-    def setColumn(self,col):
+    def setColumn(self, col):
         self.col = col
         return self
 
@@ -648,11 +643,11 @@ class CommonToken(Token):
         else:
             tval = type_
         d = {
-           'text' : self.text,
-           'type' : tval,
-           'line' : self.line,
-           'colm' : self.col
-           }
+            'text': self.text,
+            'type': tval,
+            'line': self.line,
+            'colm': self.col
+        }
 
         fmt = '["%(text)s",<%(type)s>,line=%(line)s,col=%(colm)s]'
         return fmt % d
@@ -661,10 +656,10 @@ class CommonToken(Token):
     __repr__ = toString
 
 
-if __name__ == '__main__' :
+if __name__ == '__main__':
     T = CommonToken()
     print T
-    T = CommonToken(col=15,line=1,text="some text", type=5)
+    T = CommonToken(col=15, line=1, text="some text", type=5)
     print T
     T = CommonToken()
     T.setLine(1).setColumn(15).setText("some text").setType(5)
@@ -674,15 +669,16 @@ if __name__ == '__main__' :
     print T.getText()
     print T.getType()
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                    CommonHiddenStreamToken                     ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class CommonHiddenStreamToken(CommonToken):
-    def __init__(self,*args):
-        CommonToken.__init__(self,*args)
+    def __init__(self, *args):
+        CommonToken.__init__(self, *args)
         self.hiddenBefore = None
-        self.hiddenAfter  = None
+        self.hiddenAfter = None
 
     def getHiddenAfter(self):
         return self.hiddenAfter
@@ -690,11 +686,12 @@ class CommonHiddenStreamToken(CommonToken):
     def getHiddenBefore(self):
         return self.hiddenBefore
 
-    def setHiddenAfter(self,t):
+    def setHiddenAfter(self, t):
         self.hiddenAfter = t
 
     def setHiddenBefore(self, t):
         self.hiddenBefore = t
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       Queue                                    ###
@@ -702,14 +699,13 @@ class CommonHiddenStreamToken(CommonToken):
 
 ## Shall be a circular buffer on tokens ..
 class Queue(object):
-
     def __init__(self):
-        self.buffer = [] # empty list
+        self.buffer = []  # empty list
 
-    def append(self,item):
+    def append(self, item):
         self.buffer.append(item)
 
-    def elementAt(self,index):
+    def elementAt(self, index):
         return self.buffer[index]
 
     def reset(self):
@@ -724,6 +720,7 @@ class Queue(object):
     def __str__(self):
         return str(self.buffer)
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       InputBuffer                              ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
@@ -737,10 +734,10 @@ class InputBuffer(object):
 
     def __str__(self):
         return "(%s,%s,%s,%s)" % (
-           self.nMarkers,
-           self.markerOffset,
-           self.numToConsume,
-           self.queue)
+            self.nMarkers,
+            self.markerOffset,
+            self.numToConsume,
+            self.queue)
 
     def __repr__(self):
         return str(self)
@@ -748,58 +745,58 @@ class InputBuffer(object):
     def commit(self):
         self.nMarkers -= 1
 
-    def consume(self) :
+    def consume(self):
         self.numToConsume += 1
 
     ## probably better to return a list of items
     ## because of unicode. Or return a unicode
     ## string ..
-    def getLAChars(self) :
+    def getLAChars(self):
         i = self.markerOffset
         n = self.queue.length()
         s = ''
-        while i<n:
+        while i < n:
             s += self.queue.elementAt(i)
         return s
 
     ## probably better to return a list of items
     ## because of unicode chars
-    def getMarkedChars(self) :
+    def getMarkedChars(self):
         s = ''
         i = 0
         n = self.markerOffset
-        while i<n:
+        while i < n:
             s += self.queue.elementAt(i)
         return s
 
-    def isMarked(self) :
+    def isMarked(self):
         return self.nMarkers != 0
 
-    def fill(self,k):
+    def fill(self, k):
         ### abstract method
         raise NotImplementedError()
 
-    def LA(self,k) :
+    def LA(self, k):
         self.fill(k)
         return self.queue.elementAt(self.markerOffset + k - 1)
 
-    def mark(self) :
+    def mark(self):
         self.syncConsume()
         self.nMarkers += 1
         return self.markerOffset
 
-    def rewind(self,mark) :
+    def rewind(self, mark):
         self.syncConsume()
         self.markerOffset = mark
         self.nMarkers -= 1
 
-    def reset(self) :
+    def reset(self):
         self.nMarkers = 0
         self.markerOffset = 0
         self.numToConsume = 0
         self.queue.reset()
 
-    def syncConsume(self) :
+    def syncConsume(self):
         while self.numToConsume > 0:
             if self.nMarkers > 0:
                 # guess mode -- leave leading characters and bump offset.
@@ -809,26 +806,27 @@ class InputBuffer(object):
                 self.queue.removeFirst()
             self.numToConsume -= 1
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       CharBuffer                               ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class CharBuffer(InputBuffer):
-    def __init__(self,reader):
+    def __init__(self, reader):
         ##assert isinstance(reader,file)
-        super(CharBuffer,self).__init__()
+        super(CharBuffer, self).__init__()
         ## a reader is supposed to be anything that has
         ## a method 'read(int)'.
         self.input = reader
 
     def __str__(self):
-        base = super(CharBuffer,self).__str__()
-        return "CharBuffer{%s,%s" % (base,str(input))
+        base = super(CharBuffer, self).__str__()
+        return "CharBuffer{%s,%s" % (base, str(input))
 
-    def fill(self,amount):
+    def fill(self, amount):
         try:
             self.syncConsume()
-            while self.queue.length() < (amount + self.markerOffset) :
+            while self.queue.length() < (amount + self.markerOffset):
                 ## retrieve just one char - what happend at end
                 ## of input?
                 c = self.input.read(1)
@@ -852,19 +850,20 @@ class CharBuffer(InputBuffer):
 
                 ### use unicode chars instead of ASCII ..
                 self.queue.append(c)
-        except Exception,e:
+        except Exception, e:
             raise CharStreamIOException(e)
-        ##except: # (mk) Cannot happen ...
+            ##except: # (mk) Cannot happen ...
             ##error ("unexpected exception caught ..")
             ##assert 0
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       LexerSharedInputState                    ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class LexerSharedInputState(object):
-    def __init__(self,ibuf):
-        assert isinstance(ibuf,InputBuffer)
+    def __init__(self, ibuf):
+        assert isinstance(ibuf, InputBuffer)
         self.input = ibuf
         self.column = 1
         self.line = 1
@@ -882,8 +881,9 @@ class LexerSharedInputState(object):
         self.filename = None
         self.input.reset()
 
-    def LA(self,k):
+    def LA(self, k):
         return self.input.LA(k)
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                    TokenStream                                 ###
@@ -896,13 +896,14 @@ class TokenStream(object):
     def __iter__(self):
         return TokenStreamIterator(self)
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                    TokenStreamIterator                                 ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class TokenStreamIterator(object):
-    def __init__(self,inst):
-        if isinstance(inst,TokenStream):
+    def __init__(self, inst):
+        if isinstance(inst, TokenStream):
             self.inst = inst
             return
         raise TypeError("TokenStreamIterator requires TokenStream object")
@@ -914,24 +915,24 @@ class TokenStreamIterator(object):
             raise StopIteration()
         return item
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                    TokenStreamSelector                        ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class TokenStreamSelector(TokenStream):
-
     def __init__(self):
         self._input = None
         self._stmap = {}
         self._stack = []
 
-    def addInputStream(self,stream,key):
+    def addInputStream(self, stream, key):
         self._stmap[key] = stream
 
     def getCurrentStream(self):
         return self._input
 
-    def getStream(self,sname):
+    def getStream(self, sname):
         try:
             stream = self._stmap[sname]
         except:
@@ -942,7 +943,7 @@ class TokenStreamSelector(TokenStream):
         while 1:
             try:
                 return self._input.nextToken()
-            except TokenStreamRetryException,r:
+            except TokenStreamRetryException, r:
                 ### just retry "forever"
                 pass
 
@@ -951,15 +952,15 @@ class TokenStreamSelector(TokenStream):
         self.select(stream);
         return stream;
 
-    def push(self,arg):
+    def push(self, arg):
         self._stack.append(self._input);
         self.select(arg)
 
     def retry(self):
         raise TokenStreamRetryException()
 
-    def select(self,arg):
-        if isinstance(arg,TokenStream):
+    def select(self, arg):
+        if isinstance(arg, TokenStream):
             self._input = arg
             return
         if is_string_type(arg):
@@ -968,22 +969,22 @@ class TokenStreamSelector(TokenStream):
         raise TypeError("TokenStreamSelector.select requires " +
                         "TokenStream or string argument")
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                      TokenStreamBasicFilter                    ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class TokenStreamBasicFilter(TokenStream):
-
-    def __init__(self,input):
+    def __init__(self, input):
 
         self.input = input;
         self.discardMask = BitSet()
 
-    def discard(self,arg):
-        if isinstance(arg,int):
+    def discard(self, arg):
+        if isinstance(arg, int):
             self.discardMask.add(arg)
             return
-        if isinstance(arg,BitSet):
+        if isinstance(arg, BitSet):
             self.discardMark = arg
             return
         raise TypeError("TokenStreamBasicFilter.discard requires" +
@@ -995,14 +996,14 @@ class TokenStreamBasicFilter(TokenStream):
             tok = self.input.nextToken()
         return tok
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                      TokenStreamHiddenTokenFilter              ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class TokenStreamHiddenTokenFilter(TokenStreamBasicFilter):
-
-    def __init__(self,input):
-        TokenStreamBasicFilter.__init__(self,input)
+    def __init__(self, input):
+        TokenStreamBasicFilter.__init__(self, input)
         self.hideMask = BitSet()
         self.nextMonitoredToken = None
         self.lastHiddenToken = None
@@ -1016,7 +1017,7 @@ class TokenStreamHiddenTokenFilter(TokenStreamBasicFilter):
 
         p = None;
         while self.hideMask.member(self.LA(1).getType()) or \
-              self.discardMask.member(self.LA(1).getType()):
+                self.discardMask.member(self.LA(1).getType()):
             if self.hideMask.member(self.LA(1).getType()):
                 if not p:
                     p = self.LA(1)
@@ -1032,10 +1033,10 @@ class TokenStreamHiddenTokenFilter(TokenStreamBasicFilter):
     def getDiscardMask(self):
         return self.discardMask
 
-    def getHiddenAfter(self,t):
+    def getHiddenAfter(self, t):
         return t.getHiddenAfter()
 
-    def getHiddenBefore(self,t):
+    def getHiddenBefore(self, t):
         return t.getHiddenBefore()
 
     def getHideMask(self):
@@ -1044,15 +1045,15 @@ class TokenStreamHiddenTokenFilter(TokenStreamBasicFilter):
     def getInitialHiddenToken(self):
         return self.firstHidden
 
-    def hide(self,m):
-        if isinstance(m,int):
+    def hide(self, m):
+        if isinstance(m, int):
             self.hideMask.add(m)
             return
         if isinstance(m.BitMask):
             self.hideMask = m
             return
 
-    def LA(self,i):
+    def LA(self, i):
         return self.nextMonitoredToken
 
     def nextToken(self):
@@ -1068,7 +1069,7 @@ class TokenStreamHiddenTokenFilter(TokenStreamBasicFilter):
         p = monitored
 
         while self.hideMask.member(self.LA(1).getType()) or \
-              self.discardMask.member(self.LA(1).getType()):
+                self.discardMask.member(self.LA(1).getType()):
             if self.hideMask.member(self.LA(1).getType()):
                 p.setHiddenAfter(self.LA(1))
                 if p != monitored:
@@ -1077,22 +1078,23 @@ class TokenStreamHiddenTokenFilter(TokenStreamBasicFilter):
             self.consume()
         return monitored
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       StringBuffer                             ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class StringBuffer:
-    def __init__(self,string=None):
+    def __init__(self, string=None):
         if string:
             self.text = list(string)
         else:
             self.text = []
 
-    def setLength(self,sz):
-        if not sz :
+    def setLength(self, sz):
+        if not sz:
             self.text = []
             return
-        assert sz>0
+        assert sz > 0
         if sz >= self.length():
             return
         ### just reset to empty buffer
@@ -1101,35 +1103,36 @@ class StringBuffer:
     def length(self):
         return len(self.text)
 
-    def append(self,c):
+    def append(self, c):
         self.text.append(c)
 
     ### return buffer as string. Arg 'a' is  used  as index
     ## into the buffer and 2nd argument shall be the length.
     ## If 2nd args is absent, we return chars till end of
     ## buffer starting with 'a'.
-    def getString(self,a=None,length=None):
-        if not a :
+    def getString(self, a=None, length=None):
+        if not a:
             a = 0
-        assert a>=0
-        if a>= len(self.text) :
+        assert a >= 0
+        if a >= len(self.text):
             return ""
 
         if not length:
             ## no second argument
             L = self.text[a:]
         else:
-            assert (a+length) <= len(self.text)
+            assert (a + length) <= len(self.text)
             b = a + length
             L = self.text[a:b]
         s = ""
-        for x in L : s += x
+        for x in L: s += x
         return s
 
-    toString = getString ## alias
+    toString = getString  ## alias
 
     def __str__(self):
         return str(self.text)
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       Reader                                   ###
@@ -1144,12 +1147,12 @@ class StringBuffer:
 ## wh: nov, 25th -> problem does not appear in Python 2.4.0.c1.
 
 class Reader(object):
-    def __init__(self,stream):
+    def __init__(self, stream):
         self.cin = stream
         self.buf = []
 
-    def read(self,num):
-        assert num==1
+    def read(self, num):
+        assert num == 1
 
         if len(self.buf):
             return self.buf.pop()
@@ -1158,7 +1161,7 @@ class Reader(object):
         ## Is this a bug in codecs/Python?
         c = self.cin.read(1)
 
-        if not c or len(c)==1:
+        if not c or len(c) == 1:
             return c
 
         L = list(c)
@@ -1168,6 +1171,7 @@ class Reader(object):
 
         ## read one char ..
         return self.read(1)
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       CharScanner                              ###
@@ -1197,7 +1201,7 @@ class CharScanner(TokenStream):
     def __iter__(self):
         return CharScannerIterator(self)
 
-    def setInput(self,*argv):
+    def setInput(self, *argv):
         ## case 1:
         ## if there's no arg we default to read from
         ## standard input
@@ -1215,7 +1219,7 @@ class CharScanner(TokenStream):
         ## mode. If there's no 2nd argument we fall back to
         ## mode '+rb'.
         if is_string_type(arg1):
-            f = open(arg1,"rb")
+            f = open(arg1, "rb")
             self.setInput(f)
             self.setFilename(arg1)
             return
@@ -1224,14 +1228,14 @@ class CharScanner(TokenStream):
         ## if arg1 is a file we wrap it by a char buffer (
         ## some additional checks?? No, can't do this in
         ## general).
-        if isinstance(arg1,file):
+        if isinstance(arg1, file):
             self.setInput(CharBuffer(arg1))
             return
 
         ## case 4:
         ## if arg1 is of type SharedLexerInputState we use
         ## argument as is.
-        if isinstance(arg1,LexerSharedInputState):
+        if isinstance(arg1, LexerSharedInputState):
             self.inputState = arg1
             return
 
@@ -1239,7 +1243,7 @@ class CharScanner(TokenStream):
         ## check whether argument type is of type input
         ## buffer. If so create a SharedLexerInputState and
         ## go ahead.
-        if isinstance(arg1,InputBuffer):
+        if isinstance(arg1, InputBuffer):
             self.setInput(LexerSharedInputState(arg1))
             return
 
@@ -1260,73 +1264,73 @@ class CharScanner(TokenStream):
         ## raise wrong argument exception
         raise TypeError(argv)
 
-    def setTabSize(self,size) :
+    def setTabSize(self, size):
         self.tabsize = size
 
-    def getTabSize(self) :
+    def getTabSize(self):
         return self.tabsize
 
-    def setCaseSensitive(self,t) :
+    def setCaseSensitive(self, t):
         self.caseSensitive = t
 
-    def setCommitToPath(self,commit) :
+    def setCommitToPath(self, commit):
         self.commitToPath = commit
 
-    def setFilename(self,f) :
+    def setFilename(self, f):
         self.inputState.filename = f
 
-    def setLine(self,line) :
+    def setLine(self, line):
         self.inputState.line = line
 
-    def setText(self,s) :
+    def setText(self, s):
         self.resetText()
         self.text.append(s)
 
-    def getCaseSensitive(self) :
+    def getCaseSensitive(self):
         return self.caseSensitive
 
-    def getCaseSensitiveLiterals(self) :
+    def getCaseSensitiveLiterals(self):
         return self.caseSensitiveLiterals
 
-    def getColumn(self) :
+    def getColumn(self):
         return self.inputState.column
 
-    def setColumn(self,c) :
+    def setColumn(self, c):
         self.inputState.column = c
 
-    def getCommitToPath(self) :
+    def getCommitToPath(self):
         return self.commitToPath
 
-    def getFilename(self) :
+    def getFilename(self):
         return self.inputState.filename
 
-    def getInputBuffer(self) :
+    def getInputBuffer(self):
         return self.inputState.input
 
-    def getInputState(self) :
+    def getInputState(self):
         return self.inputState
 
-    def setInputState(self,state) :
-        assert isinstance(state,LexerSharedInputState)
+    def setInputState(self, state):
+        assert isinstance(state, LexerSharedInputState)
         self.inputState = state
 
-    def getLine(self) :
+    def getLine(self):
         return self.inputState.line
 
-    def getText(self) :
+    def getText(self):
         return str(self.text)
 
-    def getTokenObject(self) :
+    def getTokenObject(self):
         return self._returnToken
 
-    def LA(self,i) :
+    def LA(self, i):
         c = self.inputState.input.LA(i)
         if not self.caseSensitive:
             ### E0006
             c = c.__class__.lower(c)
         return c
 
-    def makeToken(self,type) :
+    def makeToken(self, type):
         try:
             ## dynamically load a class
             assert self.tokenClass
@@ -1339,88 +1343,88 @@ class CharScanner(TokenStream):
             self.panic("unable to create new token")
         return Token.badToken
 
-    def mark(self) :
+    def mark(self):
         return self.inputState.input.mark()
 
-    def _match_bitset(self,b) :
+    def _match_bitset(self, b):
         if b.member(self.LA(1)):
             self.consume()
         else:
             raise MismatchedCharException(self.LA(1), b, False, self)
 
-    def _match_string(self,s) :
+    def _match_string(self, s):
         for c in s:
             if self.LA(1) == c:
                 self.consume()
             else:
                 raise MismatchedCharException(self.LA(1), c, False, self)
 
-    def match(self,item):
+    def match(self, item):
         if is_string_type(item):
             return self._match_string(item)
         else:
             return self._match_bitset(item)
 
-    def matchNot(self,c) :
+    def matchNot(self, c):
         if self.LA(1) != c:
             self.consume()
         else:
             raise MismatchedCharException(self.LA(1), c, True, self)
 
-    def matchRange(self,c1,c2) :
-        if self.LA(1) < c1 or self.LA(1) > c2 :
+    def matchRange(self, c1, c2):
+        if self.LA(1) < c1 or self.LA(1) > c2:
             raise MismatchedCharException(self.LA(1), c1, c2, False, self)
         else:
             self.consume()
 
-    def newline(self) :
+    def newline(self):
         self.inputState.line += 1
         self.inputState.column = 1
 
-    def tab(self) :
+    def tab(self):
         c = self.getColumn()
-        nc = ( ((c-1)/self.tabsize) + 1) * self.tabsize + 1
+        nc = (((c - 1) / self.tabsize) + 1) * self.tabsize + 1
         self.setColumn(nc)
 
-    def panic(self,s='') :
+    def panic(self, s=''):
         print "CharScanner: panic: " + s
         sys.exit(1)
 
-    def reportError(self,ex) :
+    def reportError(self, ex):
         print ex
 
-    def reportError(self,s) :
+    def reportError(self, s):
         if not self.getFilename():
             print "error: " + str(s)
         else:
             print self.getFilename() + ": error: " + str(s)
 
-    def reportWarning(self,s) :
+    def reportWarning(self, s):
         if not self.getFilename():
             print "warning: " + str(s)
         else:
             print self.getFilename() + ": warning: " + str(s)
 
-    def resetText(self) :
+    def resetText(self):
         self.text.setLength(0)
         self.inputState.tokenStartColumn = self.inputState.column
         self.inputState.tokenStartLine = self.inputState.line
 
-    def rewind(self,pos) :
+    def rewind(self, pos):
         self.inputState.input.rewind(pos)
 
-    def setTokenObjectClass(self,cl):
+    def setTokenObjectClass(self, cl):
         self.tokenClass = cl
 
-    def testForLiteral(self,token):
+    def testForLiteral(self, token):
         if not token:
             return
-        assert isinstance(token,Token)
+        assert isinstance(token, Token)
 
         _type = token.getType()
 
         ## special tokens can't be literals
-        if _type in [SKIP,INVALID_TYPE,EOF_TYPE,NULL_TREE_LOOKAHEAD] :
+        if _type in [SKIP, INVALID_TYPE, EOF_TYPE, NULL_TREE_LOOKAHEAD]:
             return
 
         _text = token.getText()
@@ -1428,11 +1432,11 @@ class CharScanner(TokenStream):
             return
 
         assert is_string_type(_text)
-        _type = self.testLiteralsTable(_text,_type)
+        _type = self.testLiteralsTable(_text, _type)
         token.setType(_type)
         return _type
 
-    def testLiteralsTable(self,*args):
+    def testLiteralsTable(self, *args):
         if is_string_type(args[0]):
             s = args[0]
             i = args[1]
@@ -1441,11 +1445,11 @@ class CharScanner(TokenStream):
             i = args[0]
 
         ## check whether integer has been given
-        if not isinstance(i,int):
-            assert isinstance(i,int)
+        if not isinstance(i, int):
+            assert isinstance(i, int)
 
         ## check whether we have a dict
-        assert isinstance(self.literals,dict)
+        assert isinstance(self.literals, dict)
         try:
             ## E0010
             if not self.caseSensitiveLiterals:
@@ -1455,27 +1459,27 @@ class CharScanner(TokenStream):
             pass
         return i
 
-    def toLower(self,c):
+    def toLower(self, c):
         return c.__class__.lower()
 
     def traceIndent(self):
         print ' ' * self.traceDepth
 
-    def traceIn(self,rname):
+    def traceIn(self, rname):
         self.traceDepth += 1
         self.traceIndent()
-        print "> lexer %s c== %s" % (rname,self.LA(1))
+        print "> lexer %s c== %s" % (rname, self.LA(1))
 
-    def traceOut(self,rname):
+    def traceOut(self, rname):
         self.traceIndent()
-        print "< lexer %s c== %s" % (rname,self.LA(1))
+        print "< lexer %s c== %s" % (rname, self.LA(1))
         self.traceDepth -= 1
 
     def uponEOF(self):
         pass
 
-    def append(self,c):
-        if self.saveConsumedInput :
+    def append(self, c):
+        if self.saveConsumedInput:
             self.text.append(c)
 
     def commit(self):
@@ -1489,7 +1493,7 @@ class CharScanner(TokenStream):
             else:
                 # use input.LA(), not LA(), to get original case
                 # CharScanner.LA() would toLower it.
-                c =  self.inputState.input.LA(1)
+                c = self.inputState.input.LA(1)
                 self.append(c)
 
             if c and c in "\t":
@@ -1499,25 +1503,25 @@ class CharScanner(TokenStream):
         self.inputState.input.consume()
 
     ## Consume chars until one matches the given char
-    def consumeUntil_char(self,c):
+    def consumeUntil_char(self, c):
         while self.LA(1) != EOF_CHAR and self.LA(1) != c:
             self.consume()
 
     ## Consume chars until one matches the given set
-    def consumeUntil_bitset(self,bitset):
+    def consumeUntil_bitset(self, bitset):
         while self.LA(1) != EOF_CHAR and not self.set.member(self.LA(1)):
             self.consume()
 
     ### If symbol seen is EOF then generate and set token, otherwise
     ### throw exception.
-    def default(self,la1):
-        if not la1 :
+    def default(self, la1):
+        if not la1:
             self.uponEOF()
             self._returnToken = self.makeToken(EOF_TYPE)
         else:
             self.raise_NoViableAlt(la1)
 
-    def filterdefault(self,la1,*args):
+    def filterdefault(self, la1, *args):
         if not la1:
             self.uponEOF()
             self._returnToken = self.makeToken(EOF_TYPE)
@@ -1530,23 +1534,23 @@ class CharScanner(TokenStream):
             ### apply filter object
             self.commit();
             try:
-                func=args[0]
-                args=args[1:]
-                apply(func,args)
+                func = args[0]
+                args = args[1:]
+                apply(func, args)
             except RecognitionException, e:
                 ## catastrophic failure
                 self.reportError(e);
                 self.consume();
             raise TryAgain()
 
-    def raise_NoViableAlt(self,la1=None):
+    def raise_NoViableAlt(self, la1=None):
         if not la1: la1 = self.LA(1)
         fname = self.getFilename()
-        line  = self.getLine()
-        col   = self.getColumn()
-        raise NoViableAltForCharException(la1,fname,line,col)
+        line = self.getLine()
+        col = self.getColumn()
+        raise NoViableAltForCharException(la1, fname, line, col)
 
-    def set_return_token(self,_create,_token,_ttype,_offset):
+    def set_return_token(self, _create, _token, _ttype, _offset):
         if _create and not _token and (not _ttype == SKIP):
             string = self.text.getString(_offset)
             _token = self.makeToken(_ttype)
@@ -1554,14 +1558,14 @@ class CharScanner(TokenStream):
         self._returnToken = _token
         return _token
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                   CharScannerIterator                          ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class CharScannerIterator:
-
-    def __init__(self,inst):
-        if isinstance(inst,CharScanner):
+    def __init__(self, inst):
+        if isinstance(inst, CharScanner):
             self.inst = inst
             return
         raise TypeError("CharScannerIterator requires CharScanner object")
@@ -1573,6 +1577,7 @@ class CharScannerIterator:
             raise StopIteration()
         return item
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       BitSet                                   ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
@@ -1582,60 +1587,60 @@ class CharScannerIterator:
 ### bitset (!), ie. Python would do almost all the work (TBD).
 
 class BitSet(object):
-    BITS     = 64
-    NIBBLE   = 4
+    BITS = 64
+    NIBBLE = 4
     LOG_BITS = 6
-    MOD_MASK = BITS -1
+    MOD_MASK = BITS - 1
 
-    def __init__(self,data=None):
+    def __init__(self, data=None):
         if not data:
-            BitSet.__init__(self,[long(0)])
+            BitSet.__init__(self, [long(0)])
             return
-        if isinstance(data,int):
-            BitSet.__init__(self,[long(data)])
+        if isinstance(data, int):
+            BitSet.__init__(self, [long(data)])
             return
-        if isinstance(data,long):
-            BitSet.__init__(self,[data])
+        if isinstance(data, long):
+            BitSet.__init__(self, [data])
             return
-        if not isinstance(data,list):
+        if not isinstance(data, list):
             raise TypeError("BitSet requires integer, long, or " +
                             "list argument")
         for x in data:
-            if not isinstance(x,long):
-                raise TypeError(self,"List argument item is " +
+            if not isinstance(x, long):
+                raise TypeError(self, "List argument item is " +
                                 "not a long: %s" % (x))
         self.data = data
 
     def __str__(self):
         bits = len(self.data) * BitSet.BITS
         s = ""
-        for i in xrange(0,bits):
+        for i in xrange(0, bits):
             if self.at(i):
                 s += "1"
             else:
                 s += "o"
-            if not ((i+1) % 10):
-                s += '|%s|' % (i+1)
+            if not ((i + 1) % 10):
+                s += '|%s|' % (i + 1)
         return s
 
     def __repr__(self):
         return str(self)
 
-    def member(self,item):
+    def member(self, item):
         if not item:
             return False
 
-        if isinstance(item,int):
+        if isinstance(item, int):
             return self.at(item)
 
         if not is_string_type(item):
-            raise TypeError(self,"char or unichar expected: %s" % (item))
+            raise TypeError(self, "char or unichar expected: %s" % (item))
 
         ## char is a (unicode) string with at most lenght 1, ie.
         ## a char.
 
         if len(item) != 1:
-            raise TypeError(self,"char expected: %s" % (item))
+            raise TypeError(self, "char expected: %s" % (item))
 
         ### handle ASCII/UNICODE char
         num = ord(item)
@@ -1643,34 +1648,34 @@ class BitSet(object):
         ### check whether position num is in bitset
         return self.at(num)
 
-    def wordNumber(self,bit):
+    def wordNumber(self, bit):
         return bit >> BitSet.LOG_BITS
 
-    def bitMask(self,bit):
+    def bitMask(self, bit):
         pos = bit & BitSet.MOD_MASK  ## bit mod BITS
         return (1L << pos)
 
-    def set(self,bit,on=True):
+    def set(self, bit, on=True):
         # grow bitset as required (use with care!)
         i = self.wordNumber(bit)
         mask = self.bitMask(bit)
-        if i>=len(self.data):
+        if i >= len(self.data):
             d = i - len(self.data) + 1
-            for x in xrange(0,d):
+            for x in xrange(0, d):
                 self.data.append(0L)
-            assert len(self.data) == i+1
+            assert len(self.data) == i + 1
         if on:
-            self.data[i] |=  mask
+            self.data[i] |= mask
         else:
             self.data[i] &= (~mask)
 
     ### make add an alias for set
     add = set
 
-    def off(self,bit,off=True):
-        self.set(bit,not off)
+    def off(self, bit, off=True):
+        self.set(bit, not off)
 
-    def at(self,bit):
+    def at(self, bit):
         i = self.wordNumber(bit)
         v = self.data[i]
         m = self.bitMask(bit)
@@ -1683,33 +1688,35 @@ class BitSet(object):
 
 def illegalarg_ex(func):
     raise ValueError(
-       "%s is only valid if parser is built for debugging" %
-       (func.func_name))
+        "%s is only valid if parser is built for debugging" %
+        (func.func_name))
+
 
 def runtime_ex(func):
     raise RuntimeException(
-       "%s is only valid if parser is built for debugging" %
-       (func.func_name))
+        "%s is only valid if parser is built for debugging" %
+        (func.func_name))
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       TokenBuffer                              ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class TokenBuffer(object):
-    def __init__(self,stream):
+    def __init__(self, stream):
         self.input = stream
         self.nMarkers = 0
         self.markerOffset = 0
         self.numToConsume = 0
         self.queue = Queue()
 
-    def reset(self) :
+    def reset(self):
         self.nMarkers = 0
         self.markerOffset = 0
         self.numToConsume = 0
         self.queue.reset()
 
-    def consume(self) :
+    def consume(self):
         self.numToConsume += 1
 
     def fill(self, amount):
@@ -1720,25 +1727,25 @@ class TokenBuffer(object):
     def getInput(self):
         return self.input
 
-    def LA(self,k) :
+    def LA(self, k):
         self.fill(k)
         return self.queue.elementAt(self.markerOffset + k - 1).type
 
-    def LT(self,k) :
+    def LT(self, k):
         self.fill(k)
         return self.queue.elementAt(self.markerOffset + k - 1)
 
-    def mark(self) :
+    def mark(self):
         self.syncConsume()
         self.nMarkers += 1
         return self.markerOffset
 
-    def rewind(self,mark) :
+    def rewind(self, mark):
         self.syncConsume()
         self.markerOffset = mark
         self.nMarkers -= 1
 
-    def syncConsume(self) :
+    def syncConsume(self):
         while self.numToConsume > 0:
             if self.nMarkers > 0:
                 # guess mode -- leave leading characters and bump offset.
@@ -1750,21 +1757,21 @@ class TokenBuffer(object):
 
     def __str__(self):
         return "(%s,%s,%s,%s,%s)" % (
-           self.input,
-           self.nMarkers,
-           self.markerOffset,
-           self.numToConsume,
-           self.queue)
+            self.input,
+            self.nMarkers,
+            self.markerOffset,
+            self.numToConsume,
+            self.queue)
 
     def __repr__(self):
         return str(self)
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       ParserSharedInputState                   ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class ParserSharedInputState(object):
-
     def __init__(self):
         self.input = None
         self.reset()
@@ -1775,15 +1782,15 @@ class ParserSharedInputState(object):
         if self.input:
             self.input.reset()
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       Parser                                   ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class Parser(object):
-
     def __init__(self, *args, **kwargs):
         self.tokenNames = None
-        self.returnAST  = None
+        self.returnAST = None
         self.astFactory = None
         self.tokenTypeToASTClassMap = {}
         self.ignoreInvalidDebugCalls = False
@@ -1792,46 +1799,45 @@ class Parser(object):
             self.inputState = ParserSharedInputState()
             return
         arg0 = args[0]
-        assert isinstance(arg0,ParserSharedInputState)
+        assert isinstance(arg0, ParserSharedInputState)
         self.inputState = arg0
         return
 
     def getTokenTypeToASTClassMap(self):
         return self.tokenTypeToASTClassMap
 
-
     def addMessageListener(self, l):
         if not self.ignoreInvalidDebugCalls:
             illegalarg_ex(addMessageListener)
 
-    def addParserListener(self,l) :
-        if (not self.ignoreInvalidDebugCalls) :
+    def addParserListener(self, l):
+        if (not self.ignoreInvalidDebugCalls):
             illegalarg_ex(addParserListener)
 
-    def addParserMatchListener(self, l) :
-        if (not self.ignoreInvalidDebugCalls) :
+    def addParserMatchListener(self, l):
+        if (not self.ignoreInvalidDebugCalls):
             illegalarg_ex(addParserMatchListener)
 
-    def addParserTokenListener(self, l) :
+    def addParserTokenListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             illegalarg_ex(addParserTokenListener)
 
-    def addSemanticPredicateListener(self, l) :
+    def addSemanticPredicateListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             illegalarg_ex(addSemanticPredicateListener)
 
-    def addSyntacticPredicateListener(self, l) :
+    def addSyntacticPredicateListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             illegalarg_ex(addSyntacticPredicateListener)
 
-    def addTraceListener(self, l) :
+    def addTraceListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             illegalarg_ex(addTraceListener)
 
     def consume(self):
         raise NotImplementedError()
 
-    def _consumeUntil_type(self,tokenType):
+    def _consumeUntil_type(self, tokenType):
         while self.LA(1) != EOF_TYPE and self.LA(1) != tokenType:
             self.consume()
 
@@ -1839,8 +1845,8 @@ class Parser(object):
         while self.LA(1) != EOF_TYPE and not set.member(self.LA(1)):
             self.consume()
 
-    def consumeUntil(self,arg):
-        if isinstance(arg,int):
+    def consumeUntil(self, arg):
+        if isinstance(arg, int):
             self._consumeUntil_type(arg)
         else:
             self._consumeUntil_bitset(arg)
@@ -1848,28 +1854,28 @@ class Parser(object):
     def defaultDebuggingSetup(self):
         pass
 
-    def getAST(self) :
+    def getAST(self):
         return self.returnAST
 
-    def getASTFactory(self) :
+    def getASTFactory(self):
         return self.astFactory
 
-    def getFilename(self) :
+    def getFilename(self):
         return self.inputState.filename
 
-    def getInputState(self) :
+    def getInputState(self):
         return self.inputState
 
-    def setInputState(self, state) :
+    def setInputState(self, state):
         self.inputState = state
 
-    def getTokenName(self,num) :
+    def getTokenName(self, num):
         return self.tokenNames[num]
 
-    def getTokenNames(self) :
+    def getTokenNames(self):
         return self.tokenNames
 
-    def isDebugMode(self) :
+    def isDebugMode(self):
         return self.false
 
     def LA(self, i):
@@ -1881,123 +1887,123 @@ class Parser(object):
     def mark(self):
         return self.inputState.input.mark()
 
-    def _match_int(self,t):
+    def _match_int(self, t):
         if (self.LA(1) != t):
             raise MismatchedTokenException(
-               self.tokenNames, self.LT(1), t, False, self.getFilename())
+                self.tokenNames, self.LT(1), t, False, self.getFilename())
         else:
             self.consume()
 
     def _match_set(self, b):
         if (not b.member(self.LA(1))):
             raise MismatchedTokenException(
-               self.tokenNames,self.LT(1), b, False, self.getFilename())
+                self.tokenNames, self.LT(1), b, False, self.getFilename())
         else:
             self.consume()
 
-    def match(self,set) :
-        if isinstance(set,int):
+    def match(self, set):
+        if isinstance(set, int):
             self._match_int(set)
             return
-        if isinstance(set,BitSet):
+        if isinstance(set, BitSet):
             self._match_set(set)
             return
         raise TypeError("Parser.match requires integer ot BitSet argument")
 
-    def matchNot(self,t):
+    def matchNot(self, t):
         if self.LA(1) == t:
             raise MismatchedTokenException(
-               tokenNames, self.LT(1), t, True, self.getFilename())
+                tokenNames, self.LT(1), t, True, self.getFilename())
         else:
             self.consume()
 
-    def removeMessageListener(self, l) :
+    def removeMessageListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             runtime_ex(removeMessageListener)
 
-    def removeParserListener(self, l) :
+    def removeParserListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             runtime_ex(removeParserListener)
 
-    def removeParserMatchListener(self, l) :
+    def removeParserMatchListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             runtime_ex(removeParserMatchListener)
 
-    def removeParserTokenListener(self, l) :
+    def removeParserTokenListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             runtime_ex(removeParserTokenListener)
 
-    def removeSemanticPredicateListener(self, l) :
+    def removeSemanticPredicateListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             runtime_ex(removeSemanticPredicateListener)
 
-    def removeSyntacticPredicateListener(self, l) :
+    def removeSyntacticPredicateListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             runtime_ex(removeSyntacticPredicateListener)
 
-    def removeTraceListener(self, l) :
+    def removeTraceListener(self, l):
         if (not self.ignoreInvalidDebugCalls):
             runtime_ex(removeTraceListener)
 
-    def reportError(self,x) :
+    def reportError(self, x):
         fmt = "syntax error:"
         f = self.getFilename()
         if f:
             fmt = ("%s:" % f) + fmt
-        if isinstance(x,Token):
+        if isinstance(x, Token):
             line = x.getColumn()
-            col  = x.getLine()
+            col = x.getLine()
             text = x.getText()
-            fmt  = fmt + 'unexpected symbol at line %s (column %s) : "%s"'
-            print >>sys.stderr, fmt % (line,col,text)
+            fmt = fmt + 'unexpected symbol at line %s (column %s) : "%s"'
+            print >> sys.stderr, fmt % (line, col, text)
         else:
-            print >>sys.stderr, fmt,str(x)
+            print >> sys.stderr, fmt, str(x)
 
-    def reportWarning(self,s):
+    def reportWarning(self, s):
         f = self.getFilename()
         if f:
-            print "%s:warning: %s" % (f,str(x))
+            print "%s:warning: %s" % (f, str(x))
         else:
             print "warning: %s" % (str(x))
 
-    def rewind(self, pos) :
+    def rewind(self, pos):
         self.inputState.input.rewind(pos)
 
-    def setASTFactory(self, f) :
+    def setASTFactory(self, f):
         self.astFactory = f
 
-    def setASTNodeClass(self, cl) :
+    def setASTNodeClass(self, cl):
         self.astFactory.setASTNodeType(cl)
 
-    def setASTNodeType(self, nodeType) :
+    def setASTNodeType(self, nodeType):
         self.setASTNodeClass(nodeType)
 
-    def setDebugMode(self, debugMode) :
+    def setDebugMode(self, debugMode):
         if (not self.ignoreInvalidDebugCalls):
             runtime_ex(setDebugMode)
 
-    def setFilename(self, f) :
+    def setFilename(self, f):
         self.inputState.filename = f
 
-    def setIgnoreInvalidDebugCalls(self, value) :
+    def setIgnoreInvalidDebugCalls(self, value):
         self.ignoreInvalidDebugCalls = value
 
-    def setTokenBuffer(self, t) :
+    def setTokenBuffer(self, t):
         self.inputState.input = t
 
     def traceIndent(self):
         print " " * self.traceDepth
 
-    def traceIn(self,rname):
+    def traceIn(self, rname):
         self.traceDepth += 1
         self.trace("> ", rname)
 
-    def traceOut(self,rname):
+    def traceOut(self, rname):
         self.trace("< ", rname)
         self.traceDepth -= 1
 
     ### wh: moved from ASTFactory to Parser
-    def addASTChild(self,currentAST, child):
+    def addASTChild(self, currentAST, child):
         if not child:
             return
         if not currentAST.root:
@@ -2010,7 +2016,7 @@ class Parser(object):
         currentAST.advanceChildToEnd()
 
     ### wh: moved from ASTFactory to Parser
-    def makeASTRoot(self,currentAST,root) :
+    def makeASTRoot(self, currentAST, root):
         if root:
             ### Add the current root as a child of new root
             root.addChild(currentAST.root)
@@ -2020,39 +2026,39 @@ class Parser(object):
             ### Set the new root
             currentAST.root = root
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       LLkParser                                ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class LLkParser(Parser):
-
     def __init__(self, *args, **kwargs):
         try:
             arg1 = args[0]
         except:
             arg1 = 1
 
-        if isinstance(arg1,int):
-            super(LLkParser,self).__init__()
+        if isinstance(arg1, int):
+            super(LLkParser, self).__init__()
             self.k = arg1
             return
 
-        if isinstance(arg1,ParserSharedInputState):
-            super(LLkParser,self).__init__(arg1)
-            self.set_k(1,*args)
+        if isinstance(arg1, ParserSharedInputState):
+            super(LLkParser, self).__init__(arg1)
+            self.set_k(1, *args)
             return
 
-        if isinstance(arg1,TokenBuffer):
-            super(LLkParser,self).__init__()
+        if isinstance(arg1, TokenBuffer):
+            super(LLkParser, self).__init__()
             self.setTokenBuffer(arg1)
-            self.set_k(1,*args)
+            self.set_k(1, *args)
             return
 
-        if isinstance(arg1,TokenStream):
-            super(LLkParser,self).__init__()
+        if isinstance(arg1, TokenStream):
+            super(LLkParser, self).__init__()
             tokenBuf = TokenBuffer(arg1)
             self.setTokenBuffer(tokenBuf)
-            self.set_k(1,*args)
+            self.set_k(1, *args)
             return
 
         ### unknown argument
@@ -2062,42 +2068,43 @@ class LLkParser(Parser):
     def consume(self):
         self.inputState.input.consume()
 
-    def LA(self,i):
+    def LA(self, i):
         return self.inputState.input.LA(i)
 
-    def LT(self,i):
+    def LT(self, i):
         return self.inputState.input.LT(i)
 
-    def set_k(self,index,*args):
+    def set_k(self, index, *args):
         try:
             self.k = args[index]
         except:
             self.k = 1
 
-    def trace(self,ee,rname):
+    def trace(self, ee, rname):
         print type(self)
         self.traceIndent()
         guess = ""
         if self.inputState.guessing > 0:
             guess = " [guessing]"
         print(ee + rname + guess)
-        for i in xrange(1,self.k+1):
+        for i in xrange(1, self.k + 1):
             if i != 1:
                 print(", ")
-            if self.LT(i) :
+            if self.LT(i):
                 v = self.LT(i).getText()
             else:
                 v = "null"
-            print "LA(%s) == %s" % (i,v)
+            print "LA(%s) == %s" % (i, v)
         print("\n")
 
-    def traceIn(self,rname):
+    def traceIn(self, rname):
         self.traceDepth += 1;
         self.trace("> ", rname);
 
-    def traceOut(self,rname):
+    def traceOut(self, rname):
         self.trace("< ", rname);
         self.traceDepth -= 1;
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                    TreeParserSharedInputState                  ###
@@ -2107,17 +2114,17 @@ class TreeParserSharedInputState(object):
     def __init__(self):
         self.guessing = 0
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       TreeParser                               ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class TreeParser(object):
-
     def __init__(self, *args, **kwargs):
         self.inputState = TreeParserSharedInputState()
-        self._retTree   = None
+        self._retTree = None
         self.tokenNames = []
-        self.returnAST  = None
+        self.returnAST = None
         self.astFactory = ASTFactory()
         self.traceDepth = 0
 
@@ -2127,61 +2134,61 @@ class TreeParser(object):
     def getASTFactory(self):
         return self.astFactory
 
-    def getTokenName(self,num) :
+    def getTokenName(self, num):
         return self.tokenNames[num]
 
     def getTokenNames(self):
         return self.tokenNames
 
-    def match(self,t,set) :
-        assert isinstance(set,int) or isinstance(set,BitSet)
+    def match(self, t, set):
+        assert isinstance(set, int) or isinstance(set, BitSet)
         if not t or t == ASTNULL:
-            raise MismatchedTokenException(self.getTokenNames(), t,set, False)
+            raise MismatchedTokenException(self.getTokenNames(), t, set, False)
 
-        if isinstance(set,int) and t.getType() != set:
-            raise MismatchedTokenException(self.getTokenNames(), t,set, False)
+        if isinstance(set, int) and t.getType() != set:
+            raise MismatchedTokenException(self.getTokenNames(), t, set, False)
 
-        if isinstance(set,BitSet) and not set.member(t.getType):
-            raise MismatchedTokenException(self.getTokenNames(), t,set, False)
+        if isinstance(set, BitSet) and not set.member(t.getType):
+            raise MismatchedTokenException(self.getTokenNames(), t, set, False)
 
-    def matchNot(self,t, ttype) :
+    def matchNot(self, t, ttype):
         if not t or (t == ASTNULL) or (t.getType() == ttype):
             raise MismatchedTokenException(getTokenNames(), t, ttype, True)
 
-    def reportError(self,ex):
-        print >>sys.stderr,"error:",ex
+    def reportError(self, ex):
+        print >> sys.stderr, "error:", ex
 
-    def  reportWarning(self, s):
-        print "warning:",s
+    def reportWarning(self, s):
+        print "warning:", s
 
-    def setASTFactory(self,f):
+    def setASTFactory(self, f):
         self.astFactory = f
 
-    def setASTNodeType(self,nodeType):
+    def setASTNodeType(self, nodeType):
         self.setASTNodeClass(nodeType)
 
-    def setASTNodeClass(self,nodeType):
+    def setASTNodeClass(self, nodeType):
         self.astFactory.setASTNodeType(nodeType)
 
     def traceIndent(self):
         print " " * self.traceDepth
 
-    def traceIn(self,rname,t):
+    def traceIn(self, rname, t):
         self.traceDepth += 1
         self.traceIndent()
         print("> " + rname + "(" +
-              ifelse(t,str(t),"null") + ")" +
-              ifelse(self.inputState.guessing>0,"[guessing]",""))
+              ifelse(t, str(t), "null") + ")" +
+              ifelse(self.inputState.guessing > 0, "[guessing]", ""))
 
-    def traceOut(self,rname,t):
+    def traceOut(self, rname, t):
         self.traceIndent()
         print("< " + rname + "(" +
-              ifelse(t,str(t),"null") + ")" +
-              ifelse(self.inputState.guessing>0,"[guessing]",""))
+              ifelse(t, str(t), "null") + ")" +
+              ifelse(self.inputState.guessing > 0, "[guessing]", ""))
         self.traceDepth -= 1
 
     ### wh: moved from ASTFactory to TreeParser
-    def addASTChild(self,currentAST, child):
+    def addASTChild(self, currentAST, child):
         if not child:
             return
         if not currentAST.root:
@@ -2194,7 +2201,7 @@ class TreeParser(object):
         currentAST.advanceChildToEnd()
 
     ### wh: moved from ASTFactory to TreeParser
-    def makeASTRoot(self,currentAST,root):
+    def makeASTRoot(self, currentAST, root):
         if root:
             ### Add the current root as a child of new root
             root.addChild(currentAST.root)
@@ -2204,31 +2211,34 @@ class TreeParser(object):
             ### Set the new root
             currentAST.root = root
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###               funcs to work on trees                           ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 def rightmost(ast):
     if ast:
-        while(ast.right):
+        while (ast.right):
             ast = ast.right
     return ast
 
-def cmptree(s,t,partial):
-    while(s and t):
+
+def cmptree(s, t, partial):
+    while (s and t):
         ### as a quick optimization, check roots first.
         if not s.equals(t):
             return False
 
         ### if roots match, do full list match test on children.
-        if not cmptree(s.getFirstChild(),t.getFirstChild(),partial):
+        if not cmptree(s.getFirstChild(), t.getFirstChild(), partial):
             return False
 
         s = s.getNextSibling()
         t = t.getNextSibling()
 
-    r = ifelse(partial,not t,not s and not t)
+    r = ifelse(partial, not t, not s and not t)
     return r
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                          AST                                   ###
@@ -2312,6 +2322,7 @@ class AST(object):
     def toStringTree(self):
         return self.getText()
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       ASTNULLType                              ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
@@ -2334,15 +2345,14 @@ class ASTNULLType(AST):
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class BaseAST(AST):
-
     verboseStringConversion = False
     tokenNames = None
 
     def __init__(self):
-        self.down  = None ## kid
-        self.right = None ## sibling
+        self.down = None  ## kid
+        self.right = None  ## sibling
 
-    def addChild(self,node):
+    def addChild(self, node):
         if node:
             t = rightmost(self.down)
             if t:
@@ -2359,7 +2369,7 @@ class BaseAST(AST):
             t = t.right
         return n
 
-    def doWorkForFindAll(self,v,target,partialMatch):
+    def doWorkForFindAll(self, v, target, partialMatch):
         sibling = self
 
         while sibling:
@@ -2373,12 +2383,12 @@ class BaseAST(AST):
 
             ### regardless of match or not, check any children for matches
             if sibling.getFirstChild():
-                sibling.getFirstChild().doWorkForFindAll(v,target,partialMatch)
+                sibling.getFirstChild().doWorkForFindAll(v, target, partialMatch)
 
             sibling = sibling.getNextSibling()
 
     ### Is node t equal to 'self' in terms of token type and text?
-    def equals(self,t):
+    def equals(self, t):
         if not t:
             return False
         return self.getText() == t.getText() and self.getType() == t.getType()
@@ -2392,8 +2402,8 @@ class BaseAST(AST):
     ### Is 't' a subtree of this list?
     ### The siblings of the root are NOT ignored.
     ###
-    def equalsListPartial(self,t):
-        return cmptree(self,t,partial=True)
+    def equalsListPartial(self, t):
+        return cmptree(self, t, partial=True)
 
     ### Is tree rooted at 'self' equal to 't'?  The siblings
     ### of 'self' are ignored.
@@ -2409,12 +2419,12 @@ class BaseAST(AST):
         if not t:
             return True
         return self.equals(t) and cmptree(
-           self.getFirstChild(), t.getFirstChild(), partial=True)
+            self.getFirstChild(), t.getFirstChild(), partial=True)
 
     ### Walk the tree looking for all exact subtree matches.  Return
     ### an ASTEnumerator that lets the caller walk the list
     ### of subtree roots found herein.
-    def findAll(self,target):
+    def findAll(self, target):
         roots = []
 
         ### the empty tree cannot result in an enumeration
@@ -2427,7 +2437,7 @@ class BaseAST(AST):
     ### Walk the tree looking for all subtrees.  Return
     ###  an ASTEnumerator that lets the caller walk the list
     ###  of subtree roots found herein.
-    def findAllPartial(self,sub):
+    def findAllPartial(self, sub):
         roots = []
 
         ### the empty tree cannot result in an enumeration
@@ -2463,7 +2473,7 @@ class BaseAST(AST):
     def removeChildren(self):
         self.down = None
 
-    def setFirstChild(self,c):
+    def setFirstChild(self, c):
         self.down = c
 
     def setNextSibling(self, n):
@@ -2478,9 +2488,10 @@ class BaseAST(AST):
         pass
 
     ### static
-    def setVerboseStringConversion(verbose,names):
+    def setVerboseStringConversion(verbose, names):
         verboseStringConversion = verbose
         tokenNames = names
+
     setVerboseStringConversion = staticmethod(setVerboseStringConversion)
 
     ### Return an array of strings that maps token ID to it's text.
@@ -2513,20 +2524,21 @@ class BaseAST(AST):
             ts += " )"
         return ts
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       CommonAST                                ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 ### Common AST node implementation
 class CommonAST(BaseAST):
-    def __init__(self,token=None):
-        super(CommonAST,self).__init__()
+    def __init__(self, token=None):
+        super(CommonAST, self).__init__()
         self.ttype = INVALID_TYPE
-        self.text  = "<no text>"
-        self.line  = 0
-        self.column= 0
+        self.text = "<no text>"
+        self.line = 0
+        self.column = 0
         self.initialize(token)
-        #assert self.text
+        # assert self.text
 
     ### Get the token text for this node
     def getText(self):
@@ -2544,19 +2556,19 @@ class CommonAST(BaseAST):
     def getColumn(self):
         return self.column
 
-    def initialize(self,*args):
+    def initialize(self, *args):
         if not args:
             return
 
         arg0 = args[0]
 
-        if isinstance(arg0,int):
+        if isinstance(arg0, int):
             arg1 = args[1]
             self.setType(arg0)
             self.setText(arg1)
             return
 
-        if isinstance(arg0,AST) or isinstance(arg0,Token):
+        if isinstance(arg0, AST) or isinstance(arg0, Token):
             self.setText(arg0.getText())
             self.setType(arg0.getType())
             self.line = arg0.getLine()
@@ -2564,25 +2576,25 @@ class CommonAST(BaseAST):
             return
 
     ### Set the token text for this node
-    def setText(self,text_):
+    def setText(self, text_):
         assert is_string_type(text_)
         self.text = text_
 
     ### Set the token type for this node
-    def setType(self,ttype_):
-        assert isinstance(ttype_,int)
+    def setType(self, ttype_):
+        assert isinstance(ttype_, int)
         self.ttype = ttype_
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                     CommonASTWithHiddenTokens                  ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class CommonASTWithHiddenTokens(CommonAST):
-
-    def __init__(self,*args):
-        CommonAST.__init__(self,*args)
+    def __init__(self, *args):
+        CommonAST.__init__(self, *args)
         self.hiddenBefore = None
-        self.hiddenAfter  = None
+        self.hiddenAfter = None
 
     def getHiddenAfter(self):
         return self.hiddenAfter
@@ -2590,12 +2602,13 @@ class CommonASTWithHiddenTokens(CommonAST):
     def getHiddenBefore(self):
         return self.hiddenBefore
 
-    def initialize(self,*args):
-        CommonAST.initialize(self,*args)
-        if args and isinstance(args[0],Token):
-            assert isinstance(args[0],CommonHiddenStreamToken)
+    def initialize(self, *args):
+        CommonAST.initialize(self, *args)
+        if args and isinstance(args[0], Token):
+            assert isinstance(args[0], CommonHiddenStreamToken)
             self.hiddenBefore = args[0].getHiddenBefore()
-            self.hiddenAfter  = args[0].getHiddenAfter()
+            self.hiddenAfter = args[0].getHiddenAfter()
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       ASTPair                                  ###
@@ -2603,8 +2616,8 @@ class CommonASTWithHiddenTokens(CommonAST):
 
 class ASTPair(object):
     def __init__(self):
-        self.root = None          ### current root of tree
-        self.child = None         ### current child to which siblings are added
+        self.root = None  ### current root of tree
+        self.child = None  ### current child to which siblings are added
 
     ### Make sure that child is the last sibling */
     def advanceChildToEnd(self):
@@ -2620,9 +2633,9 @@ class ASTPair(object):
         return tmp
 
     def toString(self):
-        r = ifelse(not root,"null",self.root.getText())
-        c = ifelse(not child,"null",self.child.getText())
-        return "[%s,%s]" % (r,c)
+        r = ifelse(not root, "null", self.root.getText())
+        c = ifelse(not child, "null", self.child.getText())
+        return "[%s,%s]" % (r, c)
 
     __str__ = toString
     __repr__ = toString
@@ -2633,11 +2646,11 @@ class ASTPair(object):
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class ASTFactory(object):
-    def __init__(self,table=None):
+    def __init__(self, table=None):
         self._class = None
-        self._classmap = ifelse(table,table,None)
+        self._classmap = ifelse(table, table, None)
 
-    def create(self,*args):
+    def create(self, *args):
         if not args:
             return self.create(INVALID_TYPE)
 
@@ -2652,60 +2665,59 @@ class ASTFactory(object):
             pass
 
         # ctor(int)
-        if isinstance(arg0,int) and not arg2:
+        if isinstance(arg0, int) and not arg2:
             ### get class for 'self' type
             c = self.getASTNodeType(arg0)
             t = self.create(c)
             if t:
-                t.initialize(arg0, ifelse(arg1,arg1,""))
+                t.initialize(arg0, ifelse(arg1, arg1, ""))
             return t
 
         # ctor(int,something)
-        if isinstance(arg0,int) and arg2:
+        if isinstance(arg0, int) and arg2:
             t = self.create(arg2)
             if t:
-                t.initialize(arg0,arg1)
+                t.initialize(arg0, arg1)
             return t
 
         # ctor(AST)
-        if isinstance(arg0,AST):
+        if isinstance(arg0, AST):
             t = self.create(arg0.getType())
             if t:
                 t.initialize(arg0)
             return t
 
         # ctor(token)
-        if isinstance(arg0,Token) and not arg1:
+        if isinstance(arg0, Token) and not arg1:
             ttype = arg0.getType()
-            assert isinstance(ttype,int)
+            assert isinstance(ttype, int)
             t = self.create(ttype)
             if t:
                 t.initialize(arg0)
             return t
 
         # ctor(token,class)
-        if isinstance(arg0,Token) and arg1:
-            assert isinstance(arg1,type)
-            assert issubclass(arg1,AST)
+        if isinstance(arg0, Token) and arg1:
+            assert isinstance(arg1, type)
+            assert issubclass(arg1, AST)
             # this creates instance of 'arg1' using 'arg0' as
             # argument. Wow, that's magic!
             t = arg1(arg0)
-            assert t and isinstance(t,AST)
+            assert t and isinstance(t, AST)
             return t
 
         # ctor(class)
-        if isinstance(arg0,type):
+        if isinstance(arg0, type):
             ### next statement creates instance of type (!)
             t = arg0()
-            assert isinstance(t,AST)
+            assert isinstance(t, AST)
             return t
 
-
-    def setASTNodeClass(self,className=None):
+    def setASTNodeClass(self, className=None):
         if not className:
             return
-        assert isinstance(className,type)
-        assert issubclass(className,AST)
+        assert isinstance(className, type)
+        assert issubclass(className, AST)
         self._class = className
 
     ### kind of misnomer - use setASTNodeClass instead.
@@ -2714,12 +2726,10 @@ class ASTFactory(object):
     def getASTNodeClass(self):
         return self._class
 
-
-
     def getTokenTypeToASTClassMap(self):
         return self._classmap
 
-    def setTokenTypeToASTClassMap(self,amap):
+    def setTokenTypeToASTClassMap(self, amap):
         self._classmap = amap
 
     def error(self, e):
@@ -2743,12 +2753,12 @@ class ASTFactory(object):
             ### a. class can be loaded
             ### b. class is a subclass of AST
             ###
-            assert isinstance(className,type)
-            assert issubclass(className,AST)  ## a & b
+            assert isinstance(className, type)
+            assert issubclass(className, AST)  ## a & b
             ### enter the class
             self._classmap[tokenType] = className
 
-    def getASTNodeType(self,tokenType):
+    def getASTNodeType(self, tokenType):
         """
         For a given token type return the AST node type. First we
         lookup a mapping table, second we try _class
@@ -2772,14 +2782,14 @@ class ASTFactory(object):
 
     ### methods that have been moved to file scope - just listed
     ### here to be somewhat consistent with original API
-    def dup(self,t):
-        return antlr.dup(t,self)
+    def dup(self, t):
+        return antlr.dup(t, self)
 
-    def dupList(self,t):
-        return antlr.dupList(t,self)
+    def dupList(self, t):
+        return antlr.dupList(t, self)
 
-    def dupTree(self,t):
-        return antlr.dupTree(t,self)
+    def dupTree(self, t):
+        return antlr.dupTree(t, self)
 
     ### methods moved to other classes
     ### 1. makeASTRoot  -> Parser
@@ -2788,16 +2798,18 @@ class ASTFactory(object):
     ### non-standard: create alias for longish method name
     maptype = setTokenTypeASTNodeType
 
+
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###                       ASTVisitor                               ###
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 
 class ASTVisitor(object):
-    def __init__(self,*args):
+    def __init__(self, *args):
         pass
 
-    def visit(self,ast):
+    def visit(self, ast):
         pass
+
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx###
 ###               static methods and variables                     ###
@@ -2805,23 +2817,24 @@ class ASTVisitor(object):
 
 ASTNULL = ASTNULLType()
 
+
 ### wh: moved from ASTFactory as there's nothing ASTFactory-specific
 ### in this method.
 def make(*nodes):
     if not nodes:
         return None
 
-    for i in xrange(0,len(nodes)):
+    for i in xrange(0, len(nodes)):
         node = nodes[i]
         if node:
-            assert isinstance(node,AST)
+            assert isinstance(node, AST)
 
     root = nodes[0]
     tail = None
     if root:
         root.setFirstChild(None)
 
-    for i in xrange(1,len(nodes)):
+    for i in xrange(1, len(nodes)):
         if not nodes[i]:
             continue
         if not root:
@@ -2838,7 +2851,8 @@ def make(*nodes):
             tail = tail.getNextSibling()
     return root
 
-def dup(t,factory):
+
+def dup(t, factory):
     if not t:
         return None
 
@@ -2849,20 +2863,22 @@ def dup(t,factory):
     dup_t.initialize(t)
     return dup_t
 
-def dupList(t,factory):
-    result = dupTree(t,factory)
+
+def dupList(t, factory):
+    result = dupTree(t, factory)
     nt = result
     while t:
         ## for each sibling of the root
         t = t.getNextSibling()
-        nt.setNextSibling(dupTree(t,factory))
+        nt.setNextSibling(dupTree(t, factory))
         nt = nt.getNextSibling()
     return result
 
-def dupTree(t,factory):
-    result = dup(t,factory)
+
+def dupTree(t, factory):
+    result = dup(t, factory)
     if t:
-        result.setFirstChild(dupList(t.getFirstChild(),factory))
+        result.setFirstChild(dupList(t.getFirstChild(), factory))
     return result
 
 ###xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
