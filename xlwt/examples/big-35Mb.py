@@ -2,6 +2,7 @@
 # tries stress SST, SAT and MSAT
 
 from time import *
+
 from xlwt import *
 
 style = XFStyle()
@@ -17,10 +18,10 @@ print "\nstart: %s" % ctime(t0)
 
 print "Filling..."
 for col in xrange(colcount):
-    print "[%d]" % col, 
+    print "[%d]" % col,
     for row in xrange(rowcount):
         ws0.write(row, col, "BIG(%d, %d)" % (row, col))
-        #ws0.write(row, col, "BIG")
+        # ws0.write(row, col, "BIG")
 
 t1 = time() - t0
 print "\nsince starting elapsed %.2f s" % (t1)
@@ -30,5 +31,3 @@ wb.save('big-35Mb.xls')
 
 t2 = time() - t0
 print "since starting elapsed %.2f s" % (t2)
-
-

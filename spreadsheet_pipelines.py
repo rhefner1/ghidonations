@@ -1,23 +1,24 @@
 # App Engine platform
-import logging, csv, gc, appengine_config, urllib, cStringIO
-from google.appengine.ext import blobstore
-from google.appengine.api import files, memcache, taskqueue
+import cStringIO
+import csv
+import gc
+import logging
 
+from google.appengine.api import memcache, taskqueue
 # Application files
-import DataModels as models
 import GlobalUtilities as tools
 
 # Pipeline API
 import pipeline
-from pipeline import common
 
 # Google Cloud Storage
 import cloudstorage as gcs
 
 my_default_retry_params = gcs.RetryParams(initial_delay=0.2,
-                            max_delay=5.0, backoff_factor=2,
-                            max_retry_period=15)
+                                          max_delay=5.0, backoff_factor=2,
+                                          max_retry_period=15)
 gcs.set_default_retry_params(my_default_retry_params)
+
 
 class GenerateReport(pipeline.Pipeline):
     def run(self, settings_key, mode, job_id):
@@ -37,22 +38,22 @@ class GenerateReport(pipeline.Pipeline):
 
         else:
             raise Exception("Unidentified mode in GenerateReport")
-        
+
         blobs = []
         cursor = None
 
         # Create header CSV file
         header_file_name = job_id + "-0.csv"
-        blobs.append( (yield HeaderCSV(mode, header_file_name)) )
+        blobs.append((yield HeaderCSV(mode, header_file_name)))
 
         while True:
             results = tools.queryCursorDB(query, cursor, keys_only=True, num_results=num_results)
             keys, cursor = results[0], results[1]
-            file_name = job_id + "-" + str( len(blobs) ) + ".csv"
+            file_name = job_id + "-" + str(len(blobs)) + ".csv"
 
             keys = tools.ndbKeyToUrlsafe(keys)
 
-            blobs.append( (yield CreateCSV(mode, file_name, keys)) )
+            blobs.append((yield CreateCSV(mode, file_name, keys)))
 
             if cursor == None:
                 break
@@ -60,6 +61,7 @@ class GenerateReport(pipeline.Pipeline):
         final_file_name = s.name + "-" + mode.title() + ".csv"
         gcs_file_key = yield ConcatCSV(job_id, final_file_name, *blobs)
         yield ConfirmCompletion(job_id, gcs_file_key)
+
 
 class HeaderCSV(pipeline.Pipeline):
     def run(self, mode, file_name):
@@ -108,12 +110,14 @@ class HeaderCSV(pipeline.Pipeline):
 
         writer.writerow(header_data)
 
-        gcs_file.write( si.getvalue() )
+        gcs_file.write(si.getvalue())
         gcs_file.close()
 
-        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_file_key}, countdown=1800, queue_name="deletespreadsheet")
+        taskqueue.add(url="/tasks/deletespreadsheet", params={'k': gcs_file_key}, countdown=1800,
+                      queue_name="deletespreadsheet")
 
         return gcs_file_key
+
 
 class CreateCSV(pipeline.Pipeline):
     def run(self, mode, file_name, keys):
@@ -177,13 +181,15 @@ class CreateCSV(pipeline.Pipeline):
             # Call the garbage handler
             gc.collect()
 
-        gcs_file.write( si.getvalue() )
+        gcs_file.write(si.getvalue())
         gcs_file.close()
 
-        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_file_key}, countdown=1800, queue_name="deletespreadsheet")
+        taskqueue.add(url="/tasks/deletespreadsheet", params={'k': gcs_file_key}, countdown=1800,
+                      queue_name="deletespreadsheet")
 
         return gcs_file_key
-        
+
+
 class ConcatCSV(pipeline.Pipeline):
     def run(self, job_id, file_name, *blobs):
         gcs_writer_key, gcs_writer = tools.newFile("text/csv", file_name)
@@ -198,9 +204,11 @@ class ConcatCSV(pipeline.Pipeline):
             gc.collect()
 
         gcs_writer.close()
-        taskqueue.add(url="/tasks/deletespreadsheet", params={'k':gcs_writer_key}, countdown=1800, queue_name="deletespreadsheet")
+        taskqueue.add(url="/tasks/deletespreadsheet", params={'k': gcs_writer_key}, countdown=1800,
+                      queue_name="deletespreadsheet")
 
         return gcs_writer_key
+
 
 class ConfirmCompletion(pipeline.Pipeline):
     def run(self, job_id, gcs_file_key):

@@ -7,7 +7,6 @@ from xlwt import *
 wb = Workbook()
 ws0 = wb.add_sheet('sheet0')
 
-
 fnt = Font()
 fnt.name = 'Arial'
 fnt.colour_index = 4

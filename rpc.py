@@ -1,9 +1,12 @@
 # coding: utf-8
-import logging, json, datetime, appengine_config, webapp2
-from google.appengine.api import taskqueue
+import appengine_config
+import datetime
+import json
+import logging
+import webapp2
 
 import GlobalUtilities as tools
-import DataModels as models
+
 
 class RPCHandler(webapp2.RequestHandler):
     def __init__(self, request, response):
@@ -13,7 +16,7 @@ class RPCHandler(webapp2.RequestHandler):
     def get(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         authenticated = tools.RPCcheckAuthentication(self, True)
-        #authenticated = True
+        # authenticated = True
 
         func = None
         action = self.request.get('action')
@@ -22,7 +25,7 @@ class RPCHandler(webapp2.RequestHandler):
             logging.info("Action: " + str(action))
 
             if action[0] == '_':
-                self.error(403) # access denied
+                self.error(403)  # access denied
                 return
 
             elif action[0:4] == 'pub_':
@@ -42,9 +45,8 @@ class RPCHandler(webapp2.RequestHandler):
                     self.error(401)
                     self.response.out.write("I'm not authorized to give you that information until you log in. Sorry!")
 
-
         if not func:
-            self.error(404) # method not found
+            self.error(404)  # method not found
             return
 
         args = ()
@@ -59,18 +61,18 @@ class RPCHandler(webapp2.RequestHandler):
         result = func(*args)
         dthandler = lambda obj: obj.isoformat() if isinstance(obj, datetime.datetime) else None
         self.response.out.write(json.dumps(result, default=dthandler))
-    
+
     def post(self):
         self.response.headers['Access-Control-Allow-Origin'] = '*'
         authenticated = tools.RPCcheckAuthentication(self, True)
 
         args = json.loads(self.request.body)
         logging.info(args)
-        
+
         func, args = args[0], args[1:]
 
         if func[0] == '_':
-            self.error(403) # access denied
+            self.error(403)  # access denied
             return
 
         elif func[0:4] == "pub_":
@@ -91,12 +93,13 @@ class RPCHandler(webapp2.RequestHandler):
                 self.response.out.write("I'm not authorized to give you that information until you log in. Sorry!")
 
         if not func:
-            self.error(404) # file not found
+            self.error(404)  # file not found
             return
 
         result = func(*args)
         self.response.out.write(json.dumps(result))
-   
+
+
 ## -- Set of functions that returns data to above GET request -- ##
 class RPCMethods:
     # Every function here gives a success/fail and a response.
@@ -104,25 +107,26 @@ class RPCMethods:
     # something so it integrates with other functions
     # that do have a value to return. The response in that case is None
 
-#### ---- Globalhopeindia.org Utility Functions ---- ####
+    #### ---- Globalhopeindia.org Utility Functions ---- ####
     def pub_allTeams(self, settings):
-    # This returns a json list of teams
+        # This returns a json list of teams
         s = tools.getKey(settings).get()
         return [[t.name, t.key.urlsafe()] for t in s.data.display_teams]
 
     def pub_individualInfo(self, team_key, individual_key):
         i = tools.getKey(individual_key).get()
         t_key = tools.getKey(team_key)
-        
+
         return i.data.info(t_key)
 
     def pub_teamInfo(self, team_key):
-    # This returns a simplejson list of team members' names, hosted link to picture, and description
-    # Response parsed by Javascript on main GHI site
+        # This returns a simplejson list of team members' names, hosted link to picture, and description
+        # Response parsed by Javascript on main GHI site
         t = tools.getKey(team_key).get()
         return t.data.public_members_list
 
+
 app = webapp2.WSGIApplication([
     ('/rpc', RPCHandler),
-    ], debug=True)
+], debug=True)
 app = appengine_config.recording_add_wsgi_middleware(app)
