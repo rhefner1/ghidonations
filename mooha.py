@@ -720,8 +720,8 @@ class IPN(webapp2.RequestHandler):
                     if s.exists.entity(individual_key) == False:
                         individual_key = None
 
-                except:
-                    logging.error("Excepted on designation.")
+                except Exception as e:
+                    logging.error("Excepted on designation with msg: " % e.message)
                     team_key = None
                     individual_key = None
                     special_notes = None
