@@ -4,6 +4,7 @@ import gc
 import logging
 
 import cloudstorage as gcs
+import ghidonations.tools.keys
 import pipeline
 from ghidonations.tools import util, spreadsheet
 from google.appengine.api import memcache, taskqueue
@@ -16,7 +17,7 @@ gcs.set_default_retry_params(my_default_retry_params)
 
 class GenerateReport(pipeline.Pipeline):
     def run(self, settings_key, mode, job_id):
-        s = util.get_key(settings_key).get()
+        s = ghidonations.tools.keys.get_key(settings_key).get()
 
         if mode == "contacts":
             query = s.data.all_contacts
@@ -123,7 +124,7 @@ class CreateCSV(pipeline.Pipeline):
 
         for k in keys:
             try:
-                e = util.get_key(k).get()
+                e = ghidonations.tools.keys.get_key(k).get()
 
                 row_data = []
 

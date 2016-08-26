@@ -1,3 +1,4 @@
+import ghidonations.tools.keys
 from ghidonations.http_handlers.base import BaseHandlerAdmin
 from ghidonations.tools import auth
 from google.appengine.ext.webapp import template
@@ -26,7 +27,7 @@ class NewTeam(BaseHandlerAdmin):
 
 class OfflineDonation(BaseHandlerAdmin):
     def task(self, is_admin, s):
-        i = auth.get_user_key(self).get()
+        i = ghidonations.tools.keys.get_user_key(self).get()
 
         template_variables = {"individual_name": i.name, "individual_key": i.key.urlsafe(), "teams": s.data.all_teams}
 

@@ -1,3 +1,4 @@
+import ghidonations.tools.keys
 from ghidonations.http_handlers.base import BaseHandlerAdmin
 from ghidonations.tools import util
 from google.appengine.ext.webapp import template
@@ -42,7 +43,7 @@ class AllTeams(BaseHandlerAdmin):
 class TeamMembers(BaseHandlerAdmin):
     def task(self, is_admin, s):
         team_key = self.request.get("t")
-        t = util.get_key(team_key).get()
+        t = ghidonations.tools.keys.get_key(team_key).get()
 
         template_variables = {"t": t}
         self.response.write(

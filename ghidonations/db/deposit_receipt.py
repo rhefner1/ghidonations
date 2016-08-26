@@ -1,4 +1,4 @@
-from ghidonations import tools
+from ghidonations.data_tools.deposit import DepositSearch
 from google.appengine.api import search
 from google.appengine.api import taskqueue
 from google.appengine.ext import ndb
@@ -16,7 +16,7 @@ class DepositReceipt(ndb.Expando):
 
     @property
     def search(self):
-        return tools.DepositSearch(self)
+        return DepositSearch(self)
 
     @property
     def websafe(self):

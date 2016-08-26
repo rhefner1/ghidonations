@@ -1,5 +1,6 @@
 import webapp2
 
+import ghidonations.tools.keys
 from ghidonations.tools import util
 from google.appengine.ext.webapp import template
 
@@ -11,7 +12,7 @@ class DonatePage(webapp2.RequestHandler):
         settings = self.request.get("s")
 
         try:
-            s = util.get_key(settings).get()
+            s = ghidonations.tools.keys.get_key(settings).get()
 
             template_variables = {"s": s}
             self.response.write(

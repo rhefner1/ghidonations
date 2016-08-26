@@ -1,6 +1,7 @@
 import logging
 import quopri
 
+import ghidonations.tools.keys
 from ghidonations.http_handlers.base import BaseHandler
 from ghidonations.tools import auth, util
 from google.appengine.ext import blobstore
@@ -16,13 +17,13 @@ class IndividualProfile(BaseHandler):
 
             # if no key specified, go to admin's personal account
             if i_key == "":
-                i_key = auth.get_user_key(self)
+                i_key = ghidonations.tools.keys.get_user_key(self)
             else:
-                i_key = util.get_key(i_key)
+                i_key = ghidonations.tools.keys.get_key(i_key)
 
         else:
             # If a regular user, they can ONLY get their own profile
-            i_key = auth.get_user_key(self)
+            i_key = ghidonations.tools.keys.get_user_key(self)
 
         i = i_key.get()
         logging.info("Getting profile page for: " + i.name)
@@ -65,7 +66,7 @@ class UpdateProfile(blobstore_handlers.BlobstoreUploadHandler):
         elif show_progress_bar == "":
             show_progress_bar = False
 
-        i = util.get_key(individual_key).get()
+        i = ghidonations.tools.keys.get_key(individual_key).get()
 
         if change_image is True:
             new_blobkey = str(blob_info.key())

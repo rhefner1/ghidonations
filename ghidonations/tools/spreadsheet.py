@@ -8,7 +8,7 @@ from google.appengine.api import memcache, search
 
 def check_task_completion(s, job_id):
     m = memcache.get(job_id)
-    if m == None or m == 0:
+    if not m or m == 0:
         return False, None
     else:
         return True, m

@@ -1,4 +1,4 @@
-from ghidonations.tools.util import get_key
+from ghidonations.tools.keys import get_key
 from google.appengine.api import taskqueue
 from google.appengine.ext import deferred
 

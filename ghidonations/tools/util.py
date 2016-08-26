@@ -6,6 +6,7 @@ import re
 
 from gaesessions import get_current_session
 from ghidonations.db.global_settings import GlobalSettings
+from ghidonations.tools.keys import get_key
 from google.appengine.api import memcache
 from google.appengine.api import search, datastore_errors
 from google.appengine.datastore.datastore_query import Cursor
@@ -82,21 +83,6 @@ def get_global_settings():
         global_settings = global_settings.get()
 
     return global_settings
-
-
-def get_key(entity_key):
-    return ndb.Key(urlsafe=entity_key)
-
-
-def get_key_if_exists(websafe_key):
-    try:
-        key = get_key(websafe_key)
-        key.get()
-
-        # If exception hasn't been thrown, the key exists
-        return key
-    except Exception:
-        return None
 
 
 def get_search_doc(doc_id, index):

@@ -6,6 +6,7 @@ import webapp2
 
 import appengine_config
 import cloudstorage as gcs
+import ghidonations.tools.keys
 import ghidonations.tools.util
 from ghidonations.db.contact import Contact
 from ghidonations.db.deposit_receipt import DepositReceipt
@@ -22,7 +23,7 @@ from google.appengine.ext.webapp import template
 class AggregateAnnualReport(webapp2.RequestHandler):
     def post(self):
         target_year = int(self.request.get("year"))
-        s = ghidonations.tools.util.get_key(self.request.get("skey"))
+        s = ghidonations.tools.keys.get_key(self.request.get("skey"))
 
         td1 = datetime(target_year, 1, 1, 0, 0)
         td2 = datetime(target_year, 12, 31, 0, 0)
@@ -79,7 +80,7 @@ class AnnualReport(webapp2.RequestHandler):
     def post(self):
         contact_key = self.request.get("contact_key")
         year = self.request.get("year")
-        c = ghidonations.tools.util.get_key(contact_key).get()
+        c = ghidonations.tools.keys.get_key(contact_key).get()
 
         logging.info("AnnualReport handler hit with contact key " + contact_key + " and year " + year)
 
@@ -119,7 +120,7 @@ class AnnualReport(webapp2.RequestHandler):
 class Confirmation(webapp2.RequestHandler):
     def post(self):
         donation_key = self.request.get("donation_key")
-        d = ghidonations.tools.util.get_key(donation_key).get()
+        d = ghidonations.tools.keys.get_key(donation_key).get()
 
         logging.info("Retrying confirmation email through task queue for donation: " + donation_key)
 
@@ -131,7 +132,7 @@ class DelayIndexing(webapp2.RequestHandler):
         entity_key = self.request.get("e")
 
         try:
-            e = ghidonations.tools.util.get_key(entity_key).get()
+            e = ghidonations.tools.keys.get_key(entity_key).get()
             e.search.index()
         except Exception, e:
             logging.error(str(e))
@@ -179,7 +180,7 @@ class MailchimpAdd(webapp2.RequestHandler):
         name = self.request.get("name")
 
         settings_key = self.request.get("settings")
-        s = ghidonations.tools.util.get_key(settings_key).get()
+        s = ghidonations.tools.keys.get_key(settings_key).get()
 
         s.mailchimp.add(email, name, True)
 
@@ -191,7 +192,7 @@ class ReindexEntities(webapp2.RequestHandler):
         mode = self.request.get("mode")
         e_key = self.request.get("key")
 
-        base = ghidonations.tools.util.get_key(e_key).get()
+        base = ghidonations.tools.keys.get_key(e_key).get()
 
         if mode == "contact":
             query = Donation.query(Donation.settings == base.settings,
@@ -273,7 +274,7 @@ class UpdateAnalytics(webapp2.RequestHandler):
 class UpdateContactsJSON(webapp2.RequestHandler):
     def post(self):
         s_key = self.request.get("s_key")
-        s = ghidonations.tools.util.get_key(s_key).get()
+        s = ghidonations.tools.keys.get_key(s_key).get()
 
         contacts = []
 

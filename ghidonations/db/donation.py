@@ -1,7 +1,7 @@
 import datetime
 
-from ghidonations import tools
-from ghidonations.tools.util import DecimalProperty
+from ghidonations.data_tools.donation import DonationAssign, DonationConfirmation, DonationReview, DonationSearch
+from ghidonations.tools import util
 from google.appengine.api import memcache, taskqueue
 from google.appengine.api import search
 from google.appengine.ext import ndb
@@ -20,8 +20,8 @@ class Donation(ndb.Expando):
     settings = ndb.KeyProperty()
 
     # How much is this donation worth?
-    amount_donated = DecimalProperty()
-    confirmation_amount = DecimalProperty()
+    amount_donated = util.DecimalProperty()
+    confirmation_amount = util.DecimalProperty()
 
     # Is this a recurring donation
     isRecurring = ndb.BooleanProperty(default=False)
@@ -56,11 +56,11 @@ class Donation(ndb.Expando):
 
     @property
     def assign(self):
-        return tools.DonationAssign(self)
+        return DonationAssign(self)
 
     @property
     def confirmation(self):
-        return tools.DonationConfirmation(self)
+        return DonationConfirmation(self)
 
     @property
     def contact_url(self):
@@ -86,11 +86,11 @@ class Donation(ndb.Expando):
 
     @property
     def email_formatted(self):
-        return tools.truncateEmail(self.email, is_list=True)
+        return util.truncateEmail(self.email, is_list=True)
 
     @property
     def formatted_donation_date(self):
-        return tools.convertTime(self.donation_date).strftime("%b %d, %Y")
+        return util.convertTime(self.donation_date).strftime("%b %d, %Y")
 
     @property
     def name(self):
@@ -98,11 +98,11 @@ class Donation(ndb.Expando):
 
     @property
     def review(self):
-        return tools.DonationReview(self)
+        return DonationReview(self)
 
     @property
     def search(self):
-        return tools.DonationSearch(self)
+        return DonationSearch(self)
 
     @property
     def websafe(self):

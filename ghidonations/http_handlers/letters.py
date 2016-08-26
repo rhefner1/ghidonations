@@ -1,5 +1,6 @@
 import webapp2
 
+import ghidonations.tools.keys
 from ghidonations.http_handlers.base import BaseHandlerAdmin
 from ghidonations.tools import util
 from google.appengine.ext.webapp import template
@@ -15,8 +16,8 @@ class IndividualWelcome(BaseHandlerAdmin):
                 # Throw an error if you don't have those two pieces of info
                 raise Exception("Don't know mode or individual_key.")
 
-            i = util.get_key(individual_key).get()
-            s = util.get_key(i.settings).get()
+            i = ghidonations.tools.keys.get_key(individual_key).get()
+            s = ghidonations.tools.keys.get_key(i.settings).get()
 
             template_variables = {"s": s, "i": i}
             self.response.write(
@@ -39,7 +40,7 @@ class ThankYou(webapp2.RequestHandler):
                 # Throw an error if you don't have those two pieces of info
                 raise Exception("Don't know mode or donation key.")
 
-            d = util.get_key(donation_key).get()
+            d = ghidonations.tools.keys.get_key(donation_key).get()
             date = util.convert_time(d.donation_date).strftime("%B %d, %Y")
             s = d.settings.get()
 

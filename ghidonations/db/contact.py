@@ -1,6 +1,6 @@
 import json
 
-from ghidonations import tools
+from ghidonations.data_tools.contact import ContactCreate, ContactData, ContactSearch
 from google.appengine.api import memcache, taskqueue
 from google.appengine.api import search
 from google.appengine.ext import ndb
@@ -34,15 +34,15 @@ class Contact(ndb.Expando):
 
     @property
     def create(self):
-        return tools.ContactCreate(self)
+        return ContactCreate(self)
 
     @property
     def data(self):
-        return tools.ContactData(self)
+        return ContactData(self)
 
     @property
     def search(self):
-        return tools.ContactSearch(self)
+        return ContactSearch(self)
 
     @property
     def websafe(self):

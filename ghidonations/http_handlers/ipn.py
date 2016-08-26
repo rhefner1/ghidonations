@@ -4,6 +4,7 @@ import urllib
 
 import webapp2
 
+import ghidonations.tools.keys
 from ghidonations.db.donation import Donation
 from ghidonations.tools import data_access, util
 from google.appengine.api import urlfetch
@@ -80,7 +81,7 @@ class IPN(webapp2.RequestHandler):
                 # Currency of the donation
                 # currency = parameters['mc_currency']
 
-                s = util.get_key(settings).get()
+                s = ghidonations.tools.keys.get_key(settings).get()
                 ipn_data = str(parameters)
 
                 # Email and payer ID  numbers
@@ -110,8 +111,8 @@ class IPN(webapp2.RequestHandler):
                 try:
                     decoded_custom = json.loads(parameters["custom"])
 
-                    team_key = util.get_key_if_exists(decoded_custom[0])
-                    individual_key = util.get_key_if_exists(decoded_custom[1])
+                    team_key = ghidonations.tools.keys.get_key_if_exists(decoded_custom[0])
+                    individual_key = ghidonations.tools.keys.get_key_if_exists(decoded_custom[1])
                     special_notes = decoded_custom[2]
 
                     if s.exists.entity(team_key) is False:

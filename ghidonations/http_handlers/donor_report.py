@@ -1,3 +1,4 @@
+import ghidonations.tools.keys
 from ghidonations.http_handlers.base import BaseHandlerAdmin
 from ghidonations.tools import util
 from google.appengine.ext.webapp import template
@@ -14,7 +15,7 @@ class DonorReport(BaseHandlerAdmin):
                 # Throw an error if you don't have those two pieces of info or if the year isn't a number
                 raise Exception("Don't know contact key or year.")
 
-            c = util.get_key(contact_key).get()
+            c = ghidonations.tools.keys.get_key(contact_key).get()
             s = c.settings.get()
 
             donations = c.data.annual_donations(year)

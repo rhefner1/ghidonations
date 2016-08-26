@@ -1,5 +1,6 @@
 import json
 
+import ghidonations.tools.keys
 from ghidonations.http_handlers.base import BaseHandlerAdmin, BaseHandler
 from ghidonations.tools import util, auth
 from google.appengine.ext.webapp import template
@@ -22,9 +23,9 @@ class ReviewQueueDetails(BaseHandler):
             util.give_error(self, 500)
         else:
             # Getting donation by its key (from address bar argument)
-            d = util.get_key(donation_key).get()
+            d = ghidonations.tools.keys.get_key(donation_key).get()
 
-            i_key = auth.get_user_key(self)
+            i_key = ghidonations.tools.keys.get_user_key(self)
             i = i_key.get()
 
             donation_date = [d.donation_date.day, d.donation_date.month, d.donation_date.year]

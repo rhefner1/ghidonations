@@ -2,6 +2,7 @@ import logging
 
 import webapp2
 
+import ghidonations.tools.keys
 from gaesessions import get_current_session
 from ghidonations.tools import auth
 from google.appengine.ext.webapp import template
@@ -37,7 +38,7 @@ class BaseHandlerAdmin(webapp2.RequestHandler):
 
 class Container(BaseHandler):
     def task(self, is_admin, s):
-        username = auth.get_username(self)
+        username = ghidonations.tools.keys.get_username(self)
         logging.info("Loading container for: " + str(username))
 
         session = get_current_session()

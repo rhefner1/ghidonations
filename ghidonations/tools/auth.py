@@ -4,6 +4,7 @@ import endpoints
 
 from gaesessions import get_current_session
 from ghidonations.db.individual import Individual
+from ghidonations.tools.keys import get_user_key
 
 
 def check_credentials(self, email, password):
@@ -44,40 +45,6 @@ def check_authentication(self, admin_required, from_endpoints=False):
             self.redirect("/login")
 
         return None, None
-
-
-def get_username(self):
-    try:
-        user_key = get_user_key(self)
-        user = user_key.get()
-
-        return user.name
-    except Exception:
-        self.redirect("/login")
-
-
-def get_user_key(self):
-    self.session = get_current_session()
-    user_key = self.session["key"]
-
-    if not user_key:
-        raise Exception("User key is none")
-
-    return get_key(user_key)
-
-
-def get_settings_key(self, endpoints=False):
-    try:
-        user_key = get_user_key(self)
-        user = user_key.get()
-
-        return user.settings
-
-    except Exception:
-        if endpoints:
-            raise Exception("Error in getSettingsKey")
-        else:
-            self.redirect("/login")
 
 
 def rpc_check_authentication(self, admin_required):

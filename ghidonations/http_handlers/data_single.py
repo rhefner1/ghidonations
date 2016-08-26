@@ -1,3 +1,4 @@
+import ghidonations.tools.keys
 from ghidonations.http_handlers.base import BaseHandlerAdmin
 from ghidonations.tools import util
 from google.appengine.ext.webapp import template
@@ -6,7 +7,7 @@ from google.appengine.ext.webapp import template
 class Contact(BaseHandlerAdmin):
     def task(self, is_admin, s):
         contact_key = self.request.get("c")
-        c = util.get_key(contact_key).get()
+        c = ghidonations.tools.keys.get_key(contact_key).get()
 
         template_variables = {"c": c, "s": s}
         self.response.write(
@@ -21,7 +22,7 @@ class Deposit(BaseHandlerAdmin):
         # ... But it works.
 
         deposit_key = self.request.get("d")
-        deposit = util.get_key(deposit_key).get()
+        deposit = ghidonations.tools.keys.get_key(deposit_key).get()
 
         entity_keys = deposit.entity_keys
         gross_amount = util.to_decimal(0)

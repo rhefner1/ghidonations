@@ -15,7 +15,8 @@ from ghidonations.db.team import Team
 from ghidonations.db.team_list import TeamList
 from ghidonations.tools.memcache import gql_count, cache, q_cache, get_key
 from ghidonations.tools.search import search_to_entities, search_return_all
-from ghidonations.tools.util import current_time, to_decimal, query_cursor_db, is_email_address, get_key
+from ghidonations.tools.util import current_time, to_decimal, query_cursor_db, is_email_address
+from ghidonations.tools.keys import get_key
 from google.appengine.api import taskqueue, mail, memcache, search
 from mailsnake import MailSnake
 
@@ -207,8 +208,6 @@ class SettingsCreate(UtilitiesBase):
 
         return new_team.key
 
-        return new_donation.key.urlsafe()
-
 
 class SettingsData(UtilitiesBase):
     @property
@@ -386,7 +385,7 @@ class SettingsDeposits(UtilitiesBase):
 class SettingsExists(UtilitiesBase):
     def _check_contact_email(self, email):
         try:
-            if email == None or email == "":
+            if not email:
                 return [False, None]
             else:
                 query = Contact.query(Contact.settings == self.e.key, Contact.email == email)
