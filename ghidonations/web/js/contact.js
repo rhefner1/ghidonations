@@ -78,8 +78,6 @@ $(document).ready(function () {
                     window.location.hash = 'allcontacts';
                 });
             });
-        } else {
-            return;
         }
     });
     //Save contact and post it to RPC

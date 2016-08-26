@@ -109,8 +109,6 @@ $(document).ready(function () {
                     }
                 });
             });
-        } else {
-            return;
         }
     });
     $('form input[type=submit]').click(function () {

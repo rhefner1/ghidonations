@@ -109,8 +109,6 @@ $(document).ready(function () {
                         closeColorbox();
                     });
                 });
-            } else {
-                return;
             }
         }
     });

@@ -54,8 +54,6 @@ $(document).ready(function () {
                     window.location.hash = 'alldeposits';
                 });
             });
-        } else {
-            return;
         }
     });
     $('#remove_deposits').click(function () {
@@ -70,8 +68,6 @@ $(document).ready(function () {
                     refreshPage();
                 });
             });
-        } else {
-            return;
         }
     });
 });
