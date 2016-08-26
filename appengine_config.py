@@ -1,19 +1,17 @@
-import GlobalUtilities as tools
+import sys
+
+import os
+
 from gaesessions import SessionMiddleware
+from ghidonations.tools import util
 from google.appengine.api import memcache
 from google.appengine.ext.appstats import recording
-
-# suggestion: generate your own random key using os.urandom(64)
-# WARNING: Make sure you run os.urandom(64) OFFLINE and copy/paste the output to
-# this file.  If you use os.urandom() to *dynamically* generate your key at
-# runtime then any existing sessions will become junk every time you start,
-# deploy, or update your app!
 
 COOKIE_KEY = memcache.get("COOKIE_KEY")
 GCS_BUCKET = memcache.get("GCS_BUCKET")
 
 if not COOKIE_KEY or not GCS_BUCKET:
-    global_settings = tools.getGlobalSettings()
+    global_settings = util.get_global_settings()
 
     COOKIE_KEY = global_settings.cookie_key.decode('base64')
     GCS_BUCKET = global_settings.gcs_bucket
@@ -41,3 +39,7 @@ def recording_add_wsgi_middleware(app):
 #
 remoteapi_CUSTOM_ENVIRONMENT_AUTHENTICATION = (
     'HTTP_X_APPENGINE_INBOUND_APPID', ['ghidonations'])
+
+# add `lib` subdirectory to `sys.path`, so our `main` module can load
+# third-party libraries.
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'lib'))

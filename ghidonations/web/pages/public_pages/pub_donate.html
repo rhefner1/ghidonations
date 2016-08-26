@@ -1,0 +1,242 @@
+<html lang="en-us">
+
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1" >
+	<meta charset="utf-8" />
+
+    <title>Donate</title>
+    <meta name="viewport" content="width=device-width, minimum-scale=1.0, maximum-scale=1.0">
+
+	<!-- The Columnal Grid and mobile stylesheet -->
+	<link rel="stylesheet" href="/ghidonations/web/css/columnal/columnal.css" type="text/css" media="screen" />
+
+	<!-- Fixes for IE -->
+        
+	<!--[if lt IE 9]>
+            <link rel="stylesheet" href="/ghidonations/web/css/columnal/ie.css" type="text/css" media="screen" />
+            <link rel="stylesheet" href="/ghidonations/web/css/ie8.css" type="text/css" media="screen" />
+            <script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script>
+	<![endif]-->        
+        
+	
+	<!-- Now that all the grids are loaded, we can move on to the actual styles. --> 
+    <link rel="stylesheet" href="/js/muse/jqueryui/jqueryui.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/ghidonations/web/css/style.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/ghidonations/web/css/global.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/ghidonations/web/css/config.css" type="text/css" media="screen" />
+
+    <style>
+        .profile_image{
+            max-height:100px;
+            height:auto;
+            width:auto;
+            margin-top:10px;
+            margin-left:auto;
+            margin-right:auto;
+            display:block
+        }
+
+        .form div.clearfix label.form_label{
+            width:100%;
+            float:none;
+            margin-right:15px
+        }
+        
+        .info_name{
+            margin-bottom:10px;
+            margin-top:10px
+        }
+
+        .progressbar_style{
+            margin-right:auto; 
+            margin-left:auto; 
+            width: 180px; 
+        }
+
+        #info_description {
+            margin-left:45px;
+            margin-right:45px;
+        }
+    </style>
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-27802293-1']);
+      _gaq.push(['_setDomainName', 'ghidonations.appspot.com']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+
+</head>
+<body style="background-color:#F9F9F9; height:100%">
+    <div class="col_12">
+    <form id="donate_form" action="https://www.paypal.com/cgi-bin/webscr" method="post" target="_parent">
+        <!-- PayPal Options -->
+        <input id="donation_type" type="hidden" name="cmd" value="_donations" />
+        <input type="hidden" name="business" value="{{ s.paypal_id }}" />
+        <input type="hidden" name="lc" value="US" />
+        <input id="donation_name" type="hidden" name="item_name" value="One-Time Donation | Global Hope India" />
+        <input type="hidden" name="item_number" value="0002" />
+        <input type="hidden" name="no_note" value="1" />
+        <input type="hidden" name="no_shipping" value="1" />
+        <input type="hidden" name="rm" value="1" />
+        <input type="hidden" name="return" value="http://www.globalhopeindia.org/thank-you" />
+        <input type="hidden" name="cancel_return" value="http://www.globalhopeindia.org/whoops-donation/" />
+        <input type="hidden" name="src" value="1" />
+        <input type="hidden" name="p3" value="1" />
+        <input id="duration" type="hidden" name="t3" value="M" />
+        <input type="hidden" name="currency_code" value="USD" />
+        <input type="hidden" name="bn" value="PP-SubscriptionsBF:btn_subscribeCC_LG.gif:NonHosted" />
+        <input type="hidden" name="notify_url" value="https://ghidonations.appspot.com/ipn" />
+        <!-- End PayPal options -->
+
+        <div class="form">
+                <div class="clearfix">
+                    <label>First Name:</label>
+                    <div class="input"><input class="large" type="text" name="first_name" /></div>
+                </div>
+
+                <div class="clearfix">
+                    <label>Last Name:</label>
+                    <div class="input"><input class="large" type="text" name="last_name" /></div>
+                </div>
+
+                <!-- PayPal Error here -->
+                <!-- <div class="clearfix">
+                    <label>Email Address:</label>
+                    <div class="input"><input class="large" type="text" name="email" class="validate[required,custom[email]]" /></div>
+                </div> -->
+
+                <div class="clearfix">
+                    <label>Type of donation:</label>
+                    <div class="input">
+                            <input id="onetime" type="radio" name="donation_duration" value="onetime" checked="checked" />
+                            <label class="unbold form_label" for="onetime">One-Time</label>
+
+                            <input id="monthly" type="radio" name="donation_duration" value="monthly" />
+                            <label class="unbold form_label" for="monthly">Monthly</label>
+
+                            <input id="weekly" type="radio" name="donation_duration" value="weekly" />
+                            <label class="unbold form_label" for="weekly">Weekly</label>
+
+                            
+                    </div>
+                </div>
+
+                <div class="clearfix">
+                    <label>Your generous donation:</label>
+                    <div class="input">
+                            <input class="money_select radio_amount" type="radio" name="amount" id="donate_1" value="{{ s.amount1 }}.00" checked="checked">
+                            <label class="unbold form_label" for="donate_1">${{ s.amount1 }}</label>
+
+                            <input class="money_select radio_amount" type="radio" name="amount" id="donate_2" value="{{ s.amount2 }}.00" checked="checked">
+                            <label class="unbold form_label" for="donate_2">${{ s.amount2 }}</label>
+
+                            <input class="money_select radio_amount" type="radio" name="amount" id="donate_3" value="{{ s.amount3 }}.00">
+                            <label class="unbold form_label" for="donate_3">${{ s.amount3 }}</label>
+
+                            <input class="money_select radio_amount" type="radio" name="amount" id="donate_4" value="{{ s.amount4 }}.00">
+                            <label class="unbold form_label" for="donate_4">${{ s.amount4 }}</label>
+
+                            {% if s.use_custom %}
+                            <input class="money_select" id="custom" type="radio" name="amount" value="custom" />
+                            $ &nbsp;<input id="custom_donation" style="width: 100px" type="text" placeholder="250.00" value="" />
+                            {% endif%}
+                    </div>
+                </div>
+
+                <div class="clearfix" id="designate_container">
+                    <label id="designate_label">Designate donation?</label>
+                    <div class="input" id="designate">
+                        <p>If you intend to sponsor someone's trip or give toward a specific project, you <strong>must</strong> designate it <strong>now</strong>:</p>
+                        
+                        <button id="start_designate" class="black button">Designate this donation</button>
+                    </div>
+
+                    <div class="input" id="info_container" style="display:none">
+                        <a href="#" class="button black small" id="backtolist_button"><-- Back to list</a>
+
+                        <img src="https://ghidonations.appspot.com/images/face150.jpg" class="profile_image">
+                        <h3 class="center" id="info_name"></h3>
+                        <p class="center" id="info_description"></p>
+                        <br>
+                        
+                        <div id="info_progressbar" class="ui-progressbar ui-widget ui-widget-content ui-corner-all" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="37" style="margin-right:auto; margin-left:auto; width: 180px; ">
+                            <div class="ui-progressbar-value ui-widget-header ui-corner-left"></div>
+                        </div>
+
+                        <br><p id="info_message" class="center"></p>
+
+                        <br>
+                        <p id="#info_message" class="center"></p>
+
+                        <input type="hidden" id="selected_individual" value="">
+                    </div>
+
+
+                    <div class="input" id="designate_message" style="display:none">
+                        <hr>
+                        <p style="margin-top:10px">A small portion of all designated donations may be used to cover our operating expenses. 85% or more of your generous gift will be used to empower the church in India.</p>
+                    </div>
+                </div>
+
+                <div class="clearfix">
+                    <label>Anything else?</label>
+                    
+                    <div class="input">
+                        <span class="info m_bottom15">(if there's anything else you'd like to add)</span>
+                        <input class="large" type="text" id="other_notes" />
+                    </div>
+                </div>
+
+                <div class="clearfix">
+                    <label>Transaction Fee:</label>
+                    <div class="input">
+                        <input id="cover_trans" type="checkbox" value="cover_trans" />
+                        <label class="unbold" for="cover_trans" style="width:100%">I&#8217;d like to cover the 2.2% credit card transaction fee.</label>
+                    
+                    </div>
+                </div>
+
+                {% if s.mc_use %}
+                <div class="clearfix">
+                    <label>Newsletter:</label>
+                    <div class="input">
+                        <input id="email_subscr" type="checkbox" value="email_subscr" />
+                        <label class="unbold" for="email_subscr" style="width:100%">Yes, I'd like to receive periodic emails from {{ s.name }}</label>
+                    
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Custom field - manipulated by script on submit -->
+                <input type="hidden" name="custom" />
+
+                <div class="clearfix grey-highlight">
+                    <div class="input no-label">
+                        <input type="submit" class="button blue" value="Donate"></input>
+                    </div>
+                </div>
+            </div>
+        </form>
+        </div>
+
+    </div>
+
+<!-- Variables -->
+<input type="hidden" id="settings_key" value="{{ s.websafe }}" />
+
+<!-- Scripts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+
+<!-- JSON encoder -->
+<script src="/js/muse/jquery.json-2.3.min.js"></script>
+
+<script type="text/javascript" src="/js/donate.js"></script>
+</body>
+</html>

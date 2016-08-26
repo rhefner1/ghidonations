@@ -1,0 +1,17 @@
+language: python
+
+env:
+  global:
+    secure: "Q3+vjktnBh42WB25m0fKikpJrll0I/nQXhplhhMZFe/s2v3/MrZPGC6aH/sOw7qND7a2kszK9AsQqpS4Rfs0cS2ArBCcY7/362SluTh6T75XbJfjuSr3bbNJK8f2Lu6vBYHo45+xGq8jhlxQgL0rl+yYx6jGYtCoYwvENdajeJKEJJIeGkcvh7LwB2s9agKgkhEGWoVX3pp5tXYSVIsLdZOnySeaB1WDN6dDn8wynut7I9sdH6hPIVGEdZvhKzAj6e+c9UDEYp56qV3QHo06vy3AUWrXJDuL+yEJ/wnHQG3V1UhNURcnq7BWnXtmGH2TyJ7rYSrK9TA7guNgOWL3dhHvcRkBgR2IFxiSwuYxzOaTBqtaGziDT5oNCHK5olWmZdPPHmOumXDtaNHG7kLY/swFJyJz26dqDeWrTVWo57JV7FbYbnLiL83QH6W5RvpPmc9R/vaI+aTL3j8CGlc30dPIQQ8GkPsQUTFm+H7t4nN0IHdH2LRkIc0Zjs3go5uIBlXJ6wOpaBeujVrnX8ub4NCbfrGCJaUi7EJiP1s46C7wYLV2I40OhXgW/nHMmKeZviTxdeMLOg/Ugbf/PPmbMF9bhwTTt3seyMEEdPaG1sZulPbg5G7kjLRYbobvN3J2t+IIkAHCLbAh00/yrlhkJqexzanudOHewVyY0V6ag/Y="
+  matrix:
+   - RUN_TESTS=true
+   - RUN_PYLINT=true
+
+install: ./ci/install_deps.sh
+
+script:
+ - ./ci/run_tests.sh
+ - ./ci/run_pylint.sh
+
+after_success: ./ci/deploy.sh
+after_script: ./ci/cleanup.sh

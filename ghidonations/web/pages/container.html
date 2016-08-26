@@ -1,0 +1,220 @@
+<html lang="en-us">
+
+<head>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge;chrome=1" >
+	<meta charset="utf-8" />
+    <link rel="apple-touch-icon" href="" />
+    <title>GHI Donations</title>
+
+	<!-- The Columnal Grid and mobile stylesheet -->
+	<link rel="stylesheet" href="/ghidonations/web/css/columnal/columnal.css" type="text/css" media="screen" />
+
+	<!-- Fixes for IE -->
+        
+	<!--[if IE]>
+            <link rel="stylesheet" href="/ghidonations/web/css/columnal/ie.css" type="text/css" media="screen" />
+            <link rel="stylesheet" href="/ghidonations/web/css/ie8.css" type="text/css" media="screen" />
+            <script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script>
+	<![endif]-->        
+        
+	
+	<!-- Now that all the grids are loaded, we can move on to the actual styles. --> 
+    <link rel="stylesheet" href="/js/muse/jqueryui/jqueryui.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/ghidonations/web/css/style.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/ghidonations/web/css/global.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/ghidonations/web/css/config.css" type="text/css" media="screen" />
+
+    <link rel="apple-touch-icon" href="/images/icons/apple-touch-icon.png" />
+    <link rel="apple-touch-icon" sizes="114x114" href="/images/icons/apple-touch-icon-retina.png" />
+
+    <!-- Kendo -->
+    <link rel="stylesheet" href="/ghidonations/web/css/kendo/kendo.common.min.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="/ghidonations/web/css/kendo/kendo.default.min.css" type="text/css" media="screen" />
+
+    <!-- <link rel="stylesheet" href="/css/print.css" type="text/css" media="print" /> -->
+
+    
+    
+</head>
+<body>
+
+<div id="wrap">
+	<div id="main">
+        <header class="container">
+            <div class="row clearfix">  
+                <div class="left">
+                    <img src="/images/muse/logo.png">
+                </div> 
+                             
+                <div class="right">
+                    
+                    <ul id="toolbar">
+                        <li style="display:{{ mobile_redirect }}"><a href="/m/redirect?r=0">Back to mobile</a></li>
+                        <li id="myaccount"><span>{{ username }}</span></a> <a id="loginarrow" href="#"></a></li>
+                        <li><a id="settings" href="#settings">Settings</a></li>
+                        <li><a id="refresh" href="#">Refresh</a></li>
+                    </ul>
+
+                    <div id="logindrop">
+                        <ul>
+                            <li id="editprofile"><a href="#profile">Profile</a></li>
+                            <li id="logoutprofile"><a href="/logout">Logout</a></li>
+                        </ul>
+
+                    </div>                        
+                </div>  
+            </div>
+        </header>
+        
+        <nav class="container" id="nav_menu">
+            <select class="mobile-only row clearfix" onchange="window.open(this.options[this.selectedIndex].value,'_top')">
+
+                <option value="#dashboard">Dashboard</option>
+            </select>
+
+            <ul class="sf-menu mobile-hide row clearfix">
+
+                <li class="active iconed">
+                    <a href="#dashboard"><span><img src="/images/muse/header/icon_dashboard.png" /> Dashboard</span></a>
+                </li>
+                <li><a href="#review"><span>Donations</span></a>
+                    <ul>
+                        <li><a href="#review">Review Queue</a></li>
+                        <li><a href="#offline">New Donation</a></li>
+                    </ul>
+                </li>
+                <li><a href="#undeposited"><span>Deposits</span></a>
+                    <ul>
+                        <li><a href="#undeposited">Undeposited</a></li>
+                        <li><a href="#alldeposits">All Deposits</a></li>
+                    </ul>
+                </li>
+                <li><a href="#allteams"><span>Teams</span></a>
+                    <ul>
+                        <li><a href="#allteams">All Teams</a></li>
+                        <li><a href="#newteam">New Team</a></li>
+                    </ul>
+                </li>
+                <li><a href="#allindividuals"><span>Individuals</span></a>
+                    <ul>
+                        <li><a href="#allindividuals">All Individuals</a></li>
+                        <li><a href="#newindividual">New Individual</a></li>
+                    </ul>
+                </li>
+                <li><a href="#allcontacts"><span>Contacts</span></a>
+                    <ul>
+                        <li><a href="#allcontacts">All Contacts</a></li>
+                        <li><a href="#newcontact">New Contact</a></li>
+                        <li><a href="#mergecontacts">Merge</a></li>
+                    </ul>
+                </li>
+                
+                <li><a href="#donorreport"><span>Reports</span></a>
+                    <ul>
+                        <li><a href="#donorreport">Donor Report</a></li>
+                    </ul>
+                </li>
+
+                <li>
+                    <a href="#settings">Settings</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div id="titlediv">
+            <div class="clearfix container" id="pattern">
+                <div class="row">
+                    <div class="col_12">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="flash_message"></div>
+
+        <div class="container" id="actualbody"></div><!--container -->
+
+    </div>
+</div>
+
+<footer>
+    <div class="container">
+		<div class="row clearfix">
+			<div class="col_12">
+				<span class="left">a <a target="_blank" href="http://r.hefner1.com">rhefner1</a> project</span>
+				<span class="right">Design derived from Muse by Themio</span>
+			</div>
+		</div>
+    </div>
+</footer>
+
+<!-- Settings ID -->
+<input type="hidden" id="settings" value="{{ settings_key }}">
+
+<!-- Homepage variable -->
+<input type="hidden" id="home_page" value="dashboard" />
+
+<!-- Scripts -->
+<!-- Use CDN on production server -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/jquery-ui.min.js"></script>
+
+<!-- <script src="/js/jquery.js"></script> -->
+
+<!-- Custom -->
+<script type="text/javascript" src="/js/container.js"></script>
+
+<!-- Google API -->
+<script src="https://apis.google.com/js/client.js?onload=initializeAPI"></script>
+<script type="text/javascript" src="https://www.google.com/jsapi"></script>
+
+<!-- Menu -->
+<link rel="stylesheet" href="/js/muse/superfish/superfish.css" type="text/css" media="screen" />
+<script src="/js/muse/superfish/superfish.js"></script>
+<script src="js/muse/superfish/hoverIntent.js"></script>
+
+<!-- JSON -->
+<script type="text/javascript" src="/js/muse/jquery.json-2.3.min.js"></script>
+
+<!-- Hash change -->
+<script type="text/javascript" src="/js/muse/jquery.ba-hashchange.min.js"></script>
+<script type="text/javascript" src="/js/muse/jquery.ba-bbq.min.js"></script>
+
+<!-- Colorbox is a lightbox alternative-->
+<script src="/js/muse/colorbox/jquery.colorbox-min.js"></script>
+<link rel="stylesheet" href="/js/muse/colorbox/colorbox.css" type="text/css" media="screen" />
+
+<!-- Adds HTML5 Placeholder attributes to those lesser browsers (i.e. IE) -->
+<script type="text/javascript" src="/js/muse/jquery.placeholder.1.2.min.shrink.js"></script>
+
+ <!-- Form Validation Engine -->
+<script src="/js/muse/formvalidator/jquery.validationEngine.js"></script>
+<script src="/js/muse/formvalidator/jquery.validationEngine-en.js"></script>
+<link rel="stylesheet" href="/js/muse/formvalidator/validationEngine.jquery.css" type="text/css" media="screen" />
+
+<!-- Custom Tooltips -->
+<script src="/js/muse/twipsy.js"></script>
+
+<!-- Sortable, searchable DataTable -->
+<script src="/js/muse/jquery.dataTables.min.js"></script>
+
+<!-- Kendo -->
+<script src="/js/kendo/kendo.web.min.js"></script>
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-27802293-1']);
+  _gaq.push(['_setDomainName', 'ghidonations.appspot.com']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+<!-- End Scripts -->
+
+</body>
+</html>

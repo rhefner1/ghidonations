@@ -1,8 +1,8 @@
 application: ghidonations
-version: 5s
+version: 6
 runtime: python27
 api_version: 1
-threadsafe: true
+threadsafe: false
 
 default_expiration: "30d"
 
@@ -10,41 +10,38 @@ handlers:
 
 # Static Files
 - url: /favicon\.ico
-  static_files: images/favicon.ico
-  upload: images/favicon\.ico
+  static_files: ghidonations/web/images/favicon.ico
+  upload: ghidonations/web/images/favicon\.ico
 
 - url: /apple-touch-icon-precomposed.png
-  static_files: images/icons/apple-touch-icon-precomposed.png
-  upload: images/icons/apple-touch-icon-precomposed.png
+  static_files: ghidonations/web/images/icons/apple-touch-icon-precomposed.png
+  upload: ghidonations/web/images/icons/apple-touch-icon-precomposed.png
 
 - url: /robots.txt
   static_files: robots.txt
   upload: robots.txt
 
 - url: /images
-  static_dir: images
+  static_dir: ghidonations/web/images
 
 - url: /css
-  static_dir: css
-
-- url: /docs
-  static_dir: docs
+  static_dir: ghidonations/web/css
 
 - url: /js
-  static_dir: js
+  static_dir: ghidonations/web/js
 
 
 # Secured Endpoints
 - url: /
-  script: mooha.app
+  script: ghidonations.http_handlers.dispatch.app
   secure: always
 
 - url: /ipn
-  script: mooha.app
+  script: ghidonations.http_handlers.dispatch.app
   secure: always
 
 - url: /login
-  script: mooha.app
+  script: ghidonations.http_handlers.dispatch.app
   secure: always
 
 - url: /rpc
@@ -54,27 +51,27 @@ handlers:
 
 # Unsecured Endpoints
 - url: /ajax/*.*
-  script: mooha.app
+  script: ghidonations.http_handlers.dispatch.app
   secure: optional
 
 - url: /donate
-  script: mooha.app
+  script: ghidonations.http_handlers.dispatch.app
   secure: always
 
 - url: /logout
-  script: mooha.app
+  script: ghidonations.http_handlers.dispatch.app
   secure: optional
 
 - url: /m/*.*
-  script: mooha.app
+  script: ghidonations.http_handlers.dispatch.app
   secure: optional
 
 - url: /reports/.*
-  script: mooha.app
+  script: ghidonations.http_handlers.dispatch.app
   secure: optional
 
 - url: /thanks
-  script: mooha.app
+  script: ghidonations.http_handlers.dispatch.app
   secure: optional
 
 
@@ -90,7 +87,7 @@ handlers:
   script: pipeline.handlers.app
 
 - url: /_ah/spi/.*
-  script: ghiendpoints.app
+  script: ghidonations.rpc.ghiendpoints.app
 
 
 # Admin Console
