@@ -468,6 +468,7 @@ class ReviewQueueDetails(BaseHandler):
         else:
             # Getting donation by its key (from address bar argument)
             d = tools.getKey(donation_key).get()
+            c = d.contact.get()
 
             i_key = tools.getUserKey(self)
             i = i_key.get()
@@ -475,7 +476,7 @@ class ReviewQueueDetails(BaseHandler):
             donation_date = [d.donation_date.day, d.donation_date.month, d.donation_date.year]
             donation_date = json.dumps(donation_date)
 
-            template_variables = {"d": d, "s": s, "i": i, "donation_date": donation_date}
+            template_variables = {"d": d, "c": c, "s": s, "i": i, "donation_date": donation_date}
             self.response.write(
                 template.render('pages/rq_details.html', template_variables))
 
