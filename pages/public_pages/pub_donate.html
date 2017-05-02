@@ -11,15 +11,15 @@
 	<link rel="stylesheet" href="/css/columnal/columnal.css" type="text/css" media="screen" />
 
 	<!-- Fixes for IE -->
-        
+
 	<!--[if lt IE 9]>
             <link rel="stylesheet" href="/css/columnal/ie.css" type="text/css" media="screen" />
             <link rel="stylesheet" href="/css/ie8.css" type="text/css" media="screen" />
             <script src="http://ie7-js.googlecode.com/svn/version/2.1(beta4)/IE9.js"></script>
-	<![endif]-->        
-        
-	
-	<!-- Now that all the grids are loaded, we can move on to the actual styles. --> 
+	<![endif]-->
+
+
+	<!-- Now that all the grids are loaded, we can move on to the actual styles. -->
     <link rel="stylesheet" href="/js/muse/jqueryui/jqueryui.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/css/style.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="/css/global.css" type="text/css" media="screen" />
@@ -41,16 +41,16 @@
             float:none;
             margin-right:15px
         }
-        
+
         .info_name{
             margin-bottom:10px;
             margin-top:10px
         }
 
         .progressbar_style{
-            margin-right:auto; 
-            margin-left:auto; 
-            width: 180px; 
+            margin-right:auto;
+            margin-left:auto;
+            width: 180px;
         }
 
         #info_description {
@@ -85,7 +85,7 @@
         <input type="hidden" name="no_note" value="1" />
         <input type="hidden" name="no_shipping" value="1" />
         <input type="hidden" name="rm" value="1" />
-        <input type="hidden" name="return" value="http://www.globalhopeindia.org/thank-you" />
+        <input type="hidden" name="return" value="http://www.globalhopeindia.org/thanks" />
         <input type="hidden" name="cancel_return" value="http://www.globalhopeindia.org/whoops-donation/" />
         <input type="hidden" name="src" value="1" />
         <input type="hidden" name="p3" value="1" />
@@ -124,7 +124,7 @@
                             <input id="weekly" type="radio" name="donation_duration" value="weekly" />
                             <label class="unbold form_label" for="weekly">Weekly</label>
 
-                            
+
                     </div>
                 </div>
 
@@ -154,7 +154,7 @@
                     <label id="designate_label">Designate donation?</label>
                     <div class="input" id="designate">
                         <p>If you intend to sponsor someone's trip or give toward a specific project, you <strong>must</strong> designate it <strong>now</strong>:</p>
-                        
+
                         <button id="start_designate" class="black button">Designate this donation</button>
                     </div>
 
@@ -165,7 +165,7 @@
                         <h3 class="center" id="info_name"></h3>
                         <p class="center" id="info_description"></p>
                         <br>
-                        
+
                         <div id="info_progressbar" class="ui-progressbar ui-widget ui-widget-content ui-corner-all" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="37" style="margin-right:auto; margin-left:auto; width: 180px; ">
                             <div class="ui-progressbar-value ui-widget-header ui-corner-left"></div>
                         </div>
@@ -187,7 +187,7 @@
 
                 <div class="clearfix">
                     <label>Anything else?</label>
-                    
+
                     <div class="input">
                         <span class="info m_bottom15">(if there's anything else you'd like to add)</span>
                         <input class="large" type="text" id="other_notes" />
@@ -199,7 +199,7 @@
                     <div class="input">
                         <input id="cover_trans" type="checkbox" value="cover_trans" />
                         <label class="unbold" for="cover_trans" style="width:100%">I&#8217;d like to cover the 2.2% credit card transaction fee.</label>
-                    
+
                     </div>
                 </div>
 
@@ -209,7 +209,7 @@
                     <div class="input">
                         <input id="email_subscr" type="checkbox" value="email_subscr" />
                         <label class="unbold" for="email_subscr" style="width:100%">Yes, I'd like to receive periodic emails from {{ s.name }}</label>
-                    
+
                     </div>
                 </div>
                 {% endif %}
