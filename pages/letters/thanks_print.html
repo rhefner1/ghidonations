@@ -2,8 +2,8 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        
-        
+
+
         <title>{{ s.name }} | Thanks!</title>
         <style type="text/css">
             /* Client-specific Styles */
@@ -348,15 +348,16 @@
                                     <table border="0" cellpadding="0" cellspacing="0" width="600" id="templateBody">
                                         <tr>
                                             <td valign="top" class="bodyContent">
-                                
+
                                                 <!-- // Begin Module: Standard Content \\ -->
-                                                <table border="0" cellpadding="20" cellspacing="0" width="100%">
+                                                <table border="0" cellpadding="20" cellspacing="0">
                                                     <tr>
                                                         <td valign="top">
-                                                            <div mc:edit="std_content00" style="width:500px">
+                                                            <div mc:edit="std_content00">
                                                                 <br />
-                                                                <strong>Dear {{ d.name }},</strong>
-                                                                <br>
+                                                                Dear <strong>{{ d.name }},</strong>
+                                                                <br />
+                                                                <br />
 
                                                                 Thank you for supporting {{ s.name }} with the gift of
                                                                 <strong>
@@ -373,7 +374,7 @@
                                                                 {% endif %}.
                                                                 <br />
                                                                 <br />
-                                                                
+
                                                                 {{ s.confirmation_text|safe }}
 
                                                             </div>
@@ -381,7 +382,7 @@
                                                     </tr>
                                                 </table>
                                                 <!-- // End Module: Standard Content \\ -->
-                                                
+
                                             </td>
                                         </tr>
                                     </table>
@@ -394,13 +395,13 @@
                                     <table border="0" cellpadding="10" cellspacing="0" width="600" id="templateFooter">
                                         <tr>
                                             <td valign="top" class="footerContent">
-                                            
+
                                                 <!-- // Begin Module: Standard Footer \\ -->
                                                 <table border="0" cellpadding="10" cellspacing="0" width="100%">
                                                     <tr>
                                                         <td valign="top" width="350">
                                                             <div mc:edit="std_footer">
-                                                            
+
                                                                     <img src="https://ghidonations.appspot.com/images/thankyou/divider_wide.png" alt="" style="border-top: 10px solid #fff; width: 558px">
                                                                     <br /><br />
 
@@ -411,13 +412,13 @@
                                                                     <br /><br />
 
                                                                     {{ s.confirmation_footer|safe }}
-                                                                    
+
                                                             </div>
-                                                        </td>    
+                                                        </td>
                                                     </tr>
                                                 </table>
                                                 <!-- // End Module: Standard Footer \\ -->
-                                            
+
                                             </td>
                                         </tr>
                                     </table>
