@@ -495,7 +495,7 @@ class Individual(ndb.Expando):
             tl.fundraise_amt = tools.toDecimal(team[key][1])
             tl.put()
 
-        if description != str(self.description):
+        if description != self.description:
             self.description = description
 
         if change_image != None:
