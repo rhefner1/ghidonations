@@ -26,15 +26,15 @@ class GenerateReport(pipeline.Pipeline):
 
         if mode == "contacts":
             query = s.data.all_contacts
-            num_results = 30
+            num_results = 150
 
         elif mode == "donations":
             query = s.data.all_donations
-            num_results = 50
+            num_results = 250
 
         elif mode == "individuals":
             query = s.data.all_individuals
-            num_results = 15
+            num_results = 150
 
         else:
             raise Exception("Unidentified mode in GenerateReport")
@@ -143,7 +143,7 @@ class CreateCSV(pipeline.Pipeline):
                     row_data.append(c.address[1])
                     row_data.append(c.address[2])
                     row_data.append(c.address[3])
-                    row_data.append(str(c.creation_date))
+                    row_data.append(c.creation_date)
 
                     for e in c.email:
                         row_data.append(e)
@@ -151,14 +151,14 @@ class CreateCSV(pipeline.Pipeline):
                 elif mode == "donations":
                     d = e
                     c = d.contact.get()
-                    row_data.append(str(d.donation_date))
+                    row_data.append(d.donation_date)
                     row_data.append(d.name)
                     row_data.append(d.given_email)
-                    row_data.append(str(d.amount_donated))
+                    row_data.append(d.amount_donated)
                     row_data.append(d.payment_type)
                     row_data.append(d.designated_team)
                     row_data.append(d.designated_individual)
-                    row_data.append(str(d.reviewed))
+                    row_data.append(d.reviewed)
                     row_data.append(c.phone)
                     row_data.append(c.address[0])
                     row_data.append(c.address[1])
@@ -170,8 +170,8 @@ class CreateCSV(pipeline.Pipeline):
                     row_data.append(i.name)
                     row_data.append(i.email)
                     row_data.append(i.data.readable_team_names)
-                    row_data.append(str(i.data.donation_total))
-                    row_data.append(str(i.creation_date))
+                    row_data.append(i.data.donation_total)
+                    row_data.append(i.creation_date)
 
                 writer.writerow(row_data)
 
