@@ -1,7 +1,9 @@
+from google.appengine.api import memcache
+from google.appengine.ext import vendor
+from google.appengine.ext.appstats import recording
+
 import GlobalUtilities as tools
 from gaesessions import SessionMiddleware
-from google.appengine.api import memcache
-from google.appengine.ext.appstats import recording
 
 # suggestion: generate your own random key using os.urandom(64)
 # WARNING: Make sure you run os.urandom(64) OFFLINE and copy/paste the output to
@@ -11,6 +13,8 @@ from google.appengine.ext.appstats import recording
 
 COOKIE_KEY = memcache.get("COOKIE_KEY")
 GCS_BUCKET = memcache.get("GCS_BUCKET")
+
+vendor.add('lib')
 
 if not COOKIE_KEY or not GCS_BUCKET:
     global_settings = tools.getGlobalSettings()
