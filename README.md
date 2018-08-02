@@ -24,3 +24,6 @@ The four main modules are:
  - `GlobalUtilities.py` (contains utility functions and many functions referenced by data models)
  - `endpoints.py` (contains the Cloud Endpoints API communication code)
  - `mooha.py` (the HTTP GET and POST web handlers)
+
+## Installing
+Before deploying, make `lib` and run `pip install -t lib -r requirements.txt`.

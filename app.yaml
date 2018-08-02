@@ -1,5 +1,5 @@
 application: ghidonations
-version: 5s
+version: 5t
 runtime: python27
 api_version: 1
 threadsafe: true
@@ -92,7 +92,7 @@ handlers:
 - url: /_ah/pipeline(/.*)?
   script: pipeline.handlers.app
 
-- url: /_ah/spi/.*
+- url: /_ah/api/.*
   script: ghiendpoints.app
 
 
@@ -115,8 +115,10 @@ builtins:
 - appstats: on
 
 libraries:
-- name: endpoints
-  version: latest
+- name: pycrypto
+  version: 2.6
+- name: ssl
+  version: 2.7.11
 
 inbound_services:
 - mail

@@ -1,7 +1,11 @@
-import GlobalUtilities as tools
-from gaesessions import SessionMiddleware
+from google.appengine.ext import vendor
+vendor.add('lib')
+
 from google.appengine.api import memcache
 from google.appengine.ext.appstats import recording
+
+import GlobalUtilities as tools
+from gaesessions import SessionMiddleware
 
 # suggestion: generate your own random key using os.urandom(64)
 # WARNING: Make sure you run os.urandom(64) OFFLINE and copy/paste the output to
