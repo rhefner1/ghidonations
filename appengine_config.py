@@ -1,5 +1,7 @@
-from google.appengine.api import memcache
 from google.appengine.ext import vendor
+vendor.add('lib')
+
+from google.appengine.api import memcache
 from google.appengine.ext.appstats import recording
 
 import GlobalUtilities as tools
@@ -13,8 +15,6 @@ from gaesessions import SessionMiddleware
 
 COOKIE_KEY = memcache.get("COOKIE_KEY")
 GCS_BUCKET = memcache.get("GCS_BUCKET")
-
-vendor.add('lib')
 
 if not COOKIE_KEY or not GCS_BUCKET:
     global_settings = tools.getGlobalSettings()

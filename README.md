@@ -26,4 +26,4 @@ The four main modules are:
  - `mooha.py` (the HTTP GET and POST web handlers)
 
 ## Installing
-Before deploying, make `lib` and run `pip install -t lib google-endpoints --ignore-installed`.
+Before deploying, make `lib` and run `pip install -t lib -r requirements.txt`.
